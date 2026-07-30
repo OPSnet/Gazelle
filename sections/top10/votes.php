@@ -47,7 +47,6 @@ $torMan       = new Manager\Torrent();
 $urlStem      = new User\Stylesheet($Viewer)->imagePath();
 $snatcher     = $Viewer->snatch();
 $topVotes     = $vote->topVotes();
-$number       = 0;
 
 View::show_header(TOP_TEN_HEADING . " – Voted Groups", ['js' => 'browse,voting']);
 ?>
@@ -95,23 +94,23 @@ echo display_str($_GET['year2']);} ?>">
     switch ($limit) {
         case 100:
             ?>
-            - <a href="top10.php?type=votes" class="brackets">Top 25</a>
-            - <span class="brackets">Top 100</span>
-            - <a href="top10.php?type=votes&amp;limit=250" class="brackets">Top 250</a>
+            – <a href="top10.php?type=votes" class="brackets">Top 25</a>
+            – <span class="brackets">Top 100</span>
+            – <a href="top10.php?type=votes&amp;limit=250" class="brackets">Top 250</a>
 <?php
             break;
         case 250:
             ?>
-            - <a href="top10.php?type=votes" class="brackets">Top 25</a>
-            - <a href="top10.php?type=votes&amp;limit=100" class="brackets">Top 100</a>
-            - <span class="brackets">Top 250</span>
+            – <a href="top10.php?type=votes" class="brackets">Top 25</a>
+            – <a href="top10.php?type=votes&amp;limit=100" class="brackets">Top 100</a>
+            – <span class="brackets">Top 250</span>
 <?php
             break;
         default:
             ?>
-            - <span class="brackets">Top 25</span>
-            - <a href="top10.php?type=votes&amp;limit=100" class="brackets">Top 100</a>
-            - <a href="top10.php?type=votes&amp;limit=250" class="brackets">Top 250</a>
+            – <span class="brackets">Top 25</span>
+            – <a href="top10.php?type=votes&amp;limit=100" class="brackets">Top 100</a>
+            – <a href="top10.php?type=votes&amp;limit=250" class="brackets">Top 250</a>
 <?php    } ?>
         </small>
 <?php } ?>
@@ -146,8 +145,6 @@ if (count($topVotes) === 0) { ?>
         if (count($torrentIdList) === 0) {
             continue;
         }
-        ++$number;
-        $sequence   = $result['tier'];
         $upVotes    = $result['upvote'];
         $totalVotes = $result['total'];
         $score      = $result['score'];
@@ -175,7 +172,7 @@ if (count($topVotes) === 0) { ?>
             </div>
 <?php       } ?>
             <div class="group_info clear">
-                <strong><?= $result['sequence'] ?> - <?= $tgroup->link() ?><?php if ($tgroup->year()) {
+                <strong><?= $result['tier'] ?> - <?= $tgroup->link() ?><?php if ($tgroup->year()) {
 echo ' [' . $tgroup->year() . ']'; } ?></strong>
                 <div class="tags"><?= implode(', ', array_map(
                     fn($name) => "<a href=\"collages.php?action=search&amp;tags=$name\">$name</a>", $tgroup->tagNameList()
