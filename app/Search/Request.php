@@ -55,6 +55,16 @@ class Request extends \Gazelle\Base {
         return $this;
     }
 
+    public function setBountyMax(int $bounty): static {
+        $this->info['bounty-max'] = $bounty;
+        return $this;
+    }
+
+    public function setBountyMin(int $bounty): static {
+        $this->info['bounty-min'] = $bounty;
+        return $this;
+    }
+
     public function setCreator(User $user): static {
         $this->info['creator'] = $user;
         return $this;
@@ -201,9 +211,19 @@ class Request extends \Gazelle\Base {
             $cond[] = 'r.id_torrent is null';
         }
         if (isset($this->info['bookmarker'])) {
-            $join[] = 'inner join bookmark_request br using (id_request)';
-            $cond[] = "br.id_user = {$this->pg()->placeholder(count($args))}";
-            $args[] = $this->info['bookmarker']->id;
+            $join['br'] = 'inner join bookmark_request br using (id_request)';
+            $cond[]     = "br.id_user = {$this->pg()->placeholder(count($args))}";
+            $args[]     = $this->info['bookmarker']->id;
+        }
+        if (isset($this->info['bounty-max'])) {
+            $join['rvs'] = 'inner join request_vote_summary rvs using (id_request)';
+            $cond[]      = "rvs.bounty_total <= {$this->pg()->placeholder(count($args))}";
+            $args[]      = $this->info['bounty-max'];
+        }
+        if (isset($this->info['bounty-min'])) {
+            $join['rvs'] = 'inner join request_vote_summary rvs using (id_request)';
+            $cond[]      = "rvs.bounty_total >= {$this->pg()->placeholder(count($args))}";
+            $args[]      = $this->info['bounty-min'];
         }
         if (isset($this->info['creator'])) {
             $cond[] = "r.id_user = {$this->pg()->placeholder(count($args))}";
@@ -276,7 +296,7 @@ class Request extends \Gazelle\Base {
             }
         }
         if (in_array($this->heading()->orderBy(), ['rvs.bounty_total', 'rvs.last_vote', 'rvs.user_total'])) {
-            $join[] = 'inner join request_vote_summary rvs using (id_request)';
+            $join['rvs'] = 'inner join request_vote_summary rvs using (id_request)';
         }
 
         $this->cond = $join === []

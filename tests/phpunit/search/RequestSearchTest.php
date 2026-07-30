@@ -121,6 +121,30 @@ class RequestSearchTest extends TestCase {
         );
     }
 
+    public function testRequestSearchBounty(): void {
+        $request = Helper::makeRequestMusic(
+            user:  $this->userList[0],
+            title: 'title ' . randomString(16),
+        );
+        $this->requestList[] = $request;
+        $user = Helper::makeUser('req.' . randomString(10), 'request-bounty');
+        $this->userList[] = $user;
+        $user->addBounty(get_bytes('11T'));
+        $request->vote($user, get_bytes('10T'));
+
+        $bountyMin = new Search\Request()->setBountyMin(get_bytes('8T'));
+        $this->assertEquals(1, $bountyMin->total(), 'reqs-bounty-min-total');
+        $this->assertEquals(
+            $request->id,
+            array_first($bountyMin->page(1, 0))->id,
+            'reqs-bounty-min-page-entry',
+        );
+        $bountyMinMax = new Search\Request()
+            ->setBountyMin(get_bytes('8T'))
+            ->setBountyMax(get_bytes('9T'));
+        $this->assertEquals(0, $bountyMinMax->total(), 'reqs-bounty-min-max-total');
+    }
+
     public function testRequestSearchFiller(): void {
         $title   = 'title ' . randomString(16);
         $filler  = new Search\Request();
@@ -147,7 +171,11 @@ class RequestSearchTest extends TestCase {
         $torrent = Helper::makeTorrentMusic(
             $this->tgroup, $user, 'Cassette', 'FLAC', 'Lossless',
         );
-        $this->assertEquals(1, $this->requestList[0]->fill($user, $torrent), 'request-search-fill');
+        $this->assertEquals(
+            1,
+            $this->requestList[0]->fill($user, $torrent),
+            'request-search-fill',
+        );
 
         $filler->flush();
         $filler->setFiller($user)->showFilled();
@@ -275,8 +303,8 @@ class RequestSearchTest extends TestCase {
         $title = 'title ' . randomString(16);
         $this->setupValueSearch($title);
 
-        $this->assertEquals($nomatchTotal,    $nomatch->total(), 'reqs-rtype-nomatch-strict');
-        $this->assertEquals($matchTotal  + 2, $match->total(), 'reqs-rtype-match-strict');
+        $this->assertEquals($nomatchTotal, $nomatch->total(), 'reqs-rtype-nomatch-strict');
+        $this->assertEquals($matchTotal + 2, $match->total(), 'reqs-rtype-match-strict');
 
         $this->assertEquals(
             [6, 7],

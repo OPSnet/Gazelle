@@ -83,6 +83,16 @@ Requests
                     <input type="checkbox" id="include_filled_box" name="show_filled"{{ checked(search.isShowFilled) }}>
                 </td>
             </tr>
+            <tr id="bounty_offer">
+                <td class="label"><label for="bounty_offer_min">Bounty offered (GiB):</label></td>
+                <td>
+                    <input type="text" id="bounty_offer_min" size="6" name="bounty_min" value="{{ bounty_min }}"> minimum offer
+                    <br>
+                    <input type="text" name="bounty_max" size="6" value="{{ bounty_max }}"> maximum offer
+                    <br>
+                    Values are assumed to be in GiB. You may add <b>M</b> or <b>T</b> suffix for MiB and TiB, respectively.
+                </td>
+            </tr>
         </table>
         <table class="layout">
             <tr id="cat_list">

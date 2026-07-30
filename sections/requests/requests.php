@@ -67,6 +67,13 @@ $search->setTag(
     ->setSearch(trim($_GET['search'] ?? ''))
     ->setYear((int)($_GET['year'] ?? 0));
 
+if (preg_match('/(\d+(?:\.\d+)?)\s*([MT])?/i', $_GET['bounty_max'] ?? '', $match)) {
+    $search->setBountyMax(get_bytes($match[1] . ($match[2] ?? 'G')));
+}
+if (preg_match('/(\d+(?:\.\d+)?)\s*([MT])?/i', $_GET['bounty_min'] ?? '', $match)) {
+    $search->setBountyMin(get_bytes($match[1] . ($match[2] ?? 'G')));
+}
+
 $encodingStrict = isset($_GET['bitrates_strict']);
 $formatStrict   = isset($_GET['formats_strict']);
 $mediaStrict    = isset($_GET['media_strict']);
@@ -85,6 +92,8 @@ $paginator->setTotal($search->total());
 
 echo $Twig->render('request/index.twig', [
     'bounty'          => $Viewer->ordinal()->value('request-bounty-vote'),
+    'bounty_max'      => $_GET['bounty_max'] ?? '',
+    'bounty_min'      => $_GET['bounty_min'] ?? '',
     'filter_cat'      => $categoryList,
     'encoding_strict' => $encodingStrict,
     'format_strict'   => $formatStrict,
