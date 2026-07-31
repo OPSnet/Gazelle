@@ -502,7 +502,6 @@ class DbTest extends TestCase {
         );
         $this->assertEquals(
             [
-                'bookmarks_collages',
                 'collage_has_attr',
                 'collages_artists',
                 'collages_torrents',

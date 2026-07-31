@@ -228,14 +228,6 @@ foreach ($db->collect(0) as $userId) {
     }
 }
 
-foreach (['artists', 'collages', 'requests', 'torrents'] as $type) {
-    $db->prepared_query("
-        DELETE u
-        FROM bookmarks_$type u
-        LEFT JOIN users_main um ON (um.ID = u.UserID)
-        WHERE um.ID IS NULL
-    ");
-}
 foreach (['artist', 'collage', 'request', 'tgroup'] as $type) {
     $pgrw->query(<<<END_SQL
         delete from bookmark_$type u
