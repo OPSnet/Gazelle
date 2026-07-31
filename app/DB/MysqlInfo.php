@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\DB;
 
 use Gazelle\Enum\Direction;
@@ -93,28 +95,5 @@ class MysqlInfo extends \Gazelle\Base {
 
     public function headerAlt(): string {
         return self::columnList()[$this->orderBy->value]['alt'];
-    }
-
-    public static function lookupOrderby(string $columnName): MysqlInfoOrderBy {
-        return match ($columnName) {
-            default                               => MysqlInfoOrderBy::tableName,
-            MysqlInfoOrderBy::tableRows->value    => MysqlInfoOrderBy::tableRows,
-            MysqlInfoOrderBy::rowsRead->value     => MysqlInfoOrderBy::rowsRead,
-            MysqlInfoOrderBy::dataLength->value   => MysqlInfoOrderBy::dataLength,
-            MysqlInfoOrderBy::indexLength->value  => MysqlInfoOrderBy::indexLength,
-            MysqlInfoOrderBy::totalLength->value  => MysqlInfoOrderBy::totalLength,
-            MysqlInfoOrderBy::dataFree->value     => MysqlInfoOrderBy::dataFree,
-            MysqlInfoOrderBy::freeRatio->value    => MysqlInfoOrderBy::freeRatio,
-            MysqlInfoOrderBy::avgRowLength->value => MysqlInfoOrderBy::avgRowLength,
-            MysqlInfoOrderBy::iops->value         => MysqlInfoOrderBy::iops,
-        };
-    }
-
-    public static function lookupTableMode(string $mode): MysqlTableMode {
-        return match ($mode) {
-            default                        => MysqlTableMode::all,
-            MysqlTableMode::merged->value  => MysqlTableMode::merged,
-            MysqlTableMode::exclude->value => MysqlTableMode::exclude,
-        };
     }
 }

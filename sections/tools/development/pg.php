@@ -26,8 +26,8 @@ if (preg_match('/([\w-]+(?:\.[\w-]+)?)/', $_GET['table'] ?? '', $match)) {
 }
 
 $info = new DB\PgInfo(
-    DB\PgInfo::lookupOrderby($_GET['order'] ?? Enum\PgInfoOrderBy::tableName->value),
-    DB::lookupDirection($_GET['sort'] ?? Enum\Direction::ascending->value)
+    Enum\PgInfoOrderBy::tryFrom($_GET['order'] ?? '') ?? Enum\PgInfoOrderBy::tableName,
+    Enum\Direction::tryFrom($_GET['sort'] ?? '') ?? Enum\Direction::ascending,
 );
 
 echo $Twig->render('admin/pg-table-summary.twig', [

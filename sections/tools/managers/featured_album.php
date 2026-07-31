@@ -9,10 +9,6 @@ declare(strict_types=1);
 
 namespace Gazelle;
 
-use Gazelle\Enum\FeaturedAlbumType;
-use Gazelle\Enum\LeechType;
-use Gazelle\Enum\LeechReason;
-
 if (!$Viewer->permitted('users_mod')) {
     Error403::error();
 }
@@ -24,8 +20,8 @@ $manager = new Manager\FeaturedAlbum();
 if (isset($_GET['unfeature'])) {
     authorize();
     match ($_GET['unfeature']) {
-        'aotm'     => $manager->findByType(FeaturedAlbumType::AlbumOfTheMonth)?->unfeature(),
-        'showcase' => $manager->findByType(FeaturedAlbumType::Showcase)?->unfeature(),
+        'aotm'     => $manager->findByType(Enum\FeaturedAlbumType::AlbumOfTheMonth)?->unfeature(),
+        'showcase' => $manager->findByType(Enum\FeaturedAlbumType::Showcase)?->unfeature(),
         default    => Error403::error(),
     };
     header('Location: tools.php?action=featured_album');
@@ -35,8 +31,8 @@ if (isset($_GET['unfeature'])) {
 $size = (int)($_POST['size'] ?? NEUTRAL_LEECH_THRESHOLD);
 $unit = trim($_POST['unit'] ?? NEUTRAL_LEECH_UNIT);
 
-$leechType   = $torMan->lookupLeechType($_POST['leech_type'] ?? LeechType::Free->value);
-$leechReason = $torMan->lookupLeechReason($_POST['leech_reason'] ?? LeechReason::AlbumOfTheMonth->value);
+$leechType   = Enum\LeechType::tryFrom($_POST['leech_type'] ?? '') ?? Enum\LeechType::Free;
+$leechReason = Enum\LeechReason::tryFrom($_POST['leech_reason'] ?? '') ?? Enum\LeechReason::AlbumOfTheMonth;
 
 if (isset($_POST['groupid'])) {
     authorize();
@@ -49,15 +45,16 @@ if (isset($_POST['groupid'])) {
     if (is_null($tgroup)) {
         Error400::error('You did not enter a valid group ID');
     }
-    if (empty($_POST['body'])) {
+    $body = trim($_POST['body'] ?? '');
+    if ($body === '') {
         Error400::error('You did not provide any text for the feature');
     }
     $title = trim($_POST['title'] ?? '');
-    if (empty($title)) {
+    if ($title === '') {
         Error400::error('You did not provide a title for the front page announcement');
     }
 
-    if ($leechType === LeechType::Normal || !isset($_POST['neutral'])) {
+    if ($leechType === Enum\LeechType::Normal || !isset($_POST['neutral'])) {
         $threshold = 0;
     } else {
         if (!$size || !in_array($unit, ['k', 'm', 'g'])) {
@@ -66,9 +63,9 @@ if (isset($_POST['groupid'])) {
         $threshold = get_bytes("$size$unit");
     }
 
-    $featureType = $leechReason == LeechReason::Showcase
-        ? FeaturedAlbumType::Showcase
-        : FeaturedAlbumType::AlbumOfTheMonth;
+    $featureType = $leechReason === Enum\LeechReason::Showcase
+        ? Enum\FeaturedAlbumType::Showcase
+        : Enum\FeaturedAlbumType::AlbumOfTheMonth;
 
     $featuredAlbum = $manager->create(
         featureType: $featureType,
@@ -82,7 +79,7 @@ if (isset($_POST['groupid'])) {
         leechType:   $leechType,
         threshold:   $threshold,
         title:       $title,
-        body:        $_POST['body'],
+        body:        $body,
         pitch:       trim($_POST['pitch'] ?? '') ?: 'Discuss this post',
         user:        $Viewer,
     );
@@ -94,17 +91,17 @@ if (isset($_POST['groupid'])) {
 echo  $Twig->render('admin/feature-album.twig', [
     'body'         => new Util\Textarea('body', '', 80, 20),
     'current'      => [
-        'aotm'     => $manager->findByType(FeaturedAlbumType::AlbumOfTheMonth),
-        'showcase' => $manager->findByType(FeaturedAlbumType::Showcase),
+        'aotm'     => $manager->findByType(Enum\FeaturedAlbumType::AlbumOfTheMonth),
+        'showcase' => $manager->findByType(Enum\FeaturedAlbumType::Showcase),
     ],
     'feature'      => [
-        'aotm'     => FeaturedAlbumType::AlbumOfTheMonth,
-        'showcase' => FeaturedAlbumType::Showcase,
+        'aotm'     => Enum\FeaturedAlbumType::AlbumOfTheMonth,
+        'showcase' => Enum\FeaturedAlbumType::Showcase,
     ],
-    'leech_type'   => $torMan->leechTypeList(),
+    'leech_type'   => Enum\LeechType::cases(),
     'leech_reason' => [
-        LeechReason::AlbumOfTheMonth,
-        LeechReason::Showcase,
+        Enum\LeechReason::AlbumOfTheMonth,
+        Enum\LeechReason::Showcase,
     ],
     'size'         => $size,
     'unit'         => $unit,

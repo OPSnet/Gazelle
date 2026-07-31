@@ -27,15 +27,15 @@ if (preg_match('/([\w-]+)/', $_GET['table'] ?? '', $match)) {
 }
 
 $info = new DB\MysqlInfo(
-    DB\MysqlInfo::lookupTableMode($_GET['mode'] ?? Enum\MysqlTableMode::all->value),
-    DB\MysqlInfo::lookupOrderby($_GET['order'] ?? Enum\MysqlInfoOrderBy::tableName->value),
-    DB::lookupDirection($_GET['sort'] ?? Enum\Direction::ascending->value)
+    Enum\MysqlTableMode::tryFrom($_GET['mode'] ?? '') ?? Enum\MysqlTableMode::all,
+    Enum\MysqlInfoOrderBy::tryFrom($_GET['order'] ?? '') ?? Enum\MysqlInfoOrderBy::tableName,
+    Enum\Direction::tryFrom($_GET['sort'] ?? '') ?? Enum\Direction::ascending,
 );
-$list = $info->info();
-$column = $info->orderBy() == Enum\MysqlInfoOrderBy::tableName
+$column = $info->orderBy() === Enum\MysqlInfoOrderBy::tableName
     ? Enum\MysqlInfoOrderBy::tableRows->value
     : $info->orderBy()->value;
 $data = [];
+$list = $info->info();
 foreach ($list as $t) {
     $data[$t['table_name']] = $t[$column];
 }

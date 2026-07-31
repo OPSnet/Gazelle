@@ -131,42 +131,6 @@ class Torrent extends \Gazelle\BaseManager {
         return $all;
     }
 
-    public function lookupLeechReason(string $leechReason): LeechReason {
-        return match ($leechReason) {
-            LeechReason::AlbumOfTheMonth->value => LeechReason::AlbumOfTheMonth,
-            LeechReason::Permanent->value       => LeechReason::Permanent,
-            LeechReason::Showcase->value        => LeechReason::Showcase,
-            LeechReason::StaffPick->value       => LeechReason::StaffPick,
-            default                             => LeechReason::Normal,
-        };
-    }
-
-    public function lookupLeechType(string $leechType): LeechType {
-        return match ($leechType) {
-            LeechType::Free->value    => LeechType::Free,
-            LeechType::Neutral->value => LeechType::Neutral,
-            default                   => LeechType::Normal,
-        };
-    }
-
-    public function leechReasonList(): array {
-        return [
-            LeechReason::Normal,
-            LeechReason::AlbumOfTheMonth,
-            LeechReason::Permanent,
-            LeechReason::Showcase,
-            LeechReason::StaffPick,
-        ];
-    }
-
-    public function leechTypeList(): array {
-        return [
-            LeechType::Normal,
-            LeechType::Neutral,
-            LeechType::Free,
-        ];
-    }
-
     public function flushFoldernameCache(string $folder): void {
         self::$cache->delete_value(sprintf(self::CACHE_FOLDERNAME, signature($folder, FOLDER_CLASH_SALT)));
     }

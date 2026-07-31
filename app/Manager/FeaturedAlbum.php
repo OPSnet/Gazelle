@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\Manager;
 
 use Gazelle\Enum\FeaturedAlbumType;
@@ -85,7 +87,7 @@ class FeaturedAlbum extends \Gazelle\BaseManager {
         return new \Gazelle\FeaturedAlbum($featureType, $tgroup->id)->flush();
     }
 
-    public function findById(int $id): ?\Gazelle\FeaturedAlbum {
+    public function findById(int $id): \Gazelle\FeaturedAlbum|null {
         $type = self::$db->scalar("
             SELECT Type
             FROM featured_albums
@@ -104,21 +106,14 @@ class FeaturedAlbum extends \Gazelle\BaseManager {
         );
     }
 
-    public function findByType(FeaturedAlbumType $type): ?\Gazelle\FeaturedAlbum {
-        $tgroupId = (int)self::$db->scalar("
+    public function findByType(FeaturedAlbumType $type): \Gazelle\FeaturedAlbum|null {
+        $tgroupId = self::$db->scalar("
             SELECT GroupID
             FROM featured_albums
             WHERE Ended IS NULL
                 AND Type = ?
             ", $type->value
         );
-        return $tgroupId ? new \Gazelle\FeaturedAlbum($type, $tgroupId) : null;
-    }
-
-    public function lookupFeaturedAlbumType(int $featuredAlbumType): FeaturedAlbumType {
-        return match ($featuredAlbumType) {
-            1       => FeaturedAlbumType::Showcase,
-            default => FeaturedAlbumType::AlbumOfTheMonth,
-        };
+        return is_null($tgroupId) ? null : new \Gazelle\FeaturedAlbum($type, (int)$tgroupId);
     }
 }

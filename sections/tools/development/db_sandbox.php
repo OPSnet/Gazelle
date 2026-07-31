@@ -15,9 +15,7 @@ if (!$Viewer->permitted('admin_site_debug')) {
     Error403::error();
 }
 
-$src = ($_REQUEST['src'] ?? Enum\SourceDB::mysql->value) == Enum\SourceDB::mysql->value
-    ? Enum\SourceDB::mysql
-    : Enum\SourceDB::postgres;
+$src = Enum\SourceDB::tryFrom($_REQUEST['src'] ?? '') ?? Enum\SourceDB::mysql;
 
 $execute      = false;
 $query        = null;
@@ -36,7 +34,7 @@ if (isset($_GET['debug'])) {
         ? new DB\PgTable($_GET['table'])
         : new DB\MysqlTable($_GET['table']);
     $textAreaRows = 8;
-} elseif (!empty($_POST['query'])) {
+} elseif (isset($_POST['query'])) {
     $query        = trim($_POST['query']);
     $textAreaRows = max(8, substr_count($query, "\n") + 2);
     $execute      = true;

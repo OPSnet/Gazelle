@@ -7,9 +7,6 @@ declare(strict_types=1);
 
 namespace Gazelle;
 
-use Gazelle\Enum\LeechType;
-use Gazelle\Enum\LeechReason;
-
 authorize();
 
 if (!$Viewer->permitted('torrents_edit')) {
@@ -148,8 +145,8 @@ if ($newRevision) {
 
 if ($Viewer->permitted('torrents_freeleech')) {
     $torMan    = new Manager\Torrent();
-    $leechType = $torMan->lookupLeechType($_POST['leech_type'] ?? LeechType::Normal->value);
-    $reason    = $torMan->lookupLeechReason($_POST['leech_reason'] ?? LeechReason::Normal->value);
+    $leechType = Enum\LeechType::tryFrom($_POST['leech_type']) ?? Enum\LeechType::Normal;
+    $reason    = Enum\LeechReason::tryFrom($_POST['leech_reason']) ?? Enum\LeechReason::Normal;
     $tgroup->setFreeleech(
         all:       $_POST['all'] === 'all',
         leechType: $leechType,

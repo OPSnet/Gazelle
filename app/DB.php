@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle;
 
 use Gazelle\Enum\Direction;
@@ -189,13 +191,6 @@ class DB extends Base {
                 AND TIME > ?
             ", MYSQL_SLOW_QUERY_TIMEOUT
         );
-    }
-
-    public static function lookupDirection(string $direction): Direction {
-        return match ($direction) {
-            default                      => Direction::ascending,
-            Direction::descending->value => Direction::descending,
-        };
     }
 
     public function redundantIndexList(): array {

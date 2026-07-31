@@ -18,22 +18,6 @@ class Collage extends \Gazelle\BaseManager {
     final protected const TGROUP_PERSONAL_KEY  = 'torrent_collages_personal_%d';
     final protected const ARTIST_KEY           = 'artists_collages_%d';
 
-    public static function findType(int $type): ?\Gazelle\Enum\CollageType {
-        return match ($type) {
-            0 => CollageType::personal,
-            1 => CollageType::theme,
-            2 => CollageType::genre,
-            3 => CollageType::discography,
-            4 => CollageType::label,
-            5 => CollageType::staffPick,
-            6 => CollageType::chart,
-            7 => CollageType::artist,
-            8 => CollageType::award,
-            9 => CollageType::series,
-            default => null,
-        };
-    }
-
     public function create(
         User   $user,
         int    $categoryId,

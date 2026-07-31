@@ -25,8 +25,8 @@ echo $Twig->render('tgroup/edit.twig', [
             new Manager\Request()->findByTGroup($tgroup),
             fn ($r) => !$r->isFilled()
         ) === [],
-    'leech_reason' => $torMan->leechReasonList(),
-    'leech_type'   => $torMan->leechTypeList(),
+    'leech_reason' => Enum\LeechReason::cases(),
+    'leech_type'   => Enum\LeechType::cases(),
     'release_type' => new ReleaseType()->list(),
     'size'         => NEUTRAL_LEECH_THRESHOLD,
     'tgroup'       => $tgroup->showFallbackImage(false),

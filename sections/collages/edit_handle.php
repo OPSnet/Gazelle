@@ -6,9 +6,6 @@ declare(strict_types=1);
 
 namespace Gazelle;
 
-use Gazelle\Enum\LeechType;
-use Gazelle\Enum\LeechReason;
-
 if (!$Viewer->permitted('site_edit_wiki')) {
     Error403::error();
 }
@@ -116,10 +113,10 @@ if ($Viewer->permitted('admin_freeleech') && isset($_POST['change_leech'])) {
         torMan:    $torMan,
         tracker:   new \Gazelle\Tracker(),
         user:      $Viewer,
-        leechType: $torMan->lookupLeechType($_POST['leech_type'] ?? LeechType::Normal->value),
-        reason:    $torMan->lookupLeechReason($_POST['leech_reason'] ?? LeechReason::Normal->value),
+        leechType: Enum\LeechType::tryFrom($_POST['leech_type']) ?? Enum\LeechType::Normal,
+        reason:    Enum\LeechReason::tryFrom($_POST['leech_reason']) ?? Enum\LeechReason::Normal,
         threshold: $threshold,
-        all:       $_POST['all'] == 'all',
+        all:       $_POST['all'] === 'all',
     );
 }
 

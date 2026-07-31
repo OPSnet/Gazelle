@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle;
 
 class ReportAuto extends BasePgObject {
@@ -71,7 +73,8 @@ class ReportAuto extends BasePgObject {
     public function state(): Enum\ReportAutoState {
         if ($this->isResolved()) {
             return Enum\ReportAutoState::closed;
-        } elseif ($this->isClaimed()) {
+        }
+        if ($this->isClaimed()) {
             return Enum\ReportAutoState::in_progress;
         }
         return Enum\ReportAutoState::open;

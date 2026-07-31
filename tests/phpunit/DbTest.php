@@ -13,12 +13,6 @@ use GazelleUnitTest\Helper;
 class DbTest extends TestCase {
     use Pg;
 
-    public function testDirection(): void {
-        $this->assertEquals('asc',  DB::lookupDirection('asc')->value, 'db-direction-asc');
-        $this->assertEquals('desc', DB::lookupDirection('desc')->value, 'db-direction-desc');
-        $this->assertEquals('asc',  DB::lookupDirection('wut')->value, 'db-direction-default');
-    }
-
     public function testTableCoherency(): void {
         $db = DB::DB();
         $db->prepared_query("

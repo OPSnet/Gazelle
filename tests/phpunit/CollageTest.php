@@ -936,13 +936,6 @@ class CollageTest extends TestCase {
         $this->assertEquals('locked', $response['error'], 'collage-ajax-error-locked');
     }
 
-    public function testCollageType(): void {
-        $manager = new Manager\Collage();
-        $this->assertEquals(CollageType::personal, $manager->findType(CollageType::personal->value), 'collage-type-personal');
-        $this->assertEquals(CollageType::artist, $manager->findType(CollageType::artist->value), 'collage-type-artist');
-        $this->assertEquals(CollageType::genre, $manager->findType(2), 'collage-type-genre');
-    }
-
     public function testCollageShuffle(): void {
         $manager = new Manager\Collage();
         $list = [10, 20, 30, 40];

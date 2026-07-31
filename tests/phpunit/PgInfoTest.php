@@ -7,31 +7,17 @@ use PHPUnit\Framework\TestCase;
 class PgInfoTest extends TestCase {
     use Pg;
 
-    public function testDirection(): void {
-        $this->assertEquals(
-            Enum\PgInfoOrderBy::tableSize,
-            DB\PgInfo::lookupOrderby('table_size'),
-            'pginfo-orderby-tablesize'
-        );
-        $this->assertEquals(
-            Enum\PgInfoOrderBy::tableName,
-            DB\PgInfo::lookupOrderby('table_name'),
-            'pginfo-orderby-tablename'
-        );
-        $this->assertEquals(
-            Enum\PgInfoOrderBy::tableName,
-            DB\PgInfo::lookupOrderby('wut'),
-            'pginfo-orderby-default'
-        );
-    }
-
     public function testPgInfoList(): void {
         $pgInfo = new DB\PgInfo(
             Enum\PgInfoOrderBy::tableName,
             Enum\Direction::descending,
         );
         $list = $pgInfo->info();
-        $this->assertEquals('userclass_has_privilege', $list[0]['table_name'], 'pginfo-list');
+        $this->assertEquals(
+            'userclass_has_privilege',
+            array_first($list)['table_name'],
+            'pginfo-list',
+        );
     }
 
     public function testPgInfoColumn(): void {

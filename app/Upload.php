@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle;
 
 use Gazelle\Util\Textarea;
@@ -66,15 +68,12 @@ class Upload extends Base {
         );
     }
 
-    public function foot(
-        bool $showFooter,
-        Manager\Torrent $torMan = new Manager\Torrent(),
-    ): string {
+    public function foot(bool $showFooter): string {
         return self::$twig->render('upload/footer.twig', [
             'is_upload'    => !$this->isUploaded || isset($this->Torrent['add-format']),
             'info'         => $this->Torrent,
-            'leech_type'   => $torMan->leechTypeList(),
-            'leech_reason' => $torMan->leechReasonList(),
+            'leech_reason' => Enum\LeechReason::cases(),
+            'leech_type'   => Enum\LeechType::cases(),
             'show_footer'  => $showFooter,
             'viewer'       => $this->user,
         ]);

@@ -28,7 +28,7 @@ echo $Twig->render('collage/edit.twig', [
     'collage'      => $collage,
     'description'  => new Util\Textarea('description', $collage->description(), 60, 10),
     'error'        => $Err ?? false,
-    'leech_type'   => $torMan->leechTypeList(),
-    'leech_reason' => $torMan->leechReasonList(),
+    'leech_reason' => Enum\LeechReason::cases(),
+    'leech_type'   => Enum\LeechType::cases(),
     'viewer'       => $Viewer,
 ]);

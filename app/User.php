@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle;
 
 use Gazelle\User\MultiFactorAuth;
@@ -248,12 +250,8 @@ class User extends BaseAttrObject {
     }
 
     public function avatarMode(): Enum\AvatarDisplay {
-        return match ((int)$this->option('DisableAvatars')) {
-            Enum\AvatarDisplay::none->value              => Enum\AvatarDisplay::none,
-            Enum\AvatarDisplay::fallbackSynthetic->value => Enum\AvatarDisplay::fallbackSynthetic,
-            Enum\AvatarDisplay::forceSynthetic->value    => Enum\AvatarDisplay::forceSynthetic,
-            default                                      => Enum\AvatarDisplay::show,
-        };
+        return Enum\AvatarDisplay::tryFrom((int)$this->option('DisableAvatars'))
+            ?? Enum\AvatarDisplay::show;
     }
 
     /**
@@ -296,7 +294,7 @@ class User extends BaseAttrObject {
      * Is a user allowed to download a torrent file?
      */
     public function canLeech(): bool {
-        return $this->info()['can_leech'];
+        return (bool)$this->info()['can_leech'];
     }
 
     public function userclassLevel(): int {
@@ -549,11 +547,8 @@ class User extends BaseAttrObject {
     }
 
     public function userStatus(): Enum\UserStatus {
-        return match ($this->info()['Enabled']) {
-            '1'     => Enum\UserStatus::enabled,
-            '2'     => Enum\UserStatus::disabled,
-            default => Enum\UserStatus::unconfirmed,
-        };
+        return Enum\UserStatus::tryFrom($this->info()['Enabled'])
+            ?? Enum\UserStatus::unconfirmed;
     }
 
     public function paranoia(): array {
@@ -1208,7 +1203,7 @@ class User extends BaseAttrObject {
     }
 
     public function isStaff(): bool {
-        return $this->info()['isStaff'];
+        return (bool)$this->info()['isStaff'];
     }
 
     public function isFLS(): bool {

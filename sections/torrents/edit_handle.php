@@ -9,9 +9,6 @@ declare(strict_types=1);
 
 namespace Gazelle;
 
-use Gazelle\Enum\LeechType;
-use Gazelle\Enum\LeechReason;
-use Gazelle\Enum\TorrentFlag;
 use OrpheusNET\Logchecker\Logchecker;
 
 authorize();
@@ -51,7 +48,7 @@ $Properties['RemasterYear']            = (int)($_POST['remaster_year'] ?? 0);
 $Properties['RemasterTitle']           = trim($_POST['remaster_title'] ?? '');
 $Properties['RemasterRecordLabel']     = trim($_POST['remaster_record_label'] ?? '');
 $Properties['RemasterCatalogueNumber'] = trim($_POST['remaster_catalogue_number'] ?? '');
-foreach (TorrentFlag::cases() as $flag) {
+foreach (Enum\TorrentFlag::cases() as $flag) {
     $Properties[$flag->value] = isset($_POST[$flag->value]);
 }
 
@@ -112,7 +109,7 @@ switch ($torrent->group()->categoryName()) {
         } else {
             // Handle 'other' bitrates
             $Validate->setField('other_bitrate', true, 'text', 'You must enter the other bitrate (max length: 9 characters).', ['maxlength' => 9]);
-            $Properties['Encoding'] = trim($_POST['other_bitrate']) . (!empty($_POST['vbr']) ? ' (VBR)' : '');
+            $Properties['Encoding'] = trim($_POST['other_bitrate']) . (isset($_POST['vbr']) ? ' (VBR)' : '');
         }
         break;
 
@@ -128,7 +125,7 @@ switch ($torrent->group()->categoryName()) {
             $Validate->setField('bitrate', true, 'inarray', 'You must choose a bitrate.', ['inarray' => ENCODING]);
         } else {
             $Validate->setField('other_bitrate', true, 'text', 'You must enter the other bitrate (max length: 9 characters).', ['maxlength' => 9]);
-            $Properties['Encoding'] = trim($_POST['other_bitrate']) . (!empty($_POST['vbr']) ? ' (VBR)' : '');
+            $Properties['Encoding'] = trim($_POST['other_bitrate']) . (isset($_POST['vbr']) ? ' (VBR)' : '');
         }
         break;
 
@@ -275,7 +272,7 @@ if (isset($_FILES['logfiles'])) {
     new Manager\Riplog()->bulkCreate($torrent, $_FILES['logfiles']);
 }
 
-foreach (TorrentFlag::cases() as $flag) {
+foreach (Enum\TorrentFlag::cases() as $flag) {
     if ($flag->permission() && !$Viewer->permitted($flag->permission())) {
         continue;
     }
@@ -288,9 +285,9 @@ foreach (TorrentFlag::cases() as $flag) {
 }
 
 if ($Viewer->permitted('torrents_freeleech')) {
-    $reason    = $torMan->lookupLeechReason($_POST['leech_reason'] ?? LeechReason::Normal->value);
-    $leechType = $torMan->lookupLeechType($_POST['leech_type'] ?? LeechType::Normal->value);
-    if ($leechType != $torrent->leechType() || $reason != $torrent->leechReason()) {
+    $reason    = Enum\LeechReason::tryFrom($_POST['leech_reason'] ?? '') ?? Enum\LeechReason::Normal;
+    $leechType = Enum\LeechType::tryFrom($_POST['leech_type'] ?? '') ?? Enum\LeechType::Normal;
+    if ($leechType !== $torrent->leechType() || $reason !== $torrent->leechReason()) {
         $torMan->setListFreeleech(
             tracker:   new Tracker(),
             idList:    [$torrent->id],

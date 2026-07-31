@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\DB;
 
 use Gazelle\Enum\PgInfoOrderBy;
@@ -61,20 +63,5 @@ class PgInfo {
             PgInfoOrderBy::vacuumTotal->value  =>
                 ['dbColumn' => PgInfoOrderBy::vacuumTotal->value,  'defaultSort' => 'desc', 'text' => 'Total Vacuums',  'alt' => 'total vacuum'],
         ];
-    }
-
-    public static function lookupOrderby(string $columnName): PgInfoOrderBy {
-        return match ($columnName) {
-            default                            => PgInfoOrderBy::tableName,
-            PgInfoOrderBy::tableSize->value    => PgInfoOrderBy::tableSize,
-            PgInfoOrderBy::indexSize->value    => PgInfoOrderBy::indexSize,
-            PgInfoOrderBy::live->value         => PgInfoOrderBy::live,
-            PgInfoOrderBy::dead->value         => PgInfoOrderBy::dead,
-            PgInfoOrderBy::deadRatio->value    => PgInfoOrderBy::deadRatio,
-            PgInfoOrderBy::analyzeDelta->value => PgInfoOrderBy::analyzeDelta,
-            PgInfoOrderBy::analyzeTotal->value => PgInfoOrderBy::analyzeTotal,
-            PgInfoOrderBy::vacuumDelta->value  => PgInfoOrderBy::vacuumDelta,
-            PgInfoOrderBy::vacuumTotal->value  => PgInfoOrderBy::vacuumTotal,
-        };
     }
 }
