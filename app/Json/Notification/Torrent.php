@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\Json\Notification;
 
 use Gazelle\Manager\Riplog            as RiplogManager;
@@ -11,7 +13,7 @@ class Torrent extends \Gazelle\Json {
     public function __construct(
         protected UserNotifier   $notifier,
         protected Paginator      $paginator,
-        protected TorrentManager $torMan = new TorrentManager(),
+        protected TorrentManager $torMan        = new TorrentManager(),
         protected RiplogManager  $riplogManager = new RiplogManager(),
     ) {}
 

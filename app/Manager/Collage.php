@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\Manager;
 
 use Gazelle\Enum\CollageType;
 use Gazelle\Enum\UserSummary;
 use Gazelle\Enum\UserSummaryMisc;
 use Gazelle\Intf\CollageEntry;
+use Gazelle\User;
 
 class Collage extends \Gazelle\BaseManager {
     final public const ID_KEY = 'zz_cg_%d';
@@ -32,8 +35,8 @@ class Collage extends \Gazelle\BaseManager {
     }
 
     public function create(
-        \Gazelle\User $user,
-        int $categoryId,
+        User   $user,
+        int    $categoryId,
         string $name,
         string $description,
         string $tagList,
@@ -95,7 +98,7 @@ class Collage extends \Gazelle\BaseManager {
         );
     }
 
-    public function findPersonalByUser(\Gazelle\User $user): array {
+    public function findPersonalByUser(User $user): array {
         self::$db->prepared_query("
             SELECT ID
             FROM collages
@@ -133,7 +136,7 @@ class Collage extends \Gazelle\BaseManager {
             'group_id'   => $tgroup->id,
             'image'      => image_cache_encode($tgroup->image(), height: 150, width: 150),
             'name'       => $tgroup->text(),
-            'tags'       => implode(', ', array_map(fn($n) => "#{$n}", $tgroup->tagNameList())),
+            'tags'       => implode(', ', array_map(fn ($n) => "#{$n}", $tgroup->tagNameList())),
             'tags_plain' => implode(', ', $tgroup->tagNameList()),
         ]);
     }
@@ -162,7 +165,7 @@ class Collage extends \Gazelle\BaseManager {
         return $new;
     }
 
-    public function addToArtistCollageDefault(CollageEntry $entry, \Gazelle\User $user): array {
+    public function addToArtistCollageDefault(CollageEntry $entry, User $user): array {
         $userId  = $user->id;
         $key     = sprintf(self::CACHE_DEFAULT_ARTIST, $userId);
         $default = self::$cache->get_value($key);
@@ -220,7 +223,7 @@ class Collage extends \Gazelle\BaseManager {
         return $list;
     }
 
-    public function addToCollageDefault(CollageEntry $entry, \Gazelle\User $user): array {
+    public function addToCollageDefault(CollageEntry $entry, User $user): array {
         $key = sprintf(self::CACHE_DEFAULT_GROUP, $user->id);
         $default = self::$cache->get_value($key);
         if ($default === false) {
@@ -275,12 +278,12 @@ class Collage extends \Gazelle\BaseManager {
         return $list;
     }
 
-    public function flushDefaultArtist(\Gazelle\User $user): static {
+    public function flushDefaultArtist(User $user): static {
         self::$cache->delete_value(sprintf(self::CACHE_DEFAULT_ARTIST, $user->id));
         return $this;
     }
 
-    public function flushDefaultGroup(\Gazelle\User $user): static {
+    public function flushDefaultGroup(User $user): static {
         self::$cache->delete_value(sprintf(self::CACHE_DEFAULT_GROUP, $user->id));
         return $this;
     }
@@ -332,7 +335,7 @@ class Collage extends \Gazelle\BaseManager {
         return $autocomplete;
     }
 
-    public function subscribedTGroupCollageList(\Gazelle\User $user, bool $viewAll, $manager = new TGroup()): array {
+    public function subscribedTGroupCollageList(User $user, bool $viewAll, $manager = new TGroup()): array {
         $cond = ['s.UserID = ?'];
         $args = [$user->id];
         if ($viewAll) {
@@ -357,9 +360,16 @@ class Collage extends \Gazelle\BaseManager {
         );
         $result = [];
         foreach (self::$db->to_array(false, MYSQLI_ASSOC) as $entry) {
-            $entry['groupIds'] = is_null($entry['groupIds'])
-                ? []
-                : array_map(intval(...), explode(',', $entry['groupIds']));
+            if (is_null($entry['groupIds'])) {
+                $entry['groupIds'] = [];
+            } elseif ($viewAll) {
+                $entry['groupIds'] = [$entry['groupIds']];
+            } else {
+                $entry['groupIds'] = array_map(
+                    intval(...),
+                    explode(',', $entry['groupIds']),
+                );
+            }
             $entry['tgroup_list'] = array_filter(
                 array_map(
                     fn ($id) => $manager->findById($id),
@@ -373,7 +383,7 @@ class Collage extends \Gazelle\BaseManager {
     }
 
     public function subscribedArtistCollageList(
-        \Gazelle\User $user,
+        User $user,
         bool $viewAll,
         $manager = new Artist(),
     ): array {

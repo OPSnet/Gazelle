@@ -1,17 +1,26 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\Json;
+
+use Gazelle\Artist          as ArtistInstance;
+use Gazelle\User;
+use Gazelle\User\Bookmark;
+use Gazelle\Manager\Request as RequestManager;
+use Gazelle\Manager\TGroup  as TGroupManager;
+use Gazelle\Manager\Torrent as TorrentManager;
 
 class Artist extends \Gazelle\Json {
     protected bool $releasesOnly = false;
 
     public function __construct(
-        protected \Gazelle\Artist          $artist,
-        protected \Gazelle\User            $user,
-        protected \Gazelle\User\Bookmark   $bookmark,
-        protected \Gazelle\Manager\Request $requestMan = new \Gazelle\Manager\Request(),
-        protected \Gazelle\Manager\TGroup  $tgMan      = new \Gazelle\Manager\TGroup(),
-        protected \Gazelle\Manager\Torrent $torMan     = new \Gazelle\Manager\Torrent(),
+        protected ArtistInstance $artist,
+        protected User           $user,
+        protected Bookmark       $bookmark,
+        protected RequestManager $requestMan = new RequestManager(),
+        protected TGroupManager  $tgMan      = new TGroupManager(),
+        protected TorrentManager $torMan     = new TorrentManager(),
     ) {}
 
     public function setReleasesOnly(bool $releasesOnly): static {
@@ -47,9 +56,8 @@ class Artist extends \Gazelle\Json {
                 $Tags[$tag]['count']++;
             }
 
-            $torrentIds = $tgroup->torrentIdList();
             $InnerTorrents = [];
-            foreach ($torrentIds as $torrentId) {
+            foreach ($tgroup->torrentIdList() as $torrentId) {
                 $torrent = $this->torMan->findById($torrentId);
                 if (is_null($torrent)) {
                     continue;
