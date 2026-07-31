@@ -4,6 +4,7 @@ namespace Gazelle\UserMatch;
 
 use Gazelle\Enum\Direction;
 use Gazelle\Enum\UserMatchSort;
+use Gazelle\User;
 
 class ListMatcher extends \Gazelle\Base {
     final protected const string CACHE_KEY = 'listmatcher_cache_%s_%s';
@@ -19,8 +20,8 @@ class ListMatcher extends \Gazelle\Base {
 
     public function create(): static {
         $this->ipTable = 'tmp_bulksearch_ip_' . str_replace(['.', ' '], '', microtime());
-        $this->pg()->prepared_query("drop table if exists " . $this->ipTable);
-        $this->pg()->prepared_query("
+        $this->pg()->query("drop table if exists {$this->ipTable}");
+        $this->pg()->query("
             create temporary table {$this->ipTable} (
                 addr inet primary key
             )
@@ -70,10 +71,10 @@ class ListMatcher extends \Gazelle\Base {
     public function addIps(array $ips): int {
         $added = 0;
         foreach (array_chunk($ips, self::MAX_INSERT) as $chunk) {
-            $added += $this->pg()->prepared_query("
+            $added += $this->pg()->query("
                 insert into {$this->ipTable}
                        (addr)
-                values " . placeholders($chunk, '(?)') .
+                values " . placeholders_pg($chunk, '(%s)') .
                 " on conflict do nothing",
                 ...$chunk
             );
@@ -89,12 +90,16 @@ class ListMatcher extends \Gazelle\Base {
         return $added;
     }
 
-    public function findUsers(MatchCandidate $candidate, bool $loose = true, bool $trackerIps = false): array {
+    public function findUsers(
+        MatchCandidate $candidate,
+        bool           $loose      = true,
+        bool           $trackerIps = false,
+    ): array {
         $uids = $this->findCandidates($candidate, $loose, $trackerIps);
 
         $matches = [];
         foreach ($uids as $uid) {
-            $user = new \Gazelle\User($uid);
+            $user = new User($uid);
             $siteCandidate = $this->siteUserToCandidate($user, $trackerIps);
             $matches[] = [
                 'user'  => $user,
@@ -106,22 +111,23 @@ class ListMatcher extends \Gazelle\Base {
         return $matches;
     }
 
-    protected function siteUserToCandidate(\Gazelle\User $user, bool $trackerIps = false): MatchCandidate {
-        $siteIps = $this->pg()->all("
-            select ip, lower(unnest(seen)) as first_seen, upper(unnest(seen)) as last_seen
-            from ip_site_history ih
-            inner join {$this->ipTable} s on (s.addr = ih.ip)
-            where id_user = ?
-            ", $user->id
+    protected function siteUserToCandidate(User $user, bool $trackerIps = false): MatchCandidate {
+        $siteIps = array_merge(
+            $this->pg()->allex("
+                select ip, lower(unnest(seen)) as first_seen, upper(unnest(seen)) as last_seen
+                from ip_site_history ih
+                inner join {$this->ipTable} s on (s.addr = ih.ip)
+                where id_user = $1
+                ", $user->id
+            ),
+            $this->pg()->allex("
+                select ip, lower(seen) as first_seen, upper(seen) as last_seen
+                from ip_history ih
+                inner join {$this->ipTable} s on (s.addr = ih.ip)
+                where id_user = $1
+                ", $user->id
+            ),
         );
-        $eventIps = $this->pg()->all("
-            select ip, lower(seen) as first_seen, upper(seen) as last_seen
-            from ip_history ih
-            inner join {$this->ipTable} s on (s.addr = ih.ip)
-            where id_user = ?
-            ", $user->id
-        );
-        array_push($siteIps, ...$eventIps);
 
         if ($trackerIps) {
             self::$db->prepared_query("
@@ -130,7 +136,6 @@ class ListMatcher extends \Gazelle\Base {
                     from_unixtime(min(mtime)) AS first_seen,
                     NULL                      AS last_seen
                 FROM xbt_files_users xfu
-                /*INNER JOIN {$this->ipTable} s ON (s.addr_a = xfu.IP)*/
                 WHERE xfu.uid = ?
                 GROUP BY xfu.IP
                 UNION SELECT
@@ -141,17 +146,28 @@ class ListMatcher extends \Gazelle\Base {
                 INNER JOIN {$this->ipTable} t ON (t.addr_a = xs.IP)
                 WHERE xs.uid = ?
                 GROUP BY xs.IP
-            ", $user->id, $user->id);
-            while ($row = self::$db->next_row(MYSQLI_ASSOC)) {
-                $siteIps[] = $row;
-            }
+                ", $user->id, $user->id
+            );
+            $siteIps = array_merge($siteIps, self::$db->to_array(false, MYSQLI_ASSOC));
         }
 
-        $ips = array_map(fn ($r) => [
-            $r['ip'],
-            new \DateTimeImmutable($r['first_seen']),
-            $r['last_seen'] ? new \DateTimeImmutable($r['last_seen']) : null
-        ], $siteIps);
+        // one day, everything will be in Postgresql...
+        $ips = array_map(
+            fn ($r) => [
+                $r['ip'],
+                $r['first_seen'] instanceof \DateTimeImmutable
+                    ? $r['first_seen']
+                    : new \DateTimeImmutable($r['first_seen']),
+                $r['last_seen']
+                    ? (
+                        $r['last_seen'] instanceof \DateTimeImmutable
+                        ? $r['last_seen']
+                        : new \DateTimeImmutable($r['last_seen'])
+                    )
+                    : null
+            ],
+            $siteIps
+        );
 
         self::$db->prepared_query("
             SELECT DISTINCT Email
@@ -178,7 +194,7 @@ class ListMatcher extends \Gazelle\Base {
     }
 
     protected function findSiteUsers(): array {
-        return array_map(fn ($row) => $row['id_user'], $this->pg()->all("
+        return $this->pg()->columnex("
             select id_user
             from ip_site_history ish
             inner join {$this->ipTable} s on (s.addr = ish.ip)
@@ -187,7 +203,7 @@ class ListMatcher extends \Gazelle\Base {
             from ip_history ih
             inner join {$this->ipTable} t on (t.addr = ih.ip)
             group by id_user
-        "));
+        ");
     }
 
     protected function findTrackerUsers(): array {
@@ -248,32 +264,62 @@ class ListMatcher extends \Gazelle\Base {
         return self::$db->collect('user_id');
     }
 
-    public static function sortMatches(array &$matches, UserMatchSort $sortKey, Direction $direction): void {
+    public static function sortMatches(
+        array        &$matches,
+        UserMatchSort $sortKey,
+        Direction     $direction
+    ): void {
         $direction = $direction === Direction::ascending ? 1 : -1;
         switch ($sortKey) {
             case UserMatchSort::firstDate:
-                usort($matches, fn($a, $b) => $direction * gmp_cmp($a['match']->firstDate()?->getTimestamp() ?? PHP_INT_MAX,
-                        $b['match']->firstDate()?->getTimestamp() ?? PHP_INT_MAX));
+                usort(
+                    $matches,
+                    fn ($a, $b) => $direction * gmp_cmp(
+                        $a['match']->firstDate()?->getTimestamp() ?? PHP_INT_MAX,
+                        $b['match']->firstDate()?->getTimestamp() ?? PHP_INT_MAX
+                    )
+                );
                 break;
             case UserMatchSort::lastDate:
-                usort($matches, fn($a, $b) => $direction * gmp_cmp($a['match']->lastDate()?->getTimestamp() ?? 0,
-                        $b['match']->lastDate()?->getTimestamp() ?? 0));
+                usort(
+                    $matches,
+                    fn ($a, $b) => $direction * gmp_cmp(
+                        $a['match']->lastDate()?->getTimestamp() ?? 0,
+                        $b['match']->lastDate()?->getTimestamp() ?? 0
+                    )
+                );
                 break;
             default:  // score
-                usort($matches, fn($a, $b) => $direction * gmp_cmp($a['match']->score(), $b['match']->score()));
+                usort(
+                    $matches,
+                    fn ($a, $b) => $direction * gmp_cmp(
+                        $a['match']->score(),
+                        $b['match']->score()
+                    )
+                );
                 break;
         }
     }
 
-    public static function cache(MatchCandidate $candidate, array $matches, string $text, \Gazelle\User $owner): string {
+    public static function cache(
+        MatchCandidate $candidate,
+        array          $matches,
+        string         $text,
+        User           $owner
+    ): string {
         $token = randomString(16);
         $key = sprintf(static::CACHE_KEY, $owner->id, $token);
-        self::$cache->cache_value($key, [$matches, $text, count($candidate->ips), count($candidate->emails)], 3600);
+        self::$cache->cache_value(
+            $key,
+            [$matches, $text, count($candidate->ips), count($candidate->emails)],
+            3600,
+        );
         return $token;
     }
 
-    public static function fromCache(string $token, \Gazelle\User $owner): array|false {
-        $key = sprintf(static::CACHE_KEY, $owner->id, $token);
-        return self::$cache->get_value($key);
+    public static function fromCache(string $token, User $owner): array|false {
+        return self::$cache->get_value(
+            sprintf(static::CACHE_KEY, $owner->id, $token)
+        );
     }
 }
