@@ -43,5 +43,5 @@ fi
 if [ -n "$PHP" ]; then
     echo "Linting PHP"
     docker compose exec -T web sh -c \
-        "vendor/bin/phpcs $PHP && vendor/bin/phpstan analyze --no-progress --configuration=misc/phpstan.neon --memory-limit 512M $PHP"
+        "php -l $PHP && vendor/bin/phpcs $PHP && vendor/bin/phpstan analyze --no-progress --configuration=misc/phpstan.neon --memory-limit 512M $PHP"
 fi
