@@ -7,7 +7,7 @@ use Gazelle\Util\Time;
 
 class User extends BaseAttrObject {
     final public const tableName             = 'users_main';
-    final protected const CACHE_KEY          = 'u2_%d';
+    final protected const CACHE_KEY          = 'u_v3_%d';
     final protected const CACHE_NOTIFY       = 'u_notify_%d';
     final protected const CACHE_REFERRAL     = 'u_refer_%d';
     final protected const USER_RECENT_UPLOAD = 'u_recent_up_%d';
@@ -165,8 +165,8 @@ class User extends BaseAttrObject {
                 ui.SiteOptions,
                 uls.Uploaded,
                 uls.Downloaded,
-                p.Level AS Class,
-                p.Name  AS className,
+                p.Level AS userclass_level,
+                p.Name  AS userclass_name,
                 if(p.Level >= (SELECT Level FROM permissions WHERE ID = ?), 1, 0) as isStaff,
                 uf.tokens AS FLTokens,
                 coalesce(ub.points, 0) AS BonusPoints,
@@ -303,8 +303,8 @@ class User extends BaseAttrObject {
         return $this->info()['can_leech'];
     }
 
-    public function classLevel(): int {
-        return $this->info()['Class'];
+    public function userclassLevel(): int {
+        return $this->info()['userclass_level'];
     }
 
     /**
@@ -537,7 +537,7 @@ class User extends BaseAttrObject {
     }
 
     public function userclassName(): string {
-        return $this->info()['className'];
+        return $this->info()['userclass_name'];
     }
 
     public function username(): string {
@@ -730,7 +730,7 @@ class User extends BaseAttrObject {
      * @return bool has access
      */
     public function forumAccess(Forum $forum, int $forumMinClassLevel): bool {
-        return ($this->classLevel() >= $forumMinClassLevel || in_array($forum->id, $this->permittedForums()))
+        return ($this->userclassLevel() >= $forumMinClassLevel || in_array($forum->id, $this->permittedForums()))
             && !in_array($forum->id, $this->forbiddenForums());
     }
 

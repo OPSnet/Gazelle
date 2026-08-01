@@ -50,7 +50,7 @@
 {% elseif viewer.isStaff %}
                 <select id="assign_to" name="assign">
                     <optgroup label="User classes">
-                        <option value="class_0"{{ selected(pm.unassigned and pm.classLevel == 0) }}>First Line Support</option>
+                        <option value="class_0"{{ selected(pm.unassigned and pm.userclassLevel == 0) }}>First Line Support</option>
 {%  for class in staff_level %}
                         <option value="class_{{ class.Level }}"{{ selected(not pm.assignedUserId and class.Name == pm.userclassName) }}>{{ class.Name }}</option>
 {%  endfor %}

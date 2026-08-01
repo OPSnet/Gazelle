@@ -107,11 +107,11 @@ class Quote extends \Gazelle\BaseUser {
         if (!$permittedForums) {
             // any forum they have access to due to their class
             $forumCond[] = 'f.MinClassRead <= ?';
-            $forumArgs[] = $this->user->classLevel();
+            $forumArgs[] = $this->user->userclassLevel();
         } else {
             // any forum they have access to due to their class plus additional grants
             $forumCond[] = '(f.MinClassRead <= ? OR f.ID IN (' . placeholders($permittedForums) . '))';
-            $forumArgs = array_merge([$this->user->classLevel()], $permittedForums);
+            $forumArgs = array_merge([$this->user->userclassLevel()], $permittedForums);
         }
         if ($forbiddenForums) {
             // but not if they have been banned from it

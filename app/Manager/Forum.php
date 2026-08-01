@@ -151,7 +151,7 @@ class Forum extends \Gazelle\BaseManager {
                 }
                 $userToc[$category][] = [
                     'autosub'          => in_array($f['ID'], $autosubList),
-                    'creator'          => $f['MinClassCreate'] <= $user->classLevel(),
+                    'creator'          => $f['MinClassCreate'] <= $user->userclassLevel(),
                     'category'         => $category,
                     'category_id'      => $f['categoryId'],
                     'cut_title'        => shortenString($f['Title'] ?? '', 50, true),
@@ -214,10 +214,10 @@ class Forum extends \Gazelle\BaseManager {
         $permitted = $user->permittedForums();
         if (!empty($permitted)) {
             $cond = ['(f.MinClassRead <= ? OR f.ID IN (' . placeholders($permitted) . '))'];
-            $args = array_merge([$user->classLevel()], $permitted);
+            $args = array_merge([$user->userclassLevel()], $permitted);
         } else {
             $cond = ['f.MinClassRead <= ?'];
-            $args = [$user->classLevel()];
+            $args = [$user->userclassLevel()];
         }
         $forbidden = $user->forbiddenForums();
         if (!empty($forbidden)) {

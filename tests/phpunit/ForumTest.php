@@ -677,7 +677,7 @@ class ForumTest extends TestCase {
            source:           $this->forum,
            destination:      $this->extra,
            label:            'phpunit',
-           userClass:        $this->userList['admin']->classLevel(),
+           userClass:        $this->userList['admin']->userclassLevel(),
            secondaryClasses: '',
            privileges:       '',
            userIds:          '',
@@ -686,7 +686,11 @@ class ForumTest extends TestCase {
         $this->assertEquals('phpunit', $transition->label(), 'forum-trans-label');
         $this->assertEquals($this->forum->id, $transition->sourceId(), 'forum-trans-source');
         $this->assertEquals($this->extra->id, $transition->destinationId(), 'forum-trans-dest');
-        $this->assertEquals($this->userList['admin']->classLevel(), $transition->classLevel(), 'forum-trans-class-level');
+        $this->assertEquals(
+            $this->userList['admin']->userclassLevel(),
+            $transition->userclassLevel(),
+            'forum-trans-class-level',
+        );
         $this->assertCount(0, $transition->secondaryClassIdList(), 'forum-trans-empty-secondary');
         $this->assertCount(0, $transition->userIdList(), 'forum-trans-empty-user-list');
         $this->assertTrue($transition->hasUserForThread($this->userList['admin'], $thread), 'forum-trans-has-admin');
@@ -699,7 +703,7 @@ class ForumTest extends TestCase {
            source:           $this->forum,
            destination:      $this->extra,
            label:            'phpunit',
-           userClass:        $this->userList['admin']->classLevel(),
+           userClass:        $this->userList['admin']->userclassLevel(),
            secondaryClasses: (string)FLS_TEAM,
            privileges:       '',
            userIds:          (string)$this->userList['specific']->id,

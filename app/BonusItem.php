@@ -106,7 +106,7 @@ class BonusItem extends \Gazelle\BasePgObject {
     public function priceForUser(User $user): int {
         return match ($this->label()) {
             'collage-1' => $this->price() * 2 ** min(6, $user->paidPersonalCollages()),
-            default     => $user->classLevel() >= $this->userclassFree()
+            default     => $user->userclassLevel() >= $this->userclassFree()
                 ? 0 : $this->price(),
         };
     }
@@ -165,13 +165,13 @@ class BonusItem extends \Gazelle\BasePgObject {
      *   $item->purchase($user, 0);
      */
     protected function processPurchase(User $user, int $price, array $extra = []): void {
-        if ($user->classLevel() < $this->userclassMin()) {
+        if ($user->userclassLevel() < $this->userclassMin()) {
             throw new BonusPurchaseException(Enum\BonusItemPurchaseStatus::forbidden);
         }
         if ($this->isPurchased($user) && !$this->isRecurring()) {
             throw new BonusPurchaseException(Enum\BonusItemPurchaseStatus::alreadyPurchased);
         }
-        if ($user->classLevel() >= $this->userclassFree()) {
+        if ($user->userclassLevel() >= $this->userclassFree()) {
             $price = 0;
         }
 

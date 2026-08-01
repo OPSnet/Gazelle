@@ -1,27 +1,8 @@
 <?php
 
-// phpcs:disable PSR1.Files.SideEffects.FoundWithSymbols
-
 declare(strict_types=1);
 
 namespace Gazelle;
-
-function class_list(int $Selected = 0): string {
-    /** @phpstan-var \Gazelle\User $Viewer */
-    global $Viewer;
-    $Return = '';
-    $Classes = new Manager\User()->classList();
-    foreach ($Classes as $Class) {
-        if ($Class['Level'] <= $Viewer->privilege()->effectiveClassLevel()) {
-            $Return .= '<option value="' . $Class['Level'] . '"';
-            if ($Selected == $Class['Level']) {
-                $Return .= ' selected="selected"';
-            }
-            $Return .= '>' . shortenString($Class['Name'], 20, true) . '</option>' . "\n";
-        }
-    }
-    return $Return;
-}
 
 require __DIR__ . match ($_REQUEST['action'] ?? '') {
     'add_alias'    => '/add_alias.php',

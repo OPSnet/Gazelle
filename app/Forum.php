@@ -311,10 +311,10 @@ class Forum extends BaseObject {
         $permittedForums = $user->permittedForums();
         if (!$permittedForums) {
             $cond[] = 'f.MinClassRead <= ?';
-            $args[] = $user->classLevel();
+            $args[] = $user->userclassLevel();
         } else {
             $cond[] = '(f.MinClassRead <= ? OR f.ID IN (' . placeholders($permittedForums) . '))';
-            $args = array_merge([$user->classLevel()], $permittedForums);
+            $args = array_merge([$user->userclassLevel()], $permittedForums);
         }
         $forbiddenForums = $user->forbiddenForums();
         if ($forbiddenForums) {

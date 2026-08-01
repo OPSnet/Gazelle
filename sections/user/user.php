@@ -172,9 +172,9 @@ if ($OwnProfile || $Viewer->permitted('admin_bp_history')) { ?>
 }
 if ($user->propertyVisibleMulti($previewer, ['artistsadded', 'collagecontribs+', 'downloaded', 'requestsfilled_count', 'requestsvoted_bounty', 'torrentcomments++', 'uploaded', 'uploads+', ])) {
 ?>
-                <li<?= $user->classLevel() >= 900 ? ' title="Infinite"' : '' ?>><strong>Overall rank: <?= is_null($rank->score())
+                <li<?= $user->userclassLevel() >= 900 ? ' title="Infinite"' : '' ?>><strong>Overall rank: <?= is_null($rank->score())
                     ? 'Server busy'
-                    : ($user->classLevel() >= 900 ? '&nbsp;∞' : number_format($rank->score() * $user->rankFactor())) ?></strong></li>
+                    : ($user->userclassLevel() >= 900 ? '&nbsp;∞' : number_format($rank->score() * $user->rankFactor())) ?></strong></li>
 <?php } ?>
             </ul>
         </div>

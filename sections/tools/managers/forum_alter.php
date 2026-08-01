@@ -23,7 +23,7 @@ if ($_POST['submit'] == 'Delete') {
     $minRead   = (int)$_POST['minclassread'];
     $minWrite  = (int)$_POST['minclasswrite'];
     $minCreate = (int)$_POST['minclasscreate'];
-    if ($Viewer->classLevel() < min($minRead, $minWrite, $minCreate)) {
+    if ($Viewer->userclassLevel() < min($minRead, $minWrite, $minCreate)) {
         Error403::error();
     }
 
@@ -56,7 +56,7 @@ if ($_POST['submit'] == 'Delete') {
         );
     } elseif ($_POST['submit'] == 'Edit') {
         $minClassRead = $forum->minClassRead();
-        if (!$minClassRead || $minClassRead > $Viewer->classLevel()) {
+        if (!$minClassRead || $minClassRead > $Viewer->userclassLevel()) {
             Error403::error();
         }
         $forum->modifyForum($_POST);

@@ -191,7 +191,11 @@ if (!empty($userTitle)) {
                 <a href="reports.php?action=report&amp;type=post&amp;id=<?=$PostID?>" class="brackets">Report</a>
 <?php
     $author = new User($AuthorID);
-    if ($Viewer->permitted('users_warn') && $Viewer->id != $AuthorID && $Viewer->classLevel() >= $author->classLevel()) {
+    if (
+        $Viewer->permitted('users_warn')
+        && $Viewer->id !== $AuthorID
+        && $Viewer->userclassLevel() >= $author->userclassLevel()
+    ) {
 ?>
                 <form class="manage_form hidden" name="user" id="warn<?=$PostID?>" action="" method="post">
                     <input type="hidden" name="action" value="warn">

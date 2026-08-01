@@ -53,7 +53,7 @@
                     <td><a href="staffpm.php?action=viewconv&amp;id={{ spm.id }}">{{ spm.subject }}</a></td>
                     <td>{{ spm.date|time_diff }}</td>
                     <td>
-{%  if not spm.classLevel -%}
+{%  if not spm.userclassLevel -%}
         First Line Support
 {%  else -%}
         {{ spm.userclassName }}{% if spm.userclassName != max %}+{% endif %}

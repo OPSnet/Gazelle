@@ -54,7 +54,7 @@
                 <td style="text-align:center">
 {%  if not item.permitted(viewer) %}
                     <i>Forbidden</i>
-{%  elseif item.userclassMin > viewer.classLevel %}
+{%  elseif item.userclassMin > viewer.userclassLevel %}
                     <i>Locked</i>
 {%  elseif
         (item.label == 'seedbox' and viewer.hasAttr('feature-seedbox'))

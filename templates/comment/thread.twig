@@ -36,7 +36,7 @@
 {%      endif %}
 {%      if (viewer.permitted('users_warn'))
             or (post.AuthorID == viewer.id)
-            or (viewer.classLevel >= userMan.findById(post.AuthorID).classLevel) %}
+            or (viewer.userclassLevel >= userMan.findById(post.AuthorID).userclassLevel) %}
                     <form class="manage_form hidden" name="user" id="warn{{
                         post.ID }}" action="comments.php" method="post">
                         <input type="hidden" name="action" value="warn">

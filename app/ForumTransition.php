@@ -75,7 +75,7 @@ class ForumTransition extends BaseObject {
      *  - they belong to a permitted secondary class
      */
     public function hasUser(User $user): bool {
-        return $this->classLevel() <= $user->classLevel()
+        return $this->userclassLevel() <= $user->userclassLevel()
             || in_array($user->id, $this->userIdList())
             || array_intersect(
                 array_keys(new User\Privilege($user)->secondaryClassList()),
@@ -106,7 +106,7 @@ class ForumTransition extends BaseObject {
         return $this->info()['label'];
     }
 
-    public function classLevel(): int {
+    public function userclassLevel(): int {
         return $this->info()['minimum_user_class'];
     }
 

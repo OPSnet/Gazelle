@@ -17,7 +17,7 @@ if (is_null($staffPm)) {
 }
 
 if (isset($_GET['convid'])) {
-    if ($Viewer->isFLS() && $staffPm->classLevel() > 0) {
+    if ($Viewer->isFLS() && $staffPm->userclassLevel() > 0) {
         // FLS trying to assign non-FLS conversation
         Error403::error();
     }
@@ -34,7 +34,10 @@ if (isset($_GET['convid'])) {
     exit;
 }
 
-if ($Viewer->privilege()->effectiveClassLevel() < $staffPm->classLevel() && $Viewer->id !== $staffPm->assignedUserId()) {
+if (
+    $Viewer->privilege()->effectiveClassLevel() < $staffPm->userclassLevel()
+    && $Viewer->id !== $staffPm->assignedUserId()
+) {
     // Staff member is not allowed to assign conversation
     echo '-1';
 } else {

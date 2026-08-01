@@ -49,7 +49,7 @@ class StaffPMTest extends TestCase {
         $initialResolved = $this->spMan->countByStatus($this->sysop, ['Resolved']);
         $spm = $this->spMan->create($this->user, 0, 'for FLS', 'message handled by FLS');
         $this->assertEquals(0, $spm->assignedUserId(), 'spm-fls-no-assignedUser');
-        $this->assertEquals(0, $spm->classLevel(), 'spm-fls-classlevel-0');
+        $this->assertEquals(0, $spm->userclassLevel(), 'spm-fls-classlevel-0');
         $this->assertEquals('for FLS', $spm->subject(), 'spm-fls-subject');
         $this->assertEquals('Level 0', $spm->userclassName(), 'spm-fls-userclass');
         $this->assertEquals($this->user->id, $spm->userId(), 'spm-fls-author-id');
@@ -71,12 +71,16 @@ class StaffPMTest extends TestCase {
         $this->assertTrue($spm->isUnread(), 'spm-fls-unread');
 
         $this->assertEquals(1, $spm->assign($this->fls, $this->fls), 'spm-user-assign-fls-by-fls');
-        $this->assertEquals($this->fls->privilege()->effectiveClassLevel(), $spm->classLevel(), 'spm-fls-classlevel-fls');
+        $this->assertEquals(
+            $this->fls->privilege()->effectiveClassLevel(),
+            $spm->userclassLevel(),
+            'spm-fls-classlevel-fls',
+        );
         // FIXME: Kill internal cache
         // $this->assertFalse($spm->unassigned(), 'spm-fls-assigned');
 
         $this->assertEquals(1, $spm->assign($this->mod, $this->fls), 'spm-user-assign-mod-by-fls');
-        $this->assertEquals(900, $spm->classLevel(), 'spm-fls-classlevel-mod');
+        $this->assertEquals(900, $spm->userclassLevel(), 'spm-fls-classlevel-mod');
         $this->assertTrue($spm->visible($this->user), 'spm-mod-read-user');
         $this->assertFalse($spm->visible($this->fls), 'spm-mod-read-fls');
         $this->assertTrue($spm->visible($this->mod), 'spm-mod-read-mod');
@@ -117,7 +121,7 @@ class StaffPMTest extends TestCase {
         $initial = $this->spMan->countAtLevel($this->sysop, ['Unanswered']);
         $level   = new Manager\User()->classList()[SYSOP]['Level'];
         $spm     = $this->spMan->create($this->fls, $level, 'for sysop', 'message handled by SYSOP');
-        $this->assertEquals($level, $spm->classLevel(), 'spm-sysop-classlevel-sysop');
+        $this->assertEquals($level, $spm->userclassLevel(), 'spm-sysop-classlevel-sysop');
         $this->assertEquals('Sysop', $spm->userclassName(), 'spm-sysop-userclass');
         $this->assertFalse($spm->visible($this->user), 'spm-sysop-read-user');
         $this->assertTrue($spm->visible($this->fls), 'spm-sysop-read-fls');
@@ -136,7 +140,7 @@ class StaffPMTest extends TestCase {
         $initialLevel      = $this->spMan->countAtLevel($this->fls, ['Unanswered']);
         $level             = new Manager\User()->classList()[FLS_TEAM]['Level'];
         $spm               = $this->spMan->create($this->user, $level, 'for fls', 'message handled by fls');
-        $this->assertEquals($level, $spm->classLevel(), 'spm-fls-classlevel-sysop');
+        $this->assertEquals($level, $spm->userclassLevel(), 'spm-fls-classlevel-sysop');
         $this->assertEquals('First Line Support', $spm->userclassName(), 'spm-fls-userclass');
         $this->assertEquals(
             $initialLevel + 1,

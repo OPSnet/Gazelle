@@ -28,8 +28,10 @@
                 <h3>Access</h3>
                 <p>There are some situations in which the viewing or editing of an article should be restricted to a certain class.</p>
                 <p>
-                <strong>Minimum read class:</strong> <select name="minclassread">{{ class_option(viewer.classLevel, class_list, article.minClassRead, true) }}</select>
-                <strong>Minimum edit class:</strong> <select name="minclassedit">{{ class_option(viewer.classLevel, class_list, article.minClassEdit, true) }}</select>
+                <strong>Minimum read class:</strong> <select name="minclassread">{{
+                    class_option(viewer.userclassLevel, class_list, article.minClassRead, true) }}</select>
+                <strong>Minimum edit class:</strong> <select name="minclassedit">{{
+                    class_option(viewer.userclassLevel, class_list, article.minClassEdit, true) }}</select>
                 </p>
 {% endif %}
                 <p>{{ body.button|raw }}

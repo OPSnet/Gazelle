@@ -33,7 +33,7 @@
 {%    if viewer.permitted('site_forum_post_delete') %}
                 - <a href="#" data-id="{{ comment.id }}" class="brackets delete-post">Delete</a>
 {%    endif %}
-{%    if not own_comment and viewer.permitted('users_warn') and viewer.classLevel >= author.classLevel %}
+{%    if not own_comment and viewer.permitted('users_warn') and viewer.userclassLevel >= author.userclassLevel %}
                 <form class="manage_form hidden" name="user" id="warn{{ comment.id }}" action="comments.php" method="post">
                     <input type="hidden" name="action" value="warn">
                     <input type="hidden" name="postid" value="{{ comment.id }}">

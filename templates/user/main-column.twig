@@ -68,7 +68,7 @@
 {%  if viewer.isStaff %}
 {%      set seen = 0 %}
 {%      for level, userclass in class_list %}
-{%          if viewer.classLevel > userclass.Level or viewer.classLevel == max_level %}
+{%          if viewer.userclassLevel > userclass.Level or viewer.userclassLevel == max_level %}
 {%              if seen == 0 %}
             <tr>
                 <td class="label">Userclass:</td>
@@ -78,7 +78,7 @@
                         <option value="">Unchanged</option>
 {%              endif %}
 {%              set seen = seen + 1 %}
-                        <option value="{{ userclass.ID }}"{{ selected(user.classLevel == level)
+                        <option value="{{ userclass.ID }}"{{ selected(user.userclassLevel == level)
                             }}>{{ userclass.Name }} ({{ userclass.Level }})</option>
 {%          endif %}
 {%          if loop.last and seen > 0 %}

@@ -27,7 +27,7 @@ function handleWarningRequest(\Gazelle\Manager\ForumPost|\Gazelle\Manager\Commen
     if (is_null($user)) {
         Error404::error();
     }
-    if ($user->classLevel() >= $Viewer->classLevel()) {
+    if ($user->userclassLevel() >= $Viewer->userclassLevel()) {
         Error403::error();
     }
 

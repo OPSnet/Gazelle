@@ -9,7 +9,7 @@ class BonusUploadReward extends Base {
         if (
             !BONUS_UPLOAD_BOOST_ACTIVE
             ||
-            $user->classLevel() > BONUS_UPLOAD_BOOST_MAX_LEVEL
+            $user->userclassLevel() > BONUS_UPLOAD_BOOST_MAX_LEVEL
         ) {
             return 0;
         }

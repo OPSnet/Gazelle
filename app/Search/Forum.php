@@ -239,7 +239,7 @@ class Forum extends \Gazelle\BaseUser {
         if (!($this->permittedForums || $this->selectedForums)) {
             // any forum they have access to due to their class
             $cond[] = 'f.MinClassRead <= ?';
-            $args[] = $userContext->classLevel();
+            $args[] = $userContext->userclassLevel();
         } else {
             if ($this->selectedForums) {
                 $cond[] = 'f.ID in (' . placeholders($this->selectedForums) . ')';
@@ -247,7 +247,7 @@ class Forum extends \Gazelle\BaseUser {
             }
 
             $cond[] = '(f.MinClassRead <= ?' . ($this->permittedForums ? ' OR f.ID IN (' . placeholders($this->permittedForums) . ')' : '') . ')';
-            $args = array_merge($args, [$userContext->classLevel()], $this->permittedForums);
+            $args = array_merge($args, [$userContext->userclassLevel()], $this->permittedForums);
         }
         // but not if they have been banned from it
         if ($this->forbiddenForums) {

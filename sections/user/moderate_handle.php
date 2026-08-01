@@ -49,12 +49,10 @@ if ($_POST['checkpoint'] != $user->checkpoint()) {
 $ownProfile = $user->id === $Viewer->id;
 
 // Variables for database input
-$userclass         = (int)($_POST['Class'] ?? 0);
 $title             = trim($_POST['Title']);
 $adminComment      = trim($_POST['admincomment'] ?? '');
 $visible           = isset($_POST['Visible']) ? '1' : '0';
 $invites           = (int)$_POST['Invites'];
-$slogan            = trim($_POST['slogan']);
 $changePassword    = $_POST['ChangePassword'] !== '';
 $uploaded          = 0;
 $downloaded        = 0;
@@ -174,11 +172,6 @@ if ($visible != $user->isVisible() && $Viewer->permitted('users_make_invisible')
     $editSummary[] = 'swarm visibility ' . ($visible ? 'on' : 'off');
 }
 
-if ($slogan != $user->slogan() && ($Viewer->permitted('admin_manage_fls') || $ownProfile)) {
-    $user->setField('slogan', $slogan);
-    $editSummary[] = "First-Line Support status changed to \"$slogan\"";
-}
-
 $editRatio = $Viewer->permitted('users_edit_ratio') || ($Viewer->permitted('users_edit_own_ratio') && $ownProfile);
 if ($flTokens != $user->tokenCount() && ($editRatio || $Viewer->permitted('admin_manage_user_fls'))) {
     $editSummary[] = "freeleech tokens changed from {$user->tokenCount()} to $flTokens";
@@ -242,18 +235,19 @@ if ($editRatio) {
     }
 }
 
+$userclass = (int)($_POST['Class'] ?? 0);
 if ($userclass) {
-    $classLevel = $userMan->classList()[$userclass]['Level'];
-    if ($classLevel !== $user->classLevel() && $classLevel <= $Viewer->classLevel()) {
+    $userclassLevel = $userMan->classList()[$userclass]['Level'];
+    if ($userclassLevel !== $user->userclassLevel() && $userclassLevel <= $Viewer->userclassLevel()) {
         $user->setField('PermissionID', $userclass);
         $editSummary[] = "class changed to {$userMan->userclassName($userclass)}";
-        if ($user->supportCount($userclass, $user->primaryClass()) === 2) {
-            if ($classLevel < $user->primaryClass()) {
-                $slogan = null;
-            }
-            $Cache->delete_value('staff_ids');
-        }
         $Cache->delete_value("donor_info_{$user->id}");
+    }
+} elseif (isset($_POST['slogan'])) {
+    $slogan = trim($_POST['slogan']);
+    if ($slogan !== $user->slogan() && ($Viewer->permitted('admin_manage_fls') || $ownProfile)) {
+        $editSummary[] = "First-Line Support status changed to “{$slogan}”";
+        $user->setField('slogan', $slogan === '' ? null : $slogan);
     }
 }
 

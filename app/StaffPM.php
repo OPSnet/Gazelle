@@ -52,7 +52,7 @@ class StaffPM extends BaseObject {
         return (int)$this->info()['assigned_user_id'];
     }
 
-    public function classLevel(): int {
+    public function userclassLevel(): int {
         return $this->info()['class_level'];
     }
 
@@ -98,8 +98,8 @@ class StaffPM extends BaseObject {
      */
     public function visible(User $viewer): bool {
         return in_array($viewer->id, [$this->userId(), $this->assignedUserId()])
-            || ($viewer->isFLS() && $this->classLevel() == 0)
-            || ($viewer->isStaff() && $this->classLevel() <= $viewer->privilege()->effectiveClassLevel());
+            || ($viewer->isFLS() && $this->userclassLevel() == 0)
+            || ($viewer->isStaff() && $this->userclassLevel() <= $viewer->privilege()->effectiveClassLevel());
     }
 
     public function assign(User $to, User $by): int {

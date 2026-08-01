@@ -14,7 +14,7 @@ class Wiki extends \Gazelle\Base {
         $this->args = $match[1];
         $cond = array_fill(0, count($this->args), "$type LIKE concat('%', ?, '%')");
         $cond[] = 'MinClassRead <= ?';
-        $this->args[] = $viewer->classLevel();
+        $this->args[] = $viewer->userclassLevel();
         $this->where = 'WHERE ' . implode(' AND ', $cond);
     }
 
