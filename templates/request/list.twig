@@ -46,7 +46,7 @@
 {%  set vote = request.userBounty(viewer) %}
 {%  if vote %}
                 <span title="You {% if request.isFilled %}contributed {% else %}have voted {% endif
-                    -%}{{ vote|octet_size }} towards this request">&check;</span>
+                    -%}{{ vote|octet_size }} towards this request">✓</span>
 {%  elseif not request.isFilled and viewer.permitted('site_vote') %}
                 <span class="request-vote tooltip brackets" data-id="{{ request.id
                     }}" data-bounty="{{ bounty }}" data-n="{{ request.userVotedTotal
@@ -68,7 +68,7 @@
 {%      if request.isFilled %}
                 {{- request.fillerId|user_url -}}
 {%      else -%}
-                &mdash;
+                —
 {%      endif -%}
             </td>
 {%  endif -%}

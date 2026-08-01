@@ -45,7 +45,7 @@
                 </td>
                 <td>{{ loop.index }}</td>
                 <td>{{ tgroup.year|escape('html')|default('&nbsp;'|raw) }}</td>
-                <td>{{ tgroup.artistRole.link|default('&mdash;')|raw }}</td>
+                <td>{{ tgroup.artistRole.link|default('—')|raw }}</td>
                 <td><a href="{{ tgroup.location }}" class="tooltip" title="View torrent group">{{ tgroup.name }}</a></td>
                 <td class="nobr">{{ collage.entryCreated(tgroup) }}</td>
 {%  if not collage.isPersonal %}

@@ -91,6 +91,9 @@
             'permission' : user.privilege.secondaryClassesList
         } only %}
 {%  endif %}
+{%  if (user.isFLS and viewer.permitted('admin_manage_fls')) or (own_profile and viewer.permitted('users_mod')) %}
+{%      include 'user/edit-remark.twig' with {'user': user} only %}
+{%  endif %}
 
 {%  if viewer.permittedAny('users_make_invisible', 'admin_tracker') %}
 {%      include 'user/edit-peer-visibility.twig' with {
@@ -120,10 +123,6 @@
 
 {%  if viewer.permitted('admin_manage_user_fls') %}
 {%      include 'user/edit-fltoken.twig' with {'amount' : user.tokenCount} only %}
-{%  endif %}
-
-{%  if viewer.permitted('admin_manage_fls') or (own_profile and viewer.permitted('users_mod')) %}
-{%      include 'user/edit-remark.twig' with {'user': user} only %}
 {%  endif %}
 
 {%  if viewer.permitted('users_edit_reset_keys') %}

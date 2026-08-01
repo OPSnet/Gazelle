@@ -126,7 +126,7 @@
             <input type="radio" name="vote" id="answer_{{ id }}" value="{{ id }}">
             <label for="answer_{{ id }}">{{ answer }}</label><br>
 {%      endfor %}
-            <br><input type="radio" name="vote" id="answer_0" value="0"> <label for="answer_0">Blank&nbsp;&mdash;&nbsp;Show the results!</label><br><br>
+            <br><input type="radio" name="vote" id="answer_0" value="0"> <label for="answer_0">Blank&nbsp;—&nbsp;Show the results!</label><br><br>
             <input type="button" onclick="ajax.post('index.php', 'poll', function(response) { $('#poll_container').raw().innerHTML = response } );" value="Vote">
         </form>
         </div>

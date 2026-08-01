@@ -22,7 +22,7 @@
             <br><b>Images hosted on <strong class="important_text">{{ constant('IMAGE_HOST_BANNED')|join(', ') }}
                 are not allowed</strong>, please rehost first on one of {{ constant('IMAGE_HOST_RECOMMENDED')|join(', ') }}.</b>
 {% endif %}
-            <br>If the release has no known official artwork (e.g. jam band live recording), check the following:<br>
+            <br>If the release has no known official artwork (<i>e.g.</i> jam band live recording), check the following:<br>
             <label><input type="checkbox" name="no_cover_art"{{ checked(tgroup.hasAttr('no-cover-art')) }}> No release cover art</label><br><br>
         </div>
         <div class="tbx-label">Group description</div>

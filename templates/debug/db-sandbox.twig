@@ -10,7 +10,7 @@
     <h3>DB Sandbox</h3>
     <div class="pad">Think about adding a <code>LIMIT 10</code> (or similar) on queries for which you are
     unsure how many rows will be returned. This is to avoid exhausting memory, as the resultset is buffered in memory.</div>
-    <div class="pad">If two columns have the same name (e.g. <code>ID</code>), only the first column will be displayed.</div>
+    <div class="pad">If two columns have the same name (<i>e.g.</i> <code>ID</code>), only the first column will be displayed.</div>
     <form action="tools.php?action=db_sandbox" method='POST'>
         <textarea style="width: 98%;" name="query" cols="90" rows="{{ rows }}">{{ query }}</textarea>
         Source

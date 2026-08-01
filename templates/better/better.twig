@@ -12,7 +12,7 @@
         <td>
             <input type="search" name="uploader" size="20" value="{{ uploader.id }}">
             {% if uploader %} ({{ uploader.id|user_url }}){% endif %}
-            <br>Search by userid or @username (e.g. {{ viewer.id }} or @{{ viewer.username }})
+            <br>Search by userid or @username (<i>e.g.</i> {{ viewer.id }} or @{{ viewer.username }})
         </td>
     </tr>
     <tr>

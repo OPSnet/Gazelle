@@ -15,7 +15,9 @@
     <tr>
         <th><label for="ip">IP address</label></th>
         <td>
-            <textarea id="ip" name="ip" rows="2" cols="90" placeholder="An IP address {{ viewer.requestContext.remoteAddr }} or a range (e.g. {{ viewer.requestContext.remoteAddr }}/24) can be given to specify a range of addresses."></textarea>
+            <textarea id="ip" name="ip" rows="2" cols="90" placeholder="An IP address {{
+                viewer.requestContext.remoteAddr }} or a range (<i>e.g.</i> {{
+                viewer.requestContext.remoteAddr }}/24) can be given to specify a range of addresses."></textarea>
         <br>Be careful with ranges below /24, you can quite easily block half the internet.
         </td>
     </tr>
