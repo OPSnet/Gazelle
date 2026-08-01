@@ -23,7 +23,6 @@ class BetterArtistTest extends TestCase {
         $artistMan = new Manager\Artist();
         $name      = 'phpunit better ' . randomString(6);
         $this->artist = $artistMan->create($name);
-        $artistId = $this->artist->id;
 
         $better = new Better\ArtistDescription(
             $this->user,
@@ -75,7 +74,6 @@ class BetterArtistTest extends TestCase {
         $artistMan = new Manager\Artist();
         $name      = 'phpunit better ' . randomString(6);
         $this->artist = $artistMan->create($name);
-        $artistId = $this->artist->id;
 
         $discogs = new Better\ArtistDiscogs($this->user, Enum\BetterFilter::any, $artistMan);
         $this->assertGreaterThan(
@@ -101,7 +99,6 @@ class BetterArtistTest extends TestCase {
         $artistMan = new Manager\Artist();
         $name      = 'phpunit better ' . randomString(6);
         $this->artist = $artistMan->create($name);
-        $artistId = $this->artist->id;
 
         $better = new Better\ArtistImage($this->user, Enum\BetterFilter::any, $artistMan);
         $this->assertEquals(

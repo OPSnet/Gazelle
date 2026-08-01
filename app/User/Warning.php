@@ -86,7 +86,6 @@ class Warning extends \Gazelle\BaseUser {
      * Warn a user. Returns the date range of the warning (upper, lower)
      */
     public function warn(int $week, string $staffReason, User $admin, string $userMessage): DateTimeRange {
-        $warnTime = Time::offset($week * 7 * 86_400);
         $prior  = $this->isWarned() ? $this->expiry()->format('Y-m-d H:i') : false;
         $warning = $this->add($staffReason, "$week week" . plural($week), $admin);
         if ($prior !== false) {

@@ -76,7 +76,7 @@ class CategoryTest extends TestCase {
         $tgroup->flush();
 
         // rebuild the torrent object caches
-        $torrentList = array_map(fn ($id) => $torMan->findById($id), $idList);
+        $torrentList = array_map($torMan->findById(...), $idList);
         $this->assertInstanceOf(Torrent::class, $torrentList[0], 'cat-old-t0-found');
         $this->assertInstanceOf(Torrent::class, $torrentList[1], 'cat-old-t1-found');
 
@@ -113,7 +113,7 @@ class CategoryTest extends TestCase {
         $this->assertInstanceOf(TGroup::class, $new, 'cat-change-to-comedy');
         $this->assertNull($tgMan->findById($tgroupId), 'cat-old-tgroup-removed');
 
-        $torrentList = array_map(fn($id) => $torMan->findById($id), $idList);
+        $torrentList = array_map($torMan->findById(...), $idList);
 
         // clean up
         foreach ($torrentList as $torrent) {

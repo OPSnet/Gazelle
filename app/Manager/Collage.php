@@ -105,7 +105,7 @@ class Collage extends \Gazelle\BaseManager {
             ORDER BY Featured DESC, Name ASC
             ", $user->id
         );
-        return array_map(fn ($id) => $this->findById($id), self::$db->collect(0));
+        return array_map($this->findById(...), self::$db->collect(0));
     }
 
     public function recoverById(int $id): ?\Gazelle\Collage {
@@ -359,7 +359,7 @@ class Collage extends \Gazelle\BaseManager {
         foreach (self::$db->to_array(false, MYSQLI_ASSOC) as $entry) {
             $entry['groupIds'] = is_null($entry['groupIds'])
                 ? []
-                : array_map('intval', explode(',', $entry['groupIds']));
+                : array_map(intval(...), explode(',', $entry['groupIds']));
             $entry['tgroup_list'] = array_filter(
                 array_map(
                     fn ($id) => $manager->findById($id),
@@ -403,7 +403,7 @@ class Collage extends \Gazelle\BaseManager {
         foreach ($list as &$entry) {
             $entry['artistIds'] = is_null($entry['artistIds'])
                 ? []
-                : array_map('intval', explode(',', $entry['artistIds']));
+                : array_map(intval(...), explode(',', $entry['artistIds']));
             $entry['artist_list'] = array_filter(
                 array_map(
                     fn ($id) => $manager->findById($id),

@@ -48,7 +48,7 @@ class Report extends \Gazelle\BaseManager {
             ", $user->id
         );
         $reportList = self::$db->collect(0);
-        return array_map(fn ($id) => $this->findById($id), $reportList);
+        return array_map($this->findById(...), $reportList);
     }
 
     public function decorate(

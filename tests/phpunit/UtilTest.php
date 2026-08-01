@@ -408,7 +408,7 @@ class UtilTest extends TestCase {
 
     public function testWeightedFail(): void {
         $this->expectException(\ValueError::class);
-        $fail = weightedChoice([]);
+        weightedChoice([]);
     }
 
     public function testZip(): void {

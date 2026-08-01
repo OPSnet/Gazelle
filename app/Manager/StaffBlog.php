@@ -45,7 +45,7 @@ class StaffBlog extends \Gazelle\Base {
             $list = self::$db->collect(0);
             self::$cache->cache_value(self::CACHE_KEY, $list, 1_209_600);
         }
-        return array_map(fn($id) => $this->findById($id), $list);
+        return array_map($this->findById(...), $list);
     }
 
     /**

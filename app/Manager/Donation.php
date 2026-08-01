@@ -117,7 +117,7 @@ class Donation extends \Gazelle\Base {
             fn ($u) => new \Gazelle\User\Donor($u),
             array_filter(
                 array_map(
-                    fn ($id) => $userMan->findById($id),
+                    $userMan->findById(...),
                     self::$db->collect(0)
                 ),
                 fn($u) => $u instanceof \Gazelle\User

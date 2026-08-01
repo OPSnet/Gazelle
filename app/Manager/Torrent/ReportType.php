@@ -60,7 +60,7 @@ class ReportType extends \Gazelle\Base {
 
     public function list(): array {
         return array_map(
-            fn ($id) => $this->findById($id),
+            $this->findById(...),
             $this->pg()->columnex("
                 select id_torrent_report_configuration
                 from torrent_report_configuration
@@ -71,7 +71,7 @@ class ReportType extends \Gazelle\Base {
 
     public function categoryList(int $categoryId): array {
         return array_map(
-            fn ($id) => $this->findById($id),
+            $this->findById(...),
             $this->pg()->columnex("
                 select id_torrent_report_configuration
                 from torrent_report_configuration

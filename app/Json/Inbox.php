@@ -21,13 +21,13 @@ class Inbox extends \Gazelle\Json {
         $search = trim($search);
         switch ($searchType) {
             case 'subject':
-                $words = array_unique(array_map('trim', explode(' ', $search)));
+                $words = array_unique(array_map(trim(...), explode(' ', $search)));
                 $this->cond = array_merge($this->cond, array_fill(0, count($words), "c.Subject LIKE concat('%', ?, '%')"));
                 $this->args = array_merge($this->args, $words);
                 break;
             case 'message':
                 $this->join[] = 'INNER JOIN pm_messages AS m ON (c.ID = m.ConvID)';
-                $words = array_unique(array_map('trim', explode(' ', $search)));
+                $words = array_unique(array_map(trim(...), explode(' ', $search)));
                 $this->cond = array_merge($this->cond, array_fill(0, count($words), "m.Body LIKE concat('%', ?, '%')"));
                 $this->args = array_merge($this->args, $words);
                 break;

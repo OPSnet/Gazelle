@@ -231,7 +231,7 @@ abstract class TorrentAbstract extends BaseAttrObject {
             );
         }
         return array_map(
-            fn ($f) => $this->filenameParse($f),
+            $this->filenameParse(...),
             explode("\n", $fileList)
         );
     }

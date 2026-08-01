@@ -53,7 +53,7 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
             fn ($alias) => $alias['name'],
             $this->info()['alias']
         );
-        $autocompleteKeyList = (new Manager\Artist())->autocompleteKeyList($autocompleteNameList);
+        $autocompleteKeyList = new Manager\Artist()->autocompleteKeyList($autocompleteNameList);
         self::$db->prepared_query("
             SELECT DISTINCT concat('groups_artists_', GroupID)
             FROM torrents_artists ta

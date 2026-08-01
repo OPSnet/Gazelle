@@ -211,7 +211,7 @@ abstract class AbstractBetter extends \Gazelle\Base {
             $this->pg()->setTimeoutMsec(10000);
             $this->isTimeout = false;
             return array_map(
-                fn ($id) => $this->manager->findById($id),
+                $this->manager->findById(...),
                 $this->pg()->columnex($this->pageSql($limit, $offset), ...$this->args),
             );
         } catch (QueryCanceledException $e) {

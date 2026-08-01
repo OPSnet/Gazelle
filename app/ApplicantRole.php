@@ -114,7 +114,7 @@ class ApplicantRole extends BaseObject {
                     fn ($name) => $userMan->find($name)?->id,
                     preg_split('/\s+/', $list) /** @phpstan-ignore-line */
                 ),
-                fn ($user) => is_int($user)
+                is_int(...)
             );
             sort($viewerList);
         }

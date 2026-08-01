@@ -36,7 +36,7 @@ class SessionCookieTest extends TestCase {
     }
 
     public function testCookieEmit(): void {
-        header_remove(null);
+        header_remove();
         $sessionKey = 'phpunit';
         SessionCookie::emit($this->user, $sessionKey, time() + 3600);
 

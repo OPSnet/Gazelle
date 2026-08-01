@@ -101,7 +101,7 @@ class Friend extends \Gazelle\BasePgUser {
         \Gazelle\Manager\User $manager = new \Gazelle\Manager\User(),
     ): array {
         return array_map(
-            fn ($id) => $manager->findById($id),
+            $manager->findById(...),
             $this->pg()->columnex(<<<END_SQL
                 select f.id_user_friend
                 from user_has_friend        f

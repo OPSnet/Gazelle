@@ -98,7 +98,8 @@ class User extends \Gazelle\BaseManager {
             FROM users_main
             WHERE CustomPermissions NOT IN ('', 'a:0:{}')
         ");
-        return array_map(fn($perm) => unserialize($perm),
+        return array_map(
+            unserialize(...),
             self::$db->to_pair('ID', 'CustomPermissions')
         );
     }
@@ -225,7 +226,7 @@ class User extends \Gazelle\BaseManager {
             $ancestry = self::$db->collect(0);
             self::$cache->cache_value($key, $ancestry, 0);
         }
-        return array_map(fn ($id) => $this->findById($id), $ancestry);
+        return array_map($this->findById(...), $ancestry);
     }
 
     /**
@@ -306,7 +307,7 @@ class User extends \Gazelle\BaseManager {
             $list = self::$db->collect(0);
             self::$cache->cache_value('idfls', $list, 3600);
         }
-        return array_map(fn ($id) => $this->findById($id), $list);
+        return array_map($this->findById(...), $list);
     }
 
     /**
@@ -323,7 +324,7 @@ class User extends \Gazelle\BaseManager {
             ", FORUM_MOD
         );
         $list = self::$db->collect(0);
-        return array_map(fn ($id) => $this->findById($id), $list);
+        return array_map($this->findById(...), $list);
     }
 
     /**
@@ -371,7 +372,7 @@ class User extends \Gazelle\BaseManager {
             self::$cache->cache_value('idstaff', $staff, 3600);
         }
         foreach ($staff as &$group) {
-            $group = array_map(fn($userId) => $this->findById($userId), $group);
+            $group = array_map($this->findById(...), $group);
         }
         return $staff;
     }
@@ -1844,7 +1845,7 @@ class User extends \Gazelle\BaseManager {
                 $leech
             ", 'no-fl-gifts', UserStatus::enabled->value
         );
-        $idList = array_map('intval', self::$db->collect(0));
+        $idList = array_map(intval(...), self::$db->collect(0));
         if ($idList) {
             self::$db->prepared_query("
                 UPDATE user_flt SET

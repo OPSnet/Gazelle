@@ -265,7 +265,7 @@ class Tag extends \Gazelle\BaseManager {
             ", 'genre'
         );
         return array_map(
-            fn ($id) => $this->findById($id),
+            $this->findById(...),
             self::$db->collect(0)
         );
     }

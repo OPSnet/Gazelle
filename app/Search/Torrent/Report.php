@@ -132,7 +132,7 @@ class Report extends \Gazelle\Base {
     public function page(\Gazelle\Manager\Torrent\Report $manager, int $limit, int $offset): array {
         self::$db->prepared_query($this->pageSql(), ...[...$this->args, $limit, $offset]);
         return array_map(
-            fn ($id) => $manager->findById($id),
+            $manager->findById(...),
             self::$db->collect(0)
         );
     }

@@ -245,7 +245,7 @@ class Artist extends \Gazelle\BaseManager {
         );
         return array_filter(
             array_map(
-                fn ($id) => $tgMan->findById($id),
+                $tgMan->findById(...),
                 self::$db->collect(0)
             ),
             fn ($tgroup) => !empty($tgroup)

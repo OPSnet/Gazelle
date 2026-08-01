@@ -329,7 +329,7 @@ class Request extends \Gazelle\Base {
 
     public function page(int $limit, int $offset): array {
         return array_map(
-            fn ($id) => $this->manager->findById($id),
+            $this->manager->findById(...),
             $this->pg()->columnex(
                 $this->pageSql(),
                 ...[...$this->args, $limit, $offset],

@@ -759,7 +759,7 @@ class CollageTest extends TestCase {
             'collage-manager-autocomplete'
         );
         $nameList = array_map(fn($c) => $c->name(), $this->collageList);
-        usort($nameList, 'strcasecmp');
+        usort($nameList, strcasecmp(...));
         $autocomplete = $manager->autocomplete('phpunit collage auto');
         $this->assertEquals($nameList, array_column($autocomplete, 'value'), 'collage-manager-autocomplete');
 

@@ -47,7 +47,7 @@ class Applicant extends \Gazelle\Base {
             $list = self::$db->collect(0);
             self::$cache->cache_value(self::LIST_KEY, $list, 0);
         }
-        return array_map(fn ($id) => $this->findById($id), $list);
+        return array_map($this->findById(...), $list);
     }
 
     public function resolvedList(): array {
@@ -66,7 +66,7 @@ class Applicant extends \Gazelle\Base {
             $list = self::$db->collect(0);
             self::$cache->cache_value(self::RESOLVED_KEY, $list, 0);
         }
-        return array_map(fn($id) => $this->findById($id), $list);
+        return array_map($this->findById(...), $list);
     }
 
     public function openList(\Gazelle\User $user): array {

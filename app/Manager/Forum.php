@@ -64,7 +64,7 @@ class Forum extends \Gazelle\BaseManager {
             $list = self::$db->collect('ID');
             self::$cache->cache_value(self::CACHE_LIST, $list, 86400);
         }
-        return array_map(fn ($id) => $this->findById($id), $list);
+        return array_map($this->findById(...), $list);
     }
 
     /**

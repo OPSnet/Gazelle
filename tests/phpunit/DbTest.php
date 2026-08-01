@@ -584,7 +584,7 @@ class DbTest extends TestCase {
                 payload bytea not null primary key
             )
         ");
-        $payload = pack('C*', array_map(fn ($n) => chr($n), range(0, 255)));
+        $payload = pack('C*', array_map(chr(...), range(0, 255)));
         $this->assertEquals(
             1,
             $this->pg()->query("
@@ -610,7 +610,7 @@ class DbTest extends TestCase {
                 payload bytea not null
             )
         ");
-        $payload = pack('C*', array_map(fn ($n) => chr($n), range(0, 255)));
+        $payload = pack('C*', array_map(chr(...), range(0, 255)));
         $this->pg()->prepared_query("
             insert into test_bytea (payload) values (?), (?)
             ", $payload, $payload
@@ -635,7 +635,7 @@ class DbTest extends TestCase {
                 payload bytea not null
             )
         ");
-        $payload = pack('C*', array_map(fn ($n) => chr($n), range(0, 255)));
+        $payload = pack('C*', array_map(chr(...), range(0, 255)));
         $this->pg()->query("
             insert into test_bytea (payload) values ($1), ($2)
             ", $payload, $payload
@@ -732,7 +732,7 @@ class DbTest extends TestCase {
             ['num' =>   17, 'name' =>       null, 'flag' =>     0],
             ['num' => null, 'name' =>       null, 'flag' =>  null],
         ];
-        $input = array_map(fn ($r) => array_values($r), $output);
+        $input = array_map(array_values(...), $output);
         $this->assertTrue(
             $this->pg()->insertCopy(
                 'phpunit_insert_copy',

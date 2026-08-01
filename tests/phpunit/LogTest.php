@@ -53,7 +53,6 @@ class LogTest extends TestCase {
             [[ARTIST_MAIN], ['phpunit log artist ' . randomString(6)]],
             ['log.jam']
         );
-        $tgroupId = $this->tgroup->id;
         $logger->group($this->tgroup, $this->user, self::PREFIX . "group first " . randomString());
 
         $siteLog = new Manager\SiteLog();

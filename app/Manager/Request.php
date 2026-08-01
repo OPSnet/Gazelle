@@ -104,7 +104,7 @@ class Request extends \Gazelle\BaseManager {
      */
     public function findUnfilledByUser(User $user, int $limit): array {
         return array_map(
-            fn ($id) => $this->findById($id),
+            $this->findById(...),
             $this->pg()->columnex("
                 select r.id_request
                 from request r
@@ -141,7 +141,7 @@ class Request extends \Gazelle\BaseManager {
             );
             self::$cache->cache_value($key, $requestList, 3600);
         }
-        return array_map(fn ($id) => $this->findById($id), $requestList);
+        return array_map($this->findById(...), $requestList);
     }
 
     public function findByTGroup(\Gazelle\TGroup $tgroup): array {
@@ -160,12 +160,12 @@ class Request extends \Gazelle\BaseManager {
             );
             self::$cache->cache_value($key, $requestList, 3600);
         }
-        return array_map(fn ($id) => $this->findById($id), $requestList);
+        return array_map($this->findById(...), $requestList);
     }
 
     public function findByTorrentReported(\Gazelle\TorrentAbstract $torrent): array {
         return array_map(
-            fn ($id) => $this->findById($id),
+            $this->findById(...),
             $this->pg()->columnex(<<<END_SQL
                 select distinct req.id_request
                 from request               req

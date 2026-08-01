@@ -81,12 +81,11 @@ class LoginWatch extends Base {
     /**
      * When does the login ban expire?
      */
-    public function blockedUntil(): ?\DateTimeImmutable {
-        $until = $this->pg()->scalarex('
+    public function blockedUntil(): \DateTimeImmutable|null {
+        return $this->pg()->scalarex('
             select blocked_until from login_watch where ip = $1
             ', $this->ipaddr
         );
-        return is_null($until) ? null : $until;
     }
 
     /**

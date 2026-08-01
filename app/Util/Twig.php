@@ -203,7 +203,7 @@ class Twig {
         $twig->addFilter(new \Twig\TwigFilter(
             'ucfirstall',
             fn ($text) => ucfirst(
-                implode(' ', array_map(fn($w) => ucfirst($w), explode(' ', $text)))
+                implode(' ', array_map(ucfirst(...), explode(' ', $text)))
             )
         ));
 

@@ -64,7 +64,7 @@ class Torrent extends \Gazelle\Json {
             'pages'       => $this->paginator->pages(),
             'numNew'      => $this->notifier->unread(),
             'results'     => array_map(
-                fn($t) => $this->torrentPayload($t),
+                $this->torrentPayload(...),
                 $this->notifier->page(
                     $this->torMan,
                     $this->paginator->limit(),
