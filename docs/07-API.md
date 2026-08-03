@@ -30,7 +30,6 @@ exists for the sake of interoperability and may go away in the future.
     * [Conversation](#conversation)
 * [Top 10](#top-10)
 * [User Search](#user-search)
-* [Requests Search](#requests-search)
 * [Bookmarks](#bookmarks)
 * [Subscriptions](#subscriptions)
 * [Forums](#forums)
@@ -41,23 +40,26 @@ exists for the sake of interoperability and may go away in the future.
 * [Torrents](#torrents)
     * [Torrent Search](#torrent-search)
     * [Torrent Group](#torrent-group)
-    * [Add Tag](#add-tag)
     * [Torrent](#torrent)
     * [Upload](#upload)
     * [Download](#download)
     * [Add Log](#add-log)
+    * [Log download](#riplog)
+    * [Add Tag](#add-tag)
     * [User Torrents](#user-torrents)
 * [Better](#better)
 * [Logchecker](#logchecker)
 * [Requests](#requests)
     * [Request](#request)
     * [Request Fill](#request-fill)
+    * [Requests Search](#requests-search)
 * [Collages](#collages)
 * [Notifications](#notifications)
+* [Similar Artists](#similar-artists)
 * [Announcements](#announcements)
 * [Unofficial projects that utilize the API](#unofficial-projects-that-utilize-the-api)
 
-Questions about the API can be answered in `#develop`.
+Questions about the API can be asked in `#develop`.
 
 **Using the API bestows upon you a certain level of trust and responsibility. Abusing or using this API for malicious
 purposes is a bannable offense and will not be taken lightly.
@@ -78,14 +80,25 @@ All the JSON returned is in the form:
         // Response data.
     },
     "info": {
-        "source": "Gazelle Dev",
+        "source": "Orpheus",
         "version": 1
     }
 }
 ```
 
-If the request is invalid, or a problem occurs, the `status` will be `failure`. In this case the value of `response` is
-`undefined`.
+If the request is invalid, or a problem occurs, the `status` will be `failure` and a message will be shown in `error`. The value of `response` is `undefined`.
+
+```json
+{
+    "status" : "failure",
+    "error": "bad parameters",
+    "response" : [],
+    "info": {
+    "source": "Orpheus",
+    "version": 1
+    }
+}
+```
 
 ## Index
 
@@ -108,7 +121,8 @@ If the request is invalid, or a problem occurs, the `status` will be `failure`. 
             "messages": 0,
             "notifications": 9000,
             "newAnnouncement": false,
-            "newBlog": false
+            "newBlog": false,
+            "newSubscriptions": false
         },
         "userstats": {
             "uploaded": 585564424629,
@@ -117,7 +131,8 @@ If the request is invalid, or a problem occurs, the `status` will be `failure`. 
             "requiredratio": 0.6,
             "bonusPoints": 220903,
             "bonusPointsPerHour": 1.28,
-            "class": "VIP"
+            "tokens": 23,
+            "class": "Elite"
         }
     }
 }
@@ -147,8 +162,9 @@ If the request is invalid, or a problem occurs, the `status` will be `failure`. 
             "lastAccess": "2012-08-09 00:17:52",
             "uploaded": 585564424629,
             "downloaded": 177461229738,
+            "requiredRatio": 0.6,
             "ratio": 3.3,
-            "requiredRatio": 0.6
+            "bonusPoints": 1234
         },
         "ranks": {
             "uploaded": 98,
@@ -156,12 +172,16 @@ If the request is invalid, or a problem occurs, the `status` will be `failure`. 
             "uploads": 85,
             "requests": 0,
             "bounty": 79,
-            "posts": 98,
             "artists": 0,
+            "collage-add": 56,
+            "collage-create": 74,
+            "posts": 98,
+            "vote": 5,
+            "bonus": 80,
             "overall": 85
         },
         "personal": {
-            "class": "VIP",
+            "class": "Elite",
             "paranoia": 0,
             "paranoiaText": "Off",
             "donor": true,
@@ -172,12 +192,19 @@ If the request is invalid, or a problem occurs, the `status` will be `failure`. 
         "community": {
             "posts": 863,
             "torrentComments": 13,
-            "collagesStarted": 0,
             "collagesContrib": 0,
             "requestsFilled": 0,
+            "bountyEarned": 5436723,
             "requestsVoted": 13,
-            "perfectFlacs": 2,
+            "bountySpent": 757647856,
+            "releaseVotes": 45,
             "uploaded": 29,
+            "artistsAdded": 2392,
+            "artistComments": 12,
+            "collageComments": 8,
+            "requestComments": 35,
+            "collagesStarted": 34,
+            "perfectFlacs": 2,
             "groups": 14,
             "seeding": 309,
             "leeching": 0,
@@ -199,13 +226,13 @@ If the request is invalid, or a problem occurs, the `status` will be `failure`. 
 
 `page` - page number to display (default: 1)
 
-`type` - one of: inbox or sentbox (default: inbox)
+`type` - one of: `inbox` or `sentbox` (default: `inbox`)
 
-`sort` - if set to [i]unread[/i] then unread messages come first
+`sort` - if set to `unread` then unread messages come first
 
 `search` - filter messages by search string
 
-`searchtype` - one of: subject, message, user
+`searchtype` - one of: `subject`, `message`, `user`
 
 **Response format:**
 
@@ -222,12 +249,13 @@ If the request is invalid, or a problem occurs, the `status` will be `failure`. 
                 "unread": false,
                 "sticky": false,
                 "forwardedId": 0,
-                "forwardedName": "",
+                "forwardedName": null,
                 "senderId": 0,
                 "username": "",
-                "donor": false,
+                "avatar": "https://example.com/27x372.jpg",
                 "warned": false,
                 "enabled": true,
+                "donor": false,
                 "date": "2012-06-12 00:54:01"
             },
             // ...
@@ -260,9 +288,11 @@ If the request is invalid, or a problem occurs, the `status` will be `failure`. 
                 "senderId": 0,
                 "senderName": "System",
                 "sentDate": "2012-06-12 00:54:01",
+                "avatar": "https://example.com/27x372.jpg",
                 "bbBody": "One of your uploads has been deleted for being unseeded.  Since it didn't break any rules (we hope), please feel free to re-upload it.\n\nThe following torrent was deleted:\nRa - To Sirius [MP3 / 320]",
                 "body": "One of your uploads has been deleted for being unseeded.  Since it didn't break any rules (we hope), please feel free to re-upload it.<br />\n<br />\nThe following torrent was deleted:<br />\nRa - To Sirius [MP3 / 320]"
-            }
+            },
+            // ...
         ]
     }
 }
@@ -310,7 +340,7 @@ If the request is invalid, or a problem occurs, the `status` will be `failure`. 
 - `ur`: Most Used Request Tags
 - `v`: Most Highly Voted Tags
 
-#### `limit` - The maximum number of results to return per category. 
+#### `limit` - The maximum number of results to return per category.
 
 Must be one of 10 (default), 100 or 250. When `type`="torrents" and `details`="all", only `limit`="10" is permitted.
 
@@ -342,6 +372,9 @@ Must be one of 10 (default), 100 or 250. When `type`="torrents" and `details`="a
                     "encoding": "V0 (VBR)",
                     "hasLog": false,
                     "hasCue": false,
+                    "hasLogDB": true,
+                    "logScore": 100,
+                    "logChecksum": true,
                     "media": "CD",
                     "scene": true,
                     "year": 2012,
@@ -351,192 +384,60 @@ Must be one of 10 (default), 100 or 250. When `type`="torrents" and `details`="a
                     "snatched": 135,
                     "seeders": 127,
                     "leechers": 5,
-                    "data": 17242225550
+                    "data": 17242225550,
+                    "size": 892656768,
+                    "wikiImage": "https://example.com/oyixwm1.jpg",
+                    "releaseType": 1
                 },
                 // ...
             ]
         },
+    ]
+}
+```
+```json
+{
+    "status": "success",
+    "response": [
         {
-            "caption": "Most Active Torrents Uploaded in the Past Week",
-            "tag": "week",
+            "caption": "Uploaders",
+            "tag": "ul",
             "limit": 10,
             "results": [
                 {
-                    "torrentId": 30186127,
-                    "groupId": 72265574,
-                    "artist": "Yeasayer",
-                    "groupName": "Fragrant World",
-                    "groupCategory": 0,
-                    "groupYear": 2012,
-                    "remasterTitle": "",
-                    "format": "MP3",
-                    "encoding": "320",
-                    "hasLog": false,
-                    "hasCue": false,
-                    "media": "CD",
-                    "scene": false,
-                    "year": 0,
-                    "tags": [
-                        "electronic",
-                        "indie",
-                        "pop",
-                        "psychedelic",
-                        "indie.pop"
-                    ],
-                    "snatched": 2733,
-                    "seeders": 1480,
-                    "leechers": 7,
-                    "data": 323247814656
+                    "id": 469,
+                    "username": "dr4g0n",
+                    "uploaded": 295682077601,
+                    "upSpeed": 1311433.8053828788,
+                    "downloaded": 198631514010,
+                    "downSpeed": 881263.1138529244,
+                    "numUploads": 34541,
+                    "joinDate": "2007-10-28 14:26:12"
                 },
                 // ...
             ]
         },
+    ]
+}
+```
+```json
+{
+    "status": "success",
+    "response": [
         {
-            "caption": "Most Active Torrents of All Time",
-            "tag": "overall",
+            "caption": "Most Used Torrent Tags",
+            "tag": "ut",
             "limit": 10,
             "results": [
                 {
-                    "torrentId": 29729713,
-                    "groupId": 72094817,
-                    "artist": "The Black Keys",
-                    "groupName": "El Camino",
-                    "groupCategory": 0,
-                    "groupYear": 2011,
-                    "remasterTitle": "",
-                    "format": "MP3",
-                    "encoding": "V0 (VBR)",
-                    "hasLog": false,
-                    "hasCue": false,
-                    "media": "CD",
-                    "scene": true,
-                    "year": 0,
-                    "tags": [
-                        "alternative",
-                        "indie",
-                        "pop",
-                        "rock"
-                    ],
-                    "snatched": 20062,
-                    "seeders": 3557,
-                    "leechers": 32,
-                    "data": 1589584937596
-                }
-                // ...
-            ]
-        },
-        {
-            "caption": "Most Snatched Torrents",
-            "tag": "snatched",
-            "limit": 10,
-            "results": [
-                {
-                    "torrentId": 374590,
-                    "groupId": 206657,
-                    "artist": "Various Artists",
-                    "groupName": "The What CD",
-                    "groupCategory": 0,
-                    "groupYear": 2008,
-                    "remasterTitle": "",
-                    "format": "MP3",
-                    "encoding": "V0 (VBR)",
-                    "hasLog": false,
-                    "hasCue": false,
-                    "media": "WEB",
-                    "scene": false,
-                    "year": 0,
-                    "tags": [
-                        "alternative",
-                        "vanity.house",
-                        "dubstep",
-                        "hip.hop",
-                        "rock",
-                        "industrial",
-                        "indie",
-                        "idm",
-                        "experimental",
-                        "emo",
-                        "electronic",
-                        "drum.and.bass",
-                        "ambient",
-                        "what.cd"
-                    ],
-                    "snatched": 32006,
-                    "seeders": 1318,
-                    "leechers": 5,
-                    "data": 4411956638772
+                    "name": "electronic",
+                    "uses": 297915,
+                    "posVotes": 2751506,
+                    "negVotes": 1754,
                 },
                 // ...
             ]
         },
-        {
-            "caption": "Most Data Transferred Torrents",
-            "tag": "data",
-            "limit": 10,
-            "results": [
-                {
-                    "torrentId": 1101103,
-                    "groupId": 573597,
-                    "artist": "The Beatles",
-                    "groupName": "The Beatles Stereo Box Set",
-                    "groupCategory": 0,
-                    "groupYear": 2009,
-                    "remasterTitle": "",
-                    "format": "FLAC",
-                    "encoding": "Lossless",
-                    "hasLog": true,
-                    "hasCue": true,
-                    "media": "CD",
-                    "scene": false,
-                    "year": 0,
-                    "tags": [
-                        "pop",
-                        "rock",
-                        "classic.rock",
-                        "pop.rock"
-                    ],
-                    "snatched": 23058,
-                    "seeders": 1058,
-                    "leechers": 12,
-                    "data": 91963298927520
-                },
-                // ...
-            ]
-        },
-        {
-            "caption": "Best Seeded Torrents",
-            "tag": "seeded",
-            "limit": 10,
-            "results": [
-                {
-                    "torrentId": 29729713,
-                    "groupId": 72094817,
-                    "artist": "The Black Keys",
-                    "groupName": "El Camino",
-                    "groupCategory": 0,
-                    "groupYear": 2011,
-                    "remasterTitle": "",
-                    "format": "MP3",
-                    "encoding": "V0 (VBR)",
-                    "hasLog": false,
-                    "hasCue": false,
-                    "media": "CD",
-                    "scene": true,
-                    "year": 0,
-                    "tags": [
-                        "alternative",
-                        "indie",
-                        "pop",
-                        "rock"
-                    ],
-                    "snatched": 20062,
-                    "seeders": 3557,
-                    "leechers": 32,
-                    "data": 1589584937596
-                },
-                // ...
-            ]
-        }
     ]
 }
 ```
@@ -567,91 +468,8 @@ Must be one of 10 (default), 100 or 250. When `type`="torrents" and `details`="a
                 "donor": true,
                 "warned": false,
                 "enabled": true,
-                "class": "VIP"
-            },
-            // ...
-        ]
-    }
-}
-```
-
-## Requests Search
-
-**URL:**
-`ajax.php?action=requests&search=<term>&page=<page>&tags=<tags>`
-
-**Arguments:**
-
-`search` - search term
-
-`page` - page to display (default: 1)
-
-`tags` - tags to search by (comma separated)
-
-`tags_type` - `0` for any, `1` for match all
-
-`show_filled` - Include filled requests in results - `true` or `false` (default: false).
-
-`filter_cat[]`, `releases[]`, `bitrates[]`, `formats[]`, `media[]` - as used on requests.php
-
-If no arguments are specified then the most recent requests are shown.
-
-**Response format:**
-
-```json
-{
-    "status": "success",
-    "response": {
-        "currentPage": 1,
-        "pages": 1,
-        "results": [
-            {
-                "requestId": 185971,
-                "requestorId": 498,
-                "requestorName": "Satan",
-                "timeAdded": "2012-05-06 15:43:17",
-                "lastVote": "2012-06-10 20:36:46",
-                "voteCount": 3,
-                "bounty": 245366784,
-                "categoryId": 1,
-                "categoryName": "Music",
-                "artists": [
-                    [
-                        {
-                            "id": "1460",
-                            "name": "Logistics"
-                        }
-                    ],
-                    [
-                        {
-                            "id": "25351",
-                            "name": "Alice Smith"
-                        },
-                        {
-                            "id": "44545",
-                            "name": "Nightshade"
-                        },
-                        {
-                            "id": "249446",
-                            "name": "Sarah Callander"
-                        }
-                    ]
-                ],
-                "title": "Fear Not",
-                "year": 2012,
-                "image": "http://whatimg.com/i/ralpc.jpg",
-                "description": "Thank you kindly.",
-                "catalogueNumber": "",
-                "releaseType": "",
-                "bitrateList": "1",
-                "formatList": "Lossless",
-                "mediaList": "FLAC",
-                "logCue": "CD",
-                "isFilled": false,
-                "fillerId": 0,
-                "fillerName": "",
-                "torrentId": 0,
-                "timeFilled": ""
+                "class": "Elite",
+                "avatar": "https://example.com/9xaqdj.gif"
             },
             // ...
         ]
@@ -666,7 +484,7 @@ If no arguments are specified then the most recent requests are shown.
 
 **Arguments:**
 
-`type` - one of torrents, artists (default: torrents)
+`type` - one of `torrents`, `artists` (default: `torrents`)
 
 **Response format:**
 
@@ -682,8 +500,11 @@ Torrents:
                 "year": 2010,
                 "recordLabel": "Hospital Records",
                 "catalogueNumber": "NHS178CD",
-                "tagList": "drum_and_bass electronic",
-                "releaseType": "1",
+                "tagList": [ // bug: is dict
+                    "pop",
+                    "electronic"
+                ],
+                "releaseType": 1,
                 "vanityHouse": false,
                 "image": "http://whatimg.com/i/09930203236341542660.jpg",
                 "torrents": [
@@ -695,9 +516,9 @@ Torrents:
                         "encoding": "Lossless",
                         "remasterYear": 0,
                         "remastered": false,
-                        "remasterTitle": "",
-                        "remasterRecordLabel": "",
-                        "remasterCatalogueNumber": "",
+                        "remasterTitle": null,
+                        "remasterRecordLabel": "Reunited Artists",
+                        "remasterCatalogueNumber": "12345",
                         "scene": false,
                         "hasLog": true,
                         "hasCue": true,
@@ -709,11 +530,12 @@ Torrents:
                         "seeders": 26,
                         "snatched": 142,
                         "time": "2010-11-13 21:25:10",
-                        "hasFile": 29043412
+                        "hasFile": true
                     },
                     // ...
                 ]
-            }
+            },
+            // ...
         ]
     }
 }
@@ -728,7 +550,8 @@ Artists:
             {
                 "artistId": 1460,
                 "artistName": "Logistics"
-            }
+            },
+            // ...
         ]
     }
 }
@@ -775,7 +598,7 @@ Artists:
 
 **Response format:**
 
-```
+```json
 {
     "status": "success",
     "response": {
@@ -795,11 +618,9 @@ Artists:
                         "lastPostAuthorName": "Isocline",
                         "lastTopicId": 150195,
                         "lastTime": "2012-08-08 15:03:18",
-                        "specificRules": [],
                         "lastTopic": "Whataroo 2012!",
                         "read": false,
                         "locked": false,
-                        "sticky": false
                     },
                     // ...
                 ]
@@ -823,12 +644,11 @@ Artists:
 
 **Response format:**
 
-```
+```json
 {
     "status": "success",
     "response": {
         "forumName": "Announcements",
-        "specificRules": [],
         "currentPage": 1,
         "pages": 7,
         "threads": [
@@ -885,24 +705,27 @@ Artists:
         "currentPage": 1,
         "pages": 1,
         "poll": {
-            "closed": false,
-            "featured": "0000-00-00 00:00:00",
-            "question": "Short or long",
-            "maxVotes": 74,
-            "totalVotes": 121,
-            "voted": false,
-            "answers": [
+             "answers": [
                 {
                     "answer": "Short",
+                    "score": 36,
                     "ratio": 0.63513513513514,
                     "percent": 0.38842975206612
                 },
                 {
                     "answer": "Long",
+                    "score": 72,
                     "ratio": 1,
                     "percent": 0.61157024793388
                 }
-            ]
+            ],
+            "closed": false,
+            "featured": true,
+            "question": "Short or long",
+            "maxVotes": 74,
+            "totalVotes": 121,
+            "voted": false,
+            "vote": 2
         },
         "posts": [
             {
@@ -911,8 +734,8 @@ Artists:
                 "bbBody": "Are so much sexier than when they have long hair. Call me gay or whatever but it's true! There are tons of recognizable examples to choose from so to name a few: Morena Baccarin, Emma Watson, Natalie Portman, Anne Hathaway, etc etc etc.\r\nHere\r\n[img]http://cdn03.cdnwp.celebuzz.com/wp-content/uploads/2010/12/27/emma-watson.jpg[/img][img]http://www.seventeen.com/cm/seventeen/images/sev-emma-watson-short-hair-101810.gif[/img]\r\n\r\n",
                 "body": "Are so much sexier than when they have long hair. Call me gay or whatever but it's true! There are tons of recognizable examples to choose from so to name a few: Morena Baccarin, Emma Watson, Natalie Portman, Anne Hathaway, etc etc etc.<br />\r\nHere<br />\r\n<img class=\"scale_image\" onclick=\"lightbox.init(this,500);\" alt=\"http://cdn03.cdnwp.celebuzz.com/wp-content/uploads/2010/12/27/emma-watson.jpg\" src=\"http://cdn03.cdnwp.celebuzz.com/wp-content/uploads/2010/12/27/emma-watson.jpg\" /><img class=\"scale_image\" onclick=\"lightbox.init(this,500);\" alt=\"http://www.seventeen.com/cm/seventeen/images/sev-emma-watson-short-hair-101810.gif\" src=\"http://www.seventeen.com/cm/seventeen/images/sev-emma-watson-short-hair-101810.gif\" /><br />\r\n<br />\r\n",
                 "editedUserId": 0,
-                "editedTime": "",
-                "editedUsername": "",
+                "editedTime": "2025-12-23 03:26:00",
+                "editedUsername": "dr4g0n",
                 "author": {
                     "authorId": 310550,
                     "authorName": "Z0M813",
@@ -959,6 +782,7 @@ Artists:
         "hasBookmarked": true,
         "image": "http://img120.imageshack.us/img120/3206/logiop1.jpg",
         "body": "",
+        "bodyBbcode": null,
         "vanityHouse": false,
         "tags": [
             {
@@ -967,13 +791,22 @@ Artists:
             },
             // ...
         ],
-        "similarArtists": [],
+        "similarArtists": [
+            {
+                "artistId": 175191,
+                "name": "Dimo Dimov",
+                "score": 200,
+                "similarId": 426971
+            },
+            // ...
+        ],
         "statistics": {
             "numGroups": 125,
             "numTorrents": 443,
             "numSeeders": 3047,
             "numLeechers": 95,
-            "numSnatches": 28033
+            "numSnatches": 28033,
+            "numRequests": 2
         },
         "torrentgroup": [
             {
@@ -989,8 +822,31 @@ Artists:
                     "dubstep"
                 ],
                 "releaseType": 1,
+                "wikiImage": "https://example.com/66vftw.png",
                 "groupVanityHouse": false,
                 "hasBookmarked": false,
+                "artists": [
+                    {
+                        "id": 1749,
+                        "aliasid": 1863,
+                        "name": "Delusional",
+                    }
+                ],
+                "extendedArtists": {
+                    "1": [
+                        {
+                            "id": 22,
+                            "aliasid": 22,
+                            "name": "2 Unlimited",
+                        },
+                        // ...
+                    ],
+                    "2": [
+                        // ...
+                    ],
+                    "3": null,
+                    // ...
+                },
                 "torrent": [
                     {
                         "id": 29991962,
@@ -1061,7 +917,7 @@ Artists:
         "pages": 3,
         "results": [
             {
-                "groupId": 410618,
+                "groupId": 410618,  // bug: currently str not int
                 "groupName": "Jungle Music / Toytown",
                 "artist": "Logistics",
                 "tags": [
@@ -1072,7 +928,7 @@ Artists:
                 "vanityHouse": false,
                 "groupYear": 2009,
                 "releaseType": "Single",
-                "groupTime": 1339117820,
+                "groupTime": "2025-12-24 17:35:25",
                 "maxSize": 237970,
                 "totalSnatched": 318,
                 "totalSeeders": 14,
@@ -1084,8 +940,8 @@ Artists:
                         "artists": [
                             {
                                 "id": 1460,
-                                "name": "Logistics",
-                                "aliasid": 1460
+                                "aliasid": 1460,
+                                "name": "Logistics"
                             }
                         ],
                         "remastered": false,
@@ -1093,8 +949,8 @@ Artists:
                         "remasterCatalogueNumber": "",
                         "remasterTitle": "",
                         "media": "Vinyl",
-                        "encoding": "24bit Lossless",
                         "format": "FLAC",
+                        "encoding": "24bit Lossless",
                         "hasLog": false,
                         "logScore": 79,
                         "hasCue": false,
@@ -1109,7 +965,8 @@ Artists:
                         "isFreeleech": false,
                         "isNeutralLeech": false,
                         "isPersonalFreeleech": false,
-                        "canUseToken": true
+                        "canUseToken": true,
+                        "hasSnatched": false
                     },
                     // ...
                 ]
@@ -1129,7 +986,7 @@ Artists:
 
 `id` - torrent's group id
 
-`hash` - hash of a torrent in the torrent group (must be uppercase)
+`hash` - hash of a torrent in the torrent group
 
 **Response format:**
 
@@ -1137,7 +994,7 @@ The `proxyImage` field was introduced in version 2 of this endpoint.
 
 Note: the `proxyImage` value has a short lifespan. Depending on (bad) luck,
 it may expire (404) one second after the response. It is provided in order
-to rehost the image elsewhere when the origin image is no longer available.
+to rehost the image elsewhere when the origin image (`wikiImage`) is no longer available.
 
 ```json
 {
@@ -1145,48 +1002,56 @@ to rehost the image elsewhere when the origin image is no longer available.
     "response": {
         "group": {
             "wikiBody": "",
+            "wikiBBcode": "",
             "wikiImage": "http://whatimg.com/i/ralpc.jpg",
-            "proxyImage": "http://proxy.com/xyz/abc.jpg",
+            "proxyImage": "https://imgcache.opsfet.ch/i/full/NY_j6FLUuMiwD75T/aHR0cvM6Ly9yYS50aGVzdW5nb2QueHlzL0h4LWZFOU9NLmpwZWc",
             "id": 72189681,
             "name": "Fear Not",
             "year": 2012,
             "recordLabel": "Hospital Records",
             "catalogueNumber": "NHS209CD",
             "releaseType": 1,
+            "releaseTypeName": "Album",
             "categoryId": 1,
             "categoryName": "Music",
             "time": "2012-05-02 07:39:30",
             "vanityHouse": false,
+            "isBookmarked": false,
+            "tags": [
+                "pop",
+                "rock",
+            ],
             "musicInfo": {
-                "composers": [],
-                "dj": [],
                 "artists": [
                     {
                         "id": 1460,
+                        "aliasid": 1460,
                         "name": "Logistics"
                     }
                 ],
                 "with": [
                     {
                         "id": 25351,
+                        "aliasid": 25351,
                         "name": "Alice Smith"
                     },
                     {
                         "id": 44545,
+                        "aliasid": 44545,
                         "name": "Nightshade"
-                    },
-                    {
-                        "id": 249446,
-                        "name": "Sarah Callander"
                     }
                 ],
-                "conductor": [],
                 "remixedBy": [],
-                "producer": []
+                "composers": [],
+                "conductor": [],
+                "dj": [],
+                "producer": [],
+                "arranger": [],
             }
         },
         "torrents": [
             {
+                "infoHash": "2b92273249f399325fade035a2d0ba8450268483",  // shown only on own uploads/seeds
                 "id": 29991962,
                 "media": "CD",
                 "format": "FLAC",
@@ -1196,80 +1061,33 @@ to rehost the image elsewhere when the origin image is no longer available.
                 "remasterTitle": "",
                 "remasterRecordLabel": "",
                 "remasterCatalogueNumber": "",
-                "scene": true,
-                "hasLog": false,
-                "hasCue": false,
-                "logScore": 0,
+                "scene": false,
+                "hasLog": true,
+                "hasCue": true,
+                "logScore": 100,
+                "logChecksum": true,
+                "logCount": 1,
+                "ripLogIds": [
+                    745294
+                ],
                 "fileCount": 19,
                 "size": 527749302,
                 "seeders": 20,
                 "leechers": 0,
                 "snatched": 55,
-                "freeTorrent": false,
+                "freeTorrent": "Normal",  // "Freeleech", "Neutral Leech"
+                "freeReason": "Normal",  //  "Album of the Month"
+                "trumpable": false,
+                "trumpable_reasons": [],
                 "time": "2012-04-14 15:57:00",
                 "description": "[URL=http://whatimg.com/viewer.php?file=yvpsp.jpg][IMG]http://whatimg.com/i/yvpsp_thumb.jpg[/IMG][/URL]",
                 "fileList": "00-logistics-fear_not-cd-flac-2012.jpg{{{1233205}}}|||00-logistics-fear_not-cd-flac-2012.m3u{{{538}}}|||00-logistics-fear_not-cd-flac-2012.nfo{{{1607}}}|||00-logistics-fear_not-cd-flac-2012.sfv{{{688}}}|||01-logistics-fear_not.flac{{{38139451}}}|||02-logistics-timelapse.flac{{{39346037}}}|||03-logistics-2999_(wherever_you_go).flac{{{41491133}}}|||04-logistics-try_again.flac{{{32151567}}}|||05-logistics-we_are_one.flac{{{40778041}}}|||06-logistics-crystal_skies_(feat_nightshade_and_sarah_callander).flac{{{34544405}}}|||07-logistics-feels_so_good.flac{{{41363732}}}|||08-logistics-running_late.flac{{{16679269}}}|||09-logistics-early_again.flac{{{35373278}}}|||10-logistics-believe_in_me.flac{{{39495420}}}|||11-logistics-letting_go.flac{{{30846730}}}|||12-logistics-sendai_song.flac{{{35021141}}}|||13-logistics-over_and_out.flac{{{44621200}}}|||14-logistics-destination_unknown.flac{{{13189493}}}|||15-logistics-watching_the_world_go_by_(feat_alice_smith).flac{{{43472367}}}",
                 "filePath": "Logistics-Fear_Not-CD-FLAC-2012-TaBoo",
                 "userId": 567,
-                "username": null
+                "username": "dr@gon"
             },
-            {
-                "id": 30028889,
-                "media": "CD",
-                "format": "MP3",
-                "encoding": "320",
-                "remastered": false,
-                "remasterYear": 0,
-                "remasterTitle": "",
-                "remasterRecordLabel": "",
-                "remasterCatalogueNumber": "",
-                "scene": false,
-                "hasLog": false,
-                "hasCue": false,
-                "logScore": 0,
-                "fileCount": 16,
-                "size": 167593347,
-                "seeders": 7,
-                "leechers": 0,
-                "snatched": 30,
-                "freeTorrent": false,
-                "time": "2012-05-02 07:39:30",
-                "description": "",
-                "fileList": "01 Logistics - Fear Not.mp3{{{11440094}}}|||02 Logistics - Timelapse.mp3{{{11931197}}}|||03 Logistics - 2999 (Wherever You Go).mp3{{{12767128}}}|||04 Logistics - Try Again.mp3{{{10123523}}}|||05 Logistics - We Are One.mp3{{{12664716}}}|||06 Logistics - Crystal Skies.mp3{{{10048294}}}|||07 Logistics - Feels So Good.mp3{{{11971952}}}|||08 Logistics - Running Late.mp3{{{6810155}}}|||09 Logistics - Early Again.mp3{{{11073337}}}|||10 Logistics - Believe In Me.mp3{{{12421259}}}|||11 Logistics - Letting Go.mp3{{{11697141}}}|||12 Logistics - Sendai Song.mp3{{{11732669}}}|||13 Logistics - Over And Out.mp3{{{15169339}}}|||14 Logistics - Destination Unknown.mp3{{{4976367}}}|||15 Logistics - Watching The World Go By.mp3{{{12469335}}}|||Cover.jpg{{{296841}}}",
-                "filePath": "Logistics - Fear Not (NHS209CD) [CD] (2012)",
-                "userId": 340871,
-                "username": null
-            }
+            // ...
         ]
-    }
-}
-```
-
-### Add Tag
-
-Must use either API token or `$_POST['authkey']`
-
-**URL:**
-`ajax.php?action=add_tag&groupid=<Group Id>&tagname=<Tags>`
-
-`ajax.php?action=addtag&groupid=<Group Id>&tagname=<Tags>`
-
-**Arguments**
-
-`groupid` - group id
-`tagname` - comma separated list of tags to add to group
-
-**Response format:**
-
-```json
-{
-    "status": "success",
-    "response": {
-        "added": [
-            "rock",
-            "jazz"
-        ],
-        "rejected": []
     }
 }
 ```
@@ -1283,7 +1101,7 @@ Must use either API token or `$_POST['authkey']`
 
 `id` - torrent's id
 
-`hash` - torrent's hash (must be uppercase)
+`hash` - torrent's hash
 
 **Response format:**
 
@@ -1302,39 +1120,46 @@ Must use either API token or `$_POST['authkey']`
             "recordLabel": "Hospital Records",
             "catalogueNumber": "NHS209CD",
             "releaseType": 1,
+            "releasTypeName": "Album",
             "categoryId": 1,
             "categoryName": "Music",
             "time": "2012-05-02 07:39:30",
             "vanityHouse": false,
+            "isBookmarked": false,
+            "tags": [
+                "pop",
+                "rock",
+            ],
             "musicInfo": {
-                "composers": [],
-                "dj": [],
                 "artists": [
                     {
                         "id": 1460,
+                        "aliasid": 1460,
                         "name": "Logistics"
                     }
                 ],
                 "with": [
                     {
                         "id": 25351,
+                        "aliasid": 25351,
                         "name": "Alice Smith"
                     },
                     {
                         "id": 44545,
+                        "aliasid": 44545,
                         "name": "Nightshade"
-                    },
-                    {
-                        "id": 249446,
-                        "name": "Sarah Callander"
                     }
                 ],
-                "conductor": [],
                 "remixedBy": [],
-                "producer": []
+                "composers": [],
+                "conductor": [],
+                "dj": [],
+                "producer": [],
+                "arranger": [],
             }
         },
         "torrent": {
+            "infoHash": "2b92273249f399325fade035a2d0ba8450268483",  // shown only on own uploads/seeds
             "id": 29991962,
             "media": "CD",
             "format": "FLAC",
@@ -1344,16 +1169,24 @@ Must use either API token or `$_POST['authkey']`
             "remasterTitle": "",
             "remasterRecordLabel": "",
             "remasterCatalogueNumber": "",
-            "scene": true,
-            "hasLog": false,
-            "hasCue": false,
-            "logScore": 0,
+            "scene": false,
+            "hasLog": true,
+            "hasCue": true,
+            "logScore": 100,
+            "logChecksum": true,
+            "logCount": 1,
+            "ripLogIds": [
+                745294
+            ],
             "fileCount": 19,
             "size": 527749302,
             "seeders": 20,
             "leechers": 0,
             "snatched": 55,
-            "freeTorrent": false,
+            "freeTorrent": "Normal",  // "Freeleech", "Neutral Leech"
+            "freeReason": "Normal",  //  "Album of the Month"
+            "trumpable": false,
+            "trumpable_reasons": [],
             "time": "2012-04-14 15:57:00",
             "description": "[URL=http://whatimg.com/viewer.php?file=yvpsp.jpg][IMG]http://whatimg.com/i/yvpsp_thumb.jpg[/IMG][/URL]",
             "fileList": "00-logistics-fear_not-cd-flac-2012.jpg{{{1233205}}}|||00-logistics-fear_not-cd-flac-2012.m3u{{{538}}}|||00-logistics-fear_not-cd-flac-2012.nfo{{{1607}}}|||00-logistics-fear_not-cd-flac-2012.sfv{{{688}}}|||01-logistics-fear_not.flac{{{38139451}}}|||02-logistics-timelapse.flac{{{39346037}}}|||03-logistics-2999_(wherever_you_go).flac{{{41491133}}}|||04-logistics-try_again.flac{{{32151567}}}|||05-logistics-we_are_one.flac{{{40778041}}}|||06-logistics-crystal_skies_(feat_nightshade_and_sarah_callander).flac{{{34544405}}}|||07-logistics-feels_so_good.flac{{{41363732}}}|||08-logistics-running_late.flac{{{16679269}}}|||09-logistics-early_again.flac{{{35373278}}}|||10-logistics-believe_in_me.flac{{{39495420}}}|||11-logistics-letting_go.flac{{{30846730}}}|||12-logistics-sendai_song.flac{{{35021141}}}|||13-logistics-over_and_out.flac{{{44621200}}}|||14-logistics-destination_unknown.flac{{{13189493}}}|||15-logistics-watching_the_world_go_by_(feat_alice_smith).flac{{{43472367}}}",
@@ -1374,7 +1207,7 @@ __NOTE__: Requires using the API token or authkey
 
 **Arguments:**
 
-__NOTE__: Use `0` and `1` for boolean fields. Omitting the field is the same as setting it to `0`.
+__NOTE__: Boolean fields are true if present in POST data regardless of value. Omit the field to set false.
 
 __NOTE__: If using `groupid`, may leave group details (e.g. `title`, `year`, etc.) out.
 
@@ -1466,7 +1299,8 @@ __NOTE__: If using `groupid`, may leave group details (e.g. `title`, `year`, etc
             "private": true,
             "source": true,
           },
-        ]
+          // ...
+        ],
         "fillRequest": {
             "requestId": 1,
             "torrentId": 526,
@@ -1475,7 +1309,7 @@ __NOTE__: If using `groupid`, may leave group details (e.g. `title`, `year`, etc
             "bounty": 1232452
         },
         "warnings": [
-            "non-critical html error messages"
+            "non-critical html error messages",
         ]
     }
 }
@@ -1543,10 +1377,76 @@ __Note__: Must be the uploader of the torrent or moderator to add logs
       }
     ]
   },
-  "info": {
-    "source": "Gazelle Dev",
-    "version": 1
-  }
+}
+```
+__Note__: Must be the uploader of the torrent or moderator to add logs
+
+### Riplog
+
+**URL:**
+`ajax.php?action=riplog&id=<Torrent ID>&logid=<Log ID>`
+
+**GET Arguments:**
+
+`id` - Torrent Id
+
+`logid` - Log Id's can be found in `torrent` or `tourrentgroup` response in `ripLogIds` field
+
+**Response format:**
+
+```json
+{
+  "status": "success",
+  "response": {
+    "id": 187649,
+    "logid": 8367459,
+    "log": "//5FAHgAYQBjAHQAIABBAHUAZABpAG8AIABDAG...QA9AA0ACgA=",
+    "log_sha256": "6fa3c5fa1d0e1e7b868a4ca1add7de8c42fa13c376d307cbffda7a6aef54b235",
+    "score": 100,
+    "score_adjusted": 100,
+    "checksum": true,
+    "checksum_adjusted": false,
+    "checksum_state": "checksum_ok",
+    "adjusted": false,
+    "adjusted_by": null,
+    "adjusted_reason": null,
+    "ripper": "EAC",
+    "ripper_lang": "en",
+    "checker_version": "0.14.2",
+    "success": true,
+  },
+}
+```
+__Note__: `log`: base64-encoded logfile
+
+__Note__: `log_sha256`: SHA-256 digest to verify the log was decoded correctly
+
+### Add Tag
+
+Must use either API token or `$_POST['authkey']`
+
+**URL:**
+`ajax.php?action=add_tag&groupid=<Group Id>&tagname=<Tags>`
+
+`ajax.php?action=addtag&groupid=<Group Id>&tagname=<Tags>`
+
+**Arguments**
+
+`groupid` - group id
+`tagname` - string with comma separated tags to add to group
+
+**Response format:**
+
+```json
+{
+    "status": "success",
+    "response": {
+        "added": [
+            "rock",
+            "jazz"
+        ],
+        "rejected": []
+    }
 }
 ```
 
@@ -1555,14 +1455,16 @@ __Note__: Must be the uploader of the torrent or moderator to add logs
 **URL:**
 `ajax.php?action=user_torrents&userid=<User ID>&type=<Type>`
 
-__Note__: Must be the uploader of the torrent or moderator to add logs
-
 **GET Arguments:**
 
 `userid` - The user id to get torrents for (can also use `id`)
+
 `type` - Type of torrents to display (options are `downloaded`, `leeching`, `seeding`, `snatched`, `snatched-unseeded`, `uploaded`, `uploaded-unseeded`)
-`limit` - (Optional) Number of results to display (default: 500)
+
+`limit` - (Optional) Number of results to display (default and max: 500)
+
 `offset` - (Optional) Number of results to offset by (default: 0)
+
 `page` - (Optional) Page of results to show (default: 1)
 
 __NOTE__: You can only provide one of `offset` or `page`. Offset is a number of
@@ -1596,10 +1498,6 @@ number of results to retrieve, where `(page - 1) * limit == offset`.
     ],
     "total": 1
   },
-  "info": {
-    "source": "Gazelle Dev",
-    "version": 1
-  }
 }
 ```
 
@@ -1617,7 +1515,7 @@ recommended to use the `artists` field to get artist information.
 * `method` (required)
   * `single` - single-seeded torrents
   * `transcode` - torrents missing transcodes
-  
+ 
 additional arguments for `method=transcode`
 * `search` - search term for returned torrents
 * `filter` - limit torrents based on user's torrents
@@ -1661,10 +1559,6 @@ additional arguments for `method=transcode`
       "missing320": true
     }
   ],
-  "info": {
-    "source": "Gazelle Dev",
-    "version": 2
-  }
 }
 ```
 
@@ -1723,42 +1617,19 @@ __NOTE__: `checksum` field can have the following values: `checksum_ok`, `checks
     "response": {
         "requestId": 80983,
         "requestorId": 75670,
-        "requestorName": "brontosaurus",
-        "requestTax": 0.1,
         "timeAdded": "2010-01-08 03:12:39",
-        "canEdit": false,
-        "canVote": true,
-        "minimumVote": 20971520,
         "voteCount": 765,
         "lastVote": "2012-08-08 20:37:24",
-        "topContributors": [
-            {
-                "userId": 75670,
-                "userName": "brontosaurus",
-                "bounty": 1254160859136
-            },
-            // ...
-        ],
         "totalBounty": 1489901312461,
         "categoryId": 1,
         "categoryName": "Music",
         "title": "4th Studio Album",
         "year": 2012,
         "image": "",
+        "bbDescription": "",
         "description": "This request is for a proper rip to FLAC at 24 bits \/ 96 kHz of the <br \/>\r\n4th Studio Album by Daft Punk<br \/>\r\n<br \/>\r\n<strong>A USB turntable rip does NOT suffice.<\/strong>",
-        "musicInfo": {
-            "composers": [],
-            "dj": [],
-            "artists": [{
-                "id": 431,
-                "name": "Daft Punk"
-            }],
-            "with": [],
-            "conductor": [],
-            "remixedBy": [],
-            "producer": []
-        },
-        "catalogueNumber": "",
+        "catalogueNumber": null,
+        "recordLabel": null,
         "releaseType": 1,
         "releaseTypeName": "Album",
         "bitrateList": [
@@ -1776,10 +1647,45 @@ __NOTE__: `checksum` field can have the following values: `checksum_ok`, `checks
         "minLogScore": 90,
         "isFilled": false,
         "fillerId": 0,
-        "fillerName": "0",
         "torrentId": 0,
-        "timeFilled": "0",
-        "tags": ["electronic", "house", "french"],
+        "timeFilled": null,
+        "tags": [
+            "electronic",
+            "house",
+            "french"
+        ],
+        "requestorName": "brontosaurus",
+        "isBookmarked": false,
+        "requestTax": 0,
+        "canEdit": false,
+        "canVote": true,
+        "minimumVote": 20971520,
+        "topContributors": [
+            {
+                "userId": 75670,
+                "userName": "brontosaurus",
+                "bounty": 1254160859136
+            },
+            // ...
+        ],
+        "musicInfo": {
+            "artists": [
+                {
+                    "id": 431,
+                    "aliasid": 431,
+                    "name": "Daft Punk"
+                },
+                // ...
+            ],
+            "with": [],
+            "remixedBy": [],
+            "composers": [],
+            "conductor": [],
+            "dj": [],
+            "producer": [],
+            "arranger": []
+        },
+        "fillerName": "0",
         "comments": [
             {
                 "postId": 63934,
@@ -1791,10 +1697,11 @@ __NOTE__: `checksum` field can have the following values: `checksum_ok`, `checks
                 "class": "Member",
                 "addedTime": "2012-07-10 09:02:34",
                 "avatar": "http:\/\/majastevanovich.files.wordpress.com\/2009\/10\/a20toilet20paper.jpg",
+                "bbBody": "",
                 "comment": "Can someone explain what is the attractiveness of a vinyl rip as opposed to a CD rip? CD should be direct from the source with no conversions, while on vinyl is has to be converted to analog and digital again.. isn't it loosing fidelity?",
-                "editedUserId": 0,
-                "editedUsername": "",
-                "editedTime": ""
+                "editedUserId": null,
+                "editedUsername": null,
+                "editedTime": null
             },
             // ...
         ],
@@ -1834,6 +1741,108 @@ __Note__: Either `torrentid` or `link` must be used
         "fillerId": 1,
         "fillerName": "hermes",
         "bounty": 1232452
+    }
+}
+```
+
+### Requests Search
+
+**URL:**
+`ajax.php?action=requests&search=<term>&page=<page>&tags=<tags>`
+
+**Arguments:**
+
+`search` - search term
+
+`page` - page to display (default: 1)
+
+`tags` - tags to search by (comma separated)
+
+`tags_type` - `0` for any, `1` for match all
+
+`show_filled` - Include filled requests in results - `true` or `false` (default: false).
+
+`filter_cat[]`, `releases[]`, `bitrates[]`, `formats[]`, `media[]` - as used on requests.php
+
+If no arguments are specified then the most recent requests are shown.
+
+**Response format:**
+
+```json
+{
+    "status": "success",
+    "response": {
+        "currentPage": 1,
+        "pages": 1,
+        "results": [
+            {
+                "requestId": 185971,
+                "requestorId": 498,
+                "timeAdded": "2012-05-06 15:43:17",
+                "voteCount": 3,
+                "lastVote": "2012-06-10 20:36:46",
+                "totalBounty": 245366784,
+                "categoryId": 1,
+                "categoryName": "Music",
+                "title": "Fear Not",
+                "year": 2012,
+                "image": "http://whatimg.com/i/ralpc.jpg",
+                "bbDescription": "",
+                "description": "Thank you kindly.",
+                "catalogueNumber": "",
+                "recordLabel": "",
+                "releaseType": 1,
+                "releaseTypeName": "Album",
+                "bitrateList": [
+                "Lossless"
+                ],
+                "formatList": [
+                "FLAC"
+                ],
+                "mediaList": [
+                "CD"
+                ],
+                "needCue": true,
+                "needLog": true,
+                "needLogChecksum": true,
+                "minLogScore": 90,
+                "isFilled": false,
+                "fillerId": 0,
+                "torrentId": 0,
+                "timeFilled": "",
+                "timeFilled": null,
+                "tags": [
+                    "electronic",
+                    "house",
+                    "french"
+                ],
+                "requestorName": "Satan",
+                "fillerName": "",
+                "bounty": 245366784,
+                "artists": [
+                    [
+                        {
+                            "id": 1460,
+                            "aliasid": 1460,
+                            "name": "Logistics"
+                        }
+                    ],
+                    [
+                        {
+                            "id": 25351,
+                            "aliasid": 764923,
+                            "name": "Alice Smith"
+                        },
+                        {
+                            "id": 44545,
+                            "aliasid": 5282,
+                            "name": "Nightshade"
+                        }
+                    ]
+                ],
+            },
+            // ...
+        ]
     }
 }
 ```
@@ -1883,12 +1892,12 @@ version: 3
         {
           "id": 70362,
           "name": "Drago Mlinarec",
-          "image": "https://ptpimg.me/gsotu8.jpg"
+          "image": "https://example.com/gsotu8.jpg"
         },
         {
           "id": 812898,
           "name": "Grupa Marina Škrgatića",
-          "image": "https://ptpimg.me/tpo6n0.jpg"
+          "image": "https://example.com/tpo6n0.jpg"
         }
       ]
     }
@@ -1919,32 +1928,41 @@ version: 3
                 "groupId": 71944561,
                 "groupName": "You Are a Tourist",
                 "groupCategoryId": 1,
-                "torrentTags": "alternative indie",
+                "wikiImage": "https://example.com/57vr15r.jpg",
+                "torrentTags": "alternative indie pop rock shoegaze",
                 "size": 12279586,
                 "fileCount": 2,
+                "media": "WEB",
                 "format": "MP3",
                 "encoding": "320",
-                "media": "WEB",
                 "scene": false,
                 "groupYear": 2011,
                 "remasterYear": 0,
+                "remastered": false,
                 "remasterTitle": "",
+                "remasterRecordLabel": "",
+                "remasterCatalogueNumber": "",
                 "snatched": 2,
                 "seeders": 3,
                 "leechers": 0,
-                "notificationTime": "2012-08-08 21:24:15",
                 "hasLog": false,
                 "hasCue": false,
                 "logScore": 0,
+                "logChecksum": false,
+                "logCount": 0,
+                "ripLogIds": [],
                 "freeTorrent": false,
-                "logInDb": false,
-                "unread": false
+                "isNeutralLeech": false,
+                "reported": false,
+                "time": "2025-12-28 08:11:49",
+                "description": "",
+                "filter": "Artist notifications"
             },
             // ...
         ]
     }
 }
-
+```
 ## Similar Artists
 
 **URL:**
@@ -1959,33 +1977,24 @@ version: 3
 **Response format:**
 
 ```json
-[
-    {
-        "id": 8307,
-        "name": "Fairmont",
-        "score": 200
-    },
-    {
-        "id": 3693,
-        "name": "Paul Kalkbrenner",
-        "score": 200
-    },
-    {
-        "id": 32479,
-        "name": "Lopazz",
-        "score": 200
-    },
-    {
-        "id": 33783,
-        "name": "Pawas",
-        "score": 200
-    },
-    {
-        "id": 1564,
-        "name": "Dubfire",
-        "score": 200
-    }
-]
+{
+    "status": "success",
+    "response": [
+        {
+            "artist_id": 12500,
+            "name": "Frightened Rabbit",
+            "score": 400,
+            "similar_id": 2826
+        },
+        {
+            "artist_id": 33172,
+            "name": "Broken Records",
+            "score": 200,
+            "similar_id": 134600
+        },
+        // ...
+    ]
+}
 ```
 
 
@@ -2002,27 +2011,36 @@ version: 3
     "response": {
         "announcements": [
             {
-                "newsId":263,
-                "title":"An update! A new forum, new features and more.",
-                "body":"Much has happened recently!...",
-                "newsTime":"2012-11-14 03:14:12"
+                "newsId": 263,
+                "title": "An update! A new forum, new features and more.",
+                "bbBody": "Much has happened recently!...",
+                "body": "Much has happened recently!...",
+                "newsTime": "2012-11-14 03:14:12"
             },
             // ...
         ],
-        "blogPosts": []
+        "blogPosts": [
+            {
+                "blogId": 88,
+                "author": 22,
+                "title": "Server maintenance",
+                "bbBody": "There will be server maintenance on Saturday",
+                "body": "There will be server maintenance on Saturday",
+                "blogTime": "2025-10-16 22:50:02.485716+00",
+                "threadId": 26559
+            },
+            // ...
+        ]
     }
 }
 ```
 
 
 ## Unofficial projects that utilize the API
-- Python - https://github.com/cohena/pygazelle
 - Python - https://github.com/isaaczafuta/whatapi
 - Java - https://github.com/Gwindow/WhatAPI
 - Ruby - https://github.com/chasemgray/RubyGazelle
 - Javascript - https://github.com/deoxxa/whatcd
 - C# - https://github.com/frankston/WhatAPI
-- PHP - https://github.com/GLaDOSDan/whatcd-php
 - PHP - https://github.com/Jleagle/php-gazelle
 - Go - https://github.com/kdvh/whatapi
-- Scala - https://github.com/bkkcanuck/askwhat
