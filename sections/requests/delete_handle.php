@@ -23,7 +23,7 @@ if ($request->userId() !== $Viewer->id) {
     if ($user) {
         $user->inbox()->createSystem(
             'A request you created has been deleted',
-            "The request \"$title\" was deleted by [url={$Viewer->url()}]{$Viewer->username()}[/url] for the reason: [quote]{$reason}[/quote]"
+            "The request “{$title}” was deleted by [url={$Viewer->url()}]{$Viewer->username()}[/url] for the reason: [quote]{$reason}[/quote]"
         );
     }
 }

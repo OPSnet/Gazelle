@@ -10,6 +10,7 @@ use Gazelle\SessionCookie;
 use Gazelle\Task;
 use Gazelle\Tracker;
 use Gazelle\User\Session;
+use Gazelle\Util\Mail;
 use Gazelle\Util\Time;
 
 class User extends \Gazelle\BaseManager {
@@ -775,7 +776,7 @@ class User extends \Gazelle\BaseManager {
         return count($idList);
     }
 
-    public function inactiveUserWarn(\Gazelle\Util\Mail $mailer): int {
+    public function inactiveUserWarn(Mail $mailer = new Mail()): int {
         self::$db->prepared_query("
             SELECT DISTINCT um.ID
             FROM users_main             um

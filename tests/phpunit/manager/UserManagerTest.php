@@ -6,6 +6,7 @@ use PHPUnit\Framework\TestCase;
 use GazelleUnitTest\Helper;
 use Gazelle\Enum\UserAuditEvent;
 use Gazelle\Enum\UserStatus;
+use Gazelle\Util\Time;
 
 class UserManagerTest extends TestCase {
     use Pg;
@@ -242,10 +243,10 @@ class UserManagerTest extends TestCase {
     public function testUserRatioWatch(): void {
         $manager = new Manager\User();
         $this->userList[] = Helper::makeUser('um4.' . randomString(10), 'userman', enable: true, clearInbox: true);
-        $user = $this->userList[0];
-        $this->assertFalse($user->onRatioWatch(), 'utest-personal-on-ratio-watch');
-        $this->assertEquals(0.0, $user->requiredRatio(), 'utest-required-ratio');
-        $this->assertEquals(0, $user->downloadedOnRatioWatch(), 'utest-download-ratio-watch');
+        $user0 = $this->userList[0];
+        $this->assertFalse($user0->onRatioWatch(), 'utest-personal-on-ratio-watch');
+        $this->assertEquals(0.0, $user0->requiredRatio(), 'utest-required-ratio');
+        $this->assertEquals(0, $user0->downloadedOnRatioWatch(), 'utest-download-ratio-watch');
         $idList = array_map(fn ($u) => $u->id, $this->userList);
 
         // put users onto ratio watch
@@ -267,7 +268,7 @@ class UserManagerTest extends TestCase {
         $this->assertCount(29, $result, 'uman-ratiowatch-update');
         $this->assertGreaterThanOrEqual(
             count($idList),
-            $result['07-weight'][0],
+            array_first($result['07-weight']),
             'uman-ratiowatch-set-action',
         );
         $this->assertEquals(
@@ -284,7 +285,7 @@ class UserManagerTest extends TestCase {
             $user->flush();
         }
 
-        $receiver = $this->userList[0]->inbox();
+        $receiver = $user0->inbox();
         $pmMan    = new Manager\PM($receiver->user());
         $list     = $receiver->messageList($pmMan, 2, 0);
         $this->assertEquals(1, $receiver->messageTotal(), 'uman-ratiowatch-pm-count');
@@ -292,6 +293,11 @@ class UserManagerTest extends TestCase {
             'You have been put on Ratio Watch',
             $list[0]->subject(),
             'uman-ratiowatch-pm-subject',
+        );
+        $this->assertEquals(
+            '2 weeks',
+            Time::diff($user0->ratioWatchExpiry(), span: false, levels: 1),
+            'uman-user-ratio-watch-expiry',
         );
 
         // nuke the recent pms
@@ -311,26 +317,26 @@ class UserManagerTest extends TestCase {
                 ui.RatioWatchDownload = ?,
                 uls.Downloaded = uls.Downloaded + ?
             WHERE ui.UserID = ?
-            ", $GiB50, $GiB50, $this->userList[0]->id
+            ", $GiB50, $GiB50, $user0->id
         );
-        $this->userList[0]->flush();
-        $this->assertEquals([$this->userList[0]->id], $manager->ratioWatchBlockList(), 'uman-ratiowatch-block-list');
+        $user0->flush();
+        $this->assertEquals([$user0->id], $manager->ratioWatchBlockList(), 'uman-ratiowatch-block-list');
         $this->assertEquals(1, $manager->ratioWatchBlock(), 'uman-ratiowatch-do-block');
-        $this->userList[0]->flush();
 
-        $receiver = $this->userList[0]->inbox();
+        $receiver = $user0->inbox();
         $pmMan    = new Manager\PM($receiver->user());
         $this->assertEquals(1, $receiver->messageTotal(), 'uman-ratiowatch-pm-block-count');
         $list = $receiver->messageList($pmMan, 2, 0);
         $this->assertEquals('Your download privileges have been removed', $list[0]->subject(), 'uman-ratiowatch-pm-block-subject');
-        $this->assertFalse($this->userList[0]->canLeech(), 'uman-user0-no-canleech');
+        $this->assertFalse($user0->canLeech(), 'uman-user0-no-canleech');
 
         // user[1] makes good and is cleared
+        $user1 = $this->userList[1];
         $db->prepared_query("
             UPDATE users_leech_stats SET
                 Uploaded = Uploaded + ?
             WHERE UserID = ?
-            ", $GiB50, $this->userList[1]->id
+            ", $GiB50, $user1->id
         );
 
         // ratio watch ends
@@ -345,32 +351,38 @@ class UserManagerTest extends TestCase {
         }
 
         // user[1] is cleared
-        $this->assertEquals([$this->userList[1]->id], $manager->ratioWatchClearList(), 'uman-ratiowatch-clear-list');
+        $this->assertEquals([$user1->id], $manager->ratioWatchClearList(), 'uman-ratiowatch-clear-list');
         $this->assertEquals(1, $manager->ratioWatchClear(), 'uman-ratiowatch-do-clear');
         $this->assertEquals(0, $manager->ratioWatchClear(), 'uman-ratiowatch-reprocess-clear');
-        $this->userList[1]->flush();
+        $user1->flush();
 
-        $receiver = $this->userList[1]->inbox();
+        $receiver = $user1->inbox();
         $pmMan    = new Manager\PM($receiver->user());
         $this->assertEquals(1, $receiver->messageTotal(), 'uman-ratiowatch-pm-clear-count');
         $list = $receiver->messageList($pmMan, 2, 0);
         $this->assertEquals('You have been taken off Ratio Watch', $list[0]->subject(), 'uman-ratiowatch-pm-clear-subject');
-        $this->assertTrue($this->userList[1]->canLeech(), 'uman-user1-canleech');
+        $this->assertTrue($user1->canLeech(), 'uman-user1-canleech');
 
         // user[3] is cleared
+        $user3 = $this->userList[3];
         $this->assertEquals(
             1,
-            $this->userList[3]->history()->resetRatioWatch(),
+            $user3->history()->resetRatioWatch(),
             'uman-ratiowatch-reset'
         );
 
         // user[2] did nothing, loses download privileges
-        $this->assertEquals([$this->userList[2]->id], $manager->ratioWatchEngageList(), 'uman-ratiowatch-engage-list');
+        $user2 = $this->userList[2];
+        $this->assertEquals(
+            [$user2->id],
+            $manager->ratioWatchEngageList(),
+            'uman-ratiowatch-engage-list',
+        );
         $this->assertEquals(1, $manager->ratioWatchEngage(), 'uman-ratiowatch-do-engage');
         $this->assertEquals(0, $manager->ratioWatchEngage(), 'uman-ratiowatch-reprocess-engage');
-        $this->userList[2]->flush();
+        $user2->flush();
 
-        $receiver = $this->userList[2]->inbox();
+        $receiver = $user2->inbox();
         $pmMan    = new Manager\PM($receiver->user());
         $this->assertEquals(1, $receiver->messageTotal(), 'uman-ratiowatch-pm-engage-count');
         $list = $receiver->messageList($pmMan, 2, 0);
@@ -379,7 +391,8 @@ class UserManagerTest extends TestCase {
             $list[0]->subject(),
             'uman-ratiowatch-pm-engage-subject'
         );
-        $this->assertFalse($this->userList[2]->canLeech(), 'uman-user2-no-canleech');
+        $this->assertFalse($user2->canLeech(), 'uman-user2-no-canleech');
+        $this->assertTrue($user3->canLeech(), 'uman-user3-canleech');
     }
 
     public function testSendCustomPM(): void {
@@ -460,6 +473,55 @@ class UserManagerTest extends TestCase {
             ["date", "month", "created", "manual", "ratio", "inactivity"],
             array_keys($details[0]),
             'uman-userflow-details-keys'
+        );
+    }
+
+    public function testUserMerge(): void {
+        // this does not require a manager, but easier to do here
+        // because there are two User objects
+        $userUp   = 200000;
+        $userDown = 10000;
+        $dupeUp   = 400000;
+        $dupeDown = 20000;
+        $user = $this->userList[0];
+        $user->setField('leech_upload', $userUp)
+            ->setField('leech_download', $userDown)
+            ->modify();
+        $dupe = $this->userList[1];
+        $dupe->setField('leech_upload', $dupeUp)
+            ->setField('leech_download', $dupeDown)
+            ->modify();
+        $merge = $user->mergeLeechStats($dupe, $this->userList[2]);
+        $user->setField('leech_upload', $user->uploadedSize() + $merge['up'])
+            ->setField('leech_download', $user->downloadedSize() + $merge['down'])
+            ->modify();
+        $this->assertEquals(
+            [
+                'up'   => $dupeUp,
+                'down' => $dupeDown,
+            ],
+            $merge,
+            'user-merge-stats',
+        );
+        $this->assertEquals(
+            0,
+            $dupe->flush()->uploadedSize(),
+            'user-merge-up',
+        );
+        $this->assertEquals(
+            0,
+            $dupe->downloadedSize(),
+            'user-merge-down',
+        );
+        $this->assertEquals(
+            $userUp + $dupeUp,
+            $user->flush()->uploadedSize(),
+            'user-merge-up',
+        );
+        $this->assertEquals(
+            $userDown + $dupeDown,
+            $user->downloadedSize(),
+            'user-merge-down',
         );
     }
 

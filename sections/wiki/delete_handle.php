@@ -21,8 +21,8 @@ if (is_null($article)) {
 $id    = $article->id;
 $title = $article->title();
 $article->remove();
-$article->logger()->general(
-    "Wiki article $id \"$title\" was removed by {$Viewer->username()}"
+$Viewer->logger()->general(
+    "Wiki article $id “{$title}” was removed by {$Viewer->username()}"
 );
 
 header('Location: wiki.php');

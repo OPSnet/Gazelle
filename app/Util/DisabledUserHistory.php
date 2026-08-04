@@ -1,19 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\Util;
 
+use Gazelle\User;
+
 /**
- * tracks a couple of recently disabled users in memcached
+ * track recently disabled users in memcached
  */
 class DisabledUserHistory extends \Gazelle\Base {
     protected const string CACHE_KEY = 'recently_disabled_users';
-    protected const int MAX_ENTRIES = 50;
+    public const int MAX_ENTRIES = 50;
 
-    public static function add(\Gazelle\User $user, string $reason): void {
+    public static function add(User $user, string $reason): void {
         $list = static::$cache->get_value(static::CACHE_KEY) ?: [];
         $list[] = [$user->id, $reason, time()];
         $list = array_slice($list, -static::MAX_ENTRIES);
-        static::$cache->cache_value(static::CACHE_KEY, $list, 3 * 24 * 60 * 60);
+        static::$cache->cache_value(static::CACHE_KEY, $list, 3 * 86400);
     }
 
     /**

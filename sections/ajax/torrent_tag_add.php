@@ -62,7 +62,7 @@ foreach (array_unique(explode(',', $_REQUEST['tagname'])) as $tagName) {
         $tag->voteTGroup($tgroup, $Viewer, 'up');
         $added[] = $resolved;
 
-        $tag->logger()->group($tgroup, $Viewer, "Tag \"$resolved\" added to group");
+        $tag->logger()->group($tgroup, $Viewer, "Tag “{$resolved}” added to group");
     }
 }
 

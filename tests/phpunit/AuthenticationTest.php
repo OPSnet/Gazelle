@@ -28,8 +28,7 @@ class AuthenticationTest extends TestCase {
     public function tearDown(): void {
         if (isset($this->user)) {
             $this->user->pg()->query("delete from login_watch where ip = $1", self::IP);
-            $this->user->remove();
-            unset($this->user);
+            Helper::removeUser($this->user);
         }
         if (isset($this->banMan)) {
             $this->banMan->pg()->query("delete from ip_ban where ip = $1", self::IP);

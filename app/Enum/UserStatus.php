@@ -10,10 +10,10 @@ enum UserStatus: string {
 
     public function label(): string {
         return match ($this) {
-            UserStatus::unconfirmed => 'Unconfirmed',
-            UserStatus::enabled     => 'Enabled',
-            UserStatus::disabled    => 'Disabled',
-            UserStatus::banned      => 'Banned',
+            self::unconfirmed => 'Unconfirmed',
+            self::enabled     => 'Enabled',
+            self::disabled    => 'Disabled',
+            self::banned      => 'Banned',
         };
     }
 }

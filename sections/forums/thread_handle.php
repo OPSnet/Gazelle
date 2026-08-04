@@ -83,7 +83,7 @@ $thread->editThread($newForum ?? $forum, $newPinned, $newRank, $locked, $newTitl
 // topic notes and notifications
 $notes = [];
 if ($thread->title() != $newTitle) {
-    $notes[] = "Title edited from \"{$thread->title()}\" to \"$newTitle\"";
+    $notes[] = "Title edited from “{$thread->title()}” to “{$newTitle}”";
 }
 if ($thread->isLocked() != $locked) {
     $notes[] = $thread->isLocked() ? 'Unlocked' : 'Locked';

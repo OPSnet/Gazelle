@@ -98,6 +98,25 @@ class Privilege extends \Gazelle\BaseManager {
     }
 
     /**
+     * When dropping secondary classes, there may be privileged forums
+     * to drop. Return a list of forums associated with a list of userclasses.
+     */
+    public function secondaryForumIdList(array $classList): array {
+        self::$db->prepared_query("
+            SELECT PermittedForums
+            FROM permissions
+            WHERE ID IN (" . placeholders($classList) . ")
+            ", ...$classList
+        );
+        return array_merge(
+            ...array_map(
+                fn ($p) => explode(',', $p),
+                self::$db->collect(0),
+            )
+        );
+    }
+
+    /**
      * Statistics on how many people are in the different user classes.
      */
     public function usageList(): array {

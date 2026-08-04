@@ -25,8 +25,8 @@ class User extends BaseAttrObject {
     protected array $avatarCache;
     protected array $lastRead;
     protected array $tokenCache;
-    protected array $forumWarning = [];
-    protected array $staffNote = [];
+    protected array $forumWarning;
+    protected array $staffNote;
 
     protected Stats\User      $stats;
     protected User\AuditTrail $auditTrail;
@@ -691,14 +691,6 @@ class User extends BaseAttrObject {
         return $this->privilege()->permittedForumIdList();
     }
 
-    public function forbiddenForumsList(): string {
-        return $this->privilege()->forbiddenForums();
-    }
-
-    public function permittedForumsList(): string {
-        return $this->privilege()->permittedForums();
-    }
-
     /**
      * Checks whether user has any overrides to a forum
      *
@@ -857,7 +849,7 @@ class User extends BaseAttrObject {
 
     public function modify(): bool {
         $changed = false;
-        if (!empty($this->forumWarning)) {
+        if (isset($this->forumWarning)) {
             $warning = implode(', ', $this->forumWarning);
             self::$db->prepared_query("
                 INSERT INTO users_warnings_forums
@@ -868,16 +860,16 @@ class User extends BaseAttrObject {
                 ", $this->id, $warning, $warning
             );
             $changed = self::$db->affected_rows() > 0; // 1 or 2 depending on whether the update is triggered
-            $this->forumWarning = [];
+            unset($this->forumWarning);
             self::$cache->delete_value('user_forum_warn_' . $this->id);
         }
-        if (!empty($this->staffNote)) {
+        if (isset($this->staffNote)) {
             $this->auditTrail()->addEvent(
                 Enum\UserAuditEvent::staffNote,
                 implode(', ', $this->staffNote)
             );
             $changed = true;
-            $this->staffNote = [];
+            unset($this->staffNote);
         }
 
         $userInfo = [];
@@ -951,43 +943,20 @@ class User extends BaseAttrObject {
         return false;
     }
 
-    public function mergeLeechStats(string $username, string $staffname): ?array {
-        [$mergeId, $up, $down] = self::$db->row("
-            SELECT um.ID, uls.Uploaded, uls.Downloaded
-            FROM users_main um
-            INNER JOIN users_leech_stats AS uls ON (uls.UserID = um.ID)
-            WHERE um.Username = ?
-            ", $username
-        );
-        if (!$mergeId) {
-            return null;
-        }
-        self::$db->begin_transaction();
-        self::$db->prepared_query("
-            UPDATE users_leech_stats SET
-                Uploaded = 0,
-                Downloaded = 0
-            WHERE UserID = ?
-            ", $mergeId
-        );
-        self::$db->prepared_query("
-            UPDATE users_leech_stats SET
-                Uploaded = Uploaded + ?,
-                Downloaded = Downloaded + ?
-            WHERE UserID = ?
-            ", $up, $down, $mergeId
-        );
-        self::$db->commit();
-
+    public function mergeLeechStats(User $from, User $admin): ?array {
+        $up   = $from->uploadedSize();
+        $down = $from->downloadedSize();
+        $from->setField('leech_upload', 0)
+            ->setField('leech_download', 0)
+            ->modify();
         $this->auditTrail()->addEvent(
             Enum\UserAuditEvent::staffNote,
-            sprintf("leech stats (up: %s, down: %s, ratio: %s) transferred to %s by %s\n\n",
+            sprintf("leech stats from {$from->label()} transferred to {$this->label()} (up: %s, down: %s, ratio: %s)",
                 byte_format($up), byte_format($down), ratio($up, $down),
-                $this->label(), $staffname
-            )
+            ),
+            $admin,
         );
-        $this->flush();
-        return ['up' => $up, 'down' => $down, 'userId' => $mergeId];
+        return ['up' => $up, 'down' => $down];
     }
 
     public function lockType(): ?int {
@@ -1031,28 +1000,8 @@ class User extends BaseAttrObject {
             && $this->uploadedSize() <= $this->downloadedSize() * $this->requiredRatio();
     }
 
-    public function supportCount(int $newClassId, int $levelClassId): int {
-        return (int)self::$db->scalar("
-            SELECT count(DISTINCT DisplayStaff)
-            FROM permissions
-            WHERE ID IN (?, ?)
-            ", $newClassId, $levelClassId
-        );
-    }
-
     public function updateCatchup(): bool {
         return new WitnessTable\UserReadForum()->witness($this);
-    }
-
-    public function addClasses(array $classes): int {
-        self::$db->prepared_query("
-            INSERT IGNORE INTO users_levels (UserID, PermissionID)
-            VALUES " . implode(', ', array_fill(0, count($classes), "({$this->id}, ?)")),
-            ...$classes
-        );
-        $affected = self::$db->affected_rows();
-        $this->flush();
-        return $affected;
     }
 
     public function notifyFilters(): array {
@@ -1071,9 +1020,10 @@ class User extends BaseAttrObject {
     }
 
     public function loadArtistNotifications(): array {
-        $info = self::$cache->get_value('notify_artists_' . $this->id);
-        if (empty($info)) {
-            self::$db->prepared_query("
+        $key = "notify_artists_{$this->id}";
+        $info = self::$cache->get_value($key);
+        if ($info === false) {
+            $info = self::$db->rowAssoc("
                 SELECT ID, Artists
                 FROM users_notify_filters
                 WHERE Label = ?
@@ -1081,12 +1031,8 @@ class User extends BaseAttrObject {
                 ORDER BY ID
                 LIMIT 1
                 ", 'Artist notifications', $this->id
-            );
-            $info = self::$db->next_record(MYSQLI_ASSOC);
-            if (!$info) {
-                $info = ['ID' => 0, 'Artists' => ''];
-            }
-            self::$cache->cache_value('notify_artists_' . $this->id, $info, 0);
+            ) ?? ['ID' => 0, 'Artists' => ''];
+            self::$cache->cache_value($key, $info, 0);
         }
         return $info;
     }
@@ -1122,22 +1068,20 @@ class User extends BaseAttrObject {
             $change = self::$db->affected_rows();
         }
         if ($change) {
-            self::$cache->delete_multi(['u_notify_' . $this->id, 'notify_artists_' . $this->id]);
+            self::$cache->delete_multi(["u_notify_{$this->id}", "notify_artists_{$this->id}"]);
         }
         return $change;
     }
 
-    public function removeNotificationFilter(int $notifId): int {
-        self::$db->prepared_query('
-            DELETE FROM users_notify_filters
-            WHERE UserID = ? AND ID = ?
-            ', $this->id, $notifId
+    public function addClasses(array $classes): int {
+        self::$db->prepared_query("
+            INSERT IGNORE INTO users_levels (UserID, PermissionID)
+            VALUES " . implode(', ', array_fill(0, count($classes), "({$this->id}, ?)")),
+            ...$classes
         );
-        $removed = self::$db->affected_rows();
-        if ($removed) {
-            self::$cache->delete_multi(['u_notify_' . $this->id, 'notify_artists_' . $this->id]);
-        }
-        return $removed;
+        $affected = self::$db->affected_rows();
+        $this->flush();
+        return $affected;
     }
 
     public function notifyDeleteSeeding(): bool {
@@ -1150,36 +1094,6 @@ class User extends BaseAttrObject {
 
     public function notifyDeleteDownload(): bool {
         return !$this->hasAttr('no-pm-delete-download');
-    }
-
-    public function removeArtistNotification(Artist $artist): int {
-        $info = $this->loadArtistNotifications();
-        $aliasList = $artist->aliasNameList();
-        foreach ($aliasList as $alias) {
-            while (stripos($info['Artists'], "|$alias|") !== false) {
-                $info['Artists'] = str_ireplace("|$alias|", '|', $info['Artists']);
-            }
-        }
-        if ($info['Artists'] === '||') {
-            self::$db->prepared_query("
-                DELETE FROM users_notify_filters
-                WHERE ID = ?
-                ", $info['ID']
-            );
-            $change = self::$db->affected_rows();
-        } else {
-            self::$db->prepared_query("
-                UPDATE users_notify_filters SET
-                    Artists = ?
-                WHERE ID = ?
-                ", $info['Artists'], $info['ID']
-            );
-            $change = self::$db->affected_rows();
-        }
-        if ($change) {
-            self::$cache->delete_multi(['u_notify_' . $this->id, 'notify_artists_' . $this->id]);
-        }
-        return $change;
     }
 
     public function isUnconfirmed(): bool {
@@ -1430,9 +1344,9 @@ class User extends BaseAttrObject {
      * Generates a check list of release types, ordered by the user or default
      */
     public function releaseOrder(array $releaseType): array {
-        if (empty($this->option('SortHide'))) {
+        if ($this->option('SortHide') === []) {
             $sort = $releaseType;
-            $defaults = !empty($this->option('HideTypes'));
+            $defaults = !is_null($this->option('HideTypes'));
         } else {
             $sort = (array)$this->option('SortHide');
             $missingTypes = array_diff_key($releaseType, $sort);
@@ -1719,11 +1633,47 @@ class User extends BaseAttrObject {
         return $affected;
     }
 
-    /**
-     * Remove the custom title of a user
-     */
-    public function removeTitle(): static {
-        return $this->setField('Title', null);
+    public function removeArtistNotification(Artist $artist): int {
+        $info = $this->loadArtistNotifications();
+        $aliasList = $artist->aliasNameList();
+        foreach ($aliasList as $alias) {
+            while (stripos($info['Artists'], "|$alias|") !== false) {
+                $info['Artists'] = str_ireplace("|$alias|", '|', $info['Artists']);
+            }
+        }
+        if ($info['Artists'] === '||') {
+            self::$db->prepared_query("
+                DELETE FROM users_notify_filters
+                WHERE ID = ?
+                ", $info['ID']
+            );
+            $change = self::$db->affected_rows();
+        } else {
+            self::$db->prepared_query("
+                UPDATE users_notify_filters SET
+                    Artists = ?
+                WHERE ID = ?
+                ", $info['Artists'], $info['ID']
+            );
+            $change = self::$db->affected_rows();
+        }
+        if ($change) {
+            self::$cache->delete_multi(["u_notify_{$this->id}", "notify_artists_{$this->id}"]);
+        }
+        return $change;
+    }
+
+    public function removeNotificationFilter(int $notifId): int {
+        self::$db->prepared_query('
+            DELETE FROM users_notify_filters
+            WHERE UserID = ? AND ID = ?
+            ', $this->id, $notifId
+        );
+        $removed = self::$db->affected_rows();
+        if ($removed) {
+            self::$cache->delete_multi(['u_notify_' . $this->id, 'notify_artists_' . $this->id]);
+        }
+        return $removed;
     }
 
     public function remove(): int {

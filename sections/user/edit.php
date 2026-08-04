@@ -15,9 +15,8 @@ $user = $userMan->findById(($_REQUEST['id'] ?? '') === 'me' ? $Viewer->id : (int
 if (is_null($user)) {
     Error404::error();
 }
-$UserID = $user->id;
-if ($UserID != $Viewer->id && !$Viewer->permitted('users_edit_profiles')) {
-    Error403::error();
+if ($user->id !== $Viewer->id && !$Viewer->permitted('users_edit_profiles')) {
+    Error403::error("You cannot edit someone else's profile");
 }
 
 $donor    = new User\Donor($user);

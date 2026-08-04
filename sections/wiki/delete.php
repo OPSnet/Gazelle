@@ -24,7 +24,7 @@ if ($article->id === INDEX_WIKI_PAGE_ID) {
 }
 
 $article->logger()->general(
-    "Wiki article {$article->id} \"{$article->title()}\" was deleted by {$Viewer->username()}"
+    "Wiki article {$article->id} “{$article->title()}” was deleted by {$Viewer->username()}"
 );
 $article->remove();
 

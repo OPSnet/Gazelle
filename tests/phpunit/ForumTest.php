@@ -16,9 +16,9 @@ class ForumTest extends TestCase {
     protected ForumCategory $category;
     protected Forum         $forum;
     protected Forum         $extra;
-    protected array                 $userList;
-    protected array                 $threadList;
-    protected array                 $transitionList;
+    protected array         $userList;
+    protected array         $threadList;
+    protected array         $transitionList;
 
     public function setUp(): void {
         $this->userList = [
@@ -166,8 +166,16 @@ class ForumTest extends TestCase {
         $this->assertFalse($thread->isLocked(), 'fthread-is-not-locked');
         $this->assertFalse($thread->isPinned(), 'fthread-is-not-pinned');
 
-        $this->assertEquals(1, $admin->stats()->flush()->forumThreadTotal(), 'fthread-user-stats-total');
-        $this->assertCount(0, $this->userList['user']->forumLastReadList(1, $this->forum), 'fthread-user-unread');
+        $this->assertEquals(
+            1,
+            $admin->stats()->flush()->forumThreadTotal(),
+            'fthread-user-stats-total',
+        );
+        $this->assertCount(
+            0,
+            $this->userList['user']->forumLastReadList(1, $this->forum),
+            'fthread-user-unread',
+        );
 
         // Forum Thread Notes
         $threadNote = 'this is a note';
@@ -236,6 +244,41 @@ class ForumTest extends TestCase {
         $adminSub = new User\Subscription($admin); // now sub them
         $this->assertEquals(0, $adminSub->unread(), 'fpost-subscriptions-admin-unread');
         $adminSub->subscribe($thread);
+
+        $this->assertFalse(
+            $admin->hasReadLastPost($this->forum),
+            'fpost-last-read-admin',
+        );
+        $this->assertEquals(
+            0,
+            $admin->lastReadInThread($thread),
+            'fpost-thread-last-read-admin',
+        );
+        $this->assertFalse(
+            $user->hasReadLastPost($this->forum),
+            'fpost-last-read-user',
+        );
+        $this->assertEquals(
+            0,
+            $user->lastReadInThread($thread),
+            'fpost-thread-last-read-user',
+        );
+        $this->assertEquals(
+            1,
+            $thread->catchup($user, $post->id),
+            'fpost-thread-catchup-read-user',
+        );
+        $this->assertEquals(
+            [
+                $thread->id => [
+                    'thread_id' => $thread->id,
+                    'post_id'   => $post->id,
+                    'page'      => 1,
+                ],
+            ],
+            $user->forumLastReadList(10, $this->forum),
+            'forum-last-read-list-user',
+        );
 
         /* quote first post in reply */
         $body = "good job @{$admin->username()}";

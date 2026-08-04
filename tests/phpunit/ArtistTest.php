@@ -8,7 +8,6 @@ use Gazelle\Enum\CollageType;
 use Gazelle\Enum\CommentType;
 
 class ArtistTest extends TestCase {
-    protected Artist  $artist;
     protected Collage $collage;
     protected array   $tgroupList;
     protected User    $user;
@@ -910,5 +909,56 @@ class ArtistTest extends TestCase {
             'artist-comment-keys',
         );
         $this->assertEquals($body, $comment['body'], 'artist-comment-body');
+    }
+
+    public function testArtistUserNotification(): void {
+        $manager = new Manager\Artist();
+        $artist = $manager->create('phpunit.' . randomString(12));
+        $this->artistIdList[] = $artist->id;
+        $artist2 = $manager->create('phpunit.' . randomString(12));
+        $this->artistIdList[] = $artist2->id;
+
+        $this->assertEquals(
+            1,
+            $this->user->addArtistNotification($artist),
+            'artist-user-add-notif-1',
+        );
+        $this->assertTrue(
+            $this->user->hasArtistNotification($artist->name()),
+            'artist-user-has-notif-1',
+        );
+        $this->assertFalse(
+            $this->user->hasArtistNotification($artist2->name()),
+            'artist-user-has-no-notif-2',
+        );
+        $this->assertEquals(
+            0,
+            $this->user->addArtistNotification($artist),
+            'artist-user-again-notif-1',
+        );
+        $this->assertEquals(
+            1,
+            $this->user->addArtistNotification($artist2),
+            'artist-user-add-notif-2',
+        );
+        $this->assertTrue(
+            $this->user->hasArtistNotification($artist2->name()),
+            'artist-user-has-notif-2',
+        );
+        $this->assertEquals(
+            1,
+            $this->user->removeArtistNotification($artist),
+            'artist-user-remove-notif-1',
+        );
+        $this->assertEquals(
+            0,
+            $this->user->removeArtistNotification($artist),
+            'artist-user-again-remove-notif-1',
+        );
+        $this->assertEquals(
+            1,
+            $this->user->removeArtistNotification($artist2),
+            'artist-user-remove-notif-2',
+        );
     }
 }

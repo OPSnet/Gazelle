@@ -49,14 +49,14 @@ if ($_POST['checkpoint'] != $user->checkpoint()) {
 $ownProfile = $user->id === $Viewer->id;
 
 // Variables for database input
-$title             = trim($_POST['Title']);
-$adminComment      = trim($_POST['admincomment'] ?? '');
-$visible           = isset($_POST['Visible']) ? '1' : '0';
-$invites           = (int)$_POST['Invites'];
-$changePassword    = $_POST['ChangePassword'] !== '';
-$uploaded          = 0;
-$downloaded        = 0;
-$bonusPoints       = null;
+$title          = trim($_POST['Title']);
+$adminComment   = trim($_POST['admincomment'] ?? '');
+$visible        = isset($_POST['Visible']) ? '1' : '0';
+$invites        = (int)$_POST['Invites'];
+$changePassword = $_POST['ChangePassword'] !== '';
+$uploaded       = 0;
+$downloaded     = 0;
+$bonusPoints    = null;
 
 if (isset($_POST['Uploaded']) && isset($_POST['Downloaded'])) {
     $uploaded   = max(0, byte_arithmetic($_POST['Uploaded']));
@@ -68,40 +68,44 @@ if (isset($_POST['BonusPoints'])) {
 $collageTotal = (int)($_POST['Collages'] ?? 0);
 $flTokens     = (int)($_POST['FLTokens'] ?? 0);
 
-$userReason           = trim($_POST['UserReason']);
-$disableAvatar        = isset($_POST['DisableAvatar']);
-$disableForums        = isset($_POST['DisableForums']);
-$disableInvites       = isset($_POST['DisableInvites']);
-$disableIRC           = isset($_POST['DisableIRC']);
-$disableLeech         = isset($_POST['DisableLeech']) ? 0 : 1;
-$disablePM            = isset($_POST['DisablePM']);
-$disablePoints        = isset($_POST['DisablePoints']);
-$disablePosting       = isset($_POST['DisablePosting']);
-$disableRequests      = isset($_POST['DisableRequests']);
-$disableTagging       = isset($_POST['DisableTagging']);
-$disableUpload        = isset($_POST['DisableUpload']);
-$disableWiki          = isset($_POST['DisableWiki']);
-$resetRatioWatch      = $_POST['ResetRatioWatch'] ?? 0 ? 1 : 0;
-$resetIPHistory       = $_POST['ResetIPHistory'] ?? 0;
-$resetPasskey         = isset($_POST['ResetPasskey']) ? 1 : 0;
-$resetAuthkey         = isset($_POST['ResetAuthkey']) ? 1 : 0;
-$logoutSession        = isset($_POST['Logout']) ? 1 : 0;
-$sendHackedMail       = isset($_POST['SendHackedMail']) ? 1 : 0;
-if ($sendHackedMail && trim($_POST['HackedEmail']) !== '') {
+$userReason      = trim($_POST['UserReason']);
+$disableAvatar   = isset($_POST['DisableAvatar']);
+$disableForums   = isset($_POST['DisableForums']);
+$disableInvites  = isset($_POST['DisableInvites']);
+$disableIRC      = isset($_POST['DisableIRC']);
+$disableLeech    = !isset($_POST['DisableLeech']);
+$disablePM       = isset($_POST['DisablePM']);
+$disablePoints   = isset($_POST['DisablePoints']);
+$disablePosting  = isset($_POST['DisablePosting']);
+$disableRequests = isset($_POST['DisableRequests']);
+$disableTagging  = isset($_POST['DisableTagging']);
+$disableUpload   = isset($_POST['DisableUpload']);
+$disableWiki     = isset($_POST['DisableWiki']);
+$logoutSession   = isset($_POST['Logout']);
+$resetRatioWatch = isset($_POST['ResetRatioWatch']);
+$resetIPHistory  = isset($_POST['ResetIPHistory']);
+$resetPasskey    = isset($_POST['ResetPasskey']);
+$resetAuthkey    = isset($_POST['ResetAuthkey']);
+if (isset($_POST['SendHackedMail'])) {
     $hackedEmail = trim($_POST['HackedEmail']);
-} else {
-    $sendHackedMail = false;
+    if ($hackedEmail === '') {
+        unset($hackedEmail);
+    }
 }
 $mergeStatsFrom = trim($_POST['MergeStatsFrom']);
 $reason         = trim($_POST['Reason']);
 
 $cur = $user->info();
-$cur['PermittedForums']  = $user->privilege()->permittedUserForums();
-$cur['RestrictedForums'] = $user->privilege()->forbiddenUserForums();
 
-if ($mergeStatsFrom && ($downloaded != $user->downloadedSize() || $uploaded != $user->uploadedSize())) {
-    // Too make make-work code to deal with this unlikely eventuality
-    Error400::error("Do not transfer buffer and edit upload/download in the same operation.");
+if ($mergeStatsFrom && $Viewer->permitted('users_edit_ratio')) {
+    if ($downloaded != $user->downloadedSize() || $uploaded != $user->uploadedSize()) {
+        // Too make make-work code to deal with this unlikely eventuality
+        Error400::error("Do not transfer buffer and edit upload/download in the same operation.");
+    }
+    $mergeFrom = $userMan->find($mergeStatsFrom);
+    if (is_null($mergeFrom)) {
+        Error403::error("Cannot merge from $mergeStatsFrom, user not found");
+    }
 }
 
 $tracker            = new Tracker();
@@ -212,7 +216,7 @@ if (
     && ($Viewer->permitted('users_edit_ratio') || ($Viewer->permitted('users_edit_own_ratio') && $ownProfile))
 ) {
     $user->ordinal()->set('personal-collage', $collageTotal);
-    $EditSummary[] = "personal collages changed from {$user->paidPersonalCollages()} to {$collageTotal}";
+    $editSummary[] = "personal collages changed from {$user->paidPersonalCollages()} to {$collageTotal}";
 }
 
 if ($invites != $user->unusedInviteTotal() && $Viewer->permitted('users_edit_invites')) {
@@ -257,8 +261,7 @@ if ($Viewer->permitted('users_edit_usernames')) {
         if (in_array($username, ['0', '1'])) {
             Error400::error('You cannot set a username of "0" or "1".');
         } elseif (strtolower($username) !== strtolower($user->username())) {
-            $found = $userMan->findByUsername($username);
-            if ($found) {
+            if ($userMan->findByUsername($username)) {
                 Error400::error("Username already in use by $username");
             }
         }
@@ -278,9 +281,9 @@ if ($title != $user->title() && $Viewer->permitted('users_edit_titles')) {
 }
 
 if ($Viewer->permitted('users_warn')) {
-    $weeks   = (int)($_POST['WarnLength'] ?? 0);
-    $extend  = (int)($_POST['ExtendWarning'] ?? 0);
-    $reduce  = (int)($_POST['ReduceWarning'] ?? 0);
+    $weeks  = (int)($_POST['WarnLength'] ?? 0);
+    $extend = (int)($_POST['ExtendWarning'] ?? 0);
+    $reduce = (int)($_POST['ReduceWarning'] ?? 0);
     if (!isset($_POST['Warned'])) {
         if ($user->warning()->isWarned()) {
             $user->warning()->clear();
@@ -342,6 +345,39 @@ if ($Viewer->permitted('users_give_donor')) {
     }
 }
 
+$forumMan = new Manager\Forum();
+$restricted = $_POST['RestrictedForums']
+    |> trim(...)
+    |> (fn ($id) => explode(',', $id))
+    |> array_unique(...)
+    |> (fn ($id) => array_map(intval(...), $id));
+sort($restricted);
+$restrictedIds = [];
+$restrictedNames = [];
+foreach ($restricted as $forumId) {
+    $forum = $forumMan->findById($forumId);
+    if ($forum) {
+        $restrictedIds[$forumId] = true;
+        $restrictedNames[] = "{$forum->name()} ($forumId)";
+    }
+}
+
+$permitted = $_POST['PermittedForums']
+    |> trim(...)
+    |> (fn ($id) => explode(',', $id))
+    |> array_unique(...)
+    |> (fn ($id) => array_map(intval(...), $id));
+sort($permitted);
+$permittedIds = [];
+$permittedNames = [];
+foreach ($permitted as $forumId) {
+    $forum = $forumMan->findById($forumId);
+    if ($forum) {
+        $permittedIds[$forumId]   = true;
+        $permittedNames[$forumId] = "{$forum->name()} ($forumId)";
+    }
+}
+
 $removedClasses = [];
 $addedClasses   = [];
 $currentClasses = array_keys($user->privilege()->secondaryClassList());
@@ -353,6 +389,18 @@ if ($currentClasses !== $secondaryClasses) {
     if ($removedClasses !== []) {
         $names = array_map(fn (int $c): string => $userMan->userclassName($c), $removedClasses);
         $editSummary[] = 'secondary classes dropped: ' . implode(', ', $names);
+        // revoke access to any associated forums
+        $removedForumIdList = new Manager\Privilege()->secondaryForumIdList($removedClasses);
+        $permittedIds = array_filter(
+            $permittedIds,
+            fn ($id) => !in_array($id, $removedForumIdList),
+            ARRAY_FILTER_USE_KEY
+        );
+        $permittedNames = array_filter(
+            $permittedNames,
+            fn ($id) => !in_array($id, $removedForumIdList),
+            ARRAY_FILTER_USE_KEY
+        );
     }
     if ($addedClasses !== []) {
         $names = array_map(fn (int $c): string => $userMan->userclassName($c), $addedClasses);
@@ -360,35 +408,23 @@ if ($currentClasses !== $secondaryClasses) {
     }
 }
 
-$forumMan = new Manager\Forum();
-$restricted = array_map('intval', array_unique(explode(',', trim($_POST['RestrictedForums']))));
-sort($restricted);
-$restrictedIds = [];
-$restrictedNames = [];
-foreach ($restricted as $forumId) {
-    $forum = $forumMan->findById($forumId);
-    if (!is_null($forum) && !isset($restrictedIds[$forumId])) {
-        $restrictedIds[$forumId] = true;
-        $restrictedNames[] = "{$forum->name()} ($forumId)";
-    }
-}
-
-$permitted = array_map('intval', array_unique(explode(',', trim($_POST['PermittedForums']))));
-sort($permitted);
-$permittedIds = [];
-$permittedNames = [];
-foreach ($permitted as $forumId) {
-    $forum = $forumMan->findById($forumId);
-    if (!is_null($forum) && !isset($permittedIds[$forumId])) {
-        $permittedIds[$forumId] = true;
-        $permittedNames[] = "{$forum->name()} ($forumId)";
+if (isset($removedClasses[FLS_TEAM])) {
+    $user->setField('slogan', null);
+    $Cache->delete_value('staff_ids');
+} else {
+    $slogan = isset($_POST['slogan']) ? trim($_POST['slogan']) : null;
+    if ($slogan !== $user->slogan() && ($Viewer->permitted('admin_manage_fls') || $ownProfile)) {
+        $user->setField('slogan', $slogan);
+        if ($user->isFLS()) {
+            $editSummary[] = "First-Line Support status changed to “{$slogan}”";
+        }
     }
 }
 
 $privChange = [];
 if ($Viewer->permitted('users_disable_any')) {
     if ($disableLeech != $user->canLeech()) {
-        $privChange[] = 'Your leeching privileges have been ' . revoked((bool)$disableLeech);
+        $privChange[] = 'Your leeching privileges have been ' . revoked($disableLeech);
         $user->setField('can_leech', $disableLeech ? 1 : 0);
         $needTrackerRefresh = true;
         $editSummary[] = "leeching status changed ("
@@ -442,12 +478,12 @@ if ($Viewer->permitted('users_disable_any')) {
 }
 
 $permittedForums = implode(',', array_keys($permittedIds));
-if ($permittedForums != $cur['PermittedForums']) {
+if ($permittedForums != $user->privilege()->permittedUserForums()) {
     $user->setField('PermittedForums', $permittedForums);
     $editSummary[] = "permitted forum(s): " . ($permittedForums == '' ? 'none' : implode(', ', $permittedNames));
 }
 $restrictedForums = implode(',', array_keys($restrictedIds));
-if ($restrictedForums != $cur['RestrictedForums']) {
+if ($restrictedForums != $user->privilege()->forbiddenUserForums()) {
     $user->setField('RestrictedForums', $restrictedForums);
     $editSummary[] = "prohibited forum(s): " . ($restrictedForums == '' ? 'none' : implode(', ', $restrictedNames));
 }
@@ -475,7 +511,7 @@ if ($disableIRC !== $user->disableIRC()) {
 if ($privChange && $userReason) {
     sort($privChange);
     $user->inbox()->createSystem(
-        count($privChange) == 1 ? $privChange[0] : 'Multiple privileges have changed on your account',
+        count($privChange) === 1 ? $privChange[0] : 'Multiple privileges have changed on your account',
         $Twig->render('user/pm-privilege.twig', [
             'privs'  => $privChange,
             'reason' => $userReason,
@@ -485,12 +521,8 @@ if ($privChange && $userReason) {
     $editSummary[] = 'PM sent';
 }
 
-$userStatus = match ($_POST['UserStatus']) {
-    '1'     => UserStatus::enabled,
-    '2'     => UserStatus::disabled,
-    default => UserStatus::unconfirmed,
-};
-if ($userStatus != $user->userStatus() && $Viewer->permitted('users_disable_users')) {
+$userStatus = UserStatus::tryFrom($_POST['UserStatus']) ?? UserStatus::disabled;
+if ($userStatus !== $user->userStatus() && $Viewer->permitted('users_disable_users')) {
     $enableStr = "account status {$user->userStatus()->label()} → {$userStatus->label()}";
     if ($userStatus == UserStatus::disabled) {
         $userMan->disableUserList(
@@ -536,7 +568,7 @@ if ($Viewer->permitted('users_edit_reset_keys')) {
     }
 }
 
-if ($sendHackedMail && $Viewer->permitted('users_disable_any')) {
+if (isset($hackedEmail) && $Viewer->permitted('users_disable_any')) {
     new Mail()->send($hackedEmail, SITE_NAME . ' account - suspicious activity',
         $Twig->render('email/hacked.text.twig', [
             'user' => $user
@@ -552,33 +584,26 @@ if ($sendHackedMail && $Viewer->permitted('users_disable_any')) {
     Util\DisabledUserHistory::add($user, "Disabled via hacked email");
 }
 
-if ($mergeStatsFrom && $Viewer->permitted('users_edit_ratio')) {
-    $stats = $user->mergeLeechStats($mergeStatsFrom, $Viewer->username());
-    if ($stats) {
-        $merge = new User($stats['userId']);
-        $merge->flush();
-        $user->setField('leech_uploaded', $user->uploadedSize() + $stats['up'])
-            ->setField('leech_downloaded', $user->downloadedSize() + $stats['down']);
-        $editSummary[] = sprintf('leech stats (up: %s, down: %s, ratio: %s) merged from %s (%s) prior(up: %s, down: %s, ratio: %s)',
-            byte_format($stats['up']), byte_format($stats['down']), ratio($stats['up'], $stats['down']),
-            $merge->url(), $mergeStatsFrom,
-            byte_format($user->uploadedSize()), byte_format($user->downloadedSize()), ratio($user->uploadedSize(), $user->downloadedSize())
-        );
-    }
+if (isset($mergeFrom)) {
+    $merge = $user->mergeLeechStats($mergeFrom, $Viewer);
+    $user->setField('leech_upload', $user->uploadedSize() + $merge['up'])
+        ->setField('leech_download', $user->downloadedSize() + $merge['down']);
 }
 
 if ($changePassword && $Viewer->permitted('users_edit_password')) {
     $editSummary[] = 'password reset';
 }
 
-if (!(count($editSummary)) && $reason) {
-    $editSummary[] = 'notes added';
+if ($removedClasses) {
+    $user->removeClasses($removedClasses);
+}
+if ($addedClasses) {
+    $user->addClasses($addedClasses);
 }
 
-// Because of the infinitely fucked up encoding/decoding of Gazelle, $adminComment !== $cur['admincomment']
-// almost always evaluates to true, even if the user did not purposely change the field. This then means
-// we do have a bug where if a mod changes something about a user AND changes the admin comment, we will lose
-// that change, but until we never decode stuff coming out of the DB, not much can be done.
+if ($editSummary === [] && $reason) {
+    $editSummary[] = 'notes added';
+}
 
 if ($editSummary) {
     $summary = implode(', ', $editSummary);
@@ -588,13 +613,6 @@ if ($editSummary) {
     $user->auditTrail()->addEvent(UserAuditEvent::staffNote, ucfirst($summary), $Viewer);
 } elseif ($adminComment !== $cur['admincomment']) {
     $user->auditTrail()->addEvent(UserAuditEvent::staffNote, $adminComment, $Viewer);
-}
-
-if ($removedClasses) {
-    $user->removeClasses($removedClasses);
-}
-if ($addedClasses) {
-    $user->addClasses($addedClasses);
 }
 
 if ($changePassword && $Viewer->permitted('users_edit_password')) {

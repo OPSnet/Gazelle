@@ -13,7 +13,7 @@ class DisabledUserHistoryTest extends TestCase {
         DisabledUserHistory::add($user, "test");
         $userList = DisabledUserHistory::get();
         $this->assertEquals(
-            1 + $initial,
+            min(DisabledUserHistory::MAX_ENTRIES, 1 + $initial),
             count($userList),
             'disableduserhistory-notempty',
         );
@@ -21,7 +21,7 @@ class DisabledUserHistoryTest extends TestCase {
         DisabledUserHistory::add($user, "test2");
         $userList = DisabledUserHistory::get();
         $this->assertEquals(
-            2 + $initial,
+            min(DisabledUserHistory::MAX_ENTRIES, 2 + $initial),
             count($userList),
             'disableduserhistory-addmore',
         );

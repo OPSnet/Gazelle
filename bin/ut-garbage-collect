@@ -16,6 +16,12 @@ $pgrw = new DB\Pg(PG_RW_DSN);
 $pgrw->query("
     delete from news where title ~ 'phpunit'
 ");
+$pgrw->query("
+    delete from report_auto_type where name ~ '^(ra(man|search)? test |type\d*)'
+");
+$pgrw->query("
+    delete from report_auto_category where name in ('ReportAutoTest', 'somecategory', 'newcat')
+");
 $db = DB::DB();
 
 $db->prepared_query("SHOW TABLES LIKE 'phpunit_%'");
@@ -212,7 +218,7 @@ foreach ($groupList as $tgroupId) {
 $db->prepared_query("
     SELECT um.ID
     FROM users_main um
-    WHERE um.Username regexp '^(?:(?:(?:admin|base|bb|bo(?:nus(?:add|boost|g|invite|other|r|stat|up)?)|collage|contest|cookie|create|donor|download|error|inbox\.(?:recv|send)|forum|friend[1-3]|gift|invitee?|logchecker|mod|priv[12]|riplog|session|sitelog|stats|store|tag|text|tgroup\.[anu]|trk(?:fl)?|twig|u(?:[1-3]|pload|ser(?:hist)?)|wiki)\.[a-z]{6}|tag\.[a-z]{8}|(?:advs|admin|art(?:2|ist|y)|backlog|blog|collfree|comment|dnu|dupip|email[1-3]?|enc\.med|feat|fls|geodist|invite|ipv4|merge|mfa|mod|nav|new(?:\.grp|s)|ord|phpunit|re(?:aper|clab|g[1-5]|lease|portg?|q)|riplog|sbox|searchrep|spec|stats|tag(?:no|2(?:no|yes))?|text|tg(?:cat|vote|man)|token|torman|torrent|trk(?:down|fl|free)?|uat|ul[0-4]|um[1-4]|uploader|use(?:arch|r)|year|xva)\.[a-z]{10}|notf(?:\.(new|enc))?\.[^.]+)|spm_(?:fls|mod|sysop|user)_[a-z]{10})$'
+    WHERE um.Username regexp '^(?:(?:(?:admin|base|bb|bo(?:nus(?:add|boost|g|invite|other|r|stat|up)?)|collage|contest|cookie|create|donor|download|error|inbox\.(?:recv|send)|forum|friend[1-3]|gift|invitee?|logchecker|mod|priv[12]|promo|riplog|session|sitelog|stats|store|tag|text|tgroup\.[anu]|trk(?:fl)?|twig|u(?:[1-3]|pload|ser(?:hist)?)|wiki)\.[a-z]{6}|tag\.[a-z]{8}|(?:advs|admin|art(?:2|ist|y)|authn|backlog|blog|collfree|comment|dnu|dupip|email[1-3]?|enc\.med|feat|fls|geodist|invite|ipv4|merge|mfa|mod|nav|new(?:\.grp|s)|ord|phpunit|re(?:aper|clab|g[1-5]|lease|portg?|q)|riplog|sbox|searchrep|spec|stats|tag(?:no|2(?:no|yes))?|text|tg(?:cat|vote|man)|token|torman|torrent|trk(?:down|fl|free)?|uat|ul[0-4]|um[1-4]|uploader|use(?:arch|r)|year|xva)\.[a-z]{10}|notf(?:\.(new|enc))?\.[^.]+)|spm_(?:fls|mod|sysop|user)_[a-z]{10})$'
 ");
 foreach ($db->collect(0) as $userId) {
     $user = $userMan->findById($userId);
@@ -237,9 +243,24 @@ foreach (['artist', 'collage', 'request', 'tgroup'] as $type) {
     END_SQL
     );
 }
+$pgrw->query('
+    delete from ip_history where id_user not in (select "ID" from relay.users_main)
+');
+$pgrw->query('
+    delete from ip_site_history where id_user not in (select "ID" from relay.users_main)
+');
+$pgrw->query('
+    delete from tag_reject where id_user not in (select "ID" from relay.users_main)
+');
 $db->prepared_query("
     DELETE u
     FROM users_freeleeches u
+    LEFT JOIN users_main um ON (um.ID = u.UserID)
+    WHERE um.ID IS NULL
+");
+$db->prepared_query("
+    DELETE u
+    FROM users_history_emails u
     LEFT JOIN users_main um ON (um.ID = u.UserID)
     WHERE um.ID IS NULL
 ");
@@ -257,7 +278,19 @@ $db->prepared_query("
 ");
 $db->prepared_query("
     DELETE u
-    FROM users_info u
-    LEFT JOIN users_main um ON (um.ID = u.UserID)
+    FROM xbt_files_history u
+    LEFT JOIN users_main um ON (um.ID = u.uid)
+    WHERE um.ID IS NULL
+");
+$db->prepared_query("
+    DELETE u
+    FROM xbt_files_users u
+    LEFT JOIN users_main um ON (um.ID = u.uid)
+    WHERE um.ID IS NULL
+");
+$db->prepared_query("
+    DELETE u
+    FROM xbt_snatched u
+    LEFT JOIN users_main um ON (um.ID = u.uid)
     WHERE um.ID IS NULL
 ");

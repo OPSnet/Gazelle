@@ -187,9 +187,9 @@ class UserTest extends TestCase {
         $this->assertEquals(0, $this->user->seedingSize(), 'utest-seeding-size');
         $this->assertEquals(0, $this->user->torrentRecentRemoveCount(1), 'utest-torrent-recent-remove-count');
         $this->assertEquals(0, $this->user->trackerIPCount(), 'utest-tracker-ipaddr-total');
-        $this->assertEquals('', $this->user->forbiddenForumsList(), 'utest-forbidden-forum-list');
         $this->assertEquals('', $this->user->referral(), 'utest-referral');
         $this->assertEquals('XX', $this->user->ipCountryIso(), 'utest-country-iso');
+        $this->assertEquals('127.0.0.1', $this->user->ipaddr(), 'utest-country-ipaddr');
         $this->assertEquals([], $this->user->tagSnatchCounts(), 'utest-tag-snatch-counts');
         $this->assertEquals([], $this->user->tokenList(new Manager\Torrent(), 0, 0), 'utest-token-list');
         $this->assertEquals([], $this->user->navigationList(), 'utest-navigation-list');
@@ -236,13 +236,56 @@ class UserTest extends TestCase {
             $eventList[0]['note'],
             'utest-staff-note'
         );
+    }
 
-        $this->assertFalse($this->user->setTitle(str_repeat('x', USER_TITLE_LENGTH + 1)), 'utest-title-too-long');
-        $this->assertTrue($this->user->setTitle('custom title'), 'utest-set-title');
-        $this->user->modify();
-        $this->assertEquals('custom title', $this->user->title(), 'utest-title');
-        $this->assertTrue($this->user->removeTitle()->modify(), 'utest-remove-title');
-        $this->assertEquals('', $this->user->title(), 'utest-null-title');
+    public function testUserProfile(): void {
+        $this->assertEquals('Profile', $this->user->profileTitle(), 'utest-profile-initial');
+        $profile = randomString();
+        $this->user->setField('profile_title', $profile)->modify();
+        $this->assertEquals($profile, $this->user->profileTitle(), 'utest-profile-changed');
+    }
+
+    public function testUserRequestDefaults(): void {
+        $this->assertEquals(
+            REQUEST_MIN * 1024 ** 2,
+            $this->user->requestCreationValue(),
+            'utest-req-create-value-default',
+        );
+        $createValue = 10 * 1024 ** 3;
+        $this->user->ordinal()->set('request-bounty-create', $createValue);
+        $this->assertEquals(
+            $createValue,
+            $this->user->requestCreationValue(),
+            'utest-req-create-value-custom',
+        );
+        $this->assertEquals(
+            [
+                'value' => '10.00',
+                'unit'  => 'GiB'
+            ],
+            $this->user->requestCreationInfo(),
+            'utest-req-create-info-custom',
+        );
+        $this->assertEquals(
+            REQUEST_MIN * 1024 ** 2,
+            $this->user->requestVoteValue(),
+            'utest-req-vote-value-default',
+        );
+        $voteValue = 200 * 1024 ** 2;
+        $this->user->ordinal()->set('request-bounty-vote', $voteValue);
+        $this->assertEquals(
+            $voteValue,
+            $this->user->requestVoteValue(),
+            'utest-req-vote-custom',
+        );
+        $this->assertEquals(
+            [
+                'value' => '200.00',
+                'unit'  => 'MiB'
+            ],
+            $this->user->requestVoteInfo(),
+            'utest-req-vote-info-custom',
+        );
     }
 
     public function testUpDown(): void {
@@ -510,22 +553,48 @@ class UserTest extends TestCase {
         $userMan = new Manager\User();
         $db      = DB::DB();
 
-        $this->user->setField('Enabled', UserStatus::enabled->value)->modify();
+        $this->assertEquals(
+            Enum\UserStatus::unconfirmed,
+            $this->user->userStatus(),
+            'user-status-unconfirmed',
+        );
+        $this->user->setField('Enabled', Enum\UserStatus::enabled->value)->modify();
+        $this->assertEquals(
+            Enum\UserStatus::enabled,
+            $this->user->userStatus(),
+            'user-status-enabled',
+        );
         $db->prepared_query("
             INSERT INTO user_last_access (user_id, last_access) VALUES (?, now() - INTERVAL ? DAY)
             ", $this->user->id, INACTIVE_USER_WARN_DAYS + 1
         );
         $this->user->flush();
-        $this->assertEquals(1, $userMan->inactiveUserWarn(new Util\Mail()), 'utest-one-user-inactive-warned');
-        $this->assertTrue($this->user->hasAttr('inactive-warning-sent'), 'utest-inactive-warned');
+        $this->assertEquals(
+            1,
+            $userMan->inactiveUserWarn(),
+            'utest-one-user-inactive-warned'
+        );
+        $this->assertTrue(
+            $this->user->hasAttr('inactive-warning-sent'),
+            'utest-inactive-warned',
+        );
 
         $db->prepared_query("
             UPDATE user_last_access SET last_access = now() - INTERVAL ? DAY WHERE user_id = ?
             ", INACTIVE_USER_DEACTIVATE_DAYS + 1, $this->user->id
         );
-        $this->assertEquals(1, $userMan->inactiveUserDeactivate(new Tracker()), 'utest-one-user-inactive-deactivated');
+        $this->assertEquals(
+            1,
+            $userMan->inactiveUserDeactivate(new Tracker()),
+            'utest-one-user-inactive-deactivated',
+        );
         $this->user->flush();
         $this->assertTrue($this->user->isDisabled(), 'utest-inactive-deactivated');
+        $this->assertEquals(
+            Enum\UserStatus::disabled,
+            $this->user->userStatus(),
+            'user-status-disabled',
+        );
     }
 
     public function testLastFM(): void {
@@ -589,6 +658,25 @@ class UserTest extends TestCase {
             'user-hash-user-distinct'
         );
         $second->remove();
+    }
+
+    public function testUserReleaseOrder(): void {
+        $releaseOrder = new ReleaseType()->extendedList();
+        $this->assertEquals(
+            [],
+            $this->user->releaseOrder([]),
+            'user-no-release-order',
+        );
+        $this->assertEquals(
+            count($releaseOrder),
+            count(
+                array_filter(
+                    $this->user->releaseOrder($releaseOrder),
+                    fn ($r) => $r['checked'] === 0,
+                )
+            ),
+            'user-default-release-order',
+        );
     }
 
     public function testDebugProfile(): void {

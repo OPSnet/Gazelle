@@ -323,6 +323,10 @@ class Helper {
             DELETE FROM bonus_pool_contrib WHERE user_id = ?
             ", $user->id
         );
+        \Gazelle\DB::DB()->prepared_query("
+            DELETE FROM locked_accounts WHERE UserID = ?
+            ", $user->id
+        );
         $tgMan = new \Gazelle\Manager\TGroup();
         foreach ($user->recentUploadList(100, true) as $tgroupId) {
             $tgroup = $tgMan->findById($tgroupId);

@@ -10,10 +10,14 @@ class TagTest extends TestCase {
 
     protected User    $user;
     protected Request $request;
+    protected TGroup  $tgroup;
 
     public function tearDown(): void {
         if (isset($this->request)) {
             $this->request->remove();
+        }
+        if (isset($this->tgroup)) {
+            Helper::removeTGroup($this->tgroup, $this->user);
         }
         if (isset($this->user)) {
             Helper::removeUser($this->user);
@@ -246,14 +250,14 @@ class TagTest extends TestCase {
     public function testTGroup(): void {
         $this->user = Helper::makeUser('tag.' . randomString(8), 'tag.tgroup');
         $this->user->requestContext()->setViewer($this->user);
-        $tgroup = Helper::makeTGroupMusic(
+        $this->tgroup = Helper::makeTGroupMusic(
             name:       'phpunit tag ' . randomString(6),
             artistName: [[ARTIST_MAIN], ['phpunit tag ' . randomString(6)]],
             tagName:    ['phpunit.electronic', 'phpunit.folk', 'phpunit.disco'],
             user:       $this->user,
         );
         Helper::makeTorrentMusic(
-            tgroup: $tgroup,
+            tgroup: $this->tgroup,
             user:   $this->user,
         );
 
@@ -261,7 +265,7 @@ class TagTest extends TestCase {
         $folk = $manager->findByName('phpunit.folk');
         $this->assertInstanceOf(Tag::class, $folk, 'tag-folk-found');
         $this->assertFalse(
-            $folk->hasVoteTGroup($tgroup, $this->user),
+            $folk->hasVoteTGroup($this->tgroup, $this->user),
             'tag-has-no-vote'
         );
         $tag    = $manager->findByName('phpunit.electronic');
@@ -269,15 +273,14 @@ class TagTest extends TestCase {
         $result = $tag->tgroupList();
         $item   = array_first($result);
         $this->assertCount(1, $result, 'tag-torrent-lookup');
-        $this->assertEquals($tgroup->id, $item['torrentGroupId'], 'tag-found-tgroup');
+        $this->assertEquals($this->tgroup->id, $item['torrentGroupId'], 'tag-found-tgroup');
         $this->assertEquals(
             1,
-            $folk->voteTGroup($tgroup, $this->user, 'up'),
+            $folk->voteTGroup($this->tgroup, $this->user, 'up'),
             'tag-tgroup-vote'
         );
-        DB::DB();
         $this->assertTrue(
-            $folk->hasVoteTGroup($tgroup, $this->user),
+            $folk->hasVoteTGroup($this->tgroup, $this->user),
             'tag-has-no-vote'
         );
         // not enough uses to have a meaningful result, but at least the query is run
@@ -291,13 +294,13 @@ class TagTest extends TestCase {
         $manager      = new Manager\Tag();
         $name         = self::PREFIX . randomString(10);
         $tag          = $manager->create($name, $this->user);
-        $tgroup = Helper::makeTGroupMusic(
+        $this->tgroup = Helper::makeTGroupMusic(
             name:       'phpunit tag ' . randomString(6),
             artistName: [[ARTIST_MAIN], ['phpunit tag ' . randomString(6)]],
             tagName:    [$name],
             user:       $this->user,
         );
-        $this->assertEquals(2, $tag->addTGroup($tgroup, $this->user, 0), 'tag-re-add');
+        $this->assertEquals(2, $tag->addTGroup($this->tgroup, $this->user, 0), 'tag-re-add');
     }
 
     public function testSplitNew(): void {
@@ -311,7 +314,7 @@ class TagTest extends TestCase {
         $this->request = Helper::makeRequestMusic($this->user, 'phpunit tag split new request');
         $tag->addRequest($this->request);
         $this->assertEquals(1, $tag->flush()->uses(), 'tag-instance-use-1');
-        $tgroup = Helper::makeTGroupMusic(
+        $this->tgroup = Helper::makeTGroupMusic(
             name:       'phpunit tag ' . randomString(6),
             artistName: [[ARTIST_MAIN], ['phpunit tag ' . randomString(6)]],
             tagName:    [$name],
@@ -339,7 +342,7 @@ class TagTest extends TestCase {
         );
         $this->assertEquals(
             ["$name.1", "$name.2"],
-            array_values(array_map(fn($t) => $t['name'], $tgroup->flush()->tagList())),
+            array_values(array_map(fn($t) => $t['name'], $this->tgroup->flush()->tagList())),
             'tag-split-new-tgroup',
         );
 
@@ -361,7 +364,7 @@ class TagTest extends TestCase {
         $this->user->addBounty(500 * 1024 ** 3);
         $this->request = Helper::makeRequestMusic($this->user, 'phpunit user promote request');
         $tag->addRequest($this->request);
-        $tgroup = Helper::makeTGroupMusic(
+        $this->tgroup = Helper::makeTGroupMusic(
             name:       'phpunit tag ' . randomString(6),
             artistName: [[ARTIST_MAIN], ['phpunit tag ' . randomString(6)]],
             tagName:    [$name],
@@ -390,7 +393,7 @@ class TagTest extends TestCase {
         );
         $this->assertEquals(
             ["$name.3", "$name.4"],
-            array_values(array_map(fn($t) => $t['name'], $tgroup->flush()->tagList())),
+            array_values(array_map(fn($t) => $t['name'], $this->tgroup->flush()->tagList())),
             'tag-split-existing-tgroup',
         );
 
@@ -454,7 +457,7 @@ class TagTest extends TestCase {
         );
         $list = array_filter($manager->rejectedList(), fn ($t) => $t['name'] === $name);
         $this->assertCount(1, $list, 'tag-reject-list-count');
-        $this->assertEquals($name, $list[0]['name'], 'tag-reject-list-name');
+        $this->assertEquals($name, array_first($list)['name'], 'tag-reject-list-name');
         $this->assertEquals(
             1,
             $manager->removeRejectedList([$id]),

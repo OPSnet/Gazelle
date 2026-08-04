@@ -360,7 +360,7 @@ class BonusItem extends \Gazelle\BasePgObject {
                     break;
 
                 case 'title-off':
-                    $user->removeTitle()->modify();
+                    $user->setField('Title', null)->modify();
                     break;
             }
         }

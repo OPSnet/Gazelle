@@ -21,8 +21,8 @@ if (isset($_POST['create']) && $_POST['create'] !== '') {
     $name = $manager->sanitize($_POST['create']);
     if ($name !== '') {
         $message[] = $manager->createRejected($name, $Viewer)
-            ? "Created tag \"$name\""
-            : "Did not create tag \"$name\", check if it already exists";
+            ? "Created tag “{$name}”"
+            : "Did not create tag “{$name}”, check if it already exists";
     }
 }
 if (isset($_POST['remove']) && $_POST['remove'] !== []) {

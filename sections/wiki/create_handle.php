@@ -31,7 +31,7 @@ if ($error) {
 
 $article = $wikiMan->create($title, $_POST['body'], $minRead, $minEdit, $Viewer);
 $article->logger()->general(
-    "Wiki article {$article->id} \"$title\" was created by {$Viewer->username()}"
+    "Wiki article {$article->id} “{$title}” was created by {$Viewer->username()}"
 );
 
 header('Location: ' . $article->location());

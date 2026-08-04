@@ -70,7 +70,7 @@ $logInfo = [];
 if ($_POST['name'] !== $tgroup->name()) {
     $name = trim($_POST['name']);
     $tgroup->setField('Name', $name);
-    $logInfo[] = "Renamed \"{$tgroup->name()}\" → \"$name\"";
+    $logInfo[] = "Renamed “{$tgroup->name()}” → “{$name}”";
 }
 
 $newRevision = false;

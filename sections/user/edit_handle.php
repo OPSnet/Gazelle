@@ -50,7 +50,7 @@ if (!$validator->validate($_POST)) {
     Error400::error($validator->errorMessage());
 }
 
-// Begin building $Paranoia
+// Begin building $paranoia
 // Reduce the user's input paranoia until it becomes consistent
 if (isset($_POST['p_l_uniquegroups'])) {
     $_POST['p_l_uploads'] = 'on';
@@ -70,7 +70,7 @@ if (isset($_POST['p_collagecontribs'])) {
     $_POST['p_c_collages'] = 'on';
 }
 
-if (isset($_POST['p_c_snatched']) && isset($_POST['p_c_seeding']) && isset($_POST['p_downloaded'])) {
+if (isset($_POST['p_c_snatched'], $_POST['p_c_seeding'], $_POST['p_downloaded'])) {
     $_POST['p_requiredratio'] = 'on';
 }
 
@@ -89,20 +89,25 @@ if ($StatsShown == 2) {
     }
 }
 
-$Paranoia = [];
-$Checkboxes = ['downloaded', 'uploaded', 'ratio', 'bonuspoints', 'lastseen', 'requiredratio', 'invitedcount', 'artistsadded', 'notifications'];
-foreach ($Checkboxes as $C) {
-    if (!isset($_POST["p_$C"])) {
-        $Paranoia[] = $C;
+$paranoia = [];
+foreach (
+    [
+        'downloaded', 'uploaded', 'ratio', 'bonuspoints', 'lastseen', 'requiredratio', 'invitedcount', 'artistsadded', 'notifications'
+    ] as $c
+) {
+    if (!isset($_POST["p_$c"])) {
+        $paranoia[] = $c;
     }
 }
-
-foreach (['torrentcomments', 'collages', 'collagecontribs', 'uploads', 'uniquegroups', 'perfectflacs', 'seeding', 'leeching', 'snatched'] as $S) {
-    if (!isset($_POST["p_l_$S"])) {
-        $Paranoia[] = isset($_POST["p_c_$S"]) ? $S : "$S+";
+foreach (
+    [
+        'torrentcomments', 'collages', 'collagecontribs', 'uploads', 'uniquegroups', 'perfectflacs', 'seeding', 'leeching', 'snatched'
+    ] as $c
+) {
+    if (!isset($_POST["p_l_$c"])) {
+        $paranoia[] = isset($_POST["p_c_$c"]) ? $c : "$c+";
     }
 }
-
 foreach (['requestsfilled', 'requestsvoted'] as $bounty) {
     if (isset($_POST["p_list_$bounty"])) {
         $_POST["p_count_$bounty"] = 'on';
@@ -110,17 +115,16 @@ foreach (['requestsfilled', 'requestsvoted'] as $bounty) {
     }
     foreach (['list', 'count', 'bounty'] as $item) {
         if (!isset($_POST["p_{$item}_{$bounty}"])) {
-            $Paranoia[] = "{$bounty}_{$item}";
+            $paranoia[] = "{$bounty}_{$item}";
         }
     }
 }
-
 if (!isset($_POST['p_donor_heart'])) {
-    $Paranoia[] = 'hide_donor_heart';
+    $paranoia[] = 'hide_donor_heart';
 }
+$user->setField('Paranoia', serialize($paranoia));
 
 $user->setField('IRCKey', $_POST['irckey']);
-$user->setField('Paranoia', serialize($Paranoia));
 $user->setField('profile_info', substr($_POST['info'], 0, 20480));
 $user->setField('profile_title', trim($_POST['profile_title']));
 
@@ -187,24 +191,23 @@ if (!empty($_POST['password']) && !empty($_POST['new_pass_1']) && !empty($_POST[
     }
 }
 
-$option['DisableGrouping2']    = (!empty($_POST['disablegrouping']) ? 0 : 1);
-$option['TorrentGrouping']     = (!empty($_POST['torrentgrouping']) ? 1 : 0);
+$option['DisableGrouping2']    = (isset($_POST['disablegrouping']) ? 0 : 1);
+$option['TorrentGrouping']     = (isset($_POST['torrentgrouping']) ? 1 : 0);
 $option['PostsPerPage']        = (int)$_POST['postsperpage'];
 $option['CollageEntries']      = (int)$_POST['collageentries'];
-$option['ShowTorFilter']       = (empty($_POST['showtfilter']) ? 0 : 1);
-$option['AutoSubscribe']       = (!empty($_POST['autosubscribe']) ? 1 : 0);
+$option['ShowTorFilter']       = (isset($_POST['showtfilter']) ? 1 : 0);
+$option['AutoSubscribe']       = (isset($_POST['autosubscribe']) ? 1 : 0);
 $option['DisableSmileys']      = (int)isset($_POST['disablesmileys']);
-$option['EnableMatureContent'] = (!empty($_POST['enablematurecontent']) ? 1 : 0);
-$option['UseOpenDyslexic']     = (!empty($_POST['useopendyslexic']) ? 1 : 0);
+$option['EnableMatureContent'] = (isset($_POST['enablematurecontent']) ? 1 : 0);
+$option['UseOpenDyslexic']     = (isset($_POST['useopendyslexic']) ? 1 : 0);
 $option['DisableAvatars']      = (int)($_POST['disableavatars'] ?? 0);
 $option['Identicons']          = (int)($_POST['identicons'] ?? 0);
-$option['ListUnreadPMsFirst']  = (!empty($_POST['list_unread_pms_first']) ? 1 : 0);
-$option['ShowSnatched']        = (!empty($_POST['showsnatched']) ? 1 : 0);
-$option['DisableAutoSave']     = (!empty($_POST['disableautosave']) ? 1 : 0);
-$option['NoVoteLinks']         = (!empty($_POST['novotelinks']) ? 1 : 0);
-$option['CoverArt']            = (int)!empty($_POST['coverart']);
-$option['ShowExtraCovers']     = (int)!empty($_POST['show_extra_covers']);
-$option['AutoComplete']        = $_POST['autocomplete'];
+$option['ListUnreadPMsFirst']  = (isset($_POST['list_unread_pms_first']) ? 1 : 0);
+$option['ShowSnatched']        = (isset($_POST['showsnatched']) ? 1 : 0);
+$option['DisableAutoSave']     = (isset($_POST['disableautosave']) ? 1 : 0);
+$option['NoVoteLinks']         = (isset($_POST['novotelinks']) ? 1 : 0);
+$option['CoverArt']            = (int)isset($_POST['coverart']);
+$option['ShowExtraCovers']     = (int)isset($_POST['show_extra_covers']);
 
 // user options
 $autocomplete = Enum\Autocomplete::tryFrom((int)$_POST['autocomplete'])
@@ -215,17 +218,17 @@ foreach (['DefaultSearch', 'DisableFreeTorrentTop10'] as $opt) {
         $option[$opt] = $user->option($opt);
     }
 }
-if (empty($_POST['sorthide'])) {
+if (!isset($_POST['sorthide'])) {
     $option['SortHide'] = [];
 } else {
-    $JSON = json_decode($_POST['sorthide']);
-    foreach ($JSON as $J) {
-        $E = explode('_', $J);
-        $option['SortHide'][$E[0]] = $E[1];
+    $json = json_decode($_POST['sorthide']);
+    foreach ($json as $j) {
+        [$release, $hidden] = explode('_', $j);
+        $option['SortHide'][$release] = (int)$hidden;
     }
 }
-if ($Viewer->permitted('site_advanced_search')) {
-    $option['SearchType'] = (int)!empty($_POST['search_type_advanced']);
+if ($user->permitted('site_advanced_search')) {
+    $option['SearchType'] = (int)isset($_POST['search_type_advanced']);
 } else {
     unset($option['SearchType']);
 }
