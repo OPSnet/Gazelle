@@ -81,7 +81,8 @@ class Twig {
                 \Text::full_format(
                     $text,
                     $outputToc,
-                    cache: ImageCacheMode::cache, bucket: CacheBucket::forum),
+                    cache: ImageCacheMode::cache, bucket: CacheBucket::forum,
+                ),
                 'UTF-8'
             )
         ));

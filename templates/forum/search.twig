@@ -1,4 +1,5 @@
 {% from 'macro/form.twig' import checked, class_hidden -%}
+{{ header('Forums › Search', {'js': 'bbcode,forum_search'}) }}
 <div class="thin">
     <div class="header">
         <h2><a href="forums.php">Forums</a> › Search
@@ -100,3 +101,59 @@
             </tr>
         </table>
     </form>
+{% for r in search.results(paginator) %}
+{%  if loop.first %}
+{{  paginator.linkbox|raw }}
+    <table cellpadding="6" cellspacing="1" border="0" class="forum_list border" width="100%">
+    <tr class="colhead">
+        <td>Forum</td>
+        <td>{% if thread_id %}Post begins{% else %}Thread{% endif %}</td>
+        <td>Thread created</td>
+        <td>Latest post</td>
+    </tr>
+{%  endif %}
+{%  set id         = r[0] %}
+{%  set title      = r[1] %}
+{%  set forum_id   = r[2] %}
+{%  set forum_name = r[3] %}
+{%  set latest     = r[4] %}
+{%  set post_id    = r[5] %}
+{%  set body       = r[6] %}
+{%  set created    = r[7] %}
+    <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
+        <td>
+            <a href="forums.php?action=viewforum&amp;forumid={{ forum_id }}">{{ forum_name }}</a>
+        </td>
+        <td>
+{%  if thread_id %}
+            {{ title|shorten(80) }}
+{%  else %}
+            <a href="forums.php?action=viewthread&amp;threadid={{ id }}">{{ title|shorten(80) }}</a>
+{%  endif %}
+{%  if search.isBodySearch %}
+            <a href="#" onclick="$('#post_{{ post_id
+                }}_text').gtoggle(); return false;">(Show)</a> <span style="float: right;" class="tooltip last_read" title="Jump to post"><a href="forums.php?action=viewthread&amp;threadid={{ id }}
+{%-     if post_id %}&amp;postid={{ post_id }}#post{{ post_id }}{% endif %}"></a></span>
+{%  endif %}
+        </td>
+        <td>
+            {{ created|time_diff }}
+        </td>
+        <td>
+            {{ latest|time_diff }}
+        </td>
+    </tr>
+{%  if search.isBodySearch %}
+    <tr class="hidden row{{ cycle(['a', 'b'], loop.index0) }}" id="post_{{ post_id }}_text">
+        <td colspan="4">{{ body|bb_format }}</td>
+    </tr>
+{%  endif %}
+{%  if loop.last %}
+    </table>
+    {{ paginator.linkbox|raw }}
+{%  endif %}
+{% else %}
+    <div class="thin box">Nothing found{% if username %} (unknown username){% endif %}!</div>
+{% endfor %}
+</div>
+{{ footer() }}
