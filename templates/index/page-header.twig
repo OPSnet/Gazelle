@@ -116,14 +116,16 @@
 <li id="searchbar_artists">
     <span class="hidden">Artist: </span>
     <form class="search_form" name="artists" action="artist.php" method="get">
-        <input id="artistsearch"{{ autocomplete(viewer, 'search')
+        <input id="artistsearch"{{
+            autocomplete(viewer, enum('Gazelle\\Enum\\Autocomplete').searchOnly)
             }} placeholder="Artists" type="text" name="artistname" size="17" spellcheck="false" accesskey="a">
     </form>
 </li>
 <li id="searchbar_collages">
     <span class="hidden">Collage: </span>
     <form class="search_form" name="collages" action="collages.php" method="get">
-        <input id="collagesearch"{{ autocomplete(viewer, 'search')
+        <input id="collagesearch"{{
+            autocomplete(viewer, enum('Gazelle\\Enum\\Autocomplete').searchOnly)
             }} placeholder="Collages" type="text" name="search" size="17" spellcheck="false" accesskey="c">
     </form>
 </li>

@@ -1,3 +1,4 @@
+{% from 'macro/form.twig' import autocomplete, checked %}
 {% set header_title %}
 {%  if search.isBookmarkView %}
 Bookmarked Requests
@@ -11,7 +12,6 @@ Requests voted
 Requests
 {%  endif %}
 {% endset %}
-{% from 'macro/form.twig' import autocomplete, checked %}
 {{ header(header_title, {'js': 'requests'}) }}
 <div class="thin">
     <div class="header">
@@ -72,7 +72,8 @@ Requests
             <tr id="tagfilter">
                 <td class="label">Tags (comma-separated):</td>
                 <td>
-                    <input type="search" name="tags" id="tags" size="60" value="{{ search.tagList.list }}"{{ autocomplete(user, 'other') }}>&nbsp;
+                    <input type="search" name="tags" id="tags" size="60" value="{{ search.tagList.list }}"{{
+                        autocomplete(user, enum('Gazelle\\Enum\\Autocomplete').everywhere) }}>&nbsp;
                     <label><input type="radio" name="tag_mode" value="any"{{ checked(search.tagList.mode.value == 'any') }}> Any</label>&nbsp;&nbsp;
                     <label><input type="radio" name="tag_mode" value="all"{{ checked(search.tagList.mode.value == 'all') }}> All</label>
                 </td>

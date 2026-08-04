@@ -1,24 +1,25 @@
 {%- macro autocomplete(user, type) -%}
-    {%- if user.hasAutocomplete(type) %} data-gazelle-autocomplete="true"{% endif -%}
+{%- if user.autocomplete in [type, enum('Gazelle\\Enum\\Autocomplete').everywhere]
+    %} data-gazelle-autocomplete="true"{% endif -%}
 {%- endmacro %}
 
 {%- macro checked(flag) -%}
-    {%- if flag %} checked{% endif -%}
+{%- if flag %} checked{% endif -%}
 {%- endmacro %}
 
 {%- macro disabled(flag) -%}
-    {%- if flag %} disabled{% endif -%}
+{%- if flag %} disabled{% endif -%}
 {%- endmacro %}
 
 {# used as an additional name in an element class declaration #}
 {%- macro hidden(flag) -%}
-    {%- if flag %} hidden{% endif -%}
+{%- if flag %} hidden{% endif -%}
 {%- endmacro %}
 
 {%- macro class_hidden(flag) -%}
-    {%- if flag %} class="hidden"{% endif -%}
+{%- if flag %} class="hidden"{% endif -%}
 {%- endmacro %}
 
 {%- macro selected(flag) -%}
-    {%- if flag %} selected{% endif -%}
+{%- if flag %} selected{% endif -%}
 {%- endmacro %}

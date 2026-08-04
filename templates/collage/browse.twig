@@ -45,7 +45,8 @@
                 <tr id="tagfilter">
                     <td class="label">Tags (comma-separated):</td>
                     <td>
-                        <input type="text" id="tags" name="tags" size="70" value="{{ input.tags }}"{{ autocomplete(viewer, 'other') }}>
+                        <input type="text" id="tags" name="tags" size="70" value="{{ input.tags }}"{{
+                            autocomplete(viewer, enum('Gazelle\\Enum\\Autocomplete').everywhere) }}>
                         <br><br>
                         <label><input type="radio" name="tags_type" value="1"{{ checked(search.isTagAll) }}> All</label>
                         <label><input type="radio" name="tags_type" value="0"{{ checked(not search.isTagAll) }}> Any</label>&nbsp;&nbsp;

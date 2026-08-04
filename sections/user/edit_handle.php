@@ -207,6 +207,9 @@ $option['ShowExtraCovers']     = (int)!empty($_POST['show_extra_covers']);
 $option['AutoComplete']        = $_POST['autocomplete'];
 
 // user options
+$autocomplete = Enum\Autocomplete::tryFrom((int)$_POST['autocomplete'])
+    ?? Enum\Autocomplete::everywhere;
+$option['AutoComplete'] = $autocomplete->value;
 foreach (['DefaultSearch', 'DisableFreeTorrentTop10'] as $opt) {
     if ($user->option($opt)) {
         $option[$opt] = $user->option($opt);

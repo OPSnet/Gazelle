@@ -65,12 +65,10 @@ class UserTest extends TestCase {
         unset($this->user);
     }
 
-    public function testAttr(): void {
+    public function testUserAttr(): void {
         $this->assertFalse($this->user->hasAttr('unlimited-download'), 'uattr-hasUnlimitedDownload');
         $this->user->toggleAttr('unlimited-download', true);
         $this->assertTrue($this->user->hasAttr('unlimited-download'), 'uattr-not-hasUnlimitedDownload');
-
-        $this->assertNull($this->user->option('nosuchoption'), 'uattr-nosuchoption');
 
         $this->assertEquals(AvatarDisplay::show, $this->user->avatarMode(), 'uattr-avatarMode');
         $this->assertTrue($this->user->showAvatars(), 'uattr-show-avatars');
@@ -112,6 +110,37 @@ class UserTest extends TestCase {
         $this->assertTrue($this->user->notifyDeleteSnatch(), 'uattr-pm-delete-snatch');
         $this->user->toggleAttr('no-pm-delete-snatch', true);
         $this->assertFalse($this->user->notifyDeleteSnatch(), 'uattr-no-pm-delete-snatch');
+    }
+
+    public function testUserOption(): void {
+        $this->assertNull($this->user->option('nosuchoption'), 'uopt-nosuchoption');
+        $this->assertTrue(
+            $this->user->autocomplete() === Enum\Autocomplete::everywhere,
+            'uopt-autocomplete-default'
+        );
+        $this->user->modifyOption('AutoComplete', Enum\Autocomplete::disabled->value);
+        $this->assertFalse(
+            $this->user->autocomplete() === Enum\Autocomplete::searchOnly,
+            'uopt-autocomplete-disabled-search'
+        );
+        $this->assertFalse(
+            $this->user->autocomplete() === Enum\Autocomplete::everywhere,
+            'uopt-autocomplete-disabled-other'
+        );
+        $this->user->modifyOption('AutoComplete', Enum\Autocomplete::searchOnly->value);
+        $this->assertTrue(
+            $this->user->autocomplete() === Enum\Autocomplete::searchOnly,
+            'uopt-autocomplete-searchOnly-search'
+        );
+        $this->assertFalse(
+            $this->user->autocomplete() === Enum\Autocomplete::everywhere, /** @phpstan-ignore-line identical.alwaysFalse overthinking it */
+            'uopt-autocomplete-searchOnly-other'
+        );
+        $this->user->modifyOption('AutoComplete', null);
+        $this->assertTrue(
+            $this->user->autocomplete() === Enum\Autocomplete::everywhere,
+            'uopt-autocomplete-null-other'
+        );
     }
 
     public function testCustomPrivilege(): void {
@@ -168,8 +197,6 @@ class UserTest extends TestCase {
 
         $this->assertTrue($this->user->isVisible(), 'utest-is-visble');
         $this->assertTrue($this->user->canLeech(), 'utest-can-leech');
-        $this->assertTrue($this->user->hasAutocomplete('other'), 'utest-has-autocomplete-other');
-        $this->assertTrue($this->user->hasAutocomplete('search'), 'utest-has-autocomplete-search');
         $this->assertTrue($this->user->permitted('site_upload'), 'utest-permitted-site-upload');
         $this->assertTrue($this->user->permittedAny('site_upload', 'site_debug'), 'utest-permittedAny-site-upload-site-debug');
         $this->assertTrue($this->user->updateCatchup(), 'utest-update-catchup');

@@ -38,7 +38,8 @@
                         <input type="hidden" name="action" value="add_alias">
                         <input type="hidden" name="auth" value="{{ viewer.auth }}">
                         <input type="hidden" name="groupid" value="{{ tgroup.id }}">
-                        <input type="text" id="artist" name="aliasname[]" size="17"{{ autocomplete(viewer, 'other') }}>
+                        <input type="text" id="artist" name="aliasname[]" size="17"{{
+                            autocomplete(viewer, enum('Gazelle\\Enum\\Autocomplete').searchOnly) }}>
                         <select name="importance[]">
 {%  for s in section|sort((a, b) => a.id <=> b.id) %}
                             <option value="{{ s.id }}">{% if s.role == 'Artist' %}Main{% else %}{{ s.role }}{% endif %}</option>

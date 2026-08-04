@@ -30,7 +30,8 @@
                 <input type="hidden" name="action" value="add_similar">
                 <input type="hidden" name="auth" value="{{ viewer.auth }}">
                 <input type="hidden" name="artistid" value="{{ artist.id }}">
-                <input type="text" autocomplete="off" id="artistsimilar" name="artistname" size="20"{{ autocomplete(viewer, 'other') }}>
+                <input type="text" autocomplete="off" id="artistsimilar" name="artistname" size="20"{{
+                    autocomplete(viewer, enum('Gazelle\\Enum\\Autocomplete').everywhere) }}>
                 <input type="submit" value="+">
             </form>
         </li>

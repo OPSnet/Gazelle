@@ -159,7 +159,8 @@
             <td class="label"><span title="Use !tag to exclude tag" class="tooltip">Tags (comma-separated):</span></td>
             <td colspan="3" class="ft_taglist">
                 <input type="search" size="40" id="tags" name="taglist" class="inputtext smaller" value="{{
-                    tag_list }}"{{ autocomplete(viewer, 'other') }}>&nbsp;
+                    tag_list }}"{{
+                    autocomplete(viewer, enum('Gazelle\\Enum\\Autocomplete').everywhere) }}>&nbsp;
                 <input type="radio" name="tags_type" id="tags_type0" value="0"{{ checked(input.tags_type == 0) }}><label for="tags_type0"> Any</label>&nbsp;&nbsp;
                 <input type="radio" name="tags_type" id="tags_type1" value="1"{{ checked(input.tags_type == 1) }}><label for="tags_type1"> All</label>
             </td>

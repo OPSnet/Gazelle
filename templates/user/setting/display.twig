@@ -67,12 +67,12 @@
             Check the box of a release type if it should be collapsed when an artist page is viewed.</p>
             <a href="#" id="reset_sortable" class="brackets">Reset to default</a>
             <ul class="sortable_list" id="sortable">
-{% set release -%}
-    {%- for r in release_order -%}
+{% set release %}
+{%  for r in release_order -%}
                 <li class="sortable_item"><input type="checkbox" id="{{ r.id }}"{{ checked(r.checked) }}> <label for="{{ r.id }}">{{ r.label }}</label></li>
-    {%- endfor -%}
-{% endset -%}
-                {{- release }}
+{%- endfor %}
+{% endset %}
+{{ release }}
             </ul>
             <input type="hidden" id="sorthide" name="sorthide" value="">
         </td>
@@ -116,10 +116,15 @@
         </td>
         <td>
             <select name="autocomplete">
-                {%- set ac = user.option('AutoComplete') -%}
-                <option value="0"{{ selected(ac is null) }}>Everywhere</option>
-                <option value="2"{{ selected(ac == 2) }}>Searches only</option>
-                <option value="1"{{ selected(ac == 1) }}>Disable</option>
+                <option value="{{ enum('Gazelle\\Enum\\Autocomplete').everywhere.value }}"{{
+                    selected(user.autocomplete == enum('Gazelle\\Enum\\Autocomplete').everywhere)
+                    }}>Everywhere</option>
+                <option value="{{ enum('Gazelle\\Enum\\Autocomplete').searchOnly.value }}"{{
+                    selected(user.autocomplete == enum('Gazelle\\Enum\\Autocomplete').searchOnly)
+                    }}>Searches only</option>
+                <option value="{{ enum('Gazelle\\Enum\\Autocomplete').disabled.value }}"{{
+                    selected(user.autocomplete == enum('Gazelle\\Enum\\Autocomplete').disabled)
+                    }}>Disable</option>
             </select>
         </td>
     </tr>

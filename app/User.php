@@ -214,10 +214,6 @@ class User extends BaseAttrObject {
         return $this->setField('CustomPermissions', serialize($custom))->modify();
     }
 
-    public function modifyPrivilegeList(array $current): int {
-        return $this->privilege()->modifyCustomList($current);
-    }
-
     /**
      * Does the user have a specific privilege?
      */
@@ -680,25 +676,9 @@ class User extends BaseAttrObject {
         return $this->info()['PermissionID'];
     }
 
-    /**
-     * Checks whether user has autocomplete enabled
-     *
-     * @param string $Type Where is the input requested (search, other)
-     */
-    public function hasAutocomplete(string $Type): bool {
-        $autoComplete = $this->option('AutoComplete');
-        if (is_null($autoComplete)) {
-            // not set, default to enabled
-            return true;
-        } elseif ($autoComplete == 1) {
-            // disabled
-            return false;
-        } elseif ($Type === 'search' && $autoComplete != 1) {
-            return true;
-        } elseif ($Type === 'other' && $autoComplete != 2) {
-            return true;
-        }
-        return false;
+    public function autocomplete(): Enum\Autocomplete {
+        return Enum\Autocomplete::tryFrom((int)$this->option('AutoComplete'))
+            ?? Enum\Autocomplete::everywhere;
     }
 
     /**
@@ -858,11 +838,26 @@ class User extends BaseAttrObject {
         return true;
     }
 
-    /**
-     * Remove the custom title of a user
-     */
-    public function removeTitle(): static {
-        return $this->setField('Title', null);
+    /** @phpstan-impure for Enum\Autocomplete */
+    public function modifyOption(string $name, int|string|null $value): static {
+        $options = $this->info()['SiteOptions'];
+        if (is_null($value)) {
+            unset($options[$name]);
+        } else {
+            $options[$name] = $value;
+        }
+        self::$db->prepared_query("
+            UPDATE users_info SET
+                SiteOptions = ?
+            WHERE UserID = ?
+            ", serialize($options), $this->id
+        );
+        $this->flush();
+        return $this;
+    }
+
+    public function modifyPrivilegeList(array $current): int {
+        return $this->privilege()->modifyCustomList($current);
     }
 
     public function modify(): bool {
@@ -1065,18 +1060,6 @@ class User extends BaseAttrObject {
         return $affected;
     }
 
-    public function removeClasses(array $classes): int {
-        self::$db->prepared_query("
-            DELETE FROM users_levels
-            WHERE UserID = ?
-                AND PermissionID IN (" . placeholders($classes) . ")",
-            $this->id, ...$classes
-        );
-        $affected = self::$db->affected_rows();
-        $this->flush();
-        return $affected;
-    }
-
     public function notifyFilters(): array {
         $key = sprintf(self::CACHE_NOTIFY, $this->id);
         if ($this->forceCacheFlush || ($filters = self::$cache->get_value($key)) === false) {
@@ -1090,19 +1073,6 @@ class User extends BaseAttrObject {
             self::$cache->cache_value($key, $filters, 2_592_000);
         }
         return $filters;
-    }
-
-    public function removeNotificationFilter(int $notifId): int {
-        self::$db->prepared_query('
-            DELETE FROM users_notify_filters
-            WHERE UserID = ? AND ID = ?
-            ', $this->id, $notifId
-        );
-        $removed = self::$db->affected_rows();
-        if ($removed) {
-            self::$cache->delete_multi(['u_notify_' . $this->id, 'notify_artists_' . $this->id]);
-        }
-        return $removed;
     }
 
     public function loadArtistNotifications(): array {
@@ -1160,6 +1130,19 @@ class User extends BaseAttrObject {
             self::$cache->delete_multi(['u_notify_' . $this->id, 'notify_artists_' . $this->id]);
         }
         return $change;
+    }
+
+    public function removeNotificationFilter(int $notifId): int {
+        self::$db->prepared_query('
+            DELETE FROM users_notify_filters
+            WHERE UserID = ? AND ID = ?
+            ', $this->id, $notifId
+        );
+        $removed = self::$db->affected_rows();
+        if ($removed) {
+            self::$cache->delete_multi(['u_notify_' . $this->id, 'notify_artists_' . $this->id]);
+        }
+        return $removed;
     }
 
     public function notifyDeleteSeeding(): bool {
@@ -1729,21 +1712,23 @@ class User extends BaseAttrObject {
         return !$this->disableInvites() && $this->privilege()->effectiveClassLevel() >= MIN_INVITE_CLASS;
     }
 
-    public function modifyOption(string $name, $value): static {
-        $options = $this->info()['SiteOptions'];
-        if (is_null($value)) {
-            unset($options[$name]);
-        } else {
-            $options[$name] = $value;
-        }
+    public function removeClasses(array $classes): int {
         self::$db->prepared_query("
-            UPDATE users_info SET
-                SiteOptions = ?
+            DELETE FROM users_levels
             WHERE UserID = ?
-            ", serialize($options), $this->id
+                AND PermissionID IN (" . placeholders($classes) . ")",
+            $this->id, ...$classes
         );
+        $affected = self::$db->affected_rows();
         $this->flush();
-        return $this;
+        return $affected;
+    }
+
+    /**
+     * Remove the custom title of a user
+     */
+    public function removeTitle(): static {
+        return $this->setField('Title', null);
     }
 
     public function remove(): int {

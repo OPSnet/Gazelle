@@ -120,7 +120,7 @@ if ($Viewer->permitted('site_advanced_top10')) {
                 <td class="label">Tags (comma-separated):</td>
                 <td class="ft_taglist">
                     <input type="text" name="tags" id="tags" size="75" value="<?= html_escape($tags) ?>"<?=
-                        $Viewer->hasAutocomplete('other') ? ' data-gazelle-autocomplete="true"' : '' ?>>&nbsp;
+                        $Viewer->autocomplete() === Enum\Autocomplete::everywhere ? ' data-gazelle-autocomplete="true"' : '' ?>>&nbsp;
                     <input type="radio" id="rdoAll" name="anyall" value="all"<?= $anyAll == 'all' ? ' checked' : '' ?>><label for="rdoAll"> All</label>&nbsp;&nbsp;
                     <input type="radio" id="rdoAny" name="anyall" value="any"<?= $anyAll != 'all' ? ' checked' : '' ?>><label for="rdoAny"> Any</label>
                 </td>

@@ -8,7 +8,8 @@
     </tr>
     <tr>
         <td class="label">Tags:</td>
-        <td><input type="text" id="tags" name="tags" size="60" value=""{{ autocomplete(user, 'other') }}></td>
+        <td><input type="text" id="tags" name="tags" size="60" value=""{{
+            autocomplete(user, enum('Gazelle\\Enum\\Autocomplete').everywhere) }}>
     </tr>
 {%  include 'upload/cover.twig' with {'is_uploaded': is_uploaded, 'image': torrent.Image} only %}
 {% endif %}

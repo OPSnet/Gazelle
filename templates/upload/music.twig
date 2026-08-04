@@ -33,7 +33,10 @@
 {%  if torrent.Artists %}
 {%      for role, artist_list in torrent.Artists %}
 {%          for artist in artist_list %}
-            <input type="text" id="artist_{{ loop.index0 }}" name="artists[]" size="45" value="{{ artist.name }}"{{ autocomplete(user, 'other') }}{{ disabled(is_uploaded) }} onblur="CheckVA();">
+            <input type="text" name="artists[]" size="45" onblur="CheckVA();" id="artist_{{
+                loop.index0 }}" value="{{ artist.name }}"{{
+                autocomplete(user, enum('Gazelle\\Enum\\Autocomplete').everywhere) }}{{
+                disabled(is_uploaded) }}>
             <select id="importance_{{ loop.index0 }}" name="importance[]"{{ disabled(is_uploaded) }}>
                 <option value="{{ constant('ARTIST_MAIN') }}"{{ selected(role == constant('ARTIST_MAIN')) }}>Main</option>
                 <option value="{{ constant('ARTIST_GUEST') }}"{{ selected(role == constant('ARTIST_GUEST')) }}>Guest</option>
@@ -51,7 +54,10 @@
 {%          endfor %}
 {%      endfor %}
 {%  else %}
-            <input type="text" id="artist_0" name="artists[]" size="45" value="{{ artist.name }}"{{ autocomplete(user, 'other') }}{{ disabled(is_uploaded) }} onblur="CheckVA();">
+            <input type="text" id="artist_0" name="artists[]" size="45" onblur="CheckVA();" value="{{
+                artist.name }}"{{
+                autocomplete(user, enum('Gazelle\\Enum\\Autocomplete').everywhere) }}{{
+                disabled(is_uploaded) }}>
             <select id="importance_0" name="importance[]"{{ disabled(is_uploaded) }}>
                 <option value="{{ constant('ARTIST_MAIN') }}">Main</option>
                 <option value="{{ constant('ARTIST_GUEST') }}">Guest</option>
