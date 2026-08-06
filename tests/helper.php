@@ -10,6 +10,7 @@ use Gazelle\Request\Format;
 use Gazelle\Request\Media;
 use Gazelle\Request\LogCue;
 use Gazelle\TGroup;
+use Gazelle\Torrent;
 use Gazelle\User;
 
 class Helper {
@@ -158,7 +159,7 @@ class Helper {
         TGroup $tgroup,
         User   $user,
         string $description,
-    ): \Gazelle\Torrent {
+    ): Torrent {
         return new \Gazelle\Manager\Torrent()->create(
             tgroup:                  $tgroup,
             user:                    $user,
@@ -192,7 +193,7 @@ class Helper {
         bool   $seed            = false,
         bool   $hasCue          = false,
         bool   $hasLog          = false,
-    ): \Gazelle\Torrent {
+    ): Torrent {
         if ($catalogueNumber === '') {
             $catalogueNumber = 'UA-REM-' . random_int(10000, 99999);
         }
@@ -222,7 +223,7 @@ class Helper {
     }
 
     public static function addTorrentTraffic(
-        \Gazelle\Torrent $torrent,
+        Torrent $torrent,
         int $leechTotal  = 0,
         int $seedTotal   = 0,
         int $snatchTotal = 0,
@@ -239,8 +240,28 @@ class Helper {
         return $db->affected_rows();
     }
 
+    public static function generateTorrentLeech(
+        Torrent     $torrent,
+        User        $user,
+        string      $ipAddr = self::IP_ADDR,
+        int         $interval = 5,
+        string|null $useragent = null,
+    ): int {
+        if (is_null($useragent)) {
+            $useragent = 'ua-' . randomString(12);
+        }
+        $db = \Gazelle\DB::DB();
+        $db->prepared_query("
+            INSERT INTO xbt_files_users
+                   (fid, uid, useragent, peer_id, ip, mtime, active, remaining, timespent)
+            VALUES (?,   ?,   ?,         ?,       ?, unix_timestamp(now() - interval ? second), 1, 100, 1)
+            ",  $torrent->id, $user->id, $useragent, randomString(20), $ipAddr, $interval
+        );
+        return $db->affected_rows();
+    }
+
     public static function generateTorrentSeed(
-        \Gazelle\Torrent $torrent,
+        Torrent     $torrent,
         User        $user,
         string      $ipAddr = self::IP_ADDR,
         int         $interval = 5,
@@ -259,7 +280,7 @@ class Helper {
         return $db->affected_rows();
     }
 
-    public static function generateTorrentSnatch(\Gazelle\Torrent $torrent, User $user): int {
+    public static function generateTorrentSnatch(Torrent $torrent, User $user): int {
         $db = \Gazelle\DB::DB();
         $db->prepared_query("
             INSERT INTO xbt_snatched

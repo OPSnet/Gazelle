@@ -19,14 +19,13 @@ if ($Viewer->isStaff() && isset($_GET['userid'])) {
 
 $userTorrent = new Search\UserTorrent(
     $user,
-    match ($_GET['type']) {
-        'seeding'  => UserTorrentSearch::seeding,
-        'snatches' => UserTorrentSearch::snatched,
-        default    => UserTorrentSearch::uploaded,
-    }
+    $user,
+    UserTorrentSearch::tryFrom($_GET['type'] ?? '') ?? UserTorrentSearch::uploaded,
+    0,
+    0,
 );
 
-$title     = "{$user->username()}-{$userTorrent->label()}";
+$title     = "{$user->username()}-{$userTorrent->type->value}";
 $collector = new Collector\TList($Viewer, new Manager\Torrent(), $title, 0);
 $idList    = $userTorrent->idList();
 $collector->setList($idList);

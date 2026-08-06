@@ -221,11 +221,13 @@ class TorrentTest extends TestCase {
             'torrent-user-json-download-ok'
         );
 
-        $download = new Json\UserTorrents($this->user, $this->user)
-            ->setType('downloaded')
-            ->setLimit(2)
-            ->setOffset(0)
-            ->payload();
+        $download = new Json\UserTorrents(
+            $this->user,
+            $this->user,
+            Enum\UserTorrentSearch::from('downloaded'),
+            2,
+            0
+        )->payload();
         $this->assertEquals(1, $download['total'], 'torrent-user-json-download-total');
         $this->assertEquals(
             $torrent->groupId(),
@@ -234,11 +236,13 @@ class TorrentTest extends TestCase {
         );
 
         // uploader
-        $upload = new Json\UserTorrents($this->user, $this->user)
-            ->setType('uploaded')
-            ->setLimit(2)
-            ->setOffset(0)
-            ->payload();
+        $upload = new Json\UserTorrents(
+            $this->user,
+            $this->user,
+            Enum\UserTorrentSearch::from('uploaded'),
+            2,
+            0
+        )->payload();
         $this->assertEquals(2, $upload['total'], 'torrent-user-json-upload-total');
         $this->assertEquals(
             $torrent->groupId(),
@@ -247,11 +251,13 @@ class TorrentTest extends TestCase {
         );
 
         // uploader-unseeded
-        $upUnseed = new Json\UserTorrents($this->user, $this->user)
-            ->setType('uploaded-unseeded')
-            ->setLimit(2)
-            ->setOffset(0)
-            ->payload();
+        $upUnseed = new Json\UserTorrents(
+            $this->user,
+            $this->user,
+            Enum\UserTorrentSearch::from('uploaded-unseeded'),
+            2,
+            0
+        )->payload();
         $this->assertEquals(2, $upUnseed['total'], 'torrent-user-json-up-unseed-total');
         $this->assertEquals(
             $torrent->groupId(),
@@ -260,35 +266,43 @@ class TorrentTest extends TestCase {
         );
 
         // leecher
-        $leech = new Json\UserTorrents($this->user, $this->user)
-            ->setType('leeching')
-            ->setLimit(2)
-            ->setOffset(0)
-            ->payload();
+        $leech = new Json\UserTorrents(
+            $this->user,
+            $this->user,
+            Enum\UserTorrentSearch::from('leeching'),
+            2,
+            0
+        )->payload();
         $this->assertEquals(0, $leech['total'], 'torrent-user-json-leech-total');
 
         // snatcher
-        $snatch = new Json\UserTorrents($this->user, $this->user)
-            ->setType('snatched')
-            ->setLimit(2)
-            ->setOffset(0)
-            ->payload();
+        $snatch = new Json\UserTorrents(
+            $this->user,
+            $this->user,
+            Enum\UserTorrentSearch::from('snatched'),
+            2,
+            0
+        )->payload();
         $this->assertEquals(0, $snatch['total'], 'torrent-user-json-snatch-total');
 
         // snatched-unseeded
-        $snatchUnseed = new Json\UserTorrents($this->user, $this->user)
-            ->setType('snatched-unseeded')
-            ->setLimit(2)
-            ->setOffset(0)
-            ->payload();
+        $snatchUnseed = new Json\UserTorrents(
+            $this->user,
+            $this->user,
+            Enum\UserTorrentSearch::from('snatched-unseeded'),
+            2,
+            0
+        )->payload();
         $this->assertEquals(0, $snatchUnseed['total'], 'torrent-user-json-snatch-unseed-total');
 
         // seeder
-        $seed = new Json\UserTorrents($this->user, $this->user)
-            ->setType('seeding')
-            ->setLimit(2)
-            ->setOffset(0)
-            ->payload();
+        $seed = new Json\UserTorrents(
+            $this->user,
+            $this->user,
+            Enum\UserTorrentSearch::from('seeding'),
+            2,
+            0
+        )->payload();
         $this->assertEquals(0, $seed['total'], 'torrent-user-json-seed-total');
     }
 
@@ -470,7 +484,7 @@ class TorrentTest extends TestCase {
     public function testTorrentCollector(): void {
         $title = 'phpunit-zip';
         $collector = new Collector\TList($this->user, new Manager\Torrent(), $title, 0);
-        $userTorrent = new Search\UserTorrent($this->user, UserTorrentSearch::uploaded);
+        $userTorrent = new Search\UserTorrent($this->user, $this->user, UserTorrentSearch::uploaded, 10, 0);
         $this->assertCount(1, $userTorrent->idList(), 'torrent-search-upload');
         $collector->setList($userTorrent->idList());
         $this->assertTrue($collector->prepare([]), 'collect-tlist-prepare');

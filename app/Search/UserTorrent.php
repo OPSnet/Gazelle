@@ -3,6 +3,10 @@
 namespace Gazelle\Search;
 
 use Gazelle\Enum\UserTorrentSearch;
+use Gazelle\Manager\Torrent as TorrentManager;
+use Gazelle\Search\UserTorrent\AbstractSearch;
+use Gazelle\Torrent;
+use Gazelle\User;
 
 /**
  * Collect the IDs of torrents that a user has uploaded, snatched
@@ -11,86 +15,52 @@ use Gazelle\Enum\UserTorrentSearch;
  */
 
 class UserTorrent extends \Gazelle\Base {
-    private int $limit;
-    private int $offset;
+    protected AbstractSearch $searcher;
 
     public function __construct(
-        protected \Gazelle\User     $user,
-        protected UserTorrentSearch $type,
-    ) {}
-
-    public function label(): string {
-        return $this->type->value;
-    }
-
-    public function setLimit(int $limit): static {
-        $this->limit = $limit;
-        return $this;
-    }
-
-    public function setOffset(int $offset): static {
-        $this->offset = $offset;
-        return $this;
-    }
-
-    protected function sql(): string {
-        return "FROM torrents AS t "
-            . match ($this->type) {
-                UserTorrentSearch::downloaded => "
-                    INNER JOIN users_downloads AS ud ON (ud.TorrentID = t.ID)
-                    WHERE ud.UserID = ?
-                    ORDER BY ud.Time DESC",
-                UserTorrentSearch::leeching => "
-                    INNER JOIN xbt_files_users AS xfu ON (xfu.fid = t.ID)
-                    WHERE xfu.active = 1 AND xfu.Remaining > 0 AND xfu.uid = ?
-                    ORDER BY from_unixtime(xfu.mtime - xfu.timespent) DESC",
-                UserTorrentSearch::seeding => "
-                    INNER JOIN xbt_files_users AS xfu ON (t.ID = xfu.fid)
-                    WHERE xfu.remaining = 0 AND xfu.uid = ?
-                    ORDER BY from_unixtime(xfu.mtime - xfu.timespent) DESC",
-                UserTorrentSearch::snatched => "
-                    INNER JOIN xbt_snatched AS xs ON (t.ID = xs.fid)
-                    WHERE xs.uid = ?
-                    ORDER BY from_unixtime(xs.tstamp) DESC",
-                UserTorrentSearch::snatchedUnseeded => "
-                    INNER JOIN xbt_snatched AS xs ON (xs.fid = t.ID)
-                        LEFT JOIN xbt_files_users AS xfu USING (uid, fid)
-                    WHERE xfu.fid IS NULL AND xs.uid = ?
-                    ORDER BY from_unixtime(xs.tstamp) DESC",
-                UserTorrentSearch::uploadedUnseeded => "
-                    LEFT JOIN xbt_files_users AS xfu ON (xfu.fid = t.ID AND xfu.uid = t.UserID)
-                    WHERE xfu.fid IS NULL AND t.UserID = ?
-                    ORDER BY t.created DESC",
-                // UserTorrentSearch::uploaded
-                default => "
-                    WHERE t.UserID = ?
-                    ORDER BY t.created DESC",
-            };
+        protected User                    $user,
+        protected User                    $viewer,
+        public readonly UserTorrentSearch $type,
+        public readonly int               $limit,
+        public readonly int               $offset,
+    ) {
+        $this->searcher = $type->searcher($this->user, $this->viewer);
     }
 
     public function total(): int {
-        return (int)self::$db->scalar("
-            SELECT COUNT(DISTINCT t.ID)
-            {$this->sql()}
-        ", $this->user->id);
+        return $this->pg()->scalarex(<<<END_SQL
+            select count(distinct t."ID")
+            from relay.torrents t {$this->searcher->join()} where {$this->searcher->where()}
+            END_SQL,
+                ...$this->searcher->args()
+        );
     }
 
+    /**
+     * Return the list of torrent ids
+     * If $limit and $offset are both set to zero, the entire resultset is returned.
+     * This is a bit of an awful hack, but it is required to handle the case of
+     * collecting your own unseeded uploads for example.
+     *
+     * @return array<int>
+     */
     public function idList(): array {
-        $sql = "
-            SELECT DISTINCT t.ID
-            {$this->sql()}";
-
-        $args = [$this->user->id];
-        if (isset($this->limit)) {
-            $sql .= "\nLIMIT ?";
-            $args[] = $this->limit;
+        $sql  = "select distinct t.\"ID\", {$this->searcher->orderColumn()} as seq from relay.torrents t {$this->searcher->join()} where {$this->searcher->where()} order by seq desc";
+        $args = $this->searcher->args();
+        if ($this->limit !== 0 || $this->offset !== 0) {
+            $sql .= " limit {$this->pg()->placeholder(count($args))} offset {$this->pg()->placeholder(count($args) + 1)}";
+            $args = array_merge($args, [$this->limit, $this->offset]);
         }
-        if (isset($this->offset)) {
-            $sql .= "\nOFFSET ?";
-            $args[] = $this->offset;
-        }
+        return $this->pg()->columnex($sql, ...$args);
+    }
 
-        self::$db->prepared_query($sql, ...$args);
-        return self::$db->collect(0);
+    /**
+     * @return array<Torrent>
+     */
+    public function torrentList(TorrentManager $manager = new TorrentManager()): array {
+        return array_filter(
+            array_map($manager->findById(...), $this->idList()),
+            fn ($t) => $t instanceof Torrent
+        );
     }
 }
