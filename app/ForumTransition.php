@@ -53,9 +53,9 @@ class ForumTransition extends BaseObject {
                 ", $this->id
             );
             if ($info) {
-                $info['user_id_list'] = $info['user_ids'] ? array_map('intval', explode(',', $info['user_ids'])) : [];
-                $info['privilege_list'] = $info['permissions'] ? array_map('trim', explode(',', $info['permissions'])) : [];
-                $info['secondary_class_id_list'] = $info['permission_levels'] ? array_map('intval', explode(',', $info['permission_levels'])) : [];
+                $info['user_id_list'] = $info['user_ids'] ? array_map(intval(...), explode(',', $info['user_ids'])) : [];
+                $info['privilege_list'] = $info['permissions'] ? array_map(trim(...), explode(',', $info['permissions'])) : [];
+                $info['secondary_class_id_list'] = $info['permission_levels'] ? array_map(intval(...), explode(',', $info['permission_levels'])) : [];
                 unset(
                     $info['user_ids'],
                     $info['permissions'],

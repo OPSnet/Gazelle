@@ -398,7 +398,7 @@ class Reaper extends \Gazelle\Base {
     public function expand(int $limit, array $list): array {
         $result = [];
         foreach ($list as [$userId, $ids]) {
-            $result[$userId] = array_map('intval', array_slice(explode(',', $ids), 0, $limit));
+            $result[$userId] = array_map(intval(...), array_slice(explode(',', $ids), 0, $limit));
         }
         return $result;
     }
@@ -534,7 +534,7 @@ class Reaper extends \Gazelle\Base {
     }
 
     public function claimStats(): array {
-        return array_map('intval', self::$db->rowAssoc("
+        return array_map(intval(...), self::$db->rowAssoc("
             SELECT coalesce(sum(claim_date IS NULL), 0)  AS open,
                 coalesce(sum(claim_date IS NOT NULL), 0) AS claimed
             FROM torrent_unseeded_claim

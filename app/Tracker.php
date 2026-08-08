@@ -129,7 +129,7 @@ class Tracker extends Base {
         $clear = [];
         $expire = [];
         foreach (explode(',', $payload) as $item) {
-            [$userId, $torrentId] = array_map('intval', explode(':', $item));
+            [$userId, $torrentId] = array_map(intval(...), explode(':', $item));
             if ($userId && $torrentId) {
                 $expire[] = [$userId, $torrentId];
                 $clear[$userId] = true;

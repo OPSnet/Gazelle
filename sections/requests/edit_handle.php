@@ -206,7 +206,7 @@ while (true) {
 
         $artistMan  = new Manager\Artist();
         $artistList = $_POST['artists'];
-        $roleList   = array_map('intval', $_POST['importance']);
+        $roleList   = array_map(intval(...), $_POST['importance']);
         $seen       = [];
         $main       = 0;
         for ($i = 0, $il = count($artistList); $i < $il; $i++) {
@@ -262,7 +262,7 @@ if ($categoryName === 'Music' && $Viewer->permittedAny('site_edit_requests', 'si
 if (isset($_POST['tags'])) {
     new Manager\Tag()->replaceTagList(
         $request,
-        array_unique(array_map('trim', explode(',', trim($_POST['tags'])))),
+        array_unique(array_map(trim(...), explode(',', trim($_POST['tags'])))),
         $Viewer,
     );
 }

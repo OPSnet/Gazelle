@@ -14,7 +14,7 @@ authorize();
 
 $roleAliasList = [];
 foreach (explode(',', $_POST['artists'] ?? '') as $roleAliasId) {
-    [$role, $aliasId] = array_map('intval', explode(';', $roleAliasId));
+    [$role, $aliasId] = array_map(intval(...), explode(';', $roleAliasId));
     if ($role && $aliasId) {
         $roleAliasList[] = [$role, $aliasId];
     }

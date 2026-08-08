@@ -25,8 +25,6 @@ class Authentication extends Base {
     /**
      * Same as tryAuthenticate() but will not return if authentications fails,
      * unless access is to a public endpoint.
-     *
-     * @return User|null|never
      */
     public function authenticate(): ?User {
         try {
@@ -58,7 +56,6 @@ class Authentication extends Base {
      * authentication attempts or unauthenticated access attempts to non-public endpoints.
      * Returns null on permissible, unauthenticated access to public endpoints.
      *
-     * @return User|null
      * @throws AuthnError
      */
     public function tryAuthenticate(): ?User {

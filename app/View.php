@@ -92,7 +92,7 @@ class View extends Base {
             [$ID, $Key, $Title, $Target, $Tests, $TestUser, $Mandatory] = array_values($n);
             if (str_contains($Tests, ':')) {
                 $testList = [];
-                foreach (array_map('trim', explode(',', $Tests)) as $Part) {
+                foreach (array_map(trim(...), explode(',', $Tests)) as $Part) {
                     $testList[] = array_map(fn ($t) => $t === 'false' ? false : $t, explode(':', $Part));
                 }
             } elseif (str_contains($Tests, ',')) {

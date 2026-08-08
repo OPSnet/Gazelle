@@ -29,7 +29,7 @@ if ($Viewer->hashHmac('audit', $idList) !== $_REQUEST['sig']) {
     Error400::error('bad signature');
 }
 $user->auditTrail()->modifyEventList(
-    array_map('intval', explode(',', $idList)),
+    array_map(intval(...), explode(',', $idList)),
     trim($_REQUEST['note']),
     $Viewer
 );

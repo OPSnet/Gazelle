@@ -191,7 +191,6 @@ class BetterTGroupTest extends TestCase {
 
         global $Cache;
         $Cache->delete_value($initial->totalCacheKey());
-        $initialTotal = $initial->total();
 
         $this->tgroup = Helper::makeTGroupMusic(
             user: $this->user,

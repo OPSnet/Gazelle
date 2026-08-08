@@ -144,7 +144,6 @@ class SingleSeeded extends AbstractBetter {
         if ($this->where !== []) {
             $sql .= " where " . implode(' and ', $this->where);
         }
-        $sql .= " {$this->orderBy} limit $phLimit offset $phOffset";
-        return $sql;
+        return $sql . " {$this->orderBy} limit $phLimit offset $phOffset";
     }
 }

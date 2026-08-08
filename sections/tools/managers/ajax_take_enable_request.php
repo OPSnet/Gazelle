@@ -15,7 +15,7 @@ if (!FEATURE_EMAIL_REENABLE) {
 }
 
 $enableMan = new Manager\AutoEnable();
-$idList = array_map('intval', $_GET['ids'] ?? []);
+$idList = array_map(intval(...), $_GET['ids'] ?? []);
 if (empty($idList)) {
     json_error("You must select at least one request to resolve");
 }

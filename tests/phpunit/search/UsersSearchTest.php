@@ -373,7 +373,6 @@ class UsersSearchTest extends TestCase {
     public function testSearchUsersInviteSource(): void {
         $user          = $this->userList[0];
         $sourceManager = new Manager\InviteSource();
-        $initialSource = $sourceManager->inviterConfiguration($user);
         $sourceName    = 'advs.' . randomString(10);
         $sourceId      = $sourceManager->create($sourceName);
         $sourceManager->modifyInviterConfiguration($user, [$sourceId]);

@@ -43,5 +43,5 @@ echo $Twig->render('applicant/role.twig', [
     'role'        => $role,
     'error'       => $error ?? null,
     'viewer'      => $Viewer,
-    'viewer_list' => array_map(fn($id) => $userMan->findById($id), $role->viewerList()),
+    'viewer_list' => array_map($userMan->findById(...), $role->viewerList()),
 ]);

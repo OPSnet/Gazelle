@@ -88,7 +88,7 @@ class Economic extends \Gazelle\Base {
                 select count(*) from multi_factor_auth
             ");
 
-            $info = array_map('intval', $info); // coalesce() results are stringified
+            $info = array_map(intval(...), $info); // coalesce() results are stringified
 
             self::$db->prepared_query("
                 SELECT uid AS user_id,

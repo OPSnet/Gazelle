@@ -40,7 +40,6 @@ class TorrentDeletedTest extends TestCase {
         $fullName  = $this->torrent->fullName();
         $groupLink = $this->torrent->groupLink();
         $tgroup    = $this->torrent->group();
-        $year      = $tgroup->year();
 
         $this->torrent->removeTorrent(null, 'phpunit', removePoints: false);
         $deleted = new Manager\Torrent()->findDeletedById($torrentId);

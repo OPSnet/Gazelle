@@ -40,7 +40,7 @@ $fullName = $torrent->fullName();
 $path     = $torrent->path();
 $infohash = $torrent->infohash();
 $size     = $torrent->size();
-$reason   = implode(' ', array_map('trim', [$_POST['reason'], $_POST['extra']]));
+$reason   = implode(' ', array_map(trim(...), [$_POST['reason'], $_POST['extra']]));
 
 [$success, $message] = $torrent->removeTorrent($Viewer, $reason);
 if (!$success) {

@@ -58,7 +58,7 @@ class TGroup extends AbstractCollage {
             ", $this->holder->id
         );
         $groupContribIds = self::$db->to_array('GroupID', MYSQLI_ASSOC);
-        $groupIds        = array_map('intval', array_keys($groupContribIds));
+        $groupIds        = array_map(intval(...), array_keys($groupContribIds));
 
         $this->artists      = [];
         $this->groupIds     = [];

@@ -6,7 +6,7 @@ declare(strict_types=1);
 
 namespace Gazelle;
 
-$messageIds = array_filter(array_map('intval', $_POST['messages'] ?? []), fn($id) => $id > 0);
+$messageIds = array_filter(array_map(intval(...), $_POST['messages'] ?? []), fn($id) => $id > 0);
 
 if (empty($messageIds)) {
     if (isset($_POST['unread'])) {

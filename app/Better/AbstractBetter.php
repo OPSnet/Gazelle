@@ -183,7 +183,7 @@ abstract class AbstractBetter extends \Gazelle\Base {
                 $this->pg()->setTimeoutMsec(10000);
                 $this->isTimeout = false;
                 $total = $this->pg()->scalarex($this->totalSql(), ...$this->args);
-            } catch (QueryCanceledException $e) {
+            } catch (QueryCanceledException) {
                 $this->isTimeout = true;
                 $total = 0;
             }
@@ -214,7 +214,7 @@ abstract class AbstractBetter extends \Gazelle\Base {
                 $this->manager->findById(...),
                 $this->pg()->columnex($this->pageSql($limit, $offset), ...$this->args),
             );
-        } catch (QueryCanceledException $e) {
+        } catch (QueryCanceledException) {
             $this->isTimeout = true;
             return [];
         }

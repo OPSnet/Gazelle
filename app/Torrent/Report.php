@@ -10,7 +10,7 @@ use Gazelle\RiplogCollection;
 class Report extends \Gazelle\BaseObject {
     final public const tableName = 'reportsv2';
 
-    protected \Gazelle\Torrent|\Gazelle\TorrentDeleted|null $torrent;
+    protected \Gazelle\Torrent|\Gazelle\TorrentDeleted|null $torrent = null;
 
     public function __construct(
         int $id,
@@ -100,13 +100,13 @@ class Report extends \Gazelle\BaseObject {
             return [];
         }
         $list = preg_split('/\s+/', $otherList);
-        return $list ? array_map('intval', $list) : [];
+        return $list ? array_map(intval(...), $list) : [];
     }
 
     public function otherTorrentList(): array {
         return array_filter(
             array_map(
-                fn ($id) => $this->torManager->findById($id),
+                $this->torManager->findById(...),
                 $this->otherIdList(),
             ),
             fn ($t) => $t instanceof \Gazelle\Torrent
@@ -115,7 +115,7 @@ class Report extends \Gazelle\BaseObject {
 
     public function otherRiplogCollection(): array {
         return array_map(
-            fn ($other) => $this->riplogManager->collection($other),
+            $this->riplogManager->collection(...),
             $this->otherTorrentList(),
         );
     }
@@ -169,7 +169,7 @@ class Report extends \Gazelle\BaseObject {
             return [];
         }
         $list = preg_split('/\D+/', $trackList);
-        return $list ? array_map('intval', $list) : [];
+        return $list ? array_map(intval(...), $list) : [];
     }
 
     public function type(): string {

@@ -134,7 +134,7 @@ class Torrent extends \Gazelle\Base {
                     WHERE ar.slug != 'guest' AND aa.Name IN (" . placeholders($artists) . ")
                     GROUP BY ta.GroupID
                 ) AS ta ON (g.ID = ta.GroupID)",
-                array_map('trim', $artists)
+                array_map(trim(...), $artists)
             ];
         }
         return ['', []];

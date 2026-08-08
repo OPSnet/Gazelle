@@ -74,7 +74,7 @@ while (true) { // break early on error
         }
         $artistMan  = new Manager\Artist();
         $artistList = $_POST['artists'];
-        $roleList   = array_map('intval', $_POST['importance']);
+        $roleList   = array_map(intval(...), $_POST['importance']);
         $artistRole = [];
         $seen       = [];
         $main       = 0;
@@ -209,7 +209,7 @@ if ($categoryName == 'Music') {
 }
 new Manager\Tag()->replaceTagList(
     $request,
-    array_map('trim', explode(',', $tags)),
+    array_map(trim(...), explode(',', $tags)),
     $Viewer
 );
 $tgroup?->flush();

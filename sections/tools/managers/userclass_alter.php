@@ -64,7 +64,7 @@ if (isset($_REQUEST['submit'])) {
     $secondary     = (int)isset($_REQUEST['secondary']);
     $badge         = $secondary ? ($_REQUEST['badge'] ?? '') : '';
     $privilegeList = [];
-    foreach (array_map('strval', array_keys($_POST)) as $key) {
+    foreach (array_map(strval(...), array_keys($_POST)) as $key) {
         if (str_starts_with($key, 'perm_')) {
             $privilegeList[substr($key, 5)] = true;
         }

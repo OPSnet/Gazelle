@@ -311,7 +311,7 @@ if ($Viewer->permitted('users_warn')) {
 }
 
 $secondaryClasses = array_filter(
-    array_map('intval', $_POST['secondary_classes'] ?? [] ),
+    array_map(intval(...), $_POST['secondary_classes'] ?? [] ),
     fn($id) => $id > 0
 );
 
@@ -387,7 +387,7 @@ if ($currentClasses !== $secondaryClasses) {
     $removedClasses = array_diff($currentClasses, $secondaryClasses);
     $addedClasses   = array_diff($secondaryClasses, $currentClasses);
     if ($removedClasses !== []) {
-        $names = array_map(fn (int $c): string => $userMan->userclassName($c), $removedClasses);
+        $names = array_map($userMan->userclassName(...), $removedClasses);
         $editSummary[] = 'secondary classes dropped: ' . implode(', ', $names);
         // revoke access to any associated forums
         $removedForumIdList = new Manager\Privilege()->secondaryForumIdList($removedClasses);
@@ -403,7 +403,7 @@ if ($currentClasses !== $secondaryClasses) {
         );
     }
     if ($addedClasses !== []) {
-        $names = array_map(fn (int $c): string => $userMan->userclassName($c), $addedClasses);
+        $names = array_map($userMan->userclassName(...), $addedClasses);
         $editSummary[] = "secondary classes added: " . implode(', ', $names);
     }
 }

@@ -45,7 +45,7 @@ class Wiki extends BaseObject {
             );
             $info['alias'] = array_combine(
                 explode(',', $info['aliases']),
-                array_map('intval', explode(',', $info['users']))
+                array_map(intval(...), explode(',', $info['users']))
             );
             self::$cache->cache_value($key, $info, 0);
         }

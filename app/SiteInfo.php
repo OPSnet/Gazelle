@@ -32,7 +32,7 @@ class SiteInfo extends Base {
         if ($in === false) {
             [$uptime, $idletime] = [0, 0];
         } else {
-            [$uptime, $idletime] = array_map('floatval', explode(' ', trim((string)fgets($in))));
+            [$uptime, $idletime] = array_map(floatval(...), explode(' ', trim((string)fgets($in))));
             fclose($in);
         }
         $ncpu = 0;

@@ -51,7 +51,7 @@ class User extends AbstractAPI {
             json_error("User not found");
         }
 
-        $user['SecondaryClasses'] = array_map("intval", explode(",", $user['SecondaryClasses']));
+        $user['SecondaryClasses'] = array_map(intval(...), explode(",", $user['SecondaryClasses']));
         foreach (['ID', 'Uploaded', 'Downloaded', 'Class', 'Level'] as $key) {
             $user[$key] = intval($user[$key]);
         }

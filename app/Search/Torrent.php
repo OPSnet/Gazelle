@@ -422,7 +422,7 @@ class Torrent {
                         if (is_number($Category)) {
                             $CategoryFilter[] = $Category;
                         } elseif (is_string($Category)) {
-                            $ValidValues = array_map('strtolower', CATEGORY);
+                            $ValidValues = array_map(strtolower(...), CATEGORY);
                             if (($CategoryID = array_search(strtolower($Category), $ValidValues)) !== false) {
                                 $CategoryFilter[] = $CategoryID + 1;
                             }
@@ -448,7 +448,7 @@ class Torrent {
                     $ValidValuesVarname = self::$Attributes[$Attribute];
                     // This code is incomprehensible, I would like to kill the original dev
                     global ${$ValidValuesVarname};
-                    $ValidValues = array_map('strtolower', ${$ValidValuesVarname});
+                    $ValidValues = array_map(strtolower(...), ${$ValidValuesVarname});
                     if (($Value = array_search(strtolower($Value), $ValidValues)) === false) {
                         // Force the query to return 0 results if value is still invalid
                         $Value = max(array_keys($ValidValues)) + 1; /** @phpstan-ignore-line it is a miracle this works */
@@ -512,9 +512,9 @@ class Torrent {
      * @param string $Term Given search expression
      */
     private function search_basic($Term): void {
-        $SearchBitrates = array_map('strtolower', array_merge(ENCODING, ['v0', 'v1', 'v2', '24bit']));
-        $SearchFormats = array_map('strtolower', FORMAT);
-        $SearchMedia = array_map('strtolower', MEDIA);
+        $SearchBitrates = array_map(strtolower(...), array_merge(ENCODING, ['v0', 'v1', 'v2', '24bit']));
+        $SearchFormats = array_map(strtolower(...), FORMAT);
+        $SearchMedia = array_map(strtolower(...), MEDIA);
 
         foreach (explode(' ', $Term) as $Word) {
             if (in_array($Word, $SearchBitrates)) {
@@ -663,7 +663,7 @@ class Torrent {
         if (!is_array($this->SphResults) || !count($this->SphResults)) {
             return;
         }
-        $this->Groups = array_map(fn($id) => $this->tgMan->findById($id), $this->SphResults);
+        $this->Groups = array_map($this->tgMan->findById(...), $this->SphResults);
         if ($this->need_torrent_ft()) {
             // Query Sphinx for torrent IDs if torrent-specific fulltext filters were used
             $this->filter_torrents_sph();
@@ -714,7 +714,7 @@ class Torrent {
             if (is_null($tgroup)) {
                 continue;
             }
-            $torrentList = array_map(fn($id) => $this->torMan->findById($id), $tgroup->torrentIdList());
+            $torrentList = array_map($this->torMan->findById(...), $tgroup->torrentIdList());
             foreach ($torrentList as $torrent) {
                 if (is_null($torrent) || !$this->filter_torrent_internal($torrent)) {
                     unset($this->Groups[$tgroup->id]);

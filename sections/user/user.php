@@ -278,7 +278,7 @@ echo $Twig->render('user/profileinfo.twig', [
 if ($user->propertyVisible($Viewer, 'snatched')) {
     echo $Twig->render('user/recent.twig', [
         'id'     => $userId,
-        'recent' => array_map(fn ($id) => $tgMan->findById($id), $user->snatch()->recentSnatchList()),
+        'recent' => array_map($tgMan->findById(...), $user->snatch()->recentSnatchList()),
         'title'  => 'Snatches',
         'type'   => 'snatched',
         'thing'  => 'snatches',
@@ -288,7 +288,7 @@ if ($user->propertyVisible($Viewer, 'snatched')) {
 if ($user->propertyVisible($Viewer, 'uploads')) {
     echo $Twig->render('user/recent.twig', [
         'id'     => $userId,
-        'recent' => array_map(fn ($id) => $tgMan->findById($id), $user->recentUploadList()),
+        'recent' => array_map($tgMan->findById(...), $user->recentUploadList()),
         'title'  => 'Uploads',
         'type'   => 'uploaded',
         'thing'  => 'uploads',

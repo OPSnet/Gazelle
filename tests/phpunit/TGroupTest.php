@@ -811,7 +811,6 @@ class TGroupTest extends TestCase {
         $this->assertGreaterThanOrEqual(0, $stats->seedingTotal(), 'tgroup-stats-seeding');
         $this->assertGreaterThanOrEqual(0, $stats->snatchTotal(), 'tgroup-stats-snatch');
 
-        $artMan = new Manager\Artist();
         $artistName = 'phpunit ' . randomString(6) . ' band';
         $this->tgroup->addArtists([ARTIST_MAIN], [$artistName]);
         $artistName = array_first($this->tgroup->artistRole()->roleListByType()['artists'])['name'];

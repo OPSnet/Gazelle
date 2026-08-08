@@ -78,7 +78,7 @@ if ($Results === false) {
     $Results = [];
 } else {
     // bleah
-    $Results = array_map('intval', $Results);
+    $Results = array_map(intval(...), $Results);
 }
 if ($GroupResults) {
     // FIXME: is this even needed?

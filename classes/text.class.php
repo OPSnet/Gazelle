@@ -1316,7 +1316,7 @@ class Text {
 
     protected static function bbcodeThreadUrl(int|string $thread, int|null $postId = null): string {
         if (is_string($thread) && str_contains($thread, ':')) {
-            [$threadId, $postId] = array_map('intval', explode(':', $thread));
+            [$threadId, $postId] = array_map(intval(...), explode(':', $thread));
         } else {
             $threadId = (int)$thread;
         }

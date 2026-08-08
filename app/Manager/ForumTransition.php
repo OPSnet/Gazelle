@@ -24,7 +24,7 @@ class ForumTransition extends \Gazelle\BaseManager {
 
         $privilegeList = empty(trim($privileges))
             ? []
-            : array_map(fn ($p) => trim($p), explode(',', trim($privileges)));
+            : array_map(trim(...), explode(',', trim($privileges)));
 
         $secondaryClassList = empty(trim($secondaryClasses))
             ? []

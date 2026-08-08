@@ -20,10 +20,10 @@ if (is_null($artist)) {
 }
 
 $tgMan = new Manager\TGroup();
-$tgroupList = array_map(fn ($id) => $tgMan->findById($id), $artist->tgroupIdUsage());
+$tgroupList = array_map($tgMan->findById(...), $artist->tgroupIdUsage());
 
 $reqMan = new Manager\Request();
-$requestList = array_map(fn ($id) => $reqMan->findById($id), $artist->requestIdUsage());
+$requestList = array_map($reqMan->findById(...), $artist->requestIdUsage());
 
 if (count($tgroupList) + count($requestList) > 0) {
     echo $Twig->render('artist/remove-fail.twig', [

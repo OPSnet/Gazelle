@@ -141,7 +141,7 @@ class TGroup extends \Gazelle\ArtistRole {
         if (!$matchList) {
             return [];
         }
-        $matchList = array_flip(array_map('mb_strtolower', $matchList));
+        $matchList = array_flip(array_map(mb_strtolower(...), $matchList));
         $matched = [];
         $roleList = $this->roleList();
         foreach ($roleList as $artistList) {

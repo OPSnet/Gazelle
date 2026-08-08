@@ -80,7 +80,6 @@ class Pg {
 
     /**
      * @param class-string<\BackedEnum> $className
-     * @param string $pgEnumName
      */
     public function registerEnum(
         string $className,
@@ -93,9 +92,7 @@ class Pg {
         $factory = $this->cnxrw->getTypeConverterFactory();
         /** @phpstan-ignore-next-line method.notFound dynamic method call */
         $factory->registerConverter(
-            static function () use ($className) {
-                return new EnumConverter($className);
-            },
+            static fn() => new EnumConverter($className),
             $pgEnumName,
             $schema
         );

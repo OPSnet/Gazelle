@@ -53,7 +53,7 @@ class Filter extends \Gazelle\Base {
     }
 
     protected function multiLineSplit(string $data): array {
-        return array_unique(array_map('trim', preg_split('/\r\n?|\n/', trim($data)))); /** @phpstan-ignore-line */
+        return array_unique(array_map(trim(...), preg_split('/\r\n?|\n/', trim($data)))); /** @phpstan-ignore-line */
     }
 
     public function setMultiLine(string $field, $data): static {
@@ -62,7 +62,7 @@ class Filter extends \Gazelle\Base {
     }
 
     public function setMultiValue(string $field, $data): static {
-        $this->field[$field] = array_unique(array_map('trim', $data));
+        $this->field[$field] = array_unique(array_map(trim(...), $data));
         return $this;
     }
 

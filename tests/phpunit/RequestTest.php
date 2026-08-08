@@ -991,7 +991,6 @@ class RequestTest extends TestCase {
          *  - u1 creates a request
          *  - u2 votes on it
          */
-        $manager = new Manager\Collage();
         $creator = $this->userList['admin'];
         $voter   = $this->userList['user'];
         $this->request = Helper::makeRequestMusic(
@@ -1089,7 +1088,7 @@ class RequestTest extends TestCase {
 
         $this->request->vote($voter, 1024 * 1024);
         $body    = "phpunit v{$voter->id} r{$this->request->id}";
-        $comment = new Manager\Comment()->create(
+        new Manager\Comment()->create(
             $voter,
             CommentType::request->value,
             $this->request->id,

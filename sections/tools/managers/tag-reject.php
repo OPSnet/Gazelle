@@ -28,7 +28,7 @@ if (isset($_POST['create']) && $_POST['create'] !== '') {
 if (isset($_POST['remove']) && $_POST['remove'] !== []) {
     authorize();
     $result = $manager->removeRejectedList(
-        array_map('intval', $_POST['remove'])
+        array_map(intval(...), $_POST['remove'])
     );
     $message[] = "$result tag" . plural($result) . " removed";
 }

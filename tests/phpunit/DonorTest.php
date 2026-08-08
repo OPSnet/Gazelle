@@ -415,9 +415,15 @@ class DonorTest extends TestCase {
         $this->assertGreaterThan(0, $manager->topDonorList(100, $userMan), 'donor-top-donor');
         $this->assertGreaterThan($initial + DONOR_RANK_PRICE, $manager->totalMonth(1), 'donor-manager-month');
         $username = $this->donor->user()->username();
-        $entry = array_values(array_filter($manager->rewardPage(null, 100, 0), fn($d) => $d['user_id'] == $this->donor->user()->id))[0];
+        $entry = array_first(array_filter(
+            $manager->rewardPage(null, 100, 0),
+            fn($d) => $d['user_id'] == $this->donor->user()->id,
+        ));
         $this->assertSame($username, $entry['Username'], 'donor-manager-reward-username');
-        $entry = array_values(array_filter($manager->rewardPage($username, 100, 0), fn($d) => $d['user_id'] == $this->donor->user()->id))[0];
+        $entry = array_first(array_filter(
+            $manager->rewardPage($username, 100, 0),
+            fn($d) => $d['user_id'] == $this->donor->user()->id,
+        ));
         $this->assertSame($username, $entry['Username'], 'donor-manager-reward-search');
 
         $timeline = $manager->timeline();

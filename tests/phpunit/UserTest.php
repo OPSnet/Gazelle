@@ -503,7 +503,7 @@ class UserTest extends TestCase {
         /* There is no point capturing usernames that are too long for the site schema */
         $username = '12345678901234567890'; // 20 chars max
         $watch    = new LoginWatch(Helper::IP_ADDR);
-        $result   = new Login()->login(
+        new Login()->login(
             username: $username . 'z',
             password: 'password',
             watch:    $watch,

@@ -534,8 +534,8 @@ class ReaperTest extends TestCase {
         );
         $this->assertSame(
             864000,
-            (int)strtotime(array_values($final)[0]['min_date'])
-                - (int)strtotime(array_values($initial)[0]['min_date']),
+            (int)strtotime(array_first($final)['min_date'])
+                - (int)strtotime(array_first($initial)['min_date']),
             'reaper-grace-period-delta'
         );
     }

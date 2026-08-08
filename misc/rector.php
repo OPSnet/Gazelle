@@ -9,6 +9,7 @@ use Rector\Php73\Rector\FuncCall\StringifyStrNeedlesRector;
 use Rector\Php81\Rector\FuncCall\NullToStrictStringFuncCallArgRector;
 use Rector\Php83\Rector\ClassConst\AddTypeToConstRector;
 use Rector\Php83\Rector\ClassMethod\AddOverrideAttributeToOverriddenMethodsRector;
+use Rector\Php85\Rector\Property\AddOverrideAttributeToOverriddenPropertiesRector;
 
 // phpcs:disable PSR1.Files.SideEffects.FoundWithSymbols
 define('BONUS_UPLOAD_BOOST_ACTIVE', true);
@@ -46,6 +47,7 @@ return RectorConfig::configure()
         // From the one-thing-at-a-time department
         AddTypeToConstRector::class,
         AddOverrideAttributeToOverriddenMethodsRector::class,
+        AddOverrideAttributeToOverriddenPropertiesRector::class,
         // Until rector understands that defines can be dynamic, this has to be
         // ignored, otherwise rector will hack stuff out that should be untouched.
         RemoveAlwaysTrueIfConditionRector::class,

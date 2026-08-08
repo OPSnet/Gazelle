@@ -52,7 +52,7 @@ class Privilege extends \Gazelle\BaseUser {
         foreach (unserialize($config['privileges']) ?: [] as $name => $value) {
             $info['privilege'][$name] = (bool)$value;
         }
-        foreach (array_map('intval', explode(',', $config['class_forums'])) as $forumId) {
+        foreach (array_map(intval(...), explode(',', $config['class_forums'])) as $forumId) {
             if ($forumId) {
                 $info['forum'][$forumId] = true;
             }
@@ -82,7 +82,7 @@ class Privilege extends \Gazelle\BaseUser {
             foreach (unserialize($class['Values']) ?: [] as $name => $value) {
                 $info['privilege'][$name] = (bool)$value;
             }
-            foreach (array_map('intval', explode(',', $class['PermittedForums'])) as $forumId) {
+            foreach (array_map(intval(...), explode(',', $class['PermittedForums'])) as $forumId) {
                 if ($forumId) {
                     if ($forumId == INVITATION_FORUM_ID && $this->user->disableInvites()) {
                         continue;
@@ -101,13 +101,13 @@ class Privilege extends \Gazelle\BaseUser {
         }
 
         // user-level forum overrides
-        foreach (array_map('intval', explode(',', $config['user_allowed_forums'])) as $forumId) {
+        foreach (array_map(intval(...), explode(',', $config['user_allowed_forums'])) as $forumId) {
             if ($forumId) {
                 $info['forum'][$forumId] = true;
             }
         }
         // user-forbidden may override class-allowed
-        foreach (array_map('intval', explode(',', $config['user_forbidden_forums'])) as $forumId) {
+        foreach (array_map(intval(...), explode(',', $config['user_forbidden_forums'])) as $forumId) {
             if ($forumId) {
                 $info['forum'][$forumId] = false;
             }

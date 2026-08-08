@@ -15,7 +15,7 @@ $suggestions = array_map(
         'value' => $entry['value'],
         'html'  => $twig->render('artist/widget.twig', $entry['widget']),
     ],
-    (new Manager\Artist())->autocompleteList($prefix)
+    new Manager\Artist()->autocompleteList($prefix)
 );
 
 echo json_encode([

@@ -70,7 +70,7 @@ class Contest extends BaseObject {
 
         // upload-flac-no-single => UploadFlacNoSingle
         $className = '\\Gazelle\\Contest\\'
-            . implode('', array_map('ucfirst', explode('-', $info['contest_type'])));
+            . implode('', array_map(ucfirst(...), explode('-', $info['contest_type'])));
         $info['type'] = new $className($this->id, $info['date_begin'], $info['date_end']);
 
         if ($info['bonus_pool_id']) {

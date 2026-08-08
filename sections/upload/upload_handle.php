@@ -68,7 +68,7 @@ if ($Properties['Encoding'] === 'Other') {
     $_POST['other_bitrate'] = trim($_POST['other_bitrate'] ?? '');
 }
 $Properties['TagList'] = isset($_POST['tags'])
-    ? array_unique(array_map('trim', explode(',', $_POST['tags']))) // Musicbranes loves to send duplicates
+    ? array_unique(array_map(trim(...), explode(',', $_POST['tags']))) // Musicbranes loves to send duplicates
     : [];
 $Properties['Image'] = trim($_POST['image'] ?? '');
 $Properties['GroupDescription'] = trim($_POST['album_desc'] ?? $_POST['desc'] ?? '');
@@ -80,7 +80,7 @@ if (!isset($_POST['artists'])) {
     $artistRole = [];
 } else {
     $Artists = $_POST['artists'];
-    $artistRole = array_map('intval', $_POST['importance']);
+    $artistRole = array_map(intval(...), $_POST['importance']);
 }
 
 if (isset($_POST['requestid'])) {

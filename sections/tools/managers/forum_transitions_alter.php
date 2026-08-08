@@ -28,7 +28,7 @@ if ($_POST['submit'] === 'Delete') {
         ['permissions', false, 'string', 'The permissions have a max length of 50 characters', ['maxlength' => 50]],
     ]);
 
-    $_POST = array_map('trim', $_POST);
+    $_POST = array_map(trim(...), $_POST);
     if (!$validator->validate($_POST)) {
         Error400::error($validator->errorMessage());
     }

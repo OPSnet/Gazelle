@@ -30,7 +30,7 @@ if ($note !== '') {
 }
 $userList = [];
 if (isset($_GET['user'])) {
-    foreach (array_unique(array_map('trim', explode(' ', $_GET['user']))) as $name) {
+    foreach (array_unique(array_map(trim(...), explode(' ', $_GET['user']))) as $name) {
         $user = $userMan->find($name);
         if ($user) {
             $userList[] = $user;
@@ -43,7 +43,7 @@ if (isset($_GET['user'])) {
 $authorList = [];
 if (isset($_GET['author'])) {
     $authorList = [];
-    foreach (array_unique(array_map('trim', explode(' ', $_GET['author']))) as $name) {
+    foreach (array_unique(array_map(trim(...), explode(' ', $_GET['author']))) as $name) {
         $user = $userMan->find($name);
         if ($user) {
             $authorList[] = $user;

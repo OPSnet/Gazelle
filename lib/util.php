@@ -584,7 +584,7 @@ function weightedChoice(array $list): mixed {
  */
 function extract_torrent_id(string $text): array {
     if (preg_match_all('/(?:[?&]torrentid=|(?<![:=#])\b)(\d+)/', trim($text), $match)) {
-        return array_map('intval', $match[1]);
+        return array_map(intval(...), $match[1]);
     }
     return [];
 }

@@ -88,7 +88,7 @@ echo $Twig->render('user/invited.twig', [
     'edit_source' => $inviteSourceMan && ($_GET['edit'] ?? '') === 'source',
     'heading'     => $heading,
     'invited'     => array_map(
-        fn ($id) => $userMan->findById($id),
+        $userMan->findById(...),
         $user->invite()->page(
             $heading->orderBy(), $heading->dir(), $paginator->limit(), $paginator->offset()
         )

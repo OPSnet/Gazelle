@@ -266,7 +266,7 @@ class Users extends \Gazelle\Base {
         if (!isset($this->info['xbt_files_users'])) {
             $stat = self::$cache->get_value('stat_xbt_fu');
             if ($stat === false) {
-                $stat = array_map('intval',
+                $stat = array_map(intval(...),
                     self::$db->rowAssoc("
                         SELECT count(*)                  AS peer_total,
                             sum(if(remaining = 0, 1, 0)) AS seeder_total,
@@ -352,7 +352,7 @@ class Users extends \Gazelle\Base {
         if (!isset($this->info['active'])) {
             $active = self::$cache->get_value('stats_user_active');
             if ($active === false) {
-                $active = array_map('intval',
+                $active = array_map(intval(...),
                     self::$db->rowAssoc("
                         SELECT
                             sum(ula.last_access > now() - INTERVAL 1 DAY)   AS active_day,

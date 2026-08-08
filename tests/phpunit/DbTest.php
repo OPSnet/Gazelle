@@ -194,7 +194,6 @@ class DbTest extends TestCase {
     }
 
     public function testPgBasic(): void {
-        $num = random_int(100, 999);
         $st = $this->pg()->prepare("
             create temporary table t (
                 id_t integer not null primary key generated always as identity,

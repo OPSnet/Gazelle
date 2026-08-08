@@ -230,10 +230,10 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
 
         // Reorganize tag info to be useful
         $tagNames       = explode(',', $info['tagNames'] ?? '');
-        $tagIds         = array_map('intval', explode(',', $info['tagIds'] ?? ''));
-        $tagVoteUserIds = array_map('intval', explode(',', $info['tagVoteUserIds'] ?? ''));
-        $tagUpvotes     = array_map('intval', explode(',', $info['tagUpvotes'] ?? ''));
-        $tagDownvotes   = array_map('intval', explode(',', $info['tagDownvotes'] ?? ''));
+        $tagIds         = array_map(intval(...), explode(',', $info['tagIds'] ?? ''));
+        $tagVoteUserIds = array_map(intval(...), explode(',', $info['tagVoteUserIds'] ?? ''));
+        $tagUpvotes     = array_map(intval(...), explode(',', $info['tagUpvotes'] ?? ''));
+        $tagDownvotes   = array_map(intval(...), explode(',', $info['tagDownvotes'] ?? ''));
         $info['tags']   = [];
         for ($n = 0; $n < count($tagIds); ++$n) {
             $info['tags'][$tagIds[$n]] = [
@@ -408,7 +408,7 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
         );
         $list = [];
         foreach (self::$db->to_array(false, MYSQLI_BOTH) as $item) {
-            $item['id_list'] = array_map('intval', explode(',', $item['id_concat']));
+            $item['id_list'] = array_map(intval(...), explode(',', $item['id_concat']));
             $list[] = $item;
         }
         return $list;

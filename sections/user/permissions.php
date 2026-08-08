@@ -22,7 +22,7 @@ if (is_null($user)) {
 if (isset($_POST['action'])) {
     authorize();
     $privilegeList = [];
-    foreach (array_map('strval', array_keys($_POST)) as $key) {
+    foreach (array_map(strval(...), array_keys($_POST)) as $key) {
         if (str_starts_with($key, 'perm_')) {
             $privilegeList[substr($key, 5)] = true;
         }
