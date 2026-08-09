@@ -241,9 +241,9 @@
         let $amazon_link = ($asin.length > 0)
             ? "[url=http://www.amazon.com/exec/obidos/ASIN/" + $asin + "]Amazon[/url]" + "\n"
             : "";
-        let $country = $(xml).find("country").text();
-        let $country_text = ($country.length > 0)
-            ? "Country: " + $country + "\n"
+        const $country = $(xml).find("release").children("country");
+        const $country_text = ($country.length > 0)
+            ? "Country: " + $country.text() + "\n"
             : "";
         let $barcode = $(xml).find("barcode").text();
         let $barcode_text = ($barcode.length > 0)
