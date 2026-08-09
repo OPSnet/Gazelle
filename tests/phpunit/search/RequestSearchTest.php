@@ -61,7 +61,7 @@ class RequestSearchTest extends TestCase {
         }
 
         $creator = new Search\Request()->setCreator($this->userList[0]);
-        $this->assertEquals(0, $creator->total(), 'reqs-basic-no-creator');
+        $this->assertSame(0, $creator->total(), 'reqs-basic-no-creator');
 
         $this->requestList[] = Helper::makeRequestMusic(
             user:        $this->userList[0],
@@ -71,13 +71,13 @@ class RequestSearchTest extends TestCase {
             year:        $year,
         );
 
-        $this->assertEquals(1, $creator->total(), 'reqs-creator-total');
-        $this->assertEquals(
+        $this->assertSame(1, $creator->total(), 'reqs-creator-total');
+        $this->assertSame(
             $initial['category'] + 1,
             $search['category']->total(),
             'reqs-category-total',
         );
-        $this->assertEquals(
+        $this->assertSame(
             $initial['year'] + 1,
             $search['year']->total(),
             'reqs-year-total',
@@ -85,7 +85,7 @@ class RequestSearchTest extends TestCase {
 
         $result = $creator->page(2, 0);
         $this->assertCount(1, $result, 'reqs-page-count');
-        $this->assertEquals(
+        $this->assertSame(
             $this->requestList[0]->id,
             $result[0]->id,
             'reqs-page-entry',
@@ -105,16 +105,16 @@ class RequestSearchTest extends TestCase {
         );
 
         $bookmarker = new Search\Request()->setBookmarker($user);
-        $this->assertEquals(
+        $this->assertSame(
             ['bookmarker'],
             array_keys($bookmarker->info()),
             'reqs-info'
         );
         $this->assertTrue($bookmarker->isBookmarkView(), 'reqs-is-bookmarker');
-        $this->assertEquals(1, $bookmarker->total(), 'reqs-bookmarker-total');
+        $this->assertSame(1, $bookmarker->total(), 'reqs-bookmarker-total');
         $result = $bookmarker->page(1, 0);
         $this->assertCount(1, $result, 'reqs-bookmark-page-count');
-        $this->assertEquals(
+        $this->assertSame(
             $this->requestList[0]->id,
             $result[0]->id,
             'reqs-bookmark-page-entry',
@@ -133,8 +133,8 @@ class RequestSearchTest extends TestCase {
         $request->vote($user, get_bytes('10T'));
 
         $bountyMin = new Search\Request()->setBountyMin(get_bytes('8T'));
-        $this->assertEquals(1, $bountyMin->total(), 'reqs-bounty-min-total');
-        $this->assertEquals(
+        $this->assertSame(1, $bountyMin->total(), 'reqs-bounty-min-total');
+        $this->assertSame(
             $request->id,
             array_first($bountyMin->page(1, 0))->id,
             'reqs-bounty-min-page-entry',
@@ -142,7 +142,7 @@ class RequestSearchTest extends TestCase {
         $bountyMinMax = new Search\Request()
             ->setBountyMin(get_bytes('8T'))
             ->setBountyMax(get_bytes('9T'));
-        $this->assertEquals(0, $bountyMinMax->total(), 'reqs-bounty-min-max-total');
+        $this->assertSame(0, $bountyMinMax->total(), 'reqs-bounty-min-max-total');
     }
 
     public function testRequestSearchFiller(): void {
@@ -171,7 +171,7 @@ class RequestSearchTest extends TestCase {
         $torrent = Helper::makeTorrentMusic(
             $this->tgroup, $user, 'Cassette', 'FLAC', 'Lossless',
         );
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $this->requestList[0]->fill($user, $torrent),
             'request-search-fill',
@@ -179,11 +179,11 @@ class RequestSearchTest extends TestCase {
 
         $filler->flush();
         $filler->setFiller($user)->showFilled();
-        $this->assertEquals(1, $filler->total(), 'reqs-filler-total');
+        $this->assertSame(1, $filler->total(), 'reqs-filler-total');
         $result = $filler->page(1, 0);
         $this->assertCount(1, $result, 'reqs-filler-page-count');
-        $this->assertEquals($this->requestList[0]->id, $result[0]->id, 'reqs-filler-page-entry');
-        $this->assertEquals(
+        $this->assertSame($this->requestList[0]->id, $result[0]->id, 'reqs-filler-page-entry');
+        $this->assertSame(
             $initial + 1,
             $filler->flush()->showFilled()->total(),
             'reqs-filler-filled',
@@ -235,12 +235,12 @@ class RequestSearchTest extends TestCase {
         $title = 'title ' . randomString(16);
         $this->setupValueSearch($title);
 
-        $this->assertEquals($nomatchStrictTotal,    $nomatchStrict->total(), 'reqs-enc-nomatch-strict');
-        $this->assertEquals($nomatchLooseTotal + 1, $nomatchLoose->total(), 'reqs-enc-nomatch-loose');
-        $this->assertEquals($matchStrictTotal  + 1, $matchStrict->total(), 'reqs-enc-match-strict');
-        $this->assertEquals($matchLooseTotal   + 2, $matchLoose->total(), 'reqs-enc-match-loose');
+        $this->assertSame($nomatchStrictTotal,    $nomatchStrict->total(), 'reqs-enc-nomatch-strict');
+        $this->assertSame($nomatchLooseTotal + 1, $nomatchLoose->total(), 'reqs-enc-nomatch-loose');
+        $this->assertSame($matchStrictTotal  + 1, $matchStrict->total(), 'reqs-enc-match-strict');
+        $this->assertSame($matchLooseTotal   + 2, $matchLoose->total(), 'reqs-enc-match-loose');
 
-        $this->assertEquals(
+        $this->assertSame(
             ['list' => ['24bit Lossless'], 'strict' => true],
             $matchStrict->encodingList(),
             'reqs-encoding-list',
@@ -259,12 +259,12 @@ class RequestSearchTest extends TestCase {
         $title = 'title ' . randomString(16);
         $this->setupValueSearch($title);
 
-        $this->assertEquals($nomatchStrictTotal,    $nomatchStrict->total(), 'reqs-format-nomatch-strict');
-        $this->assertEquals($nomatchLooseTotal + 1, $nomatchLoose->total(), 'reqs-format-nomatch-loose');
-        $this->assertEquals($matchStrictTotal  + 1, $matchStrict->total(), 'reqs-format-match-strict');
-        $this->assertEquals($matchLooseTotal   + 2, $matchLoose->total(), 'reqs-format-match-loose');
+        $this->assertSame($nomatchStrictTotal,    $nomatchStrict->total(), 'reqs-format-nomatch-strict');
+        $this->assertSame($nomatchLooseTotal + 1, $nomatchLoose->total(), 'reqs-format-nomatch-loose');
+        $this->assertSame($matchStrictTotal  + 1, $matchStrict->total(), 'reqs-format-match-strict');
+        $this->assertSame($matchLooseTotal   + 2, $matchLoose->total(), 'reqs-format-match-loose');
 
-        $this->assertEquals(
+        $this->assertSame(
             ['list' => ['FLAC'], 'strict' => true],
             $matchStrict->formatList(),
             'reqs-format-list',
@@ -283,12 +283,12 @@ class RequestSearchTest extends TestCase {
         $title = 'title ' . randomString(16);
         $this->setupValueSearch($title);
 
-        $this->assertEquals($nomatchStrictTotal,    $nomatchStrict->total(), 'reqs-media-nomatch-strict');
-        $this->assertEquals($nomatchLooseTotal + 1, $nomatchLoose->total(), 'reqs-media-nomatch-loose');
-        $this->assertEquals($matchStrictTotal  + 1, $matchStrict->total(), 'reqs-media-match-strict');
-        $this->assertEquals($matchLooseTotal   + 2, $matchLoose->total(), 'reqs-media-match-loose');
+        $this->assertSame($nomatchStrictTotal,    $nomatchStrict->total(), 'reqs-media-nomatch-strict');
+        $this->assertSame($nomatchLooseTotal + 1, $nomatchLoose->total(), 'reqs-media-nomatch-loose');
+        $this->assertSame($matchStrictTotal  + 1, $matchStrict->total(), 'reqs-media-match-strict');
+        $this->assertSame($matchLooseTotal   + 2, $matchLoose->total(), 'reqs-media-match-loose');
 
-        $this->assertEquals(
+        $this->assertSame(
             ['list' => ['Vinyl'], 'strict' => true],
             $matchStrict->mediaList(),
             'reqs-media-list',
@@ -303,10 +303,10 @@ class RequestSearchTest extends TestCase {
         $title = 'title ' . randomString(16);
         $this->setupValueSearch($title);
 
-        $this->assertEquals($nomatchTotal, $nomatch->total(), 'reqs-rtype-nomatch-strict');
-        $this->assertEquals($matchTotal + 2, $match->total(), 'reqs-rtype-match-strict');
+        $this->assertSame($nomatchTotal, $nomatch->total(), 'reqs-rtype-nomatch-strict');
+        $this->assertSame($matchTotal + 2, $match->total(), 'reqs-rtype-match-strict');
 
-        $this->assertEquals(
+        $this->assertSame(
             [6, 7],
             $match->releaseTypeList(),
             'reqs-rtype-list',
@@ -342,13 +342,13 @@ class RequestSearchTest extends TestCase {
         $this->requestList[2]->setField('created', date('Y-m-d H:i:s', time() + 4))->modify();
 
         $search = new Search\Request()->setTag("{$tagList[0]->name()}", Enum\SearchTag::all);
-        $this->assertEquals(2, $search->total(), 'reqs-tag-1-all-total');
-        $this->assertEquals(
+        $this->assertSame(2, $search->total(), 'reqs-tag-1-all-total');
+        $this->assertSame(
             [$this->requestList[1]->id, $this->requestList[0]->id],
             array_map(fn ($r) => $r->id, $search->page(2, 0)),
             'reqs-tag-1-all-page'
         );
-        $this->assertEquals(
+        $this->assertSame(
             [
                 'list' => "{$tagList[0]->name()}",
                 'mode' => Enum\SearchTag::all,
@@ -358,15 +358,15 @@ class RequestSearchTest extends TestCase {
         );
 
         $search->flush()->setTag("{$tagList[0]->name()},{$tagList[1]->name()}", Enum\SearchTag::all);
-        $this->assertEquals(1, $search->total(), 'reqs-tag-2-all');
-        $this->assertEquals(
+        $this->assertSame(1, $search->total(), 'reqs-tag-2-all');
+        $this->assertSame(
             [$this->requestList[0]->id],
             array_map(fn ($r) => $r->id, $search->page(1, 0)),
             'reqs-tag-2-all-page'
         );
 
         $search->flush()->setTag("{$tagList[0]->name()},{$tagList[1]->name()}", Enum\SearchTag::any);
-        $this->assertEquals(3, $search->total(), 'reqs-tag-2-any');
+        $this->assertSame(3, $search->total(), 'reqs-tag-2-any');
         $this->assertEqualsCanonicalizing(
             [$this->requestList[2]->id, $this->requestList[1]->id, $this->requestList[0]->id],
             array_map(fn ($r) => $r->id, $search->page(3, 0)),
@@ -374,8 +374,8 @@ class RequestSearchTest extends TestCase {
         );
 
         $search->flush()->setTag("{$tagList[1]->name()},!{$tagList[2]->name()}", Enum\SearchTag::any);
-        $this->assertEquals(1, $search->total(), 'reqs-tag-1-not-2-total');
-        $this->assertEquals(
+        $this->assertSame(1, $search->total(), 'reqs-tag-1-not-2-total');
+        $this->assertSame(
             [$this->requestList[0]->id],
             array_map(fn ($r) => $r->id, $search->page(3, 0)),
             'reqs-tag-1-not-2-page'
@@ -383,7 +383,7 @@ class RequestSearchTest extends TestCase {
 
         // do full text search while we are here
         $search->flush()->setSearch($title);
-        $this->assertEquals(3, $search->total(), 'reqs-match-search-total');
+        $this->assertSame(3, $search->total(), 'reqs-match-search-total');
         $this->assertEqualsCanonicalizing(
             [$this->requestList[2]->id, $this->requestList[1]->id, $this->requestList[0]->id],
             array_map(fn ($r) => $r->id, $search->page(3, 0)),
@@ -402,9 +402,9 @@ class RequestSearchTest extends TestCase {
         $this->requestList[0]->vote($user, 100000);
 
         $voter = new Search\Request()->setVoter($user);
-        $this->assertEquals(1, $voter->total(), 'reqs-voter-total');
+        $this->assertSame(1, $voter->total(), 'reqs-voter-total');
         $result = $voter->page(1, 0);
         $this->assertCount(1, $result, 'reqs-voter-page-count');
-        $this->assertEquals($this->requestList[0]->id, $result[0]->id, 'reqs-voter-page-entry');
+        $this->assertSame($this->requestList[0]->id, $result[0]->id, 'reqs-voter-page-entry');
     }
 }

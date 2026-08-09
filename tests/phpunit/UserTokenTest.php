@@ -38,7 +38,7 @@ class UserTokenTest extends TestCase {
             $manager->findByToken($userToken->value()),
             'usertoken-find-by-token',
         );
-        $this->assertEquals(
+        $this->assertSame(
             UserTokenType::password,
             $userToken->type(),
             'usertoken-type',
@@ -49,7 +49,7 @@ class UserTokenTest extends TestCase {
         Helper::sleepTick();
         $this->assertFalse($userToken->consume(), 'usertoken-already-consumed');
 
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $manager->removeUser($userToken->user()),
             'usertoken-remove-user',
@@ -59,7 +59,7 @@ class UserTokenTest extends TestCase {
     public function testUserTokenPermanent(): void {
         $manager = new Manager\UserToken();
         $userToken = $manager->create(UserTokenType::mfa, $this->user);
-        $this->assertEquals('infinity', $userToken->expiry(), 'usertoken-permanent');
+        $this->assertSame('infinity', $userToken->expiry(), 'usertoken-permanent');
     }
 
     public function testUserTokenExists(): void {
@@ -75,12 +75,12 @@ class UserTokenTest extends TestCase {
     public function testPasswordToken(): void {
         $manager = new Manager\UserToken();
         $userToken = $manager->createPasswordResetToken($this->user);
-        $this->assertEquals(
+        $this->assertSame(
             24,
             UserTokenType::confirm->hourInterval(),
             'usertoken-confirm-interval',
         );
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $this->pg()->query("
                 update user_token set
@@ -90,7 +90,7 @@ class UserTokenTest extends TestCase {
             ),
             'usertoken-pg-update',
         );
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $manager->expireTokens(UserTokenType::password),
             'usertoken-expire',
@@ -111,10 +111,10 @@ class UserTokenTest extends TestCase {
         $this->assertTrue($this->user->hasApiTokenByName('api-token'), 'user-has-token-by-name');
         $list = $this->user->apiTokenList();
         $this->assertCount(1, $list, 'user-token-list');
-        $this->assertEquals(0, $this->user->revokeApiTokenById(0), 'user-revoke-missing');
+        $this->assertSame(0, $this->user->revokeApiTokenById(0), 'user-revoke-missing');
 
         $this->assertCount(0, $this->user->apiTokenList(revoked: true), 'user-token-none-revoked');
-        $this->assertEquals(1, $this->user->revokeApiTokenById($list[0]['id']), 'user-revoke-token');
+        $this->assertSame(1, $this->user->revokeApiTokenById($list[0]['id']), 'user-revoke-token');
         $this->assertCount(1, $this->user->apiTokenList(revoked: true), 'user-token-one-revoked');
     }
 }

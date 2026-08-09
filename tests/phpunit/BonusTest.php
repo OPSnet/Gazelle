@@ -40,9 +40,9 @@ class BonusTest extends TestCase {
 
         $user  = $this->userList['giver'];
         $giver = new User\Bonus($user);
-        $this->assertEquals(0.0, $giver->hourlyRate(), 'bonus-per-hour');
-        $this->assertEquals(0, $giver->user()->bonusPointsTotal(), 'bonus-points-initial');
-        $this->assertEquals(0, $giver->user()->tokenCount(), 'bonus-fltokens-intial');
+        $this->assertSame(0.0, $giver->hourlyRate(), 'bonus-per-hour');
+        $this->assertSame(0, $giver->user()->bonusPointsTotal(), 'bonus-points-initial');
+        $this->assertSame(0, $giver->user()->tokenCount(), 'bonus-fltokens-intial');
         $this->assertCount(0, $giver->history(10, 0), 'bonus-history-initial');
         $this->assertEquals(['nr' => 0, 'total' => 0], $giver->summary(), 'bonus-summary-initial');
         $this->assertEquals(
@@ -61,7 +61,7 @@ class BonusTest extends TestCase {
         );
 
         $giver->setPoints($startingPoints);
-        $this->assertEquals(
+        $this->assertSame(
             $startingPoints,
             $giver->user()->bonusPointsTotal(),
             'bonus-set-points',
@@ -75,15 +75,14 @@ class BonusTest extends TestCase {
         // buy a token
         $flt = $manager->findBonusItemByLabel('token-1');
         $this->assertFalse($flt->needsPreparation(), 'bonus-token-no-prepare');
-        $this->assertInstanceOf(BonusItem::class, $flt->flush(), 'bonus-item-flush');
-        $this->assertEquals('', $flt->link(), 'bonus-item-link');
-        $this->assertEquals('bonus.php', $flt->location(), 'bonus-item-location');
+        $this->assertSame('', $flt->link(), 'bonus-item-link');
+        $this->assertSame('bonus.php', $flt->location(), 'bonus-item-location');
         $this->assertEquals(
             BonusItemPurchaseStatus::success,
             $flt->purchase($user, $flt->price()),
             'bonus-item-purchase-token-1',
         );
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $giver->user()->tokenCount(),
             'bonus-fltokens-bought',
@@ -102,7 +101,7 @@ class BonusTest extends TestCase {
 
         // buy a seedbox
         $seedbox = $manager->findBonusItemByLabel('seedbox');
-        $this->assertEquals(
+        $this->assertSame(
             'Seedbox Viewer',
             $seedbox->title(),
             'bonus-item-title',
@@ -150,7 +149,7 @@ class BonusTest extends TestCase {
             'bonus-item-repurchase-file-count',
         );
 
-        $this->assertEquals(
+        $this->assertSame(
             $flt->price()
                 + $seedbox->price()
                 + $fileCount->price(),
@@ -165,7 +164,7 @@ class BonusTest extends TestCase {
             $bbn->purchase($user, $bbn->price(), ['title' => '[b]i got u[/b]']),
             'bonus-item-title-no-bb',
         );
-        $this->assertEquals('i got u', $user->title(), 'bonus-item-user-has-title-no-bb');
+        $this->assertSame('i got u', $user->title(), 'bonus-item-user-has-title-no-bb');
 
         $bby = $manager->findBonusItemByLabel('title-bb-y');
         $giver->addPoints($bby->price());
@@ -174,7 +173,7 @@ class BonusTest extends TestCase {
             $bby->purchase($user, $bby->price(), ['title' => '[b]i got u[/b]']),
             'bonus-item-title-yes-bb',
         );
-        $this->assertEquals(
+        $this->assertSame(
             '<strong>i got u</strong>',
             $user->title(),
             'bonus-item-user-has-title-yes-bb',
@@ -186,7 +185,7 @@ class BonusTest extends TestCase {
             $off->purchase($user, $off->price()),
             'bonus-item-title-off',
         );
-        $this->assertEquals(
+        $this->assertSame(
             '',
             $user->title(),
             'bonus-item-user-has-no-title',
@@ -199,19 +198,19 @@ class BonusTest extends TestCase {
             $collage->purchase($user, $collage->price()),
             'bonus-item-purchase-collage',
         );
-        $this->assertEquals(
+        $this->assertSame(
             $collage->price() * 2,
             $collage->priceForUser($giver->user()),
             'bonus-item-price-for-user'
         );
-        $this->assertEquals(
+        $this->assertSame(
             $collage->price(),
             $collage->priceForUser($this->userList['receiver']),
             'bonus-item-price-for-other-user'
         );
 
         $history = $giver->history(10, 0);
-        $this->assertCount(7, $history, 'bonus-history-final');
+        $this->assertCount(7, $history, 'bonus-history-final'); /** @phpstan-ignore-line method.impossibleType */
 
         $this->assertEquals(
             [
@@ -494,7 +493,7 @@ class BonusTest extends TestCase {
             $userBonus->removePoints(1000, force: true),
             'bonus-remove-force'
         );
-        $this->assertEquals(
+        $this->assertSame(
             -1000,
             $user->bonusPointsTotal(),
             'bonus-points-negative'
@@ -588,18 +587,18 @@ class BonusTest extends TestCase {
         );
 
         $manager = new Manager\Bonus();
-        $this->assertEquals(
+        $this->assertSame(
             1,
             // but not too far
             $manager->addActivePoints(23456, date('Y-m-d H:i:s', time() + 5)),
             'bonus-add-active',
         );
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $manager->addMultiPoints(789, []),
             'bonus-add-no-multi-points',
         );
-        $this->assertEquals(
+        $this->assertSame(
             2,
             $manager->addMultiPoints(
                 12345,
@@ -607,12 +606,12 @@ class BonusTest extends TestCase {
             ),
             'bonus-add-multi-points',
         );
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $manager->addUploadPoints(369,  date('Y-m-d H:i:s', time() + 1)),
             'bonus-add-upload-points',
         );
-        $this->assertEquals(
+        $this->assertSame(
             12345,
             $this->userList[0]->flush()->bonusPointsTotal(),
             'bonus-added-user-0',
@@ -675,7 +674,7 @@ class BonusTest extends TestCase {
             format: 'FLAC',
             encoding: '24bit Lossless',
         );
-        $this->assertEquals(400, $reward->reward($torrent), 'bonus-reward-perfect-flac');
+        $this->assertSame(400, $reward->reward($torrent), 'bonus-reward-perfect-flac');
 
         $torrent = Helper::makeTorrentMusic(
             tgroup: $this->tgroupList[0],
@@ -685,7 +684,7 @@ class BonusTest extends TestCase {
             format: 'FLAC',
             encoding: 'Lossless',
         );
-        $this->assertEquals(30, $reward->reward($torrent), 'bonus-reward-flac');
+        $this->assertSame(30, $reward->reward($torrent), 'bonus-reward-flac');
 
         $torrent = Helper::makeTorrentMusic(
             tgroup: $this->tgroupList[0],
@@ -695,7 +694,7 @@ class BonusTest extends TestCase {
             format: 'MP3',
             encoding: '320',
         );
-        $this->assertEquals(30, $reward->reward($torrent), 'bonus-reward-mp3');
+        $this->assertSame(30, $reward->reward($torrent), 'bonus-reward-mp3');
 
         $this->tgroupList[] =  Helper::makeTGroupEBook('phpunit ebook title');
         $torrent = Helper::makeTorrentEBook(
@@ -708,7 +707,7 @@ class BonusTest extends TestCase {
         // You may have to close out the current valid range with something like
         // update bonus_upload_reward set valid = tstzrange(lower(valid), now()) where now() <@ valid and id_category = 3;
         // insert into bonus_upload_reward (id_category, high, standard, low, valid) values (3, 10, 10, 10, tstzrange(now(), 'infinity'));
-        $this->assertEquals(10, $reward->reward($torrent), 'bonus-reward-other');
+        $this->assertSame(10, $reward->reward($torrent), 'bonus-reward-other');
 
         $this->assertGreaterThan(
             0,
@@ -719,7 +718,7 @@ class BonusTest extends TestCase {
             'bonus-reward-modify'
         );
         $torrent->setField('created', date('Y-m-d H:i:s', time() + 1))->modify();
-        $this->assertEquals(220, $reward->reward($torrent->flush()), 'bonus-reward-new-other');
+        $this->assertSame(220, $reward->reward($torrent->flush()), 'bonus-reward-new-other');
         $reward->modifyCategory(
             CATEGORY_EBOOK,
             ['high' => 10, 'standard' => 10, 'low' => 10],
@@ -731,14 +730,14 @@ class BonusTest extends TestCase {
         $reward = new BonusUploadReward();
 
         $user->setField('PermissionID', ELITE)->modify();
-        $this->assertEquals(0, $reward->boost($user), 'bonus-boost-elite');
+        $this->assertSame(0, $reward->boost($user), 'bonus-boost-elite');
         $user->setField('PermissionID', MEMBER)->modify();
-        $this->assertEquals(BONUS_UPLOAD_BOOST[0], $reward->boost($user), 'bonus-boost-01');
-        $this->assertEquals(BONUS_UPLOAD_BOOST[1], $reward->boost($user), 'bonus-boost-02');
-        $this->assertEquals(BONUS_UPLOAD_BOOST[2], $reward->boost($user), 'bonus-boost-03');
-        $this->assertEquals(BONUS_UPLOAD_BOOST[3], $reward->boost($user), 'bonus-boost-04');
-        $this->assertEquals(BONUS_UPLOAD_BOOST[4], $reward->boost($user), 'bonus-boost-05');
-        $this->assertEquals(0,                     $reward->boost($user), 'bonus-boost-06');
+        $this->assertSame(BONUS_UPLOAD_BOOST[0], $reward->boost($user), 'bonus-boost-01');
+        $this->assertSame(BONUS_UPLOAD_BOOST[1], $reward->boost($user), 'bonus-boost-02');
+        $this->assertSame(BONUS_UPLOAD_BOOST[2], $reward->boost($user), 'bonus-boost-03');
+        $this->assertSame(BONUS_UPLOAD_BOOST[3], $reward->boost($user), 'bonus-boost-04');
+        $this->assertSame(BONUS_UPLOAD_BOOST[4], $reward->boost($user), 'bonus-boost-05');
+        $this->assertSame(0,                     $reward->boost($user), 'bonus-boost-06');
     }
 
     public function testStats(): void {
@@ -753,12 +752,12 @@ class BonusTest extends TestCase {
         $bonus->addPoints(98765);
 
         $eco->flush();
-        $this->assertEquals(98765 + $total, $eco->bonusTotal(), 'bonus-total-points');
-        $this->assertEquals($stranded, $eco->bonusStrandedTotal(), 'bonus-total-stranded-points');
+        $this->assertSame(98765 + $total, $eco->bonusTotal(), 'bonus-total-points');
+        $this->assertSame($stranded, $eco->bonusStrandedTotal(), 'bonus-total-stranded-points');
 
         $this->userList['bonus']->setField('Enabled', UserStatus::disabled->value)->modify();
         $eco->flush();
-        $this->assertEquals(
+        $this->assertSame(
             98765 + $stranded,
             $eco->bonusStrandedTotal(),
             'bonus-total-disabled-stranded-points',
@@ -769,12 +768,12 @@ class BonusTest extends TestCase {
         $siteOption = new Manager\SiteOption();
         $manager    = new Manager\Bonus();
         $initial    = $manager->discount();
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $siteOption->modifyOption('bonus-discount', '25'),
             'bonus-discount-set',
         );
-        $this->assertEquals(25, $manager->discount(), 'bonus-discount-read');
+        $this->assertSame(25, $manager->discount(), 'bonus-discount-read');
         $siteOption->modifyOption('bonus-discount', (string)$initial);
     }
 
@@ -792,26 +791,26 @@ class BonusTest extends TestCase {
             ", 'phpunit-' . randomString(10)
         );
         $pool = new BonusPool($db->inserted_id());
-        $this->assertEquals(
+        $this->assertSame(
             2,
             $pool->contribute($bonus->user(), 8_000_000, 9_000_000),
             'bonus-pool-contribute',
         );
-        $this->assertEquals(
-            [[
+        $this->assertSame(
+            [
                 'user_id' => $bonus->user()->id,
-                'total'   => 9_000_000,
-            ]],
-            $stats->topPoolContributors(1),
+                'total'   => 9_000_000.0,
+            ],
+            array_first($stats->topPoolContributors(1)),
             'bonus-top-pool-contributor',
         );
         $open = new Manager\Bonus()->openPoolList();
-        $this->assertEquals(
+        $this->assertSame(
             $pool->id,
             $open['bonus_pool_id'],
             'bonus-pool-list',
         );
-        $this->assertEquals(
+        $this->assertSame(
             2,
             $pool->remove(),
             'bonus-pool-remove'
@@ -823,12 +822,12 @@ class BonusTest extends TestCase {
         $stats = new Stats\Bonus();
         $bonus = new User\Bonus(array_first($this->userList));
         $bonus->addPoints(1_000_000_000); // if you have more than that, buy some tokens
-        $this->assertEquals(
-            [[
+        $this->assertSame(
+            [
                 'user_id' => $bonus->user()->id,
-                'total'   => 1_000_000_000,
-            ]],
-            $stats->topHoarders(1),
+                'total'   => 1_000_000_000.0,
+            ],
+            array_first($stats->topHoarders(1)),
             'bonus-top-hoarder',
         );
 

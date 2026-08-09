@@ -73,22 +73,22 @@ class TGroupVoteTest extends TestCase {
                 $v->upvote($this->tgroupList[1]);
             }
         }
-        $this->assertEquals(3, $vote[0]->total($this->tgroupList[0]), 'tgroup-vote-total-all');
-        $this->assertEquals(3, $vote[0]->totalUp($this->tgroupList[0]), 'tgroup-vote-total-up');
-        $this->assertEquals(0, $vote[0]->totalDown($this->tgroupList[0]), 'tgroup-vote-total-down');
-        $this->assertEquals(1, $vote[0]->rankOverall($this->tgroupList[0]), 'tgroup-vote-rank-overall');
-        $this->assertEquals(1, $vote[0]->rankYear($this->tgroupList[0]), 'tgroup-vote-rank-year');
-        $this->assertEquals(1, $vote[0]->rankDecade($this->tgroupList[0]), 'tgroup-vote-rank-decade');
+        $this->assertSame(3, $vote[0]->total($this->tgroupList[0]), 'tgroup-vote-total-all');
+        $this->assertSame(3, $vote[0]->totalUp($this->tgroupList[0]), 'tgroup-vote-total-up');
+        $this->assertSame(0, $vote[0]->totalDown($this->tgroupList[0]), 'tgroup-vote-total-down');
+        $this->assertSame(1, $vote[0]->rankOverall($this->tgroupList[0]), 'tgroup-vote-rank-overall');
+        $this->assertSame(1, $vote[0]->rankYear($this->tgroupList[0]), 'tgroup-vote-rank-year');
+        $this->assertSame(1, $vote[0]->rankDecade($this->tgroupList[0]), 'tgroup-vote-rank-decade');
         $this->assertCount(3, $vote[0]->ranking($this->tgroupList[0], true), 'tgroup-vote-ranking');
 
         $top = $vote[0]->topVotes();
-        $this->assertEquals(1, $top[$this->tgroupList[0]->id]['tier'], 'tgroup-vote-top-1');
-        $this->assertEquals(2, $top[$this->tgroupList[1]->id]['tier'], 'tgroup-vote-top-2');
-        $this->assertEquals(1, $top[$this->tgroupList[1]->id]['upvote'], 'tgroup-vote-up-2');
+        $this->assertSame(1, $top[$this->tgroupList[0]->id]['tier'], 'tgroup-vote-top-1');
+        $this->assertSame(2, $top[$this->tgroupList[1]->id]['tier'], 'tgroup-vote-top-2');
+        $this->assertSame(1, $top[$this->tgroupList[1]->id]['upvote'], 'tgroup-vote-up-2');
         $this->assertCount(2, $vote[1]->userVotes(), 'tgroup-vote-user-count');
 
         $manager = new Manager\TGroup();
-        $this->assertEquals(
+        $this->assertSame(
             [$this->tgroupList[0]->id],
             array_map(
                 fn ($t) => $t->id,
@@ -96,7 +96,7 @@ class TGroupVoteTest extends TestCase {
             ),
             'tgroup-vote-similar',
         );
-        $this->assertEquals(
+        $this->assertSame(
             $this->tgroupList[0]->id,
             $vote[0]->recent()[0]['group_id'],
             'tgroup-vote-recent',
@@ -108,10 +108,10 @@ class TGroupVoteTest extends TestCase {
         $Cache->delete_value("top10_votes_");
 
         $vote = array_map(fn ($u) => new User\Vote($u), $this->userList);
-        $this->assertEquals(0.0, $vote[0]->score($this->tgroupList[0]), 'tg-vote-0-0');
+        $this->assertSame(0.0, $vote[0]->score($this->tgroupList[0]), 'tg-vote-0-0');
         $result = $vote[0]->upvote($this->tgroupList[0]);
         $this->assertTrue($result[0], 'tg-upvote-result');
-        $this->assertEquals("voted", $result[1], 'tg-upvote-text');
+        $this->assertSame("voted", $result[1], 'tg-upvote-text');
         $this->assertStringContainsString(
             "<a href=\"#\" data-id=\"{$this->tgroupList[0]->id}\" class=\"tooltip small_upvote hidden\" title=\"Upvote\">",
             $vote[0]->links($this->tgroupList[0]),
@@ -121,11 +121,11 @@ class TGroupVoteTest extends TestCase {
 
         $result = $vote[0]->upvote($this->tgroupList[0]);
         $this->assertFalse($result[0], 'tg-reupvote-result');
-        $this->assertEquals("already-voted", $result[1], 'tg-reupvote-text');
+        $this->assertSame("already-voted", $result[1], 'tg-reupvote-text');
 
         $result = $vote[0]->clear($this->tgroupList[0]);
         $this->assertTrue($result[0], 'tg-reupvote-result');
-        $this->assertEquals("cleared", $result[1], 'tg-clear');
+        $this->assertSame("cleared", $result[1], 'tg-clear');
 
         $vote[0]->upvote($this->tgroupList[0]);
         $vote[1]->upvote($this->tgroupList[0]);
@@ -133,13 +133,13 @@ class TGroupVoteTest extends TestCase {
         $this->assertEqualsWithDelta(0.321145, $vote[0]->score($this->tgroupList[0]), 0.000001, 'tg-vote-1-1');
 
         $top = $vote[0]->topVotes();
-        $this->assertEquals(2, $top[$this->tgroupList[0]->id]['upvote'], 'tgroup-downvote-top-up');
-        $this->assertEquals(3, $top[$this->tgroupList[0]->id]['total'], 'tgroup-downvote-top-total');
-        $this->assertEquals(3, $vote[0]->total($this->tgroupList[0]), 'tgroup-downvote-all');
-        $this->assertEquals(2, $vote[0]->totalUp($this->tgroupList[0]), 'tgroup-downvote-total-up');
-        $this->assertEquals(1, $vote[0]->totalDown($this->tgroupList[0]), 'tgroup-downvote-total-down');
+        $this->assertSame(2, $top[$this->tgroupList[0]->id]['upvote'], 'tgroup-downvote-top-up');
+        $this->assertSame(3, $top[$this->tgroupList[0]->id]['total'], 'tgroup-downvote-top-total');
+        $this->assertSame(3, $vote[0]->total($this->tgroupList[0]), 'tgroup-downvote-all');
+        $this->assertSame(2, $vote[0]->totalUp($this->tgroupList[0]), 'tgroup-downvote-total-up');
+        $this->assertSame(1, $vote[0]->totalDown($this->tgroupList[0]), 'tgroup-downvote-total-down');
 
-        $this->assertEquals(
+        $this->assertSame(
             ['upvote', 'total', 'score'],
             array_keys($vote[0]->tgroupInfo($this->tgroupList[0])),
             'tgroup-downvote-tgroup-info'
@@ -147,12 +147,12 @@ class TGroupVoteTest extends TestCase {
 
         $page = $vote[0]->userPage(new Manager\TGroup(), User\Vote::UPVOTE, 10, 0);
         $first = array_first($page);
-        $this->assertEquals(
+        $this->assertSame(
             ['group_id', 'upvote', 'tgroup'],
             array_keys($first),
             'tgroup-downvote-user-page-first',
         );
-        $this->assertEquals(
+        $this->assertSame(
             $this->tgroupList[0]->id,
             $first['group_id'],
             'tgroup-downvote-user-page-id',
@@ -211,7 +211,7 @@ class TGroupVoteTest extends TestCase {
 
         $voter = new User\Vote($this->userList[0]);
         $voter->setTopTagList(['tap.tag', 'tip.tag'], all: true);
-        $this->assertEquals(
+        $this->assertSame(
             [],
             array_keys($voter->topVotes(bypassCache: true)),
             'tgroup-vote-filter-tag-any-none',
@@ -219,7 +219,7 @@ class TGroupVoteTest extends TestCase {
 
         $voter = new User\Vote($this->userList[0]);
         $voter->setTopTagList(['tap.tag', 'tip.tag'], all: false);
-        $this->assertEquals(
+        $this->assertSame(
             array_map(fn ($t) => $t->id, $this->tgroupList),
             array_keys($voter->topVotes(bypassCache: true)),
             'tgroup-vote-filter-tag-any-some',

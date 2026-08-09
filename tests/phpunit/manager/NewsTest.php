@@ -43,15 +43,15 @@ class NewsTest extends TestCase {
         );
         $thread = $threadMan->findById($this->forum->lastThreadId());
         $this->assertInstanceOf(ForumThread::class, $thread, 'news-announcement-thread');
-        $this->assertEquals($this->userList[0]->id, $thread->authorId(), 'news-thread-author-id');
-        $this->assertEquals($body, $thread->body(), 'news-thread-body');
-        $this->assertEquals($title, $thread->title(), 'news-thread-title');
+        $this->assertSame($this->userList[0]->id, $thread->authorId(), 'news-thread-author-id');
+        $this->assertSame($body, $thread->body(), 'news-thread-body');
+        $this->assertSame($title, $thread->title(), 'news-thread-title');
 
-        $this->assertEquals(1 + $initial, count($manager->headlines()), 'news-headlines');
-        $this->assertEquals($this->news, $manager->latestId(), 'news-id-latest');
+        $this->assertCount(1 + $initial, $manager->headlines(), 'news-headlines');
+        $this->assertSame($this->news, $manager->latestId(), 'news-id-latest');
         $this->assertLessThan(2, time() - $manager->latestEpoch(), 'news-created-epoch');
 
-        $this->assertEquals(1, $manager->remove($this->news), 'news-remove');
+        $this->assertSame(1, $manager->remove($this->news), 'news-remove');
         unset($this->news);
     }
 
@@ -64,7 +64,7 @@ class NewsTest extends TestCase {
             $this->userList[0],
             $this->forum,
         );
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $manager->modify(
                 $this->news,
@@ -73,7 +73,7 @@ class NewsTest extends TestCase {
             ),
             'news-modify',
         );
-        $this->assertEquals('phpunit new title', $manager->latest()['title'], 'news-thread-title');
+        $this->assertSame('phpunit new title', $manager->latest()['title'], 'news-thread-title');
     }
 
     public function testJsonNews(): void {
@@ -89,7 +89,7 @@ class NewsTest extends TestCase {
 
         $payload = new Json\News(1, 0)->payload();
         $this->assertCount(1, $payload['items'], 'json-news-total');
-        $this->assertEquals(
+        $this->assertSame(
             $title,
             $payload['items'][0][1],
             'json-news-title',
@@ -109,7 +109,7 @@ class NewsTest extends TestCase {
         $witness = new WitnessTable\UserReadNews();
         $this->assertNull($witness->lastRead($this->userList[1]), 'news-user-not-read');
         $this->assertTrue($witness->witness($this->userList[1]));
-        $this->assertEquals($this->news, $witness->lastRead($this->userList[1]), 'news-user-read');
+        $this->assertSame($this->news, $witness->lastRead($this->userList[1]), 'news-user-read');
     }
 
     public function testNewsNotification(): void {
@@ -132,8 +132,8 @@ class NewsTest extends TestCase {
 
         $alertNews = $alertList['News'];
         $this->assertInstanceOf(User\Notification\News::class, $alertNews, 'alert-news-instance');
-        $this->assertEquals('News', $alertNews->type(), 'alert-news-type');
-        $this->assertEquals("Announcement: $title", $alertNews->title(), 'alert-news-title');
-        $this->assertEquals($this->news, $alertNews->context(), 'alert-news-context-is-news');
+        $this->assertSame('News', $alertNews->type(), 'alert-news-type');
+        $this->assertSame("Announcement: $title", $alertNews->title(), 'alert-news-title');
+        $this->assertSame($this->news, $alertNews->context(), 'alert-news-context-is-news');
     }
 }

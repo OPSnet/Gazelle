@@ -19,13 +19,13 @@ class SiteOptionTest extends TestCase {
         // exercise the SQL
         global $Cache;
         $Cache->delete_value(sprintf($manager::CACHE_KEY, $name));
-        $this->assertEquals(
+        $this->assertSame(
             $value,
             $manager->findValueByName($name),
             'site-option-find-by-name',
         );
         $list = $manager->list();
-        $this->assertEquals(
+        $this->assertSame(
             [
                 'id'      => $optionId,
                 'name'    => $name,
@@ -35,17 +35,17 @@ class SiteOptionTest extends TestCase {
             $list[$name],
             'site-option-list',
         );
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $manager->modifyOption($name, "$value mod"),
             'site-option-modify',
         );
-        $this->assertEquals(
+        $this->assertSame(
             "$value mod",
             $manager->findValueByName($name),
             'site-option-find-modified',
         );
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $manager->removeOptionByName($name),
             'site-option-remove',

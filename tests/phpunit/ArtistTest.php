@@ -95,8 +95,8 @@ class ArtistTest extends TestCase {
         $artist = $manager->create('phpunit.' . randomString(12));
         $this->artistIdList[] = $artist->id;
 
-        $this->assertEquals("<a href=\"artist.php?id={$artist->id}\">{$artist->name()}</a>", $artist->link(), 'artist-link');
-        $this->assertEquals("artist.php?id={$artist->id}", $artist->location(), 'artist-location');
+        $this->assertSame("<a href=\"artist.php?id={$artist->id}\">{$artist->name()}</a>", $artist->link(), 'artist-link');
+        $this->assertSame("artist.php?id={$artist->id}", $artist->location(), 'artist-location');
         $this->assertNull($artist->body(), 'artist-body-null');
         $this->assertNull($artist->image(), 'artist-image-null');
         $this->assertFalse($artist->isLocked(), 'artist-is-unlocked');
@@ -110,7 +110,7 @@ class ArtistTest extends TestCase {
         $this->artistIdList[] = $artist->id;
         $_GET['req']       = 'artist';
         $_GET['artist_id'] = $artist->id;
-        $this->assertEquals(
+        $this->assertSame(
             [
                 'ArtistID' => $artist->id,
                 'Name'     => $artist->name(),
@@ -132,7 +132,7 @@ class ArtistTest extends TestCase {
             user:    $this->user,
         );
         $this->assertGreaterThan(0, $revision, 'artist-revision-1-id');
-        $this->assertEquals('phpunit body test', $artist->body(), 'artist-body-revised');
+        $this->assertSame('phpunit body test', $artist->body(), 'artist-body-revised');
 
         $rev2 = $artist->createRevision(
             body:    'phpunit body test revised',
@@ -140,24 +140,24 @@ class ArtistTest extends TestCase {
             summary: ['phpunit second revision'],
             user:    $this->user,
         );
-        $this->assertEquals($revision + 1, $rev2, 'artist-revision-2');
-        $this->assertEquals('https://example.com/artist-revised.jpg', $artist->image(), 'artist-image-revised');
+        $this->assertSame($revision + 1, $rev2, 'artist-revision-2');
+        $this->assertSame('https://example.com/artist-revised.jpg', $artist->image(), 'artist-image-revised');
 
         $artistV1 = $manager->findByIdAndRevision($artist->id, $revision);
         $this->assertNotNull($artistV1, 'artist-revision-1-found');
-        $this->assertEquals('phpunit body test', $artistV1->body(), 'artist-body-rev-1');
+        $this->assertSame('phpunit body test', $artistV1->body(), 'artist-body-rev-1');
 
         $artistV2 = $manager->findByIdAndRevision($artist->id, $rev2);
         $this->assertInstanceOf(Artist::class, $artistV2, 'artist-found-by-id-and-rev');
-        $this->assertEquals('https://example.com/artist-revised.jpg', $artistV2->image(), 'artist-image-rev-2');
+        $this->assertSame('https://example.com/artist-revised.jpg', $artistV2->image(), 'artist-image-rev-2');
 
         $list = $artist->revisionList();
-        $this->assertEquals('phpunit second revision', $list[0]['summary']);
-        $this->assertEquals($revision, $list[1]['revision']);
+        $this->assertSame('phpunit second revision', $list[0]['summary']);
+        $this->assertSame($revision, $list[1]['revision']);
 
         $artist->revertRevision($revision, $this->user);
         $this->assertCount(3, $artist->revisionList());
-        $this->assertEquals($artistV1->body(), $artist->body(), 'artist-body-rev-3');
+        $this->assertSame($artistV1->body(), $artist->body(), 'artist-body-rev-3');
     }
 
     public function testArtistAlias(): void {
@@ -165,18 +165,18 @@ class ArtistTest extends TestCase {
         $artist = $manager->create('phpunit.' . randomString(12));
         $this->artistIdList[] = $artist->id;
 
-        $this->assertEquals($artist->id, $artist->id, 'artist-find-by-alias-id');
-        $this->assertEquals(
+        $this->assertSame($artist->id, $artist->id, 'artist-find-by-alias-id');
+        $this->assertSame(
             $artist->id,
             $manager->findByName($artist->name())?->id,
             'artist-find-by-alias-name'
         );
-        $this->assertEquals(
+        $this->assertSame(
             $artist->aliasId(),
-            $manager->findByName($artist->name())?->aliasId(),
+            $manager->findByName($artist->name())->aliasId(),
             'artist-find-aliasid-by-alias-name'
         );
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $manager->aliasUseTotal($artist->aliasId()),
             'artist-sole-alias'
@@ -189,14 +189,14 @@ class ArtistTest extends TestCase {
 
         $aliasName = $artist->name() . '-alias';
         $newId = $artist->addAlias($aliasName, 0, $this->user);
-        $this->assertEquals($artist->aliasId() + 1, $newId, 'artist-new-alias');
-        $this->assertEquals(2, $manager->aliasUseTotal($artist->aliasId()), 'artist-two-alias');
+        $this->assertSame($artist->aliasId() + 1, $newId, 'artist-new-alias');
+        $this->assertSame(2, $manager->aliasUseTotal($artist->aliasId()), 'artist-two-alias');
 
         $alias = $manager->findByName($aliasName);
-        $this->assertEquals($artist->id, $alias?->id, 'artist-fetch-artist-id');
-        $this->assertEquals($newId, $alias?->aliasId(), 'artist-fetch-alias-id');
+        $this->assertSame($artist->id, $alias->id, 'artist-fetch-artist-id');
+        $this->assertSame($newId, $alias->aliasId(), 'artist-fetch-alias-id');
 
-        $this->assertEquals(1, $artist->removeAlias($newId), 'artist-remove-alias');
+        $this->assertSame(1, $artist->removeAlias($newId), 'artist-remove-alias');
     }
 
     public function testArtistNonRedirAlias(): void {
@@ -206,7 +206,7 @@ class ArtistTest extends TestCase {
 
         $aliasName = $artist->name() . '-reformed';
         $newId = $artist->addAlias($aliasName, $artist->id, $this->user);
-        $this->assertEquals(
+        $this->assertSame(
             $artist->aliasId() + 1,
             $newId,
             'artist-new-non-redirect'
@@ -214,7 +214,7 @@ class ArtistTest extends TestCase {
         $aliasInfo = $artist->aliasInfo();
         $this->assertCount(2, $aliasInfo, 'artist-alias-count');
         $aliasId = $artist->aliasId();
-        $this->assertEquals(
+        $this->assertSame(
             [
                 'alias'    => [],
                 'alias_id' => $aliasId,
@@ -227,9 +227,9 @@ class ArtistTest extends TestCase {
         $artistInfo = $aliasInfo[$artist->id];
         $this->assertArrayHasKey('alias', $artistInfo, 'artist-alias-has-key');
         $alias = array_first($artistInfo['alias']);
-        $this->assertEquals($newId, $alias['alias_id'], 'artist-alias-artist-id');
-        $this->assertEquals($aliasName, $alias['name'], 'artist-alias-name');
-        $this->assertEquals($this->user->id, $alias['user']->id, 'artist-alias-user');
+        $this->assertSame($newId, $alias['alias_id'], 'artist-alias-artist-id');
+        $this->assertSame($aliasName, $alias['name'], 'artist-alias-name');
+        $this->assertSame($this->user->id, $alias['user']->id, 'artist-alias-user');
     }
 
     public function testArtistMerge(): void {
@@ -287,7 +287,7 @@ class ArtistTest extends TestCase {
             ),
         ];
 
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $new->merge(
                 $old,
@@ -304,11 +304,11 @@ class ArtistTest extends TestCase {
 
         // FIXME: flushed collage objects cannot be refreshed
         $merged = $collMan->findById($this->collage->id);
-        $this->assertEquals([$new->id], $merged?->entryList(), 'art-merge-collage');
+        $this->assertSame([$new->id], $merged?->entryList(), 'art-merge-collage');
 
         $comment = new Comment\Artist($new->id, 1, 0);
         $comment->load(); // FIXME: load() should not be necessary
-        $this->assertEquals(
+        $this->assertSame(
             [$postList[0]->id, $postList[1]->id],
             array_map(fn($p) => $p['ID'], $comment->thread()),
             'art-merge-comments'
@@ -321,7 +321,7 @@ class ArtistTest extends TestCase {
             // cannot use flush() as the aliasId is wiped, replace the object by its id
             $actual = $artistRole->idList()[ARTIST_MAIN][0];
             $actual['artist'] = $actual['artist']->id;
-            $this->assertEquals(
+            $this->assertSame(
                 [
                     'id'      => $new->id,
                     'aliasid' => $oldAliasId,
@@ -367,7 +367,7 @@ class ArtistTest extends TestCase {
 
         $oldName = $artist->name();
         $rename = $artist->name() . '-rename';
-        $this->assertEquals(
+        $this->assertSame(
             $artist->aliasId() + 1,
             $artist->renameAlias($artist->aliasId(), $rename, $this->user),
             'alias-rename'
@@ -375,7 +375,7 @@ class ArtistTest extends TestCase {
         $this->assertContains($rename, $artist->aliasNameList(), 'alias-is-renamed');
         $newAlias = array_filter($artist->aliasList(), fn($v) => $v['name'] == $rename)[0];
         $oldAlias = array_filter($artist->aliasList(), fn($v) => $v['name'] == $oldName)[0];
-        $this->assertEquals($newAlias['alias_id'], $oldAlias['redirect_id'], 'alias-is-redirected');
+        $this->assertSame($newAlias['alias_id'], $oldAlias['redirect_id'], 'alias-is-redirected');
     }
 
     public function testArtistRenamePrimary(): void {
@@ -416,27 +416,22 @@ class ArtistTest extends TestCase {
 
         $name = $artist->name() . '-rename2';
         $artist->renameAlias($artist->primaryAliasId(), $name, $this->user);
-        $this->assertEquals($name, $artist->name(), 'artist-is-smart-renamed');
+        $this->assertSame($name, $artist->name(), 'artist-is-smart-renamed');
 
         $commentPage = new Comment\Artist($artist->id, 1, 0);
         $commentPage->load();
         $threadList = $commentPage->threadList(new Manager\User());
         $this->assertCount(1, $threadList, 'artist-renamed-comments');
-        $this->assertEquals($post->id, $threadList[0]['postId'], 'artist-renamed-comments');
+        $this->assertSame($post->id, $threadList[0]['postId'], 'artist-renamed-comments');
 
         $request->flush();
-        $this->assertInstanceOf(
-            ArtistRole\Request::class,
-            $request->artistRole(),
-            'request-has-artistrole'
-        );
         $idList = $request->artistRole()->idList();
-        $this->assertEquals($artist->id, $idList[ARTIST_MAIN][0]['id'], 'artist-renamed-request');
+        $this->assertSame($artist->id, $idList[ARTIST_MAIN][0]['id'], 'artist-renamed-request');
         $request->remove();
 
         $this->tgroupList[0]->artistRole()->flush();
         $idList = $this->tgroupList[0]->artistRole()->idList();
-        $this->assertEquals($artist->id, $idList[ARTIST_MAIN][0]['id'], 'artist-renamed-tgroup');
+        $this->assertSame($artist->id, $idList[ARTIST_MAIN][0]['id'], 'artist-renamed-tgroup');
     }
 
     public function testRenameAliasCapchange(): void {
@@ -450,17 +445,17 @@ class ArtistTest extends TestCase {
         $aliasUpper = strtoupper($aliasName);
         $aliasId = $artist->getAlias($aliasName);
         $this->assertNotNull($aliasId, 'artist-rename-capchange-create');
-        $this->assertEquals(
+        $this->assertSame(
             $aliasId,
             $artist->renameAlias($aliasId, $aliasUpper, $this->user),
             'artist-rename-capchange-1',
         );
-        $this->assertEquals(
+        $this->assertSame(
             $aliasId,
             $artist->getAlias($aliasName),
             'artist-rename-capchange-2',
         );
-        $this->assertEquals(
+        $this->assertSame(
             $mainAliasId,
             $artist->primaryAliasId(),
             'artist-rename-capchange-sanity',
@@ -485,7 +480,7 @@ class ArtistTest extends TestCase {
         $a2Name = 'phpunit.' . randomString(12) . '-alias';
         $a2Id = $artist->addAlias($a2Name, null, $this->user);
 
-        $this->assertEquals(
+        $this->assertSame(
             $a2Id,
             $artist->renameAlias($a1Id, $a2Name, $this->user),
             'artist-rename-nramerge-1',
@@ -495,26 +490,26 @@ class ArtistTest extends TestCase {
         $a2 = $artist->aliasList()[$a2Id];
         $ra = $artist->aliasList()[$raId];
 
-        $this->assertEquals($a2Id, $a1['redirect_id'], 'artist-rename-nramerge-2');
-        $this->assertEquals($a2Id, $ra['redirect_id'], 'artist-rename-nramerge-3');
-        $this->assertEquals($a1Name, $a1['name'], 'artist-rename-nramerge-4');
-        $this->assertEquals($a2Id, $a2['alias_id'], 'artist-rename-nramerge-5');
-        $this->assertEquals($mainAliasId, $artist->primaryAliasId(), 'artist-rename-nramerge-sanity');
+        $this->assertSame($a2Id, $a1['redirect_id'], 'artist-rename-nramerge-2');
+        $this->assertSame($a2Id, $ra['redirect_id'], 'artist-rename-nramerge-3');
+        $this->assertSame($a1Name, $a1['name'], 'artist-rename-nramerge-4');
+        $this->assertSame($a2Id, $a2['alias_id'], 'artist-rename-nramerge-5');
+        $this->assertSame($mainAliasId, $artist->primaryAliasId(), 'artist-rename-nramerge-sanity');
 
         // rename a2 and test redirects
         $a2NewName = 'phpunit.' . randomString(12) . '-new';
         $a3Id = $artist->renameAlias($a2Id, $a2NewName, $this->user);
-        $this->assertNotEquals($a2Id, $a3Id, 'artist-rename-nramerge-6');
+        $this->assertNotSame($a2Id, $a3Id, 'artist-rename-nramerge-6');
 
         $a1 = $artist->aliasList()[$a1Id];
         $a2 = $artist->aliasList()[$a2Id];
         $ra = $artist->aliasList()[$raId];
         $a3 = $artist->aliasList()[$a3Id];
-        $this->assertEquals($a3Id, $a3['alias_id'], 'artist-rename-id-simple');
-        $this->assertEquals($a2NewName, $a3['name'], 'artist-rename-name-simple');
-        $this->assertEquals($a3Id, $a1['redirect_id'], 'artist-rename-redirect-1');
-        $this->assertEquals($a3Id, $a2['redirect_id'], 'artist-rename-redirect-2');
-        $this->assertEquals($a3Id, $ra['redirect_id'], 'artist-rename-redirect-3');
+        $this->assertSame($a3Id, $a3['alias_id'], 'artist-rename-id-simple');
+        $this->assertSame($a2NewName, $a3['name'], 'artist-rename-name-simple');
+        $this->assertSame($a3Id, $a1['redirect_id'], 'artist-rename-redirect-1');
+        $this->assertSame($a3Id, $a2['redirect_id'], 'artist-rename-redirect-2');
+        $this->assertSame($a3Id, $ra['redirect_id'], 'artist-rename-redirect-3');
     }
 
     public function testArtistSimilar(): void {
@@ -531,16 +526,16 @@ class ArtistTest extends TestCase {
 
         $this->assertFalse($artist->similar()->voteSimilar($this->extra, $artist, true), 'artist-vote-self');
 
-        $this->assertEquals(1, $artist->similar()->addSimilar($other1, $this->user), 'artist-add-other1');
-        $this->assertEquals(0, $artist->similar()->addSimilar($other1, $this->user), 'artist-read-other1');
-        $this->assertEquals(1, $artist->similar()->addSimilar($other2, $this->user), 'artist-add-other2');
-        $this->assertEquals(1, $other1->similar()->addSimilar($other2, $this->user), 'artist-other1-add-other2');
+        $this->assertSame(1, $artist->similar()->addSimilar($other1, $this->user), 'artist-add-other1');
+        $this->assertSame(0, $artist->similar()->addSimilar($other1, $this->user), 'artist-read-other1');
+        $this->assertSame(1, $artist->similar()->addSimilar($other2, $this->user), 'artist-add-other2');
+        $this->assertSame(1, $other1->similar()->addSimilar($other2, $this->user), 'artist-other1-add-other2');
 
         $this->assertTrue($artist->similar()->voteSimilar($this->extra, $other1, true), 'artist-vote-up-other1');
         $this->assertFalse($artist->similar()->voteSimilar($this->extra, $other1, true), 'artist-revote-up-other1');
         $this->assertTrue($other1->similar()->voteSimilar($this->extra, $other2, false), 'artist-vote-down-other2');
 
-        $this->assertEquals(
+        $this->assertSame(
             [
                 [
                     'artist_id'  => $other1->id,
@@ -561,12 +556,12 @@ class ArtistTest extends TestCase {
 
         $graph = $artist->similar()->similarGraph(100, 100);
         $this->assertCount(2, $graph, 'artist-similar-count');
-        $this->assertEquals(
+        $this->assertSame(
             [$other1->id, $other2->id],
             array_values(array_map(fn($sim) => $sim['artist_id'], $graph)),
             'artist-similar-id-list'
         );
-        $this->assertEquals($other2->id, $graph[$other1->id]['related'][0], 'artist-sim-related');
+        $this->assertSame($other2->id, $graph[$other1->id]['related'][0], 'artist-sim-related');
         $this->assertLessThan($graph[$other1->id]['proportion'], $graph[$other2->id]['proportion'], 'artist-sim-proportion');
 
         $this->assertFalse($artist->similar()->removeSimilar($artist, $this->extra), 'artist-remove-similar-self');
@@ -603,15 +598,15 @@ class ArtistTest extends TestCase {
             new User\Bookmark($this->user),
         );
         $payload = $json->payload();
-        $this->assertEquals(
+        $this->assertSame(
             ["id", "name", "notificationsEnabled", "hasBookmarked", "image",
                 "body", "bodyBbcode", "vanityHouse", "tags", "similarArtists",
                 "statistics", "torrentgroup", "requests"],
             array_keys($payload),
             'artist-json-payload'
         );
-        $this->assertEquals($artist->id, $payload['id'], 'artist-payload-id');
-        $this->assertEquals($artist->name(), $payload['name'], 'artist-payload-name');
+        $this->assertSame($artist->id, $payload['id'], 'artist-payload-id');
+        $this->assertSame($artist->name(), $payload['name'], 'artist-payload-name');
         $this->assertCount(1, $payload['tags'], 'artist-payload-tags');
         $this->assertCount(1, $payload['similarArtists'], 'artist-payload-similar-artists');
         $this->assertCount(1, $payload['torrentgroup'], 'artist-payload-torrentgroup');
@@ -620,7 +615,7 @@ class ArtistTest extends TestCase {
 
         $similar = new Json\ArtistSimilar($artist, 1)->payload();
         $this->assertCount(1, $similar, 'artist-similar-payload-total');
-        $this->assertEquals($other->id, $similar[0]['artist_id'], 'artist-similar-payload-id');
+        $this->assertSame($other->id, $similar[0]['artist_id'], 'artist-similar-payload-id');
     }
 
     public function testArtistAutocomplete(): void {
@@ -679,8 +674,8 @@ class ArtistTest extends TestCase {
         ]);
         $autocomplete = $manager->autocompleteList($redirectName);
         $this->assertCount(1, $autocomplete, 'artist-autocomp-redir-count');
-        $this->assertEquals([$artist->id], array_column($autocomplete, 'data'), 'artist-autocomp-redir-id');
-        $this->assertEquals([$redirectName], array_column($autocomplete, 'value'), 'artist-autocomp-redir-value');
+        $this->assertSame([$artist->id], array_column($autocomplete, 'data'), 'artist-autocomp-redir-id');
+        $this->assertSame([$redirectName], array_column($autocomplete, 'value'), 'artist-autocomp-redir-value');
         $widget = $this->renderAutocompleteWidget($autocomplete[0]);
         $this->assertStringContainsString(
             "<a class=\"cae-row-link\" href=\"artist.php?id={$artist->id}\"",
@@ -812,7 +807,7 @@ class ArtistTest extends TestCase {
 
         new User\Bookmark($this->user)->create($artist);
         $json = new Json\Bookmark\Artist(new User\Bookmark($this->user));
-        $this->assertEquals(
+        $this->assertSame(
             [[
                 'artistId'   => $artist->id,
                 'artistName' => $name,
@@ -837,15 +832,15 @@ class ArtistTest extends TestCase {
             name: $name,
             sequence: 2,
         );
-        $this->assertEquals($id, $discogs->id, 'artist-discogs-id');
-        $this->assertEquals($name, $discogs->name(), 'artist-discogs-name');
-        $this->assertEquals($name, $discogs->stem(), 'artist-discogs-stem');
-        $this->assertEquals(2, $discogs->sequence(), 'artist-discogs-sequence');
+        $this->assertSame($id, $discogs->id, 'artist-discogs-id');
+        $this->assertSame($name, $discogs->name(), 'artist-discogs-name');
+        $this->assertSame($name, $discogs->stem(), 'artist-discogs-stem');
+        $this->assertSame(2, $discogs->sequence(), 'artist-discogs-sequence');
         $this->assertTrue(
             $artist->setField('discogs', $discogs)->setUpdateUser($this->user)->modify(),
             'artist-add-discogs'
         );
-        $this->assertEquals($name, $artist->discogs()->name(), 'artist-self-discogs-name');
+        $this->assertSame($name, $artist->discogs()->name(), 'artist-self-discogs-name');
         $context = $artist->widgetContext();
         $this->assertSame($artist, $context['artist'], 'artist-widget-context-object');
         $widget = \Gazelle\Util\Twig::factory(new Manager\User())->render(
@@ -856,7 +851,7 @@ class ArtistTest extends TestCase {
         $this->assertStringContainsString('cae-advanced-item-discogs', $widget, 'artist-discogs-advanced-discogs');
         $this->assertStringContainsString((string)$id, $widget, 'artist-discogs-advanced-discogs-id');
         $this->assertStringContainsString('cae-advanced-item-snatches', $widget, 'artist-discogs-advanced-snatches');
-        $this->assertEquals(1, $artist->removeDiscogsRelation(), 'artist-discogs-remove');
+        $this->assertSame(1, $artist->removeDiscogsRelation(), 'artist-discogs-remove');
     }
 
     public function testArtistRole(): void {
@@ -885,12 +880,12 @@ class ArtistTest extends TestCase {
         );
 
         $this->assertCount(0, $search->linkList(), 'artist-comment-linklist');
-        $this->assertEquals(
+        $this->assertSame(
             'Artist comments',
             $search->title(),
             'artist-comment-linklist'
         );
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $search->total(),
             'artist-comment-total'
@@ -908,7 +903,7 @@ class ArtistTest extends TestCase {
             array_keys($comment),
             'artist-comment-keys',
         );
-        $this->assertEquals($body, $comment['body'], 'artist-comment-body');
+        $this->assertSame($body, $comment['body'], 'artist-comment-body');
     }
 
     public function testArtistUserNotification(): void {
@@ -918,7 +913,7 @@ class ArtistTest extends TestCase {
         $artist2 = $manager->create('phpunit.' . randomString(12));
         $this->artistIdList[] = $artist2->id;
 
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $this->user->addArtistNotification($artist),
             'artist-user-add-notif-1',
@@ -931,12 +926,12 @@ class ArtistTest extends TestCase {
             $this->user->hasArtistNotification($artist2->name()),
             'artist-user-has-no-notif-2',
         );
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $this->user->addArtistNotification($artist),
             'artist-user-again-notif-1',
         );
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $this->user->addArtistNotification($artist2),
             'artist-user-add-notif-2',
@@ -945,17 +940,17 @@ class ArtistTest extends TestCase {
             $this->user->hasArtistNotification($artist2->name()),
             'artist-user-has-notif-2',
         );
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $this->user->removeArtistNotification($artist),
             'artist-user-remove-notif-1',
         );
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $this->user->removeArtistNotification($artist),
             'artist-user-again-remove-notif-1',
         );
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $this->user->removeArtistNotification($artist2),
             'artist-user-remove-notif-2',

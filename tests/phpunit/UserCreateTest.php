@@ -33,8 +33,8 @@ class UserCreateTest extends TestCase {
             ->addNote($note)
             ->create();
 
-        $this->assertEquals($name, $this->user->username(), 'user-create-username');
-        $this->assertEquals($email, $this->user->email(), 'user-create-email');
+        $this->assertSame($name, $this->user->username(), 'user-create-username');
+        $this->assertSame($email, $this->user->email(), 'user-create-email');
         $this->assertStringContainsString(
             $note,
             $this->user->auditTrail()->fullEventList()[0]['note'],
@@ -48,10 +48,10 @@ class UserCreateTest extends TestCase {
         );
 
         $location = "user.php?id={$this->user->id}";
-        $this->assertEquals($location, $this->user->location(), 'user-location');
-        $this->assertEquals(SITE_URL . "/$location", $this->user->publicLocation(), 'user-public-location');
-        $this->assertEquals($location, $this->user->url(), 'user-url');
-        $this->assertEquals(SITE_URL . "/$location", $this->user->publicUrl(), 'user-public-url');
+        $this->assertSame($location, $this->user->location(), 'user-location');
+        $this->assertSame(SITE_URL . "/$location", $this->user->publicLocation(), 'user-public-location');
+        $this->assertSame($location, $this->user->url(), 'user-url');
+        $this->assertSame(SITE_URL . "/$location", $this->user->publicUrl(), 'user-public-url');
 
         $info = $this->user->stats()->info();
         $this->assertCount(27, $info, 'user-empty-stats');
@@ -67,7 +67,7 @@ class UserCreateTest extends TestCase {
         $login = new Login();
         $watch = new LoginWatch(Helper::IP_ADDR);
         $watch->clearAttempt();
-        $this->assertEquals(
+        $this->assertSame(
             Helper::IP_ADDR,
             $watch->ipaddr,
             'user-login-watch-ipaddr'
@@ -77,7 +77,7 @@ class UserCreateTest extends TestCase {
             $login->login($this->user->username(), 'not-the-password!', $watch),
             'user-create-login-bad-pw-null'
         );
-        $this->assertEquals(
+        $this->assertSame(
             Enum\LoginStatus::badCredentials,
             $login->error(),
             'user-create-login-bad-pw-error'
@@ -87,36 +87,36 @@ class UserCreateTest extends TestCase {
             $login->login($this->user->username(), 'password', $watch),
             'user-create-login-unconfirmed-null'
         );
-        $this->assertEquals(
+        $this->assertSame(
             Enum\LoginStatus::unconfirmed,
             $login->error(),
             'user-create-login-unconfirmed-error',
         );
 
-        $this->assertEquals(2, $watch->attemptTotal(), 'user-create-two-login-attempts');
+        $this->assertSame(2, $watch->attemptTotal(), 'user-create-two-login-attempts');
         $this->assertTrue(Helper::futureDate(
             $watch->blockedUntil()->format('Y-m-d H:i:s'), 70),
             'user-login-temporary-ban'
         );
-        $this->assertEquals(1, $watch->unblock(), 'user-login-clear-ban');
+        $this->assertSame(1, $watch->unblock(), 'user-login-clear-ban');
         $this->user->setField('Enabled', Enum\UserStatus::enabled->value)->modify();
 
         $enabledUser = $login->login($this->user->username(), 'password', $watch);
         $this->assertInstanceOf(User::class, $enabledUser, 'user-create-login-success');
-        $this->assertEquals(0, $watch->attemptTotal(), 'user-create-two-login-cleared');
+        $this->assertSame(0, $watch->attemptTotal(), 'user-create-two-login-cleared');
         // check the table if this fails
-        $this->assertEquals(0, $watch->blockTotal(), 'user-create-two-login-banned');
-        $this->assertEquals($this->user->username(), $watch->capture(), 'user-login-capture');
+        $this->assertSame(0, $watch->blockTotal(), 'user-create-two-login-banned');
+        $this->assertSame($this->user->username(), $watch->capture(), 'user-login-capture');
 
         $relogin = new Login();
         foreach (range(1, 11) as $nr) {
             $relogin->login($this->user->username(), "multi-fail-$nr", $watch);
         }
         $inbox = $this->user->inbox();
-        $this->assertEquals(1, $inbox->messageTotal(), 'user-login-fail-inbox');
+        $this->assertSame(1, $inbox->messageTotal(), 'user-login-fail-inbox');
         $list    = $inbox->messageList(new Manager\PM($this->user), 3, 0);
         $warning = array_last($list);
-        $this->assertEquals(
+        $this->assertSame(
             'Too many login attempts on your account',
             $warning->subject(),
             'user-login-pm-subject'
@@ -153,13 +153,17 @@ class UserCreateTest extends TestCase {
 
     public function testNameTrim(): void {
         $_SERVER['HTTP_USER_AGENT'] = 'phpunit';
+        $name = randomString(19);
         $this->user = new UserCreator()
-            ->setUsername(' ' . randomString(6))
+            ->setUsername(" $name")
             ->setEmail("test@example.com")
             ->setPassword(randomString(20))
             ->addNote('Created by tests/phpunit/UserCreateTest.php')
             ->create();
-
-        $this->assertInstanceOf(User::class, $this->user, 'user-create-trim');
+        $this->assertSame(
+            $name,
+            $this->user->username(),
+            'user-create-trim-username'
+        );
     }
 }

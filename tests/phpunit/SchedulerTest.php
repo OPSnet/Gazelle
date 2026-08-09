@@ -44,12 +44,12 @@ class SchedulerTest extends TestCase {
 
     public function testMissingTaskEntry(): void {
         $scheduler = new TaskScheduler();
-        $this->assertEquals(
+        $this->assertSame(
             -1,
             $scheduler->runTask(-666),
             "sched-task-no-such-task-id"
         );
-        $this->assertEquals(
+        $this->assertSame(
             -1,
             $scheduler->runClass("NoSuchClassname"),
             "sched-task-no-such-class"
@@ -76,7 +76,7 @@ class SchedulerTest extends TestCase {
             $name, "phpunit task", "A task with no PHP implementation"
         );
         ob_start();
-        $this->assertEquals(
+        $this->assertSame(
             -1,
             $scheduler->runClass($name),
             "sched-task-unimplemented"
@@ -172,7 +172,7 @@ class SchedulerTest extends TestCase {
         ob_start();
         $scheduler->runTask($taskId);
         ob_end_clean();
-        $this->assertEquals(
+        $this->assertSame(
             $total + 1,
             $scheduler->taskRunTotal($taskId),
             'task-run-total'
@@ -180,7 +180,7 @@ class SchedulerTest extends TestCase {
         $this->assertTrue($scheduler->isLastRunIntervalOk(10), 'task-run-interval-ok');
 
         $history = $scheduler->taskHistory($taskId, 10, 0);
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $history->count - $initial->count,
             'task-history-total'
@@ -190,28 +190,28 @@ class SchedulerTest extends TestCase {
             Helper::recentDateTimeImmutable($item->created),
             'task-created'
         );
-        $this->assertEquals('completed', $item->status, 'task-status');
-        $this->assertEquals(0, $item->nrErrors, 'task-nr-error');
-        $this->assertEquals(0, $item->nrItems, 'task-nr-item');
+        $this->assertSame('completed', $item->status, 'task-status');
+        $this->assertNull($item->nrErrors, 'task-nr-error');
+        $this->assertNull($item->nrItems, 'task-nr-item');
     }
 
     public function testTaskEnqueue(): void {
         $scheduler = new TaskScheduler();
         $task      = $scheduler->findByName('Test');
         $taskId    = $task['id_task'];
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $scheduler->enqueue($taskId),
             'task-enqueue',
         );
         $task = $scheduler->findByName('Test');
-        $this->assertEquals(1, $task['run_now'], 'task-is-enqueued');
-        $this->assertEquals(
+        $this->assertTrue($task['run_now'], 'task-is-enqueued');
+        $this->assertSame(
             1,
             $scheduler->clear($taskId),
             'task-clear',
         );
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $scheduler->runNow($taskId),
             'task-run-now',
@@ -231,7 +231,7 @@ class SchedulerTest extends TestCase {
 
     public function testGlobalStats(): void {
         $stats = new TaskScheduler()->runtimeStats();
-        $this->assertEquals(
+        $this->assertSame(
             ['hourly', 'daily', 'tasks', 'totals'],
             array_keys($stats),
             'task-stats-global',
@@ -239,7 +239,7 @@ class SchedulerTest extends TestCase {
     }
 
     public function testTaskUpdate(): void {
-        $this->assertEquals(
+        $this->assertSame(
             1,
             new TaskScheduler()->updateTask(
                 taskId:      1,

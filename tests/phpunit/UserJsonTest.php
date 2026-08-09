@@ -31,12 +31,12 @@ class UserJsonTest extends TestCase {
     public function testJsonUserAdmin(): void {
         $json = new Json\User($this->userList['admin'], $this->userList['user']);
         $payload = $json->payload();
-        $this->assertEquals(
+        $this->assertSame(
             $this->userList['admin']->username(),
             $payload['username'],
             'json-user-admin-username'
         );
-        $this->assertEquals(
+        $this->assertSame(
             [
                 "username",
                 "avatar",
@@ -57,17 +57,17 @@ class UserJsonTest extends TestCase {
     public function testJsonUserUser(): void {
         $json = new Json\User($this->userList['user'], $this->userList['admin']);
         $payload = $json->payload();
-        $this->assertEquals(
+        $this->assertSame(
             $this->userList['user']->username(),
             $payload['username'],
             'json-user-user-username'
         );
-        $this->assertEquals(
+        $this->assertSame(
             $this->userList['user']->announceKey(),
             $payload['personal']['passkey'],
             'json-user-user-passkey-visible'
         );
-        $this->assertEquals(
+        $this->assertSame(
             STARTING_UPLOAD,
             $payload['stats']['uploaded'],
             'json-user-user-uploaded-override'
@@ -88,14 +88,14 @@ class UserJsonTest extends TestCase {
             $this->userList['admin'],
         );
         $payload = $recent->payload();
-        $this->assertEquals([], $payload['snatches'], 'json-user-recent-admin-snatch');
-        $this->assertEquals(
+        $this->assertSame([], $payload['snatches'], 'json-user-recent-admin-snatch');
+        $this->assertSame(
             $torrent->groupId(),
             $payload['uploads'][0]['ID'],
             'json-user-recent-admin-upload'
         );
 
-        $this->assertEquals(
+        $this->assertSame(
             'hidden',
             new Json\UserRecent(
                 $this->userList['admin'],
@@ -113,16 +113,16 @@ class UserJsonTest extends TestCase {
         );
         $payload = $json->payload();
 
-        $this->assertEquals(1, $payload['pages'], 'json-user-search-page-total');
-        $this->assertEquals(1, $payload['currentPage'], 'json-user-search-page-current');
+        $this->assertSame(1, $payload['pages'], 'json-user-search-page-total');
+        $this->assertSame(1, $payload['currentPage'], 'json-user-search-page-current');
         $this->assertCount(1, $payload['results'], 'json-user-search-results');
         $result = array_first($payload['results']);
-        $this->assertEquals(
+        $this->assertSame(
             $this->userList['admin']->id,
             $result['userId'],
             'json-user-search-id',
         );
-        $this->assertEquals(
+        $this->assertSame(
             $this->userList['admin']->username(),
             $result['username'],
             'json-user-search-username',
@@ -137,7 +137,7 @@ class UserJsonTest extends TestCase {
             new Util\Paginator(10, 1),
         );
         $payload = $json->payload();
-        $this->assertEquals(0, $payload['pages'], 'json-user-search-simple-page-total');
-        $this->assertEquals([], $payload['results'], 'json-user-search-simple-results');
+        $this->assertSame(0, $payload['pages'], 'json-user-search-simple-page-total');
+        $this->assertSame([], $payload['results'], 'json-user-search-simple-results');
     }
 }

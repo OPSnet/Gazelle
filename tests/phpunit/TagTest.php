@@ -44,20 +44,20 @@ class TagTest extends TestCase {
 
     public function testSanitize(): void {
         $manager = new Manager\Tag();
-        $this->assertEquals('trim', $manager->sanitize(' trim '), 'tag-sanitize-trim');
-        $this->assertEquals('lower', $manager->sanitize('Lower'), 'tag-sanitize-lower');
-        $this->assertEquals('heavy.metal', $manager->sanitize('heavy metal'), 'tag-sanitize-internal-space');
-        $this->assertEquals('post.rock', $manager->sanitize('post rock'), 'tag-sanitize-internal-space');
-        $this->assertEquals('alpha1', $manager->sanitize('a@l,p#_h"a!1'), 'tag-sanitize-alphanum');
-        $this->assertEquals('dot.dot', $manager->sanitize('dot...dot'), 'tag-sanitize-double-dot');
+        $this->assertSame('trim', $manager->sanitize(' trim '), 'tag-sanitize-trim');
+        $this->assertSame('lower', $manager->sanitize('Lower'), 'tag-sanitize-lower');
+        $this->assertSame('heavy.metal', $manager->sanitize('heavy metal'), 'tag-sanitize-internal-space');
+        $this->assertSame('post.rock', $manager->sanitize('post rock'), 'tag-sanitize-internal-space');
+        $this->assertSame('alpha1', $manager->sanitize('a@l,p#_h"a!1'), 'tag-sanitize-alphanum');
+        $this->assertSame('dot.dot', $manager->sanitize('dot...dot'), 'tag-sanitize-double-dot');
     }
 
     public function testNormalize(): void {
         $manager = new Manager\Tag();
-        $this->assertEquals('', $manager->normalize('              '), 'tag-normalize-space');
-        $this->assertEquals('dub', $manager->normalize('Dub dub  DUB! '), 'tag-normalize-dup');
-        $this->assertEquals('neo.folk', $manager->normalize('neo...folk neo-folk'), 'tag-normalize-more');
-        $this->assertEquals('pop rock', $manager->normalize(' pop rock rock pop Rock'), 'tag-normalize-two');
+        $this->assertSame('', $manager->normalize('              '), 'tag-normalize-space');
+        $this->assertSame('dub', $manager->normalize('Dub dub  DUB! '), 'tag-normalize-dup');
+        $this->assertSame('neo.folk', $manager->normalize('neo...folk neo-folk'), 'tag-normalize-more');
+        $this->assertSame('pop rock', $manager->normalize(' pop rock rock pop Rock'), 'tag-normalize-two');
     }
 
     public function testCreate(): void {
@@ -68,13 +68,12 @@ class TagTest extends TestCase {
         $this->user = Helper::makeUser('tag.' . randomString(6), 'tag');
         $this->user->requestContext()->setViewer($this->user);
         $tag = $manager->create($name, $this->user);
-        $this->assertInstanceOf(Tag::class, $tag, 'tag-find-by-id');
-        $this->assertEquals($tag->id, $manager->findByName($tag->name())?->id, 'tag-method-lookup');
-        $this->assertEquals($name, $tag->name(), 'tag-method-name');
-        $this->assertEquals($name, $manager->findByName($tag->name())?->name(), 'tag-find-by-name');
+        $this->assertSame($tag->id, $manager->findByName($tag->name())?->id, 'tag-method-lookup');
+        $this->assertSame($name, $tag->name(), 'tag-method-name');
+        $this->assertSame($name, $manager->findByName($tag->name())->name(), 'tag-find-by-name');
 
         $find = $manager->findById($tag->id);
-        $this->assertEquals($tag->id, $find?->id, 'tag-find-by-id');
+        $this->assertSame($tag->id, $find?->id, 'tag-find-by-id');
 
         $this->user->addBounty(500 * 1024 ** 3);
         $this->request = Helper::makeRequestMusic($this->user, 'phpunit tag create request');
@@ -85,24 +84,24 @@ class TagTest extends TestCase {
         $this->assertNull($manager->findByName($new), 'tag-lookup-new-fail');
         $newTag = $manager->softCreate($new, $this->user);
         $this->assertInstanceOf(\Gazelle\Tag::class, $newTag, 'tag-new-found');
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $manager->rename( $tag, [$newTag], $this->user),
             'tag-rename'
         );
         $find = $manager->findByName($new);
-        $this->assertInstanceOf(\Gazelle\Tag::class, $find, 'tag-found');
-        $this->assertEquals($find->id, $newTag->id, 'tag-lookup-new-success');
+        $this->assertInstanceOf(Tag::class, $find, 'tag-find-by-id'); /** @phpstan-ignore-line method.impossibleType */
+        $this->assertSame($find->id, $newTag->id, 'tag-lookup-new-success');
 
         // rename to an existing tag
         $new2    = "$name." . randomString(5);
         $new2Tag = $manager->create($new2, $this->user);
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $manager->rename($newTag, [$new2Tag], $this->user),
             'tag-existing-rename'
         );
-        $this->assertEquals(
+        $this->assertSame(
             $new2Tag->id,
             (int)$manager->findByName($new2Tag->name())?->id,
             'tag-lookup-existing-success'
@@ -123,7 +122,7 @@ class TagTest extends TestCase {
         $t2 = $manager->softCreate($valid, $this->user);
         $this->assertInstanceOf(Tag::class, $t1, 'tag-t1-found');
         $this->assertInstanceOf(Tag::class, $t2, 'tag-t2-found');
-        $this->assertEquals($t1->id, $t2->id, 'tag-soft-create-valid');
+        $this->assertSame($t1->id, $t2->id, 'tag-soft-create-valid');
     }
 
     public function testAlias(): void {
@@ -132,14 +131,14 @@ class TagTest extends TestCase {
 
         $bad  = $manager->create(self::PREFIX . randomString(10), $this->user);
         $good = $manager->create(self::PREFIX . randomString(10), $this->user);
-        $this->assertNotEquals($bad->id, $good->id, 'tag-just-try-again');
+        $this->assertNotSame($bad->id, $good->id, 'tag-just-try-again');
         $aliasId =  $manager->createAlias($bad->name(), $good->name());
-        $this->assertEquals($aliasId, $manager->lookupBad($bad->name()), 'tag-lookup-bad');
+        $this->assertSame($aliasId, $manager->lookupBad($bad->name()), 'tag-lookup-bad');
 
         $exclude    = $manager->create(self::PREFIX . randomString(10), $this->user);
         $excludeBad = $manager->create(self::PREFIX . randomString(10), $this->user);
         $manager->createAlias($excludeBad->name(), $exclude->name());
-        $this->assertEquals(
+        $this->assertSame(
             [
                 'include' => [str_replace('.', '_', $good->name())],
                 'exclude' => ['!' . str_replace('.', '_', $exclude->name())],
@@ -154,7 +153,7 @@ class TagTest extends TestCase {
         );
         $found = $manager->listAlias(false);
         $this->assertGreaterThan(0, count($found), 'tag-alias-total');
-        $this->assertEquals(
+        $this->assertSame(
             ['id' => $aliasId, 'bad' => $bad->name(), 'alias' => $good->name()],
             $found[$aliasId],
             'tag-alias-list',
@@ -164,7 +163,7 @@ class TagTest extends TestCase {
             'exclude' => ['!' . $exclude->name()],
         ];
         $input = "{$good->name()}, !{$exclude->name()}";
-        $this->assertEquals(
+        $this->assertSame(
             [
                 "input"     => $input,
                 "predicate" => "{$good->name()} !{$exclude->name()}",
@@ -172,7 +171,7 @@ class TagTest extends TestCase {
             $manager->sphinxFilter($tagList, true, true),
             'tag-sphinx-neg-all'
         );
-        $this->assertEquals(
+        $this->assertSame(
             [
                 "input"     => $input,
                 "predicate" => "( {$good->name()} ) !{$exclude->name()}",
@@ -180,7 +179,7 @@ class TagTest extends TestCase {
             $manager->sphinxFilter($tagList, true, false),
             'tag-sphinx-neg-noall'
         );
-        $this->assertEquals(
+        $this->assertSame(
             [
                 "input"     => $input,
                 "predicate" => "{$good->name()} \\\\!{$exclude->name()}",
@@ -188,7 +187,7 @@ class TagTest extends TestCase {
             $manager->sphinxFilter($tagList, false, true),
             'tag-sphinx-noneg-all'
         );
-        $this->assertEquals(
+        $this->assertSame(
             [
                 "input"     => $input,
                 "predicate" => "( {$good->name()} | \\\\!{$exclude->name()} )",
@@ -198,33 +197,33 @@ class TagTest extends TestCase {
         );
 
         $notgood = $good->name() . '.nope';
-        $this->assertEquals(1, $manager->modifyAlias($aliasId, $notgood, $good->name()), 'tag-rename-alias');
+        $this->assertSame(1, $manager->modifyAlias($aliasId, $notgood, $good->name()), 'tag-rename-alias');
         $list = array_filter(
             $manager->aliasList(),
             fn($t) => $t['BadTag'] == strtr($notgood, '.', '_'),
         );
         $this->assertCount(1, $list, 'tag-alias-list');
-        $this->assertEquals($good->name(), $manager->resolve($notgood), 'tag-resolve-alias');
-        $this->assertEquals(1, $manager->removeAlias($aliasId), 'tag-remove-alias');
+        $this->assertSame($good->name(), $manager->resolve($notgood), 'tag-resolve-alias');
+        $this->assertSame(1, $manager->removeAlias($aliasId), 'tag-remove-alias');
     }
 
     public function testOfficial(): void {
         $manager    = new Manager\Tag();
         $this->user = Helper::makeUser('tag.' . randomString(6), 'tag');
         $tag        = $manager->create(self::PREFIX . randomString(10), $this->user);
-        $this->assertEquals($tag->id, $manager->officialize($tag->name(), $this->user)->id, 'tag-officalize-existing');
+        $this->assertSame($tag->id, $manager->officialize($tag->name(), $this->user)->id, 'tag-officalize-existing');
         $list = array_filter($manager->genreList(), fn($t) => $t == $tag->name());
         $this->assertCount(1, $list, 'tag-genre-list');
 
         $official = $manager->officialize(self::PREFIX . 'off.' . randomString(10), $this->user);
-        $this->assertNotEquals($tag->id, $official->id, 'tag-officialize-new');
+        $this->assertNotSame($tag->id, $official->id, 'tag-officialize-new');
         $officialName = $official->name();
         $list = array_filter(
             $manager->officialList(),
             fn($t) => $t->name() == $officialName
         );
         $this->assertCount(1, $list, 'tag-official-list');
-        $this->assertEquals(1, $manager->unofficialize([$official->id]), 'tag-unofficialize');
+        $this->assertSame(1, $manager->unofficialize([$official->id]), 'tag-unofficialize');
         $this->assertCount(
             0,
             array_filter($manager->officialList(), fn($t) => $t->name() == $officialName),
@@ -273,8 +272,8 @@ class TagTest extends TestCase {
         $result = $tag->tgroupList();
         $item   = array_first($result);
         $this->assertCount(1, $result, 'tag-torrent-lookup');
-        $this->assertEquals($this->tgroup->id, $item['torrentGroupId'], 'tag-found-tgroup');
-        $this->assertEquals(
+        $this->assertSame($this->tgroup->id, $item['torrentGroupId'], 'tag-found-tgroup');
+        $this->assertSame(
             1,
             $folk->voteTGroup($this->tgroup, $this->user, 'up'),
             'tag-tgroup-vote'
@@ -300,7 +299,7 @@ class TagTest extends TestCase {
             tagName:    [$name],
             user:       $this->user,
         );
-        $this->assertEquals(2, $tag->addTGroup($this->tgroup, $this->user, 0), 'tag-re-add');
+        $this->assertSame(2, $tag->addTGroup($this->tgroup, $this->user, 0), 'tag-re-add');
     }
 
     public function testSplitNew(): void {
@@ -313,17 +312,17 @@ class TagTest extends TestCase {
         $this->user->addBounty(500 * 1024 ** 3);
         $this->request = Helper::makeRequestMusic($this->user, 'phpunit tag split new request');
         $tag->addRequest($this->request);
-        $this->assertEquals(1, $tag->flush()->uses(), 'tag-instance-use-1');
+        $this->assertSame(1, $tag->flush()->uses(), 'tag-instance-use-1');
         $this->tgroup = Helper::makeTGroupMusic(
             name:       'phpunit tag ' . randomString(6),
             artistName: [[ARTIST_MAIN], ['phpunit tag ' . randomString(6)]],
             tagName:    [$name],
             user:       $this->user,
         );
-        $this->assertEquals(2, $tag->flush()->uses(), 'tag-instance-use-2');
+        $this->assertSame(2, $tag->flush()->uses(), 'tag-instance-use-2');
 
         // split tag into two new (indie.rock.alt.rock => indie.rock, alt.rock)
-        $this->assertEquals(
+        $this->assertSame(
             3, // 2 for tgroup and 1 for request
             $manager->rename(
                 $tag,
@@ -335,19 +334,19 @@ class TagTest extends TestCase {
             ),
             'tag-new-split',
         );
-        $this->assertEquals(
+        $this->assertSame(
             ["$name.1", "$name.2"],
             $this->request->flush()->tagNameList(),
             'tag-split-new-request',
         );
-        $this->assertEquals(
+        $this->assertSame(
             ["$name.1", "$name.2"],
             array_values(array_map(fn($t) => $t['name'], $this->tgroup->flush()->tagList())),
             'tag-split-new-tgroup',
         );
 
         $this->assertNull($manager->findByName($name), 'tag-new-gone');
-        $this->assertEquals(
+        $this->assertSame(
             2,
             $manager->findByName("$name.2")?->uses(),
             'tag-new-uses',
@@ -374,7 +373,7 @@ class TagTest extends TestCase {
         // split tag into two existing tags
         $nameList = ["$name.3", "$name.4"];
         array_map(fn($n) => $manager->create($n, $this->user), $nameList);
-        $this->assertEquals(
+        $this->assertSame(
             3,
             $manager->rename(
                 $tag,
@@ -386,19 +385,19 @@ class TagTest extends TestCase {
             ),
             'tag-existing-split',
         );
-        $this->assertEquals(
+        $this->assertSame(
             ["$name.3", "$name.4"],
             $this->request->flush()->tagNameList(),
             'tag-split-existing-request',
         );
-        $this->assertEquals(
+        $this->assertSame(
             ["$name.3", "$name.4"],
             array_values(array_map(fn($t) => $t['name'], $this->tgroup->flush()->tagList())),
             'tag-split-existing-tgroup',
         );
 
         $this->assertNull($manager->findByName($name), 'tag-existing-gone');
-        $this->assertEquals(
+        $this->assertSame(
             2,
             $manager->findByName("$name.3")?->uses(),
             'tag-existing-uses',
@@ -410,18 +409,17 @@ class TagTest extends TestCase {
         $manager    = new Manager\Tag();
         $name       = self::PREFIX . randomString(10);
         $tag        = $manager->create($name, $this->user);
-        $this->assertInstanceOf(Tag::class, $tag, 'tag-instance-find');
-        $this->assertEquals($name, $tag->name(), 'tag-instance-name');
-        $this->assertEquals(
+        $this->assertSame($name, $tag->name(), 'tag-instance-name');
+        $this->assertSame(
             "<a href=\"torrents.php?taglist=$name\">$name</a>",
             $tag->link(),
             'tag-instance-link'
         );
-        $this->assertEquals("torrents.php?taglist=$name", $tag->location(), 'tag-instance-location');
-        $this->assertEquals('other', $tag->type(), 'tag-instance-table-name');
+        $this->assertSame("torrents.php?taglist=$name", $tag->location(), 'tag-instance-location');
+        $this->assertSame('other', $tag->type(), 'tag-instance-table-name');
         $manager->officialize($name, $this->user);
-        $this->assertEquals('genre', $tag->flush()->type(), 'tag-instance-genre');
-        $this->assertEquals($this->user->id, $tag->userId(), 'tag-instance-creator');
+        $this->assertSame('genre', $tag->flush()->type(), 'tag-instance-genre');
+        $this->assertSame($this->user->id, $tag->userId(), 'tag-instance-creator');
     }
 
     public function testTop10(): void {
@@ -436,9 +434,9 @@ class TagTest extends TestCase {
 
         $payload = new Json\Top10\Tag('all', 10)->payload();
         $this->assertCount(3, $payload, 'tag-top10-all-payload');
-        $this->assertEquals('ut', $payload[0]['tag'], 'tag-top10-payload-ut');
-        $this->assertEquals('ur', $payload[1]['tag'], 'tag-top10-payload-ur');
-        $this->assertEquals('v', $payload[2]['tag'], 'tag-top10-payload-v');
+        $this->assertSame('ut', $payload[0]['tag'], 'tag-top10-payload-ut');
+        $this->assertSame('ur', $payload[1]['tag'], 'tag-top10-payload-ur');
+        $this->assertSame('v', $payload[2]['tag'], 'tag-top10-payload-v');
 
         $this->assertCount(0, new Json\Top10\Tag('bogus', 1)->payload(), 'tag-top10-bogus-payload');
     }
@@ -450,15 +448,15 @@ class TagTest extends TestCase {
 
         $id = $manager->createRejected($name, $this->user);
         $this->assertGreaterThan(0, $id, 'tag-reject-create');
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $manager->createRejected($name, $this->user),
             'tag-reject-duplicate',
         );
         $list = array_filter($manager->rejectedList(), fn ($t) => $t['name'] === $name);
         $this->assertCount(1, $list, 'tag-reject-list-count');
-        $this->assertEquals($name, array_first($list)['name'], 'tag-reject-list-name');
-        $this->assertEquals(
+        $this->assertSame($name, array_first($list)['name'], 'tag-reject-list-name');
+        $this->assertSame(
             1,
             $manager->removeRejectedList([$id]),
             'tag-reject-remove',

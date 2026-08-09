@@ -59,7 +59,7 @@ class UserTest extends TestCase {
 
         $id       = $this->user->id;
         $username = $this->user->username();
-        $this->assertEquals(1, $this->user->remove(), 'user-remove-exists');
+        $this->assertSame(1, $this->user->remove(), 'user-remove-exists');
         $this->assertNull(new Manager\User()->findById($id), 'user-is-removed');
         $this->assertNull(new Manager\User()->findByUsername($username), 'username-is-removed');
         unset($this->user);
@@ -70,13 +70,13 @@ class UserTest extends TestCase {
         $this->user->toggleAttr('unlimited-download', true);
         $this->assertTrue($this->user->hasAttr('unlimited-download'), 'uattr-not-hasUnlimitedDownload');
 
-        $this->assertEquals(AvatarDisplay::show, $this->user->avatarMode(), 'uattr-avatarMode');
+        $this->assertSame(AvatarDisplay::show, $this->user->avatarMode(), 'uattr-avatarMode');
         $this->assertTrue($this->user->showAvatars(), 'uattr-show-avatars');
-        $this->assertEquals(0, $this->user->bonusPointsTotal(), 'uattr-bp');
-        $this->assertEquals(0, $this->user->downloadedSize(), 'uattr-starting-download');
-        $this->assertEquals(POSTS_PER_PAGE, $this->user->postsPerPage(), 'uattr-ppp');
-        $this->assertEquals(STARTING_UPLOAD, $this->user->uploadedSize(), 'uattr-starting-upload');
-        $this->assertEquals('User', $this->user->userclassName(), 'uattr-userclass-name');
+        $this->assertSame(0, $this->user->bonusPointsTotal(), 'uattr-bp');
+        $this->assertSame(0, $this->user->downloadedSize(), 'uattr-starting-download');
+        $this->assertSame(POSTS_PER_PAGE, $this->user->postsPerPage(), 'uattr-ppp');
+        $this->assertSame(STARTING_UPLOAD, $this->user->uploadedSize(), 'uattr-starting-upload');
+        $this->assertSame('User', $this->user->userclassName(), 'uattr-userclass-name');
 
         $this->assertFalse($this->user->disableAvatar(), 'uattr-disableAvatar');
         $this->assertFalse($this->user->disableBonusPoints(), 'uattr-disableBonusPoints');
@@ -148,21 +148,21 @@ class UserTest extends TestCase {
         $this->assertFalse($this->user->permitted($privilege), 'user-permitted-custom-no');
         $this->assertTrue($this->user->addCustomPrivilege($privilege), 'user-permitted-custom-modify');
         $this->assertTrue($this->user->permitted($privilege), 'user-permitted-custom-yes');
-        $this->assertEquals(1, $this->user->modifyPrivilegeList([]), 'user-permitted-custom-none');
+        $this->assertSame(1, $this->user->modifyPrivilegeList([]), 'user-permitted-custom-none');
         $this->assertFalse($this->user->permitted($privilege), 'user-permitted-custom-removed');
     }
 
     public function testExternalProfile(): void {
         $externalProfile = new User\ExternalProfile($this->user);
-        $this->assertEquals('', $externalProfile->profile(), 'user-profile-new');
-        $this->assertEquals(1, $externalProfile->modifyProfile('phpunit'), 'user-profile-create');
-        $this->assertEquals('phpunit', $externalProfile->profile(), 'user-profile-set');
+        $this->assertSame('', $externalProfile->profile(), 'user-profile-new');
+        $this->assertSame(1, $externalProfile->modifyProfile('phpunit'), 'user-profile-create');
+        $this->assertSame('phpunit', $externalProfile->profile(), 'user-profile-set');
 
-        $this->assertEquals(1, $externalProfile->modifyProfile('phpunit update'), 'user-profile-update');
-        $this->assertEquals('phpunit update', $this->user->externalProfile()->profile(), 'user-profile-delegate');
+        $this->assertSame(1, $externalProfile->modifyProfile('phpunit update'), 'user-profile-update');
+        $this->assertSame('phpunit update', $this->user->externalProfile()->profile(), 'user-profile-delegate');
 
-        $this->assertEquals(1, $externalProfile->remove(), 'user-profile-remove');
-        $this->assertEquals('', $externalProfile->profile(), 'user-profile-empty');
+        $this->assertSame(1, $externalProfile->remove(), 'user-profile-remove');
+        $this->assertSame('', $externalProfile->profile(), 'user-profile-empty');
     }
 
     public function testPassword(): void {
@@ -171,29 +171,29 @@ class UserTest extends TestCase {
         $this->assertLessThan(1, $this->user->history()->passwordAge(), 'utest-password-age');
         $this->assertTrue($this->user->validatePassword($password), 'utest-password-validate-new');
         $this->assertCount(1, $this->user->history()->passwordList(), 'utest-password-list');
-        $this->assertEquals(1, $this->user->history()->passwordTotal(), 'utest-password-count');
+        $this->assertSame(1, $this->user->history()->passwordTotal(), 'utest-password-count');
     }
 
     public function testUserBasic(): void {
-        $this->assertEquals($this->user->username(), $this->user->flush()->username(), 'utest-flush-username');
+        $this->assertSame($this->user->username(), $this->user->flush()->username(), 'utest-flush-username');
 
-        $this->assertEquals(0, $this->user->allowedPersonalCollages(), 'utest-personal-collages-allowed');
-        $this->assertEquals(0, $this->user->paidPersonalCollages(), 'utest-personal-collages-paid');
-        $this->assertEquals(0, $this->user->activePersonalCollages(), 'utest-personal-collages-active');
-        $this->assertEquals(0, $this->user->collagesCreated(), 'utest-collage-created');
-        $this->assertEquals(0, $this->user->collageUnreadCount(), 'utest-collage-unread-count');
-        $this->assertEquals(0, $this->user->forumCatchupEpoch(), 'utest-forum-catchup-epoch');
-        $this->assertEquals(0, $this->user->invite()->pendingTotal(), 'utest-pending-invite-count');
-        $this->assertEquals(0, $this->user->seedingSize(), 'utest-seeding-size');
-        $this->assertEquals(0, $this->user->torrentRecentRemoveCount(1), 'utest-torrent-recent-remove-count');
-        $this->assertEquals(0, $this->user->trackerIPCount(), 'utest-tracker-ipaddr-total');
-        $this->assertEquals('', $this->user->referral(), 'utest-referral');
-        $this->assertEquals('XX', $this->user->ipCountryIso(), 'utest-country-iso');
-        $this->assertEquals('127.0.0.1', $this->user->ipaddr(), 'utest-country-ipaddr');
-        $this->assertEquals([], $this->user->tagSnatchCounts(), 'utest-tag-snatch-counts');
-        $this->assertEquals([], $this->user->tokenList(new Manager\Torrent(), 0, 0), 'utest-token-list');
-        $this->assertEquals([], $this->user->navigationList(), 'utest-navigation-list');
-        $this->assertEquals(USER, $this->user->primaryClass(), 'utest-primary-class');
+        $this->assertSame(0, $this->user->allowedPersonalCollages(), 'utest-personal-collages-allowed');
+        $this->assertSame(0, $this->user->paidPersonalCollages(), 'utest-personal-collages-paid');
+        $this->assertSame(0, $this->user->activePersonalCollages(), 'utest-personal-collages-active');
+        $this->assertSame(0, $this->user->collagesCreated(), 'utest-collage-created');
+        $this->assertSame(0, $this->user->collageUnreadCount(), 'utest-collage-unread-count');
+        $this->assertSame(0, $this->user->forumCatchupEpoch(), 'utest-forum-catchup-epoch');
+        $this->assertSame(0, $this->user->invite()->pendingTotal(), 'utest-pending-invite-count');
+        $this->assertSame(0, $this->user->seedingSize(), 'utest-seeding-size');
+        $this->assertSame(0, $this->user->torrentRecentRemoveCount(1), 'utest-torrent-recent-remove-count');
+        $this->assertSame(0, $this->user->trackerIPCount(), 'utest-tracker-ipaddr-total');
+        $this->assertSame('', $this->user->referral(), 'utest-referral');
+        $this->assertSame('XX', $this->user->ipCountryIso(), 'utest-country-iso');
+        $this->assertSame('127.0.0.1', $this->user->ipaddr(), 'utest-country-ipaddr');
+        $this->assertSame([], $this->user->tagSnatchCounts(), 'utest-tag-snatch-counts');
+        $this->assertSame([], $this->user->tokenList(new Manager\Torrent(), 0, 0), 'utest-token-list');
+        $this->assertSame([], $this->user->navigationList(), 'utest-navigation-list');
+        $this->assertSame(USER, $this->user->primaryClass(), 'utest-primary-class');
 
         $this->assertTrue($this->user->isVisible(), 'utest-is-visble');
         $this->assertTrue($this->user->canLeech(), 'utest-can-leech');
@@ -213,25 +213,24 @@ class UserTest extends TestCase {
 
         $this->assertNull($this->user->warning()->expiry(), 'utest-warning-expiry');
 
-        $this->assertEquals([], $this->user->recentUploadList(), 'utest-recent-upload');
+        $this->assertSame([], $this->user->recentUploadList(), 'utest-recent-upload');
         $this->assertTrue($this->user->flushRecentUpload(), 'utest-flush-recent-upload');
 
-        $this->assertEquals(0, $this->user->tokenCount(), 'utest-token-count');
+        $this->assertSame(0, $this->user->tokenCount(), 'utest-token-count');
         $this->assertTrue($this->user->updateTokens(10), 'utest-token-update-10');
         $this->assertTrue($this->user->updateTokens(5), 'utest-token-update-5');
-        $this->assertEquals(5, $this->user->tokenCount(), 'utest-token-new-count');
+        $this->assertSame(5, $this->user->tokenCount(), 'utest-token-new-count');
 
-        // TODO: this will become null
-        $this->assertEquals('', $this->user->slogan(), 'utest-slogan');
+        $this->assertNull($this->user->slogan(), 'utest-slogan');
         $this->assertTrue($this->user->setField('slogan', 'phpunit slogan')->modify(), 'utest-modify-slogan');
 
-        $this->assertEquals('', $this->user->IRCKey(), 'utest-no-irc-key');
+        $this->assertNull($this->user->IRCKey(), 'utest-no-irc-key');
         $this->user->setField('IRCkey', 'irckey')->modify();
-        $this->assertEquals('irckey', $this->user->IRCKey(), 'utest-irc-key');
+        $this->assertSame('irckey', $this->user->IRCKey(), 'utest-irc-key');
 
         $this->user->addStaffNote('phpunit staff note')->modify();
         $eventList = $this->user->auditTrail()->fullEventList();
-        $this->assertEquals(
+        $this->assertSame(
             'phpunit staff note',
             $eventList[0]['note'],
             'utest-staff-note'
@@ -239,26 +238,26 @@ class UserTest extends TestCase {
     }
 
     public function testUserProfile(): void {
-        $this->assertEquals('Profile', $this->user->profileTitle(), 'utest-profile-initial');
+        $this->assertSame('Profile', $this->user->profileTitle(), 'utest-profile-initial');
         $profile = randomString();
         $this->user->setField('profile_title', $profile)->modify();
-        $this->assertEquals($profile, $this->user->profileTitle(), 'utest-profile-changed');
+        $this->assertSame($profile, $this->user->profileTitle(), 'utest-profile-changed');
     }
 
     public function testUserRequestDefaults(): void {
-        $this->assertEquals(
+        $this->assertSame(
             REQUEST_MIN * 1024 ** 2,
             $this->user->requestCreationValue(),
             'utest-req-create-value-default',
         );
         $createValue = 10 * 1024 ** 3;
         $this->user->ordinal()->set('request-bounty-create', $createValue);
-        $this->assertEquals(
+        $this->assertSame(
             $createValue,
             $this->user->requestCreationValue(),
             'utest-req-create-value-custom',
         );
-        $this->assertEquals(
+        $this->assertSame(
             [
                 'value' => '10.00',
                 'unit'  => 'GiB'
@@ -266,19 +265,19 @@ class UserTest extends TestCase {
             $this->user->requestCreationInfo(),
             'utest-req-create-info-custom',
         );
-        $this->assertEquals(
+        $this->assertSame(
             REQUEST_MIN * 1024 ** 2,
             $this->user->requestVoteValue(),
             'utest-req-vote-value-default',
         );
         $voteValue = 200 * 1024 ** 2;
         $this->user->ordinal()->set('request-bounty-vote', $voteValue);
-        $this->assertEquals(
+        $this->assertSame(
             $voteValue,
             $this->user->requestVoteValue(),
             'utest-req-vote-custom',
         );
-        $this->assertEquals(
+        $this->assertSame(
             [
                 'value' => '200.00',
                 'unit'  => 'MiB'
@@ -289,19 +288,19 @@ class UserTest extends TestCase {
     }
 
     public function testUpDown(): void {
-        $this->assertEquals(STARTING_UPLOAD, $this->user->uploadedSize(), 'utest-initial-up');
-        $this->assertEquals(0, $this->user->downloadedSize(), 'utest-initial-down');
+        $this->assertSame(STARTING_UPLOAD, $this->user->uploadedSize(), 'utest-initial-up');
+        $this->assertSame(0, $this->user->downloadedSize(), 'utest-initial-down');
         $this->user->setField('leech_upload', STARTING_UPLOAD * 4)
             ->setField('leech_download', STARTING_UPLOAD * 2)
             ->modify();
-        $this->assertEquals(STARTING_UPLOAD * 4, $this->user->uploadedSize(), 'utest-modified-up');
-        $this->assertEquals(STARTING_UPLOAD * 2, $this->user->downloadedSize(), 'utest-modified-down');
+        $this->assertSame(STARTING_UPLOAD * 4, $this->user->uploadedSize(), 'utest-modified-up');
+        $this->assertSame(STARTING_UPLOAD * 2, $this->user->downloadedSize(), 'utest-modified-down');
     }
 
     public function testAvatar(): void {
         $userMan = new Manager\User();
-        $this->assertEquals('', $this->user->avatar(), 'utest-avatar-blank');
-        $this->assertEquals(
+        $this->assertSame('', $this->user->avatar(), 'utest-avatar-blank');
+        $this->assertSame(
             [
                 'image' => USER_DEFAULT_AVATAR,
                 'hover' => false,
@@ -313,9 +312,9 @@ class UserTest extends TestCase {
 
         // defeat the avatar cache
         $this->assertTrue($this->modifyAvatarRender(AvatarDisplay::none, AvatarSynthetic::robot1), 'utest-avatar-update-none');
-        $this->assertEquals(AvatarDisplay::none, $this->user->avatarMode(), 'utest-has-avatar-none');
+        $this->assertSame(AvatarDisplay::none, $this->user->avatarMode(), 'utest-has-avatar-none');
         $new = $userMan->findById($this->user->id);
-        $this->assertEquals(
+        $this->assertSame(
             USER_DEFAULT_AVATAR,
             $new?->avatarComponentList($this->user->flush())['image'],
             'utest-avatar-none'
@@ -323,9 +322,9 @@ class UserTest extends TestCase {
 
         $url = 'https://www.example.com/avatar.jpg';
         $this->assertTrue($this->user->setField('avatar', $url)->modify(), 'utest-avatar-set');
-        $this->assertEquals($url, $this->user->avatar(), 'utest-avatar-url');
+        $this->assertSame($url, $this->user->avatar(), 'utest-avatar-url');
         $new = $userMan->findById($this->user->id);
-        $this->assertEquals(
+        $this->assertSame(
             USER_DEFAULT_AVATAR,
             $new?->avatarComponentList($this->user->flush())['image'],
             'utest-avatar-override-none'
@@ -335,7 +334,7 @@ class UserTest extends TestCase {
             AvatarSynthetic::identicon),
             'utest-avatar-update-synthetic-identicon'
         );
-        $this->assertEquals(
+        $this->assertSame(
             AvatarDisplay::forceSynthetic,
             $this->user->flush()->avatarMode(),
             'utest-clone-avatar-forceSynthetic'
@@ -346,7 +345,7 @@ class UserTest extends TestCase {
             'utest-avatar-update-show'
         );
         $new = $userMan->findById($this->user->id);
-        $this->assertEquals(
+        $this->assertSame(
             'https://www.example.com/avatar.jpg',
             $new?->avatarComponentList($this->user->flush())['image'],
             'utest-avatar-show'
@@ -355,7 +354,7 @@ class UserTest extends TestCase {
 
     public function testLastAccess(): void {
         $this->assertNull($this->user->lastAccess(), 'utest-no-last-access');
-        $this->assertEquals(1, $this->user->refreshLastAccess(), 'utest-refresh-last-access');
+        $this->assertSame(1, $this->user->refreshLastAccess(), 'utest-refresh-last-access');
         $this->assertTrue(
             Helper::recentDate((string)$this->user->lastAccessRealtime()),
             'utest-realtime-last-access'
@@ -373,7 +372,7 @@ class UserTest extends TestCase {
         $this->assertTrue($this->user->setField('lock-type', STAFF_LOCKED)->modify(), 'utest-set-locked');
         $this->user->flush();
         $this->assertTrue($this->user->isLocked(), 'utest-is-now-locked');
-        $this->assertEquals(STAFF_LOCKED, $this->user->lockType(), 'utest-lock-type');
+        $this->assertSame(STAFF_LOCKED, $this->user->lockType(), 'utest-lock-type');
         $this->assertTrue($this->user->setField('lock-type', 0)->modify(), 'utest-set-unlocked');
         $this->user->flush();
         $this->assertFalse($this->user->isLocked(), 'utest-is-unlocked');
@@ -385,22 +384,26 @@ class UserTest extends TestCase {
         $manager = new Manager\Stylesheet();
         $list = $manager->list();
         $this->assertGreaterThan(5, $list, 'we-can-haz-stylesheets');
-        $this->assertEquals(count($list), count($manager->usageList()), 'stylesheet-list-usage');
+        $this->assertCount(
+            count($list),
+            $manager->usageList(),
+            'stylesheet-list-usage',
+        );
 
         $sheet = array_last($list);
         $url   = STATIC_SERVER . '/bogus.css';
         $stylesheet = $this->user->stylesheet();
         $this->assertNull($stylesheet->styleUrl(), 'stylesheet-no-external-url');
-        $this->assertEquals(1, $stylesheet->modifyInfo($sheet['id'], null), 'stylesheet-modify');
-        $this->assertEquals($sheet['css_name'], $stylesheet->cssName(), 'stylesheet-css-name');
+        $this->assertSame(1, $stylesheet->modifyInfo($sheet['id'], null), 'stylesheet-modify');
+        $this->assertSame($sheet['css_name'], $stylesheet->cssName(), 'stylesheet-css-name');
         $this->assertStringContainsString("/static/styles/{$sheet['css_name']}/style.css?v=", $stylesheet->cssUrl(), 'stylesheet-css-url');
         $this->assertStringContainsString("/static/styles/{$sheet['css_name']}/images/", $stylesheet->imagePath(), 'stylesheet-image-path');
-        $this->assertEquals($sheet['name'], $stylesheet->name(), 'stylesheet-name');
-        $this->assertEquals($sheet['id'], $stylesheet->styleId(), 'stylesheet-style-id');
-        $this->assertEquals($sheet['theme'], $stylesheet->theme(), 'stylesheet-theme');
-        $this->assertEquals(1, $stylesheet->modifyInfo($sheet['id'], $url), 'stylesheet-set-external');
-        $this->assertEquals('External CSS', $stylesheet->name(), 'stylesheet-name');
-        $this->assertEquals($url, $stylesheet->styleUrl(), 'stylesheet-external-url');
+        $this->assertSame($sheet['name'], $stylesheet->name(), 'stylesheet-name');
+        $this->assertSame($sheet['id'], $stylesheet->styleId(), 'stylesheet-style-id');
+        $this->assertSame($sheet['theme'], $stylesheet->theme(), 'stylesheet-theme');
+        $this->assertSame(1, $stylesheet->modifyInfo($sheet['id'], $url), 'stylesheet-set-external');
+        $this->assertSame('External CSS', $stylesheet->name(), 'stylesheet-name');
+        $this->assertSame($url, $stylesheet->styleUrl(), 'stylesheet-external-url');
         $this->assertEquals($url, $stylesheet->cssUrl(), 'stylesheet-external-ccs-url');
     }
 
@@ -414,7 +417,7 @@ class UserTest extends TestCase {
             'utest-warn-1-hour',
         );
         $this->assertTrue($warned->isWarned(), 'utest-is-warned');
-        $this->assertEquals(1, $warned->total(), 'utest-warn-total');
+        $this->assertSame(1, $warned->total(), 'utest-warn-total');
 
         $end = $warned->warn(2, "phpunit warning", $this->user, "phpunit");
         $this->assertTrue(
@@ -422,14 +425,14 @@ class UserTest extends TestCase {
             Helper::recentDateTimeImmutable($end->upper, strtotime('+2 weeks') - 60),
             'utest-warn-in-future',
         );
-        $this->assertEquals(2, $warned->total(), 'utest-warn-total');
+        $this->assertSame(2, $warned->total(), 'utest-warn-total');
         $warningList = $warned->warningList();
         $this->assertCount(2, $warningList, 'utest-warn-list');
-        $this->assertEquals('phpunit 1', $warningList[0]['reason'], 'utest-warn-first-reason');
+        $this->assertSame('phpunit 1', $warningList[0]['reason'], 'utest-warn-first-reason');
         $this->assertTrue($warningList[0]['active'], 'utest-warn-first-active');
         $this->assertFalse($warningList[1]['active'], 'utest-warn-second-inactive');
 
-        $this->assertEquals(2, $warned->clear(), 'utest-warn-clear');
+        $this->assertSame(2, $warned->clear(), 'utest-warn-clear');
         $this->assertFalse($warned->isWarned(), 'utest-warn-final');
     }
 
@@ -441,8 +444,8 @@ class UserTest extends TestCase {
         $login  = new Login();
         $ipaddr = $_SERVER['REMOTE_ADDR'];
         $watch  = new LoginWatch($ipaddr);
-        $this->assertEquals(0, $watch->attemptTotal(), 'loginwatch-init-attempt');
-        $this->assertEquals(0, $watch->blockTotal(), 'loginwatch-init-block');
+        $this->assertSame(0, $watch->attemptTotal(), 'loginwatch-init-attempt');
+        $this->assertSame(0, $watch->blockTotal(), 'loginwatch-init-block');
 
         $result = $login->login(
             username: 'email@example.com',
@@ -450,11 +453,11 @@ class UserTest extends TestCase {
             watch:    $watch,
         );
         $this->assertNull($result, 'login-bad-username');
-        $this->assertEquals($login->error(), Enum\LoginStatus::badCredentials, 'login-error-username');
-        $this->assertEquals('email@example.com', $login->username(), 'login-username');
-        $this->assertEquals($ipaddr, $login->requestContext()->remoteAddr(), 'login-ipaddr');
+        $this->assertSame($login->error(), Enum\LoginStatus::badCredentials, 'login-error-username');
+        $this->assertSame('email@example.com', $login->username(), 'login-username');
+        $this->assertSame($ipaddr, $login->requestContext()->remoteAddr(), 'login-ipaddr');
         $this->assertFalse($login->persistent(), 'login-persistent');
-        $this->assertEquals(1, $watch->attemptTotal(), 'loginwatch-attempt');
+        $this->assertSame(1, $watch->attemptTotal(), 'loginwatch-attempt');
 
         $result = $login->login(
             username: $this->user->username(),
@@ -462,23 +465,23 @@ class UserTest extends TestCase {
             watch:    $watch,
         );
         $this->assertNull($result, 'login-bad-password');
-        $this->assertEquals($login->error(), Enum\LoginStatus::badCredentials, 'login-error-password');
-        $this->assertEquals(2, $watch->attemptTotal(), 'loginwatch-more-attempt');
+        $this->assertSame($login->error(), Enum\LoginStatus::badCredentials, 'login-error-password');
+        $this->assertSame(2, $watch->attemptTotal(), 'loginwatch-more-attempt');
 
         $watchMan = new Manager\LoginWatch();
         $total = $watchMan->activeTotal();
         $this->assertGreaterThanOrEqual(0, $total, 'user-login-watch-total');
-        $this->assertEquals(
+        $this->assertCount(
             $total,
-            count($watchMan->activeList(10, 0)),
+            $watchMan->activeList(10, 0),
             'loginwatch-active-list'
         );
-        $this->assertEquals(1, $watch->clearAttempt(), 'loginwatch-clear');
-        $this->assertEquals(0, $watch->attemptTotal(), 'loginwatch-no-attempts');
+        $this->assertSame(1, $watch->clearAttempt(), 'loginwatch-clear');
+        $this->assertSame(0, $watch->attemptTotal(), 'loginwatch-no-attempts');
 
         $banMan = new Manager\Ban();
         $banned = $banMan->create($watch->ipaddr, 'phpunit ban', $this->user);
-        $this->assertEquals($watch->ipaddr, $banned->ip(), 'loginwatch-ip-ban');
+        $this->assertSame($watch->ipaddr, $banned->ip(), 'loginwatch-ip-ban');
 
         $ban = $banMan->findByIp($login->requestContext()->remoteAddr());
         $this->assertInstanceOf(Ban::class, $ban, 'loginwatch-find-ban');
@@ -487,13 +490,13 @@ class UserTest extends TestCase {
             'loginwatch-ip-is-banned'
         );
         $banMan->setFilterIpaddr($login->requestContext()->remoteAddr());
-        $this->assertEquals(1, $banMan->total(), 'loginwatch-ip-total');
+        $this->assertSame(1, $banMan->total(), 'loginwatch-ip-total');
         $page = $banMan->page(2, 0);
         $this->assertCount(1, $page, 'loginwatch-ip-page');
-        $this->assertEquals($ban->id, $page[0]['id'], 'loginwatch-ip-id-page');
-        $this->assertEquals(1, $ban->remove(), 'loginwatch-ip-ban-clear');
+        $this->assertSame($ban->id, $page[0]['id'], 'loginwatch-ip-id-page');
+        $this->assertSame(1, $ban->remove(), 'loginwatch-ip-ban-clear');
 
-        $this->assertEquals(1, $this->user->history()->resetIp(), 'user-reset-ip');
+        $this->assertSame(1, $this->user->history()->resetIp(), 'user-reset-ip');
     }
 
     public function testLoginTrim(): void {
@@ -505,7 +508,7 @@ class UserTest extends TestCase {
             password: 'password',
             watch:    $watch,
         );
-        $this->assertEquals(
+        $this->assertSame(
             $username,
             $watch->capture(),
             'login-username-trim'
@@ -513,9 +516,9 @@ class UserTest extends TestCase {
     }
 
     public function testParanoia(): void {
-        $this->assertEquals([], $this->user->paranoia(), 'utest-paranoia');
-        $this->assertEquals('Off', $this->user->paranoiaLabel(), 'utest-paranoid-label-off');
-        $this->assertEquals(0, $this->user->paranoiaLevel(), 'utest-paranoid-level-off');
+        $this->assertSame([], $this->user->paranoia(), 'utest-paranoia');
+        $this->assertSame('Off', $this->user->paranoiaLabel(), 'utest-paranoid-label-off');
+        $this->assertSame(0, $this->user->paranoiaLevel(), 'utest-paranoid-level-off');
         $this->assertFalse($this->user->isParanoid('lastseen'), 'utest-is-not-last-seen-paranoid');
     }
 
@@ -523,8 +526,8 @@ class UserTest extends TestCase {
         $key = $this->user->announceKey();
         $url = $this->user->announceUrl();
 
-        $this->assertEquals(0, $this->user->history()->announceKeyTotal(), 'utest-announce-key-count');
-        $this->assertEquals(32, strlen($key), 'utest-announce-key');
+        $this->assertSame(0, $this->user->history()->announceKeyTotal(), 'utest-announce-key-count');
+        $this->assertSame(32, strlen($key), 'utest-announce-key');
         $this->assertStringStartsWith(TRACKER_PUBLIC_HOST, $url, 'utest-announce-url-begin');
         $this->assertStringEndsWith('/announce', $url, 'utest-announce-url-end');
         $this->assertCount(0, $this->user->history()->announceKeyList(), 'utest-announce-key-list');
@@ -533,12 +536,12 @@ class UserTest extends TestCase {
         $id  = $this->user->history()->modifyAnnounceKey($key, $new);
         $this->assertGreaterThan(0, $id, 'utest-announce-key-modify');
         $this->user->modify();
-        $this->assertEquals($new, $this->user->announceKey(), 'utest-new-announce-key');
-        $this->assertEquals(1, $this->user->history()->announceKeyTotal(), 'utest-announce-key-new-count');
+        $this->assertSame($new, $this->user->announceKey(), 'utest-new-announce-key');
+        $this->assertSame(1, $this->user->history()->announceKeyTotal(), 'utest-announce-key-new-count');
         $history = array_first($this->user->history()->announceKeyList());
         $this->assertCount(4, $history, 'utest-announce-key-new-history');
-        $this->assertEquals($key, $history['previous'], 'utest-announce-key-history-old');
-        $this->assertEquals(
+        $this->assertSame($key, $history['previous'], 'utest-announce-key-history-old');
+        $this->assertSame(
             $this->user->requestContext()->remoteAddr(),
             $history['ip'],
             'utest-announce-key-history-ipaddr'
@@ -553,13 +556,13 @@ class UserTest extends TestCase {
         $userMan = new Manager\User();
         $db      = DB::DB();
 
-        $this->assertEquals(
+        $this->assertSame(
             Enum\UserStatus::unconfirmed,
             $this->user->userStatus(),
             'user-status-unconfirmed',
         );
         $this->user->setField('Enabled', Enum\UserStatus::enabled->value)->modify();
-        $this->assertEquals(
+        $this->assertSame(
             Enum\UserStatus::enabled,
             $this->user->userStatus(),
             'user-status-enabled',
@@ -569,7 +572,7 @@ class UserTest extends TestCase {
             ", $this->user->id, INACTIVE_USER_WARN_DAYS + 1
         );
         $this->user->flush();
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $userMan->inactiveUserWarn(),
             'utest-one-user-inactive-warned'
@@ -583,14 +586,14 @@ class UserTest extends TestCase {
             UPDATE user_last_access SET last_access = now() - INTERVAL ? DAY WHERE user_id = ?
             ", INACTIVE_USER_DEACTIVATE_DAYS + 1, $this->user->id
         );
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $userMan->inactiveUserDeactivate(new Tracker()),
             'utest-one-user-inactive-deactivated',
         );
         $this->user->flush();
         $this->assertTrue($this->user->isDisabled(), 'utest-inactive-deactivated');
-        $this->assertEquals(
+        $this->assertSame(
             Enum\UserStatus::disabled,
             $this->user->userStatus(),
             'user-status-disabled',
@@ -599,23 +602,23 @@ class UserTest extends TestCase {
 
     public function testLastFM(): void {
         $lastfm = new Util\LastFM();
-        $this->assertEquals(
+        $this->assertSame(
             'name',
             $lastfm->cleanUsername('https://last.fm/user/name'),
             'lastfm-clear-name'
         );
         $username = 'phpunit.' . randomString(6);
-        $this->assertEquals($username, $lastfm->cleanUsername($username), 'lastfm-clear-name');
+        $this->assertSame($username, $lastfm->cleanUsername($username), 'lastfm-clear-name');
         $this->assertNull($lastfm->username($this->user), 'lastfm-no-username');
-        $this->assertEquals(1, $lastfm->modifyUsername($this->user, $username), 'lastfm-create-username');
-        $this->assertEquals($username, $lastfm->username($this->user), 'lastfm-has-username');
+        $this->assertSame(1, $lastfm->modifyUsername($this->user, $username), 'lastfm-create-username');
+        $this->assertSame($username, $lastfm->username($this->user), 'lastfm-has-username');
 
         $username = "new.$username";
-        $this->assertEquals(1, $lastfm->modifyUsername($this->user, $username), 'lastfm-modify-username');
-        $this->assertEquals($username, $lastfm->username($this->user), 'lastfm-has-new-username');
-        $this->assertEquals(0, $lastfm->modifyUsername($this->user, $username), 'lastfm-no-modify-username');
+        $this->assertSame(1, $lastfm->modifyUsername($this->user, $username), 'lastfm-modify-username');
+        $this->assertSame($username, $lastfm->username($this->user), 'lastfm-has-new-username');
+        $this->assertSame(0, $lastfm->modifyUsername($this->user, $username), 'lastfm-no-modify-username');
 
-        $this->assertEquals(1, $lastfm->modifyUsername($this->user, ''), 'lastfm-remove-username');
+        $this->assertSame(1, $lastfm->modifyUsername($this->user, ''), 'lastfm-remove-username');
         $this->assertNull($lastfm->username($this->user), 'lastfm-has-no-username');
     }
 
@@ -645,14 +648,14 @@ class UserTest extends TestCase {
                 'comment-t'      => 0,
             ]
         );
-        $this->assertEquals(0, $rank->score(), 'userrank-score');
-        $this->assertEquals(0, $rank->rank('downloaded'), 'userrank-rank');
+        $this->assertSame(0, $rank->score(), 'userrank-score');
+        $this->assertSame(0, $rank->rank('downloaded'), 'userrank-rank');
     }
 
     public function testUserHash(): void {
         // ensure the same text hashed by two users is different
         $second = Helper::makeUser('user.' . randomString(6), 'user');
-        $this->assertNotEquals(
+        $this->assertNotSame(
             $this->user->hashHmac('topic', 'phpunit'),
             $second->hashHmac('topic', 'phpunit'),
             'user-hash-user-distinct'
@@ -662,18 +665,16 @@ class UserTest extends TestCase {
 
     public function testUserReleaseOrder(): void {
         $releaseOrder = new ReleaseType()->extendedList();
-        $this->assertEquals(
+        $this->assertSame(
             [],
             $this->user->releaseOrder([]),
             'user-no-release-order',
         );
-        $this->assertEquals(
+        $this->assertCount(
             count($releaseOrder),
-            count(
-                array_filter(
-                    $this->user->releaseOrder($releaseOrder),
-                    fn ($r) => $r['checked'] === 0,
-                )
+            array_filter(
+                $this->user->releaseOrder($releaseOrder),
+                fn ($r) => $r['checked'] === 0,
             ),
             'user-default-release-order',
         );

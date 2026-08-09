@@ -12,37 +12,37 @@ class SiteInfoTest extends TestCase {
         $this->assertGreaterThanOrEqual(0, strlen($info->phpinfo()), 'siteinfo-phpinfo');
         $this->assertCount(2, $info->uptime(), 'siteinfo-uptime');
         $this->assertGreaterThan(0, count($info->phinx()), 'siteinfo-phinx');
-        $this->assertEquals(0, $info->phinxMigrationsPending(), 'siteinfo-pending-phinx');
+        $this->assertFalse($info->phinxMigrationsPending(), 'siteinfo-pending-phinx');
         $this->assertStringStartsWith(
             'Composer version 2.',
             $info->composerVersion(),
             'siteinfo-composer-version'
         );
         $package = array_first($info->composerPackages());
-        $this->assertEquals(
+        $this->assertSame(
             ['name', 'require', 'locked', 'installed'],
             array_keys($package),
             'siteinfo-composer-packages',
         );
         $this->assertTrue($info->tableExists('users_main'), 'siteinfo-table-exists');
-        $this->assertEquals(
+        $this->assertSame(
             ["ROWS_READ", "ROWS_CHANGED", "ROWS_CHANGED_X_INDEXES"],
             array_keys($info->tableRowsRead('users_main')[0]),
             'siteinfo-table-read'
         );
-        $this->assertEquals(
+        $this->assertSame(
             ['index_name', 'rows_read', 'column_list'],
             array_keys($info->indexRowsRead('users_main')[0]),
             'siteinfo-index-read',
         );
-        $this->assertEquals(
+        $this->assertSame(
             ["TABLE_ROWS", "AVG_ROW_LENGTH", "DATA_LENGTH", "INDEX_LENGTH",
                 "DATA_FREE", "ROWS_READ", "ROWS_CHANGED", "ROWS_CHANGED_X_INDEXES"],
             array_keys($info->tableStats('users_main')),
             'siteinfo-table-stats',
         );
-        $this->assertEquals([], $info->tablesWithoutPK(), 'siteinfo-table-no-pk');
-        $this->assertEquals([], $info->tablesWithDuplicateForeignKeys(), 'siteinfo-table-dup-foreign-keys');
+        $this->assertSame([], $info->tablesWithoutPK(), 'siteinfo-table-no-pk');
+        $this->assertSame([], $info->tablesWithDuplicateForeignKeys(), 'siteinfo-table-dup-foreign-keys');
     }
 
     public function testSiteMetric(): void {
@@ -50,7 +50,7 @@ class SiteInfoTest extends TestCase {
             delete from history_site_metric where dt = $1
             ', new \DateTimeImmutable('yesterday')
         );
-        $this->assertEquals(
+        $this->assertSame(
             11,
             new SiteInfo()->refreshHistorySiteMetric(),
             'siteinfo-history-metric',

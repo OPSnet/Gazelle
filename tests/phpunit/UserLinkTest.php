@@ -18,9 +18,8 @@ class UserLinkTest extends TestCase {
         $this->userList[] = Helper::makeUser('ul1.' . randomString(10), 'userlink');
         $linker = new User\UserLink($this->userList[0]);
 
-        $this->assertInstanceOf(User\UserLink::class, $linker->flush(), 'user-link-flush');
-        $this->assertEquals($this->userList[0]->link(), $linker->link(), 'user-link-html-link');
-        $this->assertEquals($this->userList[0]->location(), $linker->location(), 'user-link-html-location');
+        $this->assertSame($this->userList[0]->link(), $linker->link(), 'user-link-html-link');
+        $this->assertSame($this->userList[0]->location(), $linker->location(), 'user-link-html-location');
     }
 
     public function testUserLinkInfo(): void {
@@ -44,7 +43,7 @@ class UserLinkTest extends TestCase {
             $this->userList[1]->auditTrail()->fullEventList()[0]['note'],
             'user-linked-staff-note'
         );
-        $this->assertEquals(
+        $this->assertSame(
             $linker->groupId($this->userList[0]),
             $linker->groupId($this->userList[1]),
             'user-link-same',
@@ -64,15 +63,15 @@ class UserLinkTest extends TestCase {
             'user-link-no-op-comment-add'
         );
         $info = $linker->info();
-        $this->assertEquals($linker->groupId($this->userList[0]), $info['id'], 'user-link-info-id');
-        $this->assertEquals($comment, $info['comment'], 'user-link-info-comment');
+        $this->assertSame($linker->groupId($this->userList[0]), $info['id'], 'user-link-info-id');
+        $this->assertSame($comment, $info['comment'], 'user-link-info-comment');
         $this->assertCount(1, $info['list'], 'user-link-info-list');
-        $this->assertEquals(
+        $this->assertSame(
             [$this->userList[1]->id => $this->userList[1]->username()],
             $info['list'],
             'user-link-info-user'
         );
-        $this->assertEquals(
+        $this->assertSame(
             [$this->userList[0]->id => $this->userList[0]->username()],
             new User\UserLink($this->userList[1])->info()['list'],
             'user-link-info-other-user'
@@ -90,19 +89,19 @@ class UserLinkTest extends TestCase {
 
         $linker->groupId($this->userList[0]);
         $linker->dupe($this->userList[2], $this->userList[0], true);
-        $this->assertEquals(
+        $this->assertSame(
             $linker->groupId($this->userList[1]),
             $linker->groupId($this->userList[2]),
             'user-link-linked-same',
         );
 
         $this->assertCount(2, $linker->info()['list'], 'user-link-two');
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $linker->removeUser($this->userList[1], $this->userList[0]),
             'user-link-remove-group',
         );
-        $this->assertEquals(
+        $this->assertSame(
             2,
             $linker->removeUser($this->userList[2], $this->userList[0]),
             'user-link-remove-last',
@@ -131,12 +130,12 @@ class UserLinkTest extends TestCase {
         $linka->dupe($this->userList[3], $this->userList[0], true);
 
         // 2 and 3 should have the same group
-        $this->assertEquals(
+        $this->assertSame(
             $linka->groupId($this->userList[2]),
             $linkb->groupId($this->userList[3]),
             'user-link-merge-group',
         );
-        $this->assertEquals(
+        $this->assertSame(
             [
                 $this->userList[2]->id => $this->userList[2]->username(),
                 $this->userList[3]->id => $this->userList[3]->username(),
@@ -145,7 +144,7 @@ class UserLinkTest extends TestCase {
             $linka->info()['list'],
             'user-link-merged-1'
         );
-        $this->assertEquals(
+        $this->assertSame(
             [
                 $this->userList[1]->id => $this->userList[1]->username(),
                 $this->userList[2]->id => $this->userList[2]->username(),

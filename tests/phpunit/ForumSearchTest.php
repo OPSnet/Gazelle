@@ -37,32 +37,31 @@ class ForumSearchTest extends TestCase {
         $this->thread = $threadMan->create($this->forum, $this->user, $title, $body);
 
         $search = new Search\Forum($this->user);
-        $this->assertInstanceOf(Search\Forum::class, $search, 'forum-search-new');
         $this->assertFalse($search->isBodySearch(), 'forum-search-title');
 
         $search->setSearchText('textnotfound ' . randomString(40));
-        $this->assertEquals(0, $search->totalHits(), 'forum-search-title-miss');
+        $this->assertSame(0, $search->totalHits(), 'forum-search-title-miss');
         $search->setSearchText($title);
-        $this->assertEquals(1, $search->totalHits(), 'forum-search-title-hit');
+        $this->assertSame(1, $search->totalHits(), 'forum-search-title-hit');
 
         $search->setSearchType('body');
         $this->assertTrue($search->isBodySearch(), 'forum-search-body');
         $search->setSearchText('textnotfound ' . randomString(40));
-        $this->assertEquals(0, $search->totalHits(), 'forum-search-body-miss');
+        $this->assertSame(0, $search->totalHits(), 'forum-search-body-miss');
         $search->setSearchText($body);
-        $this->assertEquals(1, $search->totalHits(), 'forum-search-body-hit');
+        $this->assertSame(1, $search->totalHits(), 'forum-search-body-hit');
 
         $resultList = $search->results(new Util\Paginator(25, 1));
         $this->assertCount(1, $resultList, 'forum-search-body-result');
         $result = array_first($resultList);
-        $this->assertEquals($this->thread->id, $result[0], 'forum-search-body-thread-id');
-        $this->assertEquals($this->thread->title(), $result[1], 'forum-search-body-thread-title');
-        $this->assertEquals($this->forum->id, $result[2], 'forum-search-body-thread-forum-id');
-        $this->assertEquals($this->forum->name(), $result[3], 'forum-search-body-thread-forum-name');
+        $this->assertSame($this->thread->id, $result[0], 'forum-search-body-thread-id');
+        $this->assertSame($this->thread->title(), $result[1], 'forum-search-body-thread-title');
+        $this->assertSame($this->forum->id, $result[2], 'forum-search-body-thread-forum-id');
+        $this->assertSame($this->forum->name(), $result[3], 'forum-search-body-thread-forum-name');
         // 4 is post created
         // 5 is post id
-        $this->assertEquals($body, $result[6], 'forum-search-body-thread-forum-body');
-        $this->assertEquals($this->thread->created(), $result[7], 'forum-search-body-thread-created');
+        $this->assertSame($body, $result[6], 'forum-search-body-thread-forum-body');
+        $this->assertSame($this->thread->created(), $result[7], 'forum-search-body-thread-created');
     }
 
     public function testForumSearchAuthor(): void {
@@ -80,11 +79,10 @@ class ForumSearchTest extends TestCase {
         $this->thread = $threadMan->create($this->forum, $this->user, $title, $body);
 
         $search = new Search\Forum($this->user);
-        $this->assertInstanceOf(Search\Forum::class, $search->setAuthor($this->user->username()), 'forum-search-author');
-        $this->assertEquals(1, $search->totalHits(), 'forum-search-user-hit');
+        $this->assertSame(1, $search->totalHits(), 'forum-search-user-hit');
 
         $search->setAuthor('nobody-by-this-name!');
-        $this->assertEquals(0, $search->totalHits(), 'forum-search-user-miss');
+        $this->assertSame(0, $search->totalHits(), 'forum-search-user-miss');
     }
 
     public function testForumSearchJson(): void {
@@ -145,12 +143,12 @@ class ForumSearchTest extends TestCase {
             array_keys($payload['messages'][0]),
             'json-posthistory-payload-pm-keys',
         );
-        $this->assertEquals(
+        $this->assertSame(
             $this->thread->id,
             $payload['messages'][0]['topicId'],
             'json-posthistory-payload-pm-thread-id',
         );
-        $this->assertEquals(
+        $this->assertSame(
             $pm->id,
             $payload['messages'][0]['postId'],
             'json-posthistory-payload-pm-post-id',

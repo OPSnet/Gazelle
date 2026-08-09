@@ -64,29 +64,29 @@ class UserTorrentTest extends TestCase {
             new User\UserclassRateLimit($this->user),
             false,
         );
-        $this->assertEquals(
+        $this->assertSame(
             Enum\DownloadStatus::ok,
             $download->status(),
             'search-utor-download-ok',
         );
         $self = $this->searchSelf(UserTorrentSearch::downloaded);
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $self->total(),
             'search-utor-total-downloaded',
         );
-        $this->assertEquals(
+        $this->assertSame(
             $torrent->id,
             array_first($self->torrentList())->id,
             'search-utor-list-downloaded'
         );
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $this->searchOther(UserTorrentSearch::downloaded)->total(),
             'search-utor-paranoia-downloaded',
         );
         $this->user->setField('Paranoia', serialize([]))->modify();
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $this->searchOther(UserTorrentSearch::downloaded)->total(),
             'search-utor-paranoia-ok-downloaded',
@@ -97,23 +97,23 @@ class UserTorrentTest extends TestCase {
         $this->user->setField('Paranoia', serialize(['leeching']))->modify();
         Helper::generateTorrentLeech($this->torrentList[1], $this->user);
         $self = $this->searchSelf(UserTorrentSearch::leeching);
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $self->total(),
             'search-utor-total-leeching',
         );
-        $this->assertEquals(
+        $this->assertSame(
             [$this->torrentList[1]->id],
             $self->idList(),
             'search-utor-list-leeching'
         );
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $this->searchOther(UserTorrentSearch::leeching)->total(),
             'search-utor-paranoia-leeching',
         );
         $this->user->setField('Paranoia', serialize(['leeching+']))->modify();
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $this->searchOther(UserTorrentSearch::leeching)->total(),
             'search-utor-paranoia+-leeching',
@@ -124,23 +124,23 @@ class UserTorrentTest extends TestCase {
         $this->user->setField('Paranoia', serialize(['seeding']))->modify();
         Helper::generateTorrentSeed($this->torrentList[1], $this->user);
         $self = $this->searchSelf(UserTorrentSearch::seeding);
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $self->total(),
             'search-utor-total-seeding',
         );
-        $this->assertEquals(
+        $this->assertSame(
             [$this->torrentList[1]->id],
             $self->idList(),
             'search-utor-list-seeding'
         );
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $this->searchOther(UserTorrentSearch::seeding)->total(),
             'search-utor-paranoia-seeding',
         );
         $this->user->setField('Paranoia', serialize(['seeding+']))->modify();
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $this->searchOther(UserTorrentSearch::seeding)->total(),
             'search-utor-paranoia+-seeding',
@@ -151,23 +151,23 @@ class UserTorrentTest extends TestCase {
         $this->user->setField('Paranoia', serialize(['snatched']))->modify();
         Helper::generateTorrentSnatch($this->torrentList[0], $this->user);
         $self = $this->searchSelf(UserTorrentSearch::snatched);
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $self->total(),
             'search-utor-total-snatch',
         );
-        $this->assertEquals(
+        $this->assertSame(
             [$this->torrentList[0]->id],
             $self->idList(),
             'search-utor-list-snatched',
         );
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $this->searchOther(UserTorrentSearch::snatched)->total(),
             'search-utor-paranoia-snatched',
         );
         $this->user->setField('Paranoia', serialize(['snatched+']))->modify();
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $this->searchOther(UserTorrentSearch::snatched)->total(),
             'search-utor-paranoia+-snatched',
@@ -178,23 +178,23 @@ class UserTorrentTest extends TestCase {
         $this->user->setField('Paranoia', serialize(['snatched']))->modify();
         Helper::generateTorrentSnatch($this->torrentList[0], $this->user);
         $self = $this->searchSelf(UserTorrentSearch::snatchedUnseeded);
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $self->total(),
             'search-utor-total-snatch-unseeded',
         );
-        $this->assertEquals(
+        $this->assertSame(
             [$this->torrentList[0]->id],
             $self->idList(),
             'search-utor-list-snatched-unseeded',
         );
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $this->searchOther(UserTorrentSearch::snatchedUnseeded)->total(),
             'search-utor-paranoia-snatched-unseeded',
         );
         $this->user->setField('Paranoia', serialize(['snatched+']))->modify();
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $this->searchOther(UserTorrentSearch::snatchedUnseeded)->total(),
             'search-utor-paranoia+-snatched-unseeded',
@@ -204,7 +204,7 @@ class UserTorrentTest extends TestCase {
     public function testUploaded(): void {
         $this->user->setField('Paranoia', serialize(['uploads']))->modify();
         $self = $this->searchSelf(UserTorrentSearch::uploaded);
-        $this->assertEquals(
+        $this->assertSame(
             2,
             $self->total(),
             'search-utor-total-uploaded',
@@ -214,13 +214,13 @@ class UserTorrentTest extends TestCase {
             $self->idList(),
             'search-utor-list-uploaded',
         );
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $this->searchOther(UserTorrentSearch::uploaded)->total(),
             'search-utor-paranoia-uploaded',
         );
         $this->user->setField('Paranoia', serialize(['uploads+']))->modify();
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $this->searchOther(UserTorrentSearch::uploaded)->total(),
             'search-utor-paranoia+uploaded',
@@ -230,7 +230,7 @@ class UserTorrentTest extends TestCase {
     public function testUploadedUnseeded(): void {
         $this->user->setField('Paranoia', serialize(['uploads']))->modify();
         $self = $this->searchSelf(UserTorrentSearch::uploadedUnseeded);
-        $this->assertEquals(
+        $this->assertSame(
             2,
             $self->total(),
             'search-utor-total-uploaded-unseeded',
@@ -240,13 +240,13 @@ class UserTorrentTest extends TestCase {
             $self->idList(),
             'search-utor-list-uploaded-unseeded',
         );
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $this->searchOther(UserTorrentSearch::uploadedUnseeded)->total(),
             'search-utor-paranoia-uploaded-unseeded',
         );
         $this->user->setField('Paranoia', serialize(['uploads+']))->modify();
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $this->searchOther(UserTorrentSearch::uploaded)->total(),
             'search-utor-paranoia+uploaded-unseeded',

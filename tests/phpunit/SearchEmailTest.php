@@ -29,12 +29,12 @@ class SearchEmailTest extends TestCase {
         $text = "chaff {$this->userList[0]->email()} chaff {$this->userList[1]->email()} chaff {$this->userList[2]->email()} dup {$this->userList[0]->email()} ";
         $list = $search->extract($text);
         $this->assertCount(3, $list, 'search-email-extract');
-        $this->assertEquals(0, $search->add([]), 'search-add-empty');
-        $this->assertEquals(3, $search->add($list), 'search-add-list');
+        $this->assertSame(0, $search->add([]), 'search-add-empty');
+        $this->assertSame(3, $search->add($list), 'search-add-list');
 
         $emailList = array_map(fn($u) => $u->email(), $this->userList);
         sort($emailList);
-        $this->assertEquals($emailList, $search->emailList(), 'search-email-list');
+        $this->assertSame($emailList, $search->emailList(), 'search-email-list');
 
         $search->setColumn(1);    // Username
         $search->setDirection(1); // DESC
@@ -42,6 +42,6 @@ class SearchEmailTest extends TestCase {
         $this->assertCount(3, $liveList, 'search-live-list-count');
         $nameList = array_map(fn($u) => $u->username(), $this->userList);
         rsort($nameList);
-        $this->assertEquals($nameList, array_map(fn($e) => $e['username'], $liveList), 'searach-live-page-order');
+        $this->assertSame($nameList, array_map(fn($e) => $e['username'], $liveList), 'searach-live-page-order');
     }
 }

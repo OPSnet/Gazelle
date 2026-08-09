@@ -123,13 +123,13 @@ class ReaperTest extends TestCase {
     public function testExpand(): void {
         $reaper = new Torrent\Reaper();
 
-        $this->assertEquals(
+        $this->assertSame(
             [456 => [99, 88, 77]],
             $reaper->expand(100, [[456, '99,88,77']]),
             'torrent-reaper-expand-1',
         );
 
-        $this->assertEquals(
+        $this->assertSame(
             [
                 456 => [99, 88, 77],
                 567 => [10, 20, 30, 40, 50],
@@ -142,7 +142,7 @@ class ReaperTest extends TestCase {
             ]), 'torrent-reaper-expand-2',
         );
 
-        $this->assertEquals(
+        $this->assertSame(
             [
                 456 => [99, 88],
                 567 => [10, 20],
@@ -160,7 +160,7 @@ class ReaperTest extends TestCase {
     public function testNeverSeeded(): void {
         $user = $this->torrentList[0]->uploader();
         $pmMan = new Manager\PM($user);
-        $this->assertEquals(0, $user->inbox()->messageTotal(), 'never-inbox-initial');
+        $this->assertSame(0, $user->inbox()->messageTotal(), 'never-inbox-initial');
 
         $torMan = new Manager\Torrent();
         $reaper = new Torrent\Reaper();
@@ -174,12 +174,12 @@ class ReaperTest extends TestCase {
         // look for never seeded
         $neverInitial = $reaper->initialNeverSeededList();
         $this->assertCount(1, $neverInitial, 'never-initial-0-count');
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $reaper->process($neverInitial, ReaperState::NEVER, ReaperNotify::INITIAL),
             'never-initial-process'
         );
-        $this->assertEquals(
+        $this->assertSame(
             [
                 "never_seeded_initial" => $initialUnseededStats['never_seeded_initial'] + 1,
                 "unseeded_initial"     => 0,
@@ -191,9 +191,9 @@ class ReaperTest extends TestCase {
         );
 
         // check the notification
-        $this->assertEquals(1, $user->inbox()->messageTotal(), 'never-message-initial-count');
+        $this->assertSame(1, $user->inbox()->messageTotal(), 'never-message-initial-count');
         $pm = $user->inbox()->messageList($pmMan, 1, 0)[0];
-        $this->assertEquals('You have a non-seeded new upload to rescue', $pm->subject(), 'never-message-initial-subject');
+        $this->assertSame('You have a non-seeded new upload to rescue', $pm->subject(), 'never-message-initial-subject');
         $pm->remove();
 
         // reset the unseeded entries and time out a second upload
@@ -202,12 +202,12 @@ class ReaperTest extends TestCase {
 
         $neverInitial = $reaper->initialNeverSeededList();
         $this->assertCount(1, $neverInitial, 'never-initial-2'); // one user ...
-        $this->assertEquals(2,                            // ... with two uploads
+        $this->assertSame(2,                            // ... with two uploads
             $reaper->process($neverInitial, ReaperState::NEVER, ReaperNotify::INITIAL),
             'never-2-process'
         );
 
-        $this->assertEquals(
+        $this->assertEqualsCanonicalizing(
             [
                 "never_seeded_initial" => $initialUnseededStats['never_seeded_initial'] + 2,
                 "never_seeded_final"   => $initialUnseededStats['never_seeded_final'],
@@ -218,10 +218,10 @@ class ReaperTest extends TestCase {
             'reaper-unseeded-stats-1'
         );
 
-        $this->assertEquals(1, $user->inbox()->messageTotal(), 'never-message-2');
+        $this->assertSame(1, $user->inbox()->messageTotal(), 'never-message-2');
         $pm   = $user->inbox()->messageList($pmMan, 1, 0)[0];
         $body = $pm->postList(1, 0)[0]['body'];
-        $this->assertEquals('You have 2 non-seeded new uploads to rescue', $pm->subject(), 'never-message-2');
+        $this->assertSame('You have 2 non-seeded new uploads to rescue', $pm->subject(), 'never-message-2');
         $this->assertStringContainsString("Dear {$this->userList[0]->username()}", $body, 'never-body-2-dear');
         $this->assertStringContainsString("[pl]{$this->torrentList[0]->id}[/pl]", $body, 'never-body-2-pl-0');
         $this->assertStringContainsString("[pl]{$this->torrentList[1]->id}[/pl]", $body, 'never-body-2-pl-1');
@@ -242,14 +242,14 @@ class ReaperTest extends TestCase {
         // we no longer need to consider the torrent creation date.
         $this->modifyUnseededInterval($this->torrentList[1], NOTIFY_NEVER_SEEDED_FINAL_HOUR + 1);
 
-        $this->assertEquals(0, $user->inbox()->messageTotal(), 'never-message-final-none');
+        $this->assertSame(0, $user->inbox()->messageTotal(), 'never-message-final-none');
         $neverFinal = $reaper->finalNeverSeededList();
         $this->assertCount(1, $neverFinal, 'never-final-0'); // one user ...
-        $this->assertEquals(1,                               // ... with one upload
+        $this->assertSame(1,                               // ... with one upload
             $reaper->process($neverFinal, ReaperState::NEVER, ReaperNotify::FINAL),
             'never-final-process'
         );
-        $this->assertEquals(
+        $this->assertEqualsCanonicalizing(
             [
                 "never_seeded_initial" => $initialUnseededStats['never_seeded_initial'] + 1,
                 "never_seeded_final"   => $initialUnseededStats['never_seeded_final'] + 1,
@@ -257,13 +257,13 @@ class ReaperTest extends TestCase {
                 "unseeded_final"       => 0,
             ],
             $reaper->stats(),
-            'reaper-unseeded-stats-final'
+            'reaper-initial-stats-final'
         );
 
-        $this->assertEquals(1, $user->inbox()->messageTotal(), 'never-message-final-count');
+        $this->assertSame(1, $user->inbox()->messageTotal(), 'never-message-final-count');
         $pm   = $user->inbox()->messageList($pmMan, 1, 0)[0];
         $body = $pm->postList(1, 0)[0]['body'];
-        $this->assertEquals('You have a non-seeded new upload scheduled for deletion very soon', $pm->subject(), 'never-message-final-subject');
+        $this->assertSame('You have a non-seeded new upload scheduled for deletion very soon', $pm->subject(), 'never-message-final-subject');
         $this->assertStringContainsString("Dear {$this->userList[0]->username()}", $body, 'never-body-3-dear');
         $this->assertStringContainsString("[pl]{$this->torrentList[1]->id}[/pl]", $body, 'never-body-3-pl-1');
         $pm->remove();
@@ -274,16 +274,16 @@ class ReaperTest extends TestCase {
             state:    ReaperState::NEVER,
             interval: REMOVE_NEVER_SEEDED_HOUR,
         ));
-        $this->assertEquals(
+        $this->assertSame(
             $initialNeverSeededTotal + 1,
             $neverSeededTotal,
             'never-seeded-total'
         );
 
-        $this->assertEquals(1, $reaper->removeNeverSeeded(), 'never-seeded-reap-remove');
+        $this->assertSame(1, $reaper->removeNeverSeeded(), 'never-seeded-reap-remove');
         $pm   = $user->inbox()->messageList($pmMan, 1, 0)[0];
         $body = $pm->postList(1, 0)[0]['body'];
-        $this->assertEquals('1 of your uploads has been deleted for inactivity (never seeded)', $pm->subject(), 'never-seeded--remove-message');
+        $this->assertSame('1 of your uploads has been deleted for inactivity (never seeded)', $pm->subject(), 'never-seeded--remove-message');
         $this->assertStringContainsString("Dear {$this->userList[0]->username()}", $body, 'never-seeded--remove-body-dear');
         $this->assertStringContainsString("[url=torrents.php?id={$this->torrentList[1]->group()->id}]", $body, 'never-seeded--remove-body-pl');
         $pm->remove();
@@ -314,12 +314,12 @@ class ReaperTest extends TestCase {
         // look for unseeded
         $unseededInitial = $reaper->initialUnseededList();
         $this->assertCount(1, $unseededInitial, 'unseeded-initial-1');
-        $this->assertEquals(
+        $this->assertSame(
             2,
             $reaper->process($unseededInitial, ReaperState::UNSEEDED, ReaperNotify::INITIAL),
             'unseeded-initial-process'
         );
-        $this->assertEquals(
+        $this->assertEqualsCanonicalizing(
             [
                 "never_seeded_initial" => $initialUnseededStats['never_seeded_initial'],
                 "never_seeded_final"   => 0,
@@ -339,28 +339,28 @@ class ReaperTest extends TestCase {
             new Manager\PM($this->userList[1]),
         ];
 
-        $this->assertEquals(1, $inboxList[0]->messageTotal(), 'unseeded-initial-0-inbox');
+        $this->assertSame(1, $inboxList[0]->messageTotal(), 'unseeded-initial-0-inbox');
         $pm   = $inboxList[0]->messageList($pmMan[0], 1, 0)[0];
         $body = $pm->postList(1, 0)[0]['body'];
-        $this->assertEquals('There are 2 unseeded uploads to rescue', $pm->subject(), 'unseeded-initial-0-rescue');
+        $this->assertSame('There are 2 unseeded uploads to rescue', $pm->subject(), 'unseeded-initial-0-rescue');
         $this->assertStringContainsString("You have 2 uploads that are not currently seeding by you (or anyone else)", $body, 'unseeded-initial-0-body');
         $this->assertStringContainsString("[pl]{$this->torrentList[0]->id}[/pl]", $body, 'unseeded-initial-0-body-pl-0');
         $this->assertStringContainsString("[pl]{$this->torrentList[1]->id}[/pl]", $body, 'unseeded-initial-0-body-pl-1');
         $pm->remove();
 
-        $this->assertEquals(1, $inboxList[1]->messageTotal(), 'unseeded-initial-1-inbox');
+        $this->assertSame(1, $inboxList[1]->messageTotal(), 'unseeded-initial-1-inbox');
         $pm   = $inboxList[1]->messageList($pmMan[1], 1, 0)[0];
         $body = $pm->postList(1, 0)[0]['body'];
-        $this->assertEquals('You have 2 unseeded snatches to save', $pm->subject(), 'unseeded-initial-1-rescue');
+        $this->assertSame('You have 2 unseeded snatches to save', $pm->subject(), 'unseeded-initial-1-rescue');
         $this->assertStringContainsString("In the past, you snatched 2 uploads that are no longer being seeded", $body, 'unseeded-initial-1-body');
         $this->assertStringContainsString("[pl]{$this->torrentList[0]->id}[/pl]", $body, 'unseeded-initial-1-body-pl-0');
         $this->assertStringContainsString("[pl]{$this->torrentList[1]->id}[/pl]", $body, 'unseeded-initial-1-body-pl-1');
         $pm->remove();
 
         $initialClaim = $reaper->claimStats();
-        $this->assertEquals(['open', 'claimed'], array_keys($initialClaim), 'claim-initial');
-        $this->assertEquals(2, $initialClaim['open'], 'claim-open');
-        $this->assertEquals(0, $initialClaim['claimed'], 'claim-claimed');
+        $this->assertSame(['open', 'claimed'], array_keys($initialClaim), 'claim-initial');
+        $this->assertSame(2, $initialClaim['open'], 'claim-open');
+        $this->assertSame(0, $initialClaim['claimed'], 'claim-claimed');
 
         // snatcher reseeds the first upload
         $this->modifyUnseededInterval($this->torrentList[0], NOTIFY_UNSEEDED_INITIAL_HOUR + 3);
@@ -371,21 +371,25 @@ class ReaperTest extends TestCase {
         $win   = $reaper->claim();
         $this->assertCount(1, $win, 'unseeded-claim-win-count');
         [$torrentId, $userId, $bp] = $win[0];
-        $this->assertEquals($this->torrentList[0]->id, $torrentId, 'unseeded-claim-win-torrent');
-        $this->assertEquals($this->userList[1]->id, $userId, 'unseeded-claim-win-user');
-        $this->assertEquals($this->userList[1]->flush()->bonusPointsTotal(), $bonus + $bp, 'unseeded-claim-win-bp');
+        $this->assertSame($this->torrentList[0]->id, $torrentId, 'unseeded-claim-win-torrent');
+        $this->assertSame($this->userList[1]->id, $userId, 'unseeded-claim-win-user');
+        $this->assertEquals(
+            $this->userList[1]->flush()->bonusPointsTotal(),
+            $bonus + $bp,
+            'unseeded-claim-win-bp',
+        );
 
         // message
         $pm   = $inboxList[1]->messageList($pmMan[1], 1, 0)[0];
         $body = $pm->postList(1, 0)[0]['body'];
-        $this->assertEquals("Thank you for reseeding {$this->torrentList[0]->group()->name()}!", $pm->subject(), 'unseeded-initial-1-thx');
+        $this->assertSame("Thank you for reseeding {$this->torrentList[0]->group()->name()}!", $pm->subject(), 'unseeded-initial-1-thx');
         $this->assertStringContainsString("[pl]{$this->torrentList[0]->id}[/pl]", $body, 'unseeded-initial-1-body-pl-thx');
         $this->assertStringContainsString("$bp bonus points", $body, 'unseeded-initial-1-body-bp-thx');
         $pm->remove();
 
         $newClaim = $reaper->claimStats();
-        $this->assertEquals(1, $newClaim['open'], 'claim-new-open');
-        $this->assertEquals(1, $newClaim['claimed'], 'claim-new-claimed');
+        $this->assertSame(1, $newClaim['open'], 'claim-new-open');
+        $this->assertSame(1, $newClaim['claimed'], 'claim-new-claimed');
 
         // reset the time of the remaing unseeded alert back in time to hit the final timeout.
         $this->modifyLastAction($this->torrentList[1], NOTIFY_UNSEEDED_FINAL_HOUR + 2);
@@ -395,11 +399,11 @@ class ReaperTest extends TestCase {
         $unseededFinal = $reaper->finalUnseededList();
 
         $this->assertCount(1, $unseededFinal, 'unseeded-final-0');
-        $this->assertEquals(1,
+        $this->assertSame(1,
             $reaper->process($unseededFinal, ReaperState::UNSEEDED, ReaperNotify::FINAL),
             'unseeded-final-process'
         );
-        $this->assertEquals(
+        $this->assertEqualsCanonicalizing(
             [
                 "never_seeded_initial" => $initialUnseededStats['never_seeded_initial'],
                 "never_seeded_final"   => 0,
@@ -410,15 +414,15 @@ class ReaperTest extends TestCase {
             'reaper-unseeded-stats-final'
         );
 
-        $this->assertEquals(1, $inboxList[0]->messageTotal(), 'unseeded-final-0-inbox');
+        $this->assertSame(1, $inboxList[0]->messageTotal(), 'unseeded-final-0-inbox');
         $pm   = $inboxList[0]->messageList($pmMan[0], 1, 0)[0];
         $body = $pm->postList(1, 0)[0]['body'];
-        $this->assertEquals('There is an unseeded upload scheduled for deletion very soon', $pm->subject(), 'unseeded-final-0-rescue');
+        $this->assertSame('There is an unseeded upload scheduled for deletion very soon', $pm->subject(), 'unseeded-final-0-rescue');
         $this->assertStringContainsString("You have an upload that is still not currently seeding by you (or anyone else)", $body, 'unseeded-final-0-body');
         $this->assertStringContainsString("[pl]{$this->torrentList[1]->id}[/pl]", $body, 'unseeded-final-0-body-pl-1');
         $pm->remove();
 
-        $this->assertEquals(0, $inboxList[1]->messageTotal(), 'unseeded-final-no-snatcher-inbox');
+        $this->assertSame(0, $inboxList[1]->messageTotal(), 'unseeded-final-no-snatcher-inbox');
 
         // too late
         $this->modifyUnseededInterval($this->torrentList[1], REMOVE_UNSEEDED_HOUR + 1);
@@ -428,18 +432,18 @@ class ReaperTest extends TestCase {
             interval: REMOVE_UNSEEDED_HOUR,
         );
         $this->assertCount(1, $list, 'unseeded-reap-list');
-        $this->assertEquals(1, $reaper->removeUnseeded(), 'unseeded-reap-remove');
+        $this->assertSame(1, $reaper->removeUnseeded(), 'unseeded-reap-remove');
 
         $pm   = $inboxList[0]->messageList($pmMan[0], 1, 0)[0];
         $body = $pm->postList(1, 0)[0]['body'];
-        $this->assertEquals('1 of your uploads has been deleted for inactivity (unseeded)', $pm->subject(), 'never-remove-message');
+        $this->assertSame('1 of your uploads has been deleted for inactivity (unseeded)', $pm->subject(), 'never-remove-message');
         $this->assertStringContainsString("Dear {$this->userList[0]->username()}", $body, 'never-remove-body-dear');
         $this->assertStringContainsString("[url=torrents.php?id={$this->torrentList[1]->group()->id}]", $body, 'never-remove-body-pl');
         $pm->remove();
 
         $pm   = $inboxList[1]->messageList($pmMan[1], 1, 0)[0];
         $body = $pm->postList(1, 0)[0]['body'];
-        $this->assertEquals('1 of your snatches was deleted for inactivity', $pm->subject(), 'never-remove-snatcher-message');
+        $this->assertSame('1 of your snatches was deleted for inactivity', $pm->subject(), 'never-remove-snatcher-message');
         $this->assertStringContainsString("Dear {$this->userList[1]->username()}", $body, 'never-remove-snatcher-body-dear');
         $this->assertStringContainsString("[url=torrents.php?id={$this->torrentList[1]->group()->id}]", $body, 'never-remove-snatcher-body-pl');
         $pm->remove();
@@ -467,8 +471,8 @@ class ReaperTest extends TestCase {
         $reaper = new Torrent\Reaper();
         $reaper->process($reaper->initialNeverSeededList(), ReaperState::NEVER, ReaperNotify::INITIAL);
 
-        $this->assertEquals(0, $this->userList[0]->inbox()->messageTotal(), 'never-uploader-no-notify');
-        $this->assertEquals(0, $this->userList[1]->inbox()->messageTotal(), 'never-snatcher-no-notify');
+        $this->assertSame(0, $this->userList[0]->inbox()->messageTotal(), 'never-uploader-no-notify');
+        $this->assertSame(0, $this->userList[1]->inbox()->messageTotal(), 'never-snatcher-no-notify');
     }
 
     public function testUnseededNotify(): void {
@@ -492,11 +496,11 @@ class ReaperTest extends TestCase {
         // look for unseeded
         $reaper->process($reaper->initialUnseededList(), ReaperState::UNSEEDED, ReaperNotify::INITIAL);
 
-        $this->assertEquals(1, $this->userList[0]->inbox()->messageTotal(), 'unseeded-uploader-no-notify');
-        $this->assertEquals(0, $this->userList[1]->inbox()->messageTotal(), 'unseeded-snatcher-no-notify');
+        $this->assertSame(1, $this->userList[0]->inbox()->messageTotal(), 'unseeded-uploader-no-notify');
+        $this->assertSame(0, $this->userList[1]->inbox()->messageTotal(), 'unseeded-snatcher-no-notify');
 
         $timeline = $reaper->timeline();
-        $this->assertEquals(2, array_first($timeline), 'reaper-two-today');
+        $this->assertSame(2, array_first($timeline), 'reaper-two-today');
         $today = array_first(array_keys($timeline));
         // take into account the chance of running a few seconds before midnight
         $this->assertContains($today, [date('Y-m-d'), date('Y-m-d', strtotime('1 hour ago'))], 'reaper-timeline');
@@ -519,7 +523,7 @@ class ReaperTest extends TestCase {
             fn($user) => $user['user_id'] == $uploaderId
         );
         $this->assertCount(1, $initial, 'reaper-grace-period-initial');
-        $this->assertEquals(
+        $this->assertSame(
             2, // two torrents will be extended 10 days
             $reaper->extendGracePeriod([$uploaderId], 10),
             'reaper-grace-period-extend'
@@ -528,7 +532,7 @@ class ReaperTest extends TestCase {
             $reaper->unseederList(),
             fn($user) => $user['user_id'] == $uploaderId
         );
-        $this->assertEquals(
+        $this->assertSame(
             864000,
             (int)strtotime(array_values($final)[0]['min_date'])
                 - (int)strtotime(array_values($initial)[0]['min_date']),

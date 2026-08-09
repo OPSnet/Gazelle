@@ -9,17 +9,17 @@ class CategoryTest extends TestCase {
     public function testCategory(): void {
         $manager = new Manager\Category();
 
-        $this->assertEquals(1, $manager->findIdByName('Music'), 'cat-name-comics');
-        $this->assertEquals(7, $manager->findIdByName('Comics'), 'cat-name-comics');
-        $this->assertEquals('Comics', $manager->findNameById(7), 'cat-id-comics');
+        $this->assertSame(1, $manager->findIdByName('Music'), 'cat-name-comics');
+        $this->assertSame(7, $manager->findIdByName('Comics'), 'cat-name-comics');
+        $this->assertSame('Comics', $manager->findNameById(7), 'cat-id-comics');
         $this->assertNull($manager->findIdByName('thereisnospoon'), 'cat-name-bogus');
 
-        $this->assertEquals('Music', $manager->findNameById(1), 'cat-id-ebooks');
-        $this->assertEquals('E-Books', $manager->findNameById(3), 'cat-id-ebooks');
+        $this->assertSame('Music', $manager->findNameById(1), 'cat-id-ebooks');
+        $this->assertSame('E-Books', $manager->findNameById(3), 'cat-id-ebooks');
         $this->assertNull($manager->findNameById(67890), 'cat-id-bogus');
 
         $categoryList = $manager->categoryList();
-        $this->assertEquals('Global', $categoryList[0]['name'], 'cat-global');
+        $this->assertSame('Global', $categoryList[0]['name'], 'cat-global');
     }
 
     public function testChangeCategory(): void {
@@ -80,8 +80,8 @@ class CategoryTest extends TestCase {
         $this->assertInstanceOf(Torrent::class, $torrentList[0], 'cat-old-t0-found');
         $this->assertInstanceOf(Torrent::class, $torrentList[1], 'cat-old-t1-found');
 
-        $this->assertEquals([$torrentList[0]->id], $tgroup->torrentIdList(), 'cat-old-tidlist');
-        $this->assertEquals($torrentList[1]->groupId(), $new->id, 'cat-new-groupid');
+        $this->assertSame([$torrentList[0]->id], $tgroup->torrentIdList(), 'cat-old-tidlist');
+        $this->assertSame($torrentList[1]->groupId(), $new->id, 'cat-new-groupid');
 
         // move remaining torrent to same category
         $new = $tgMan->changeCategory(
@@ -120,7 +120,7 @@ class CategoryTest extends TestCase {
             $torrent?->removeTorrent($user, 'phpunit');
         }
         $tgroup->remove();
-        $this->assertEquals(0, (int)DB::DB()->scalar("
+        $this->assertSame(0, (int)DB::DB()->scalar("
             SELECT count(*) FROM torrents_artists WHERE GroupID = ?
             ", $tgroupId),
             'cat-old-group-no-artists'

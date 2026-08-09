@@ -54,19 +54,19 @@ class FeaturedAlbumTest extends TestCase {
             leechType:   LeechType::Free,
             threshold:   20000,
         );
-        $this->assertEquals($this->tgroup->id, $aotm->tgroupId(), 'aotm-tgroupid');
-        $this->assertEquals($this->tgroup->id, $aotm->tgroup()->id, 'aotm-tgroup-id');
+        $this->assertSame($this->tgroup->id, $aotm->tgroupId(), 'aotm-tgroupid');
+        $this->assertSame($this->tgroup->id, $aotm->tgroup()->id, 'aotm-tgroup-id');
 
         $find = $manager->findByType(FeaturedAlbumType::AlbumOfTheMonth);
         $this->assertInstanceOf(FeaturedAlbum::class, $find, 'aotm-found-by-type');
-        $this->assertEquals($aotm->id, $find->id, 'aotm-find-by-type');
+        $this->assertSame($aotm->id, $find->id, 'aotm-find-by-type');
 
         $find = $manager->findById($this->tgroup->id);
         $this->assertInstanceOf(FeaturedAlbum::class, $find, 'aotm-found-by-id');
-        $this->assertEquals($aotm->id, $find->id, 'aotm-find-by-id');
-        $this->assertEquals(FeaturedAlbumType::AlbumOfTheMonth, $find->type(), 'aotm-type');
+        $this->assertSame($aotm->id, $find->id, 'aotm-find-by-id');
+        $this->assertSame(FeaturedAlbumType::AlbumOfTheMonth, $find->type(), 'aotm-type');
 
-        $this->assertEquals(1, $aotm->unfeature(), 'aotm-unfeature');
+        $this->assertSame(1, $aotm->unfeature(), 'aotm-unfeature');
         $this->assertNull($manager->findByType(FeaturedAlbumType::AlbumOfTheMonth), 'aotm-no-featured');
     }
 
@@ -88,18 +88,18 @@ class FeaturedAlbumTest extends TestCase {
             leechType:   LeechType::Free,
             threshold:   20000,
         );
-        $this->assertEquals($this->tgroup->id, $showcase->tgroupId(), 'showcase-tgroupid');
+        $this->assertSame($this->tgroup->id, $showcase->tgroupId(), 'showcase-tgroupid');
 
         $find = $manager->findByType(FeaturedAlbumType::Showcase);
         $this->assertInstanceOf(FeaturedAlbum::class, $find, 'showcase-found-by-type');
-        $this->assertEquals($showcase->id, $find->id, 'showcase-find-by-type');
+        $this->assertSame($showcase->id, $find->id, 'showcase-find-by-type');
 
         $find = $manager->findById($this->tgroup->id);
         $this->assertInstanceOf(FeaturedAlbum::class, $find, 'showcase-found-by-id');
-        $this->assertEquals($showcase->id, $find->id, 'showcase-find-by-id');
-        $this->assertEquals(FeaturedAlbumType::Showcase, $find->type(), 'showcase-type');
+        $this->assertSame($showcase->id, $find->id, 'showcase-find-by-id');
+        $this->assertSame(FeaturedAlbumType::Showcase, $find->type(), 'showcase-type');
 
-        $this->assertEquals(1, $showcase->unfeature(), 'aotm-unfeature');
+        $this->assertSame(1, $showcase->unfeature(), 'aotm-unfeature');
         $this->assertNull($manager->findByType(FeaturedAlbumType::AlbumOfTheMonth), 'aotm-no-featured');
     }
 }

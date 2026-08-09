@@ -16,19 +16,19 @@ class MoneroTest extends TestCase {
         $addr = $m->address($user->id);
         $addr2 = $m->address($user->id);
 
-        $this->assertEquals($addr, $addr2, 'monero-deterministic-address');
+        $this->assertSame($addr, $addr2, 'monero-deterministic-address');
 
         $addrDecoded = $cn->decode_address($addr);
 
-        $this->assertEquals($mainDecoded['spendKey'], $addrDecoded['spendKey'], 'monero-verify-spendkey');
-        $this->assertEquals($mainDecoded['viewKey'], $addrDecoded['viewKey'], 'monero-verify-viewkey');
-        $this->assertEquals('13', $addrDecoded['networkByte'], 'monero-verify-network-byte');
+        $this->assertSame($mainDecoded['spendKey'], $addrDecoded['spendKey'], 'monero-verify-spendkey');
+        $this->assertSame($mainDecoded['viewKey'], $addrDecoded['viewKey'], 'monero-verify-viewkey');
+        $this->assertSame('13', $addrDecoded['networkByte'], 'monero-verify-network-byte');
 
         // man, this lib is very barebone; and why is it using hex everywhere?
         $decoded = new \MoneroIntegrations\MoneroPhp\base58()->decode($addr);
         $paymentId = substr($decoded, 64 + 66, 16);
 
-        $this->assertEquals($user->id, $m->findUserIdbyPaymentId($paymentId), 'monero-lookup-payment-id');
+        $this->assertSame($user->id, $m->findUserIdbyPaymentId($paymentId), 'monero-lookup-payment-id');
 
         $this->assertTrue($m->invalidate($user->id), 'monero-invalidate-success');
         $this->assertFalse($m->invalidate($user->id), 'monero-invalidate-fail');

@@ -51,7 +51,7 @@ class SearchReportAutoTest extends TestCase {
     protected function matchThingList(array $thingList, User|ReportAuto\Type $matcher, int $n, string $msg): void {
         foreach ($thingList as $list) {
             match ($list[0]->id) {
-                $matcher->id => $this->assertEquals($n, $list[1], "rasearch-$msg"),
+                $matcher->id => $this->assertSame($n, $list[1], "rasearch-$msg"),
                 default => $this->fail("rasearch-$msg-fail")
             };
         }
@@ -62,16 +62,16 @@ class SearchReportAutoTest extends TestCase {
 
         foreach ($search->typeTotalList() as $typeList) {
             match ($typeList[0]) {
-                self::$type1 => $this->assertEquals(3 + 5, $typeList[1], 'rasearch-all-2'),
-                self::$type2 => $this->assertEquals(7 + 11, $typeList[1], 'rasearch-all-3'),
+                self::$type1 => $this->assertSame(3 + 5, $typeList[1], 'rasearch-all-2'),
+                self::$type2 => $this->assertSame(7 + 11, $typeList[1], 'rasearch-all-3'),
                 default => null,  // created by other tests
             };
         }
 
         foreach ($search->userTotalList() as $userList) {
             match ($userList[0]) {
-                self::$user1 => $this->assertEquals(3 + 7, $userList[1], 'rasearch-all-4'),
-                self::$user2 => $this->assertEquals(5 + 11, $userList[1], 'rasearch-all-5'),
+                self::$user1 => $this->assertSame(3 + 7, $userList[1], 'rasearch-all-4'),
+                self::$user2 => $this->assertSame(5 + 11, $userList[1], 'rasearch-all-5'),
                 default => null,  // created by other tests
             };
         }
@@ -84,10 +84,10 @@ class SearchReportAutoTest extends TestCase {
 
         $this->matchThingList($search->typeTotalList(), self::$type1, 3 + 5 - 2, 'state');
 
-        $this->assertEquals(2, count($search->page(10, 0)), 'rasearch-page-1');
-        $this->assertEquals(1, count($search->page(1, 0)), 'rasearch-page-2');
-        $this->assertEquals(1, count($search->page(1, 1)), 'rasearch-page-3');
-        $this->assertEquals(0, count($search->page(1, 2)), 'rasearch-page-4');
+        $this->assertCount(2, $search->page(10, 0), 'rasearch-page-1');
+        $this->assertCount(1, $search->page(1, 0), 'rasearch-page-2');
+        $this->assertCount(1, $search->page(1, 1), 'rasearch-page-3');
+        $this->assertCount(0, $search->page(1, 2), 'rasearch-page-4');
     }
 
     public function testStateInprogress(): void {
@@ -141,8 +141,8 @@ class SearchReportAutoTest extends TestCase {
 
         foreach ($search->userTotalList() as $userList) {
             match ($userList[0]->id) {
-                self::$user1->id => $this->assertEquals(2, $userList[1], 'rasearch-closed-2-1'),
-                self::$user2->id => $this->assertEquals(2, $userList[1], 'rasearch-closed-2-2'),
+                self::$user1->id => $this->assertSame(2, $userList[1], 'rasearch-closed-2-1'),
+                self::$user2->id => $this->assertSame(2, $userList[1], 'rasearch-closed-2-2'),
                 default => $this->fail('rasearch-closed-2-fail')
             };
         }
@@ -155,8 +155,8 @@ class SearchReportAutoTest extends TestCase {
 
         foreach ($search->userTotalList() as $userList) {
             match ($userList[0]->id) {
-                self::$user1->id => $this->assertEquals(2, $userList[1], 'rasearch-claimed-1-1'),
-                self::$user2->id => $this->assertEquals(1, $userList[1], 'rasearch-claimed-1-2'),
+                self::$user1->id => $this->assertSame(2, $userList[1], 'rasearch-claimed-1-1'),
+                self::$user2->id => $this->assertSame(1, $userList[1], 'rasearch-claimed-1-2'),
                 default => $this->fail('rasearch-claimed-1-fail')
             };
         }
@@ -193,6 +193,6 @@ class SearchReportAutoTest extends TestCase {
     public function testIdNoExist(): void {
         $search = new Search\ReportAuto(self::$raMan, self::$ratMan);
         $search->setId(12345);
-        $this->assertEquals(0, $search->total(), 'rasearch-id-2');
+        $this->assertSame(0, $search->total(), 'rasearch-id-2');
     }
 }

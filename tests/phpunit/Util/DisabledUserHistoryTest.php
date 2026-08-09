@@ -12,21 +12,21 @@ class DisabledUserHistoryTest extends TestCase {
 
         DisabledUserHistory::add($user, "test");
         $userList = DisabledUserHistory::get();
-        $this->assertEquals(
+        $this->assertCount(
             min(DisabledUserHistory::MAX_ENTRIES, 1 + $initial),
-            count($userList),
+            $userList,
             'disableduserhistory-notempty',
         );
 
         DisabledUserHistory::add($user, "test2");
         $userList = DisabledUserHistory::get();
-        $this->assertEquals(
+        $this->assertCount(
             min(DisabledUserHistory::MAX_ENTRIES, 2 + $initial),
-            count($userList),
+            $userList,
             'disableduserhistory-addmore',
         );
-        $this->assertEquals("test", $userList[0][1], 'disableduserhistory-reason');
-        $this->assertEquals("test2", $userList[1][1], 'disableduserhistory-reason2');
-        $this->assertEquals($user->id, $userList[1][0], 'disableduserhistory-userid');
+        $this->assertSame("test", $userList[0][1], 'disableduserhistory-reason');
+        $this->assertSame("test2", $userList[1][1], 'disableduserhistory-reason2');
+        $this->assertSame($user->id, $userList[1][0], 'disableduserhistory-userid');
     }
 }

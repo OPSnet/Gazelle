@@ -29,7 +29,7 @@ class UsersTest extends TestCase {
 
         $dist = $stats->userclassDistribution(true);
         $this->assertCount(14, $dist, 'users-stats-userclass-total');
-        $this->assertEquals('User', $dist[0]['name'], 'users-stats-userclass-name');
+        $this->assertSame('User', $dist[0]['name'], 'users-stats-userclass-name');
         $this->assertGreaterThan(0, $dist[0]['y'], 'users-stats-userclass-total');
 
         $list = $stats->userclassDistributionList(true);
@@ -45,7 +45,7 @@ class UsersTest extends TestCase {
         $this->assertGreaterThanOrEqual(0, $stats->peerTotal(), 'users-stats-total-peer');
         $this->assertGreaterThanOrEqual(0, $stats->seederTotal(), 'users-stats-total-seeder');
         $this->assertGreaterThanOrEqual(0, $stats->snatchTotal(), 'users-stats-total-snatch');
-        $this->assertEquals(
+        $this->assertSame(
             ['peer_total', 'seeder_total', 'leecher_total'],
             array_keys($stats->peerStat()),
             'users-stats-peer'
@@ -90,7 +90,7 @@ class UsersTest extends TestCase {
             fn ($c) => $c['ipcc'] === 'XB'
         ));
         $this->assertGreaterThan($geoStaff[0]['value'], $geoPublic[0]['value'], 'ustats-geodist-staff');
-        $this->assertEquals(COUNTRY_MINIMUM + COUNTRY_STEP, $geoPublic[0]['value'], 'ustats-geodist-public');
+        $this->assertSame(COUNTRY_MINIMUM + COUNTRY_STEP, $geoPublic[0]['value'], 'ustats-geodist-public');
     }
 
     public function testNewUsersAllowed(): void {
@@ -104,32 +104,37 @@ class UsersTest extends TestCase {
         $this->userList[] = Helper::makeUser('stats.' . randomString(6), 'user', enable: true);
         $userStats = $this->userList[0]->stats();
         $id = $this->userList[0]->id;
-        $this->assertEquals(
+        $this->assertSame(
             "user.php?action=stats&userid={$id}",
             $userStats->location(),
             'user-stats-location',
         );
-        $this->assertEquals(
+        $this->assertSame(
             "<a href=\"user.php?action=stats&amp;userid={$id}\">Stats</a>",
             $userStats->link(),
             'user-stats-link'
         );
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $userStats->unresolvedReportsTotal(),
             'user-stats-unresolved-reports',
         );
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $userStats->remove(),
             'user-stats-remove',
         );
     }
 
+    public function testExceptionFree(): void {
+        $this->expectNotToPerformAssertions();
+        $stats = new Stats\Users();
+        $stats->flush();
+        $stats->flushTop(10);
+    }
+
     public function testTop(): void {
         $stats = new Stats\Users();
-        $this->assertInstanceOf(Stats\Users::class, $stats->flush(), 'users-stats-flush');
-        $this->assertInstanceOf(Stats\Users::class, $stats->flushTop(10), 'users-stats-top-flush');
         $this->assertGreaterThanOrEqual(0, count($stats->topDownloadList(10)), 'users-stats-top-download');
         $this->assertGreaterThanOrEqual(0, count($stats->topDownSpeedList(10)), 'users-stats-top-downspeed');
         $this->assertGreaterThanOrEqual(0, count($stats->topUploadList(10)), 'users-stats-top-upload');
@@ -159,15 +164,15 @@ class UsersTest extends TestCase {
         $this->assertTrue($this->userList[0]->updateTokens(23), 'utest-stats-token-5');
 
         $eco->flush();
-        $this->assertEquals(23 + $total, $eco->tokenTotal(), 'utest-stats-total-tokens');
-        $this->assertEquals($stranded, $eco->tokenStrandedTotal(), 'utest-stats-total-stranded-tokens');
+        $this->assertSame(23 + $total, $eco->tokenTotal(), 'utest-stats-total-tokens');
+        $this->assertSame($stranded, $eco->tokenStrandedTotal(), 'utest-stats-total-stranded-tokens');
 
         $disabled = $eco->userDisabledTotal();
         $eco->flush();
         $this->userList[0]->setField('Enabled', UserStatus::disabled->value)->modify();
 
-        $this->assertEquals(23 + $stranded, $eco->tokenStrandedTotal(), 'utest-stats-total-disabled-stranded-tokens');
-        $this->assertEquals(1 + $disabled, $eco->userDisabledTotal(), 'utest-stats-user-disabled-total');
+        $this->assertSame(23 + $stranded, $eco->tokenStrandedTotal(), 'utest-stats-total-disabled-stranded-tokens');
+        $this->assertSame(1 + $disabled, $eco->userDisabledTotal(), 'utest-stats-user-disabled-total');
     }
 
     public function testJsonUserStats(): void {

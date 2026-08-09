@@ -24,15 +24,15 @@ class PaymentTest extends TestCase {
         $this->assertGreaterThan(0, $id, 'payment-create');
         $payment = array_first(array_filter($manager->list(), fn ($p) => $p['id'] === $id));
         $this->assertTrue($payment['active'], 'payment-active');
-        $this->assertEquals($name, $payment['name'], 'payment-text');
+        $this->assertSame($name, $payment['name'], 'payment-text');
         $this->assertEquals($expiry, $payment['expiry'], 'payment-expiry');
-        $this->assertEquals('XBT', $payment['currency'], 'payment-cc');
-        $this->assertEquals(0.03125, $payment['rent'], 'payment-rent');
-        $this->assertEquals(0.03125, $payment['annual_rent'], 'payment-btc-annual');
-        $this->assertEquals(0.03125, $payment['btcRent'], 'payment-btc-rent');
-        $this->assertEquals(1, $payment['fiatRate'], 'payment-fiat');
+        $this->assertSame('XBT', $payment['currency'], 'payment-cc');
+        $this->assertSame(0.03125, $payment['rent'], 'payment-rent');
+        $this->assertSame(0.03125, $payment['annual_rent'], 'payment-btc-annual');
+        $this->assertSame(0.03125, $payment['btcRent'], 'payment-btc-rent');
+        $this->assertSame(1.0, $payment['fiatRate'], 'payment-fiat');
 
-        $this->assertEquals(1, $manager->remove($id), 'payment-remove');
+        $this->assertSame(1, $manager->remove($id), 'payment-remove');
     }
 
     public function testMonth(): void {
@@ -48,12 +48,12 @@ class PaymentTest extends TestCase {
         // if these fails it is because there are other payment records or
         // donations in the database
         Helper::flushDonationMonth(1);
-        $this->assertEquals(
+        $this->assertSame(
             0.03125,
             $manager->monthlyRental(),
             'payment-monthly-rental',
         );
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $manager->monthlyPercent(new Donation()),
             'payment-monthly-percent',
@@ -84,10 +84,10 @@ class PaymentTest extends TestCase {
 
         $soon = $manager->soon();
         $this->assertCount(2, $soon, 'payment-soon-element');
-        $this->assertEquals(2, $soon['total'], 'payment-soon-total');
+        $this->assertSame(2, $soon['total'], 'payment-soon-total');
         $this->assertEquals($next, $soon['next'], 'payment-soon-next');
 
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $manager->modify(
                 id:     $idList[1],
@@ -100,7 +100,7 @@ class PaymentTest extends TestCase {
             'payment-modify',
         );
         $soon = $manager->soon();
-        $this->assertEquals(1, $soon['total'], 'payment-sooner-total');
+        $this->assertSame(1, $soon['total'], 'payment-sooner-total');
 
         foreach ($idList as $id) {
             $manager->remove($id);

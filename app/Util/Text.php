@@ -8,8 +8,12 @@ class Text {
     }
 
     public static function base64UrlDecode(string $data): string {
-        return base64_decode(str_pad(strtr($data, '-_', '+/'), strlen($data) % 4, '=',
-            STR_PAD_RIGHT));
+        return base64_decode(
+            str_pad(
+                strtr($data, '-_', '+/'), strlen($data) % 4, '=',
+                STR_PAD_RIGHT
+            )
+        );
     }
 
     /**
@@ -19,8 +23,11 @@ class Text {
      * that html_escape does.
      */
     public static function parseHtml(string $html): string {
+        if ($html === '') {
+            return '';
+        }
         $dom = new \DOMDocument();
-        $dom->loadHTML(stripslashes($html));
+        $dom->loadHTML(stripslashes($html)); /** @phpstan-ignore-line argument.type */
 
         // For any manipulation that we do on the DOM tree, always go in reverse order or
         // else you end up with broken array pointers and missed elements

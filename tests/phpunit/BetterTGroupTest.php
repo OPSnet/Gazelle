@@ -29,11 +29,11 @@ class BetterTGroupTest extends TestCase {
             'better-artwork-snatched-heading',
         );
         $Cache->delete_value($snatched->totalCacheKey());
-        $this->assertEquals(0, $snatched->total(), 'better-artwork-snatched-total');
+        $this->assertSame(0, $snatched->total(), 'better-artwork-snatched-total');
 
         $uploaded = new Better\Artwork($this->user, Enum\BetterFilter::uploaded, $tgMan);
         $Cache->delete_value($uploaded->totalCacheKey());
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $uploaded->total(),
             'better-artwork-uploaded-total'
@@ -56,7 +56,7 @@ class BetterTGroupTest extends TestCase {
             image: '',
         );
         $Cache->delete_value($artwork->totalCacheKey());
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $artwork->total() - $initialTotal,
             'better-artwork-total'
@@ -66,9 +66,9 @@ class BetterTGroupTest extends TestCase {
     public function testBetterBad(): void {
         $torMan = new Manager\Torrent();
         $badFile = new Better\Bad($this->user, Enum\BetterFilter::uploaded, $torMan);
-        $this->assertEquals('torrent', $badFile->mode(), 'better-badfile-mode');
+        $this->assertSame('torrent', $badFile->mode(), 'better-badfile-mode');
         $badFile->setBadType(Enum\TorrentFlag::badFile);
-        $this->assertEquals(
+        $this->assertSame(
             Enum\TorrentFlag::badFile,
             $badFile->torrentFlag(),
             'better-badfile-torrentflag',
@@ -98,7 +98,7 @@ class BetterTGroupTest extends TestCase {
         $torrent->addFlag(Enum\TorrentFlag::badFile, $this->user);
 
         $Cache->delete_value($badFile->totalCacheKey());
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $badFile->total() - $initialTotal,
             'better-bad-badfile-total'
@@ -108,12 +108,12 @@ class BetterTGroupTest extends TestCase {
             $this->user, Enum\BetterFilter::snatched, $torMan,
         )->setBadType(Enum\TorrentFlag::badFolder);
         $Cache->delete_value($badFolder->totalCacheKey());
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $badFolder->total(),
             'better-bad-badfolder-snatched-total'
         );
-        $this->assertNotEquals(
+        $this->assertNotSame(
             $badFile->heading(),
             $badFolder->heading(),
             'better-badfolder-heading',
@@ -123,7 +123,7 @@ class BetterTGroupTest extends TestCase {
     public function testBetterChecksum(): void {
         $torMan = new Manager\Torrent();
         $checksum = new Better\Checksum($this->user, Enum\BetterFilter::any, $torMan);
-        $this->assertEquals('torrent', $checksum->mode(), 'better-checksum-mode');
+        $this->assertSame('torrent', $checksum->mode(), 'better-checksum-mode');
         $this->assertGreaterThan(
             10,
             strlen($checksum->heading()),
@@ -149,7 +149,7 @@ class BetterTGroupTest extends TestCase {
         $torrent->setField('HasLogDB', '1')->setField('LogChecksum', '0')->modify();
 
         $Cache->delete_value($checksum->totalCacheKey());
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $checksum->total() - $initialTotal,
             'better-bad-checksum-total'
@@ -159,12 +159,12 @@ class BetterTGroupTest extends TestCase {
         $Cache->delete_value($snatched->totalCacheKey());
         $search = randomString(10);
         $snatched->setSearch($search);
-        $this->assertEquals(
+        $this->assertSame(
             $search,
             $snatched->search(),
             'better-bad-checksum-search',
         );
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $snatched->total(),
             'better-bad-checksum-snatched->total',
@@ -172,7 +172,7 @@ class BetterTGroupTest extends TestCase {
 
         $uploaded = new Better\Checksum($this->user, Enum\BetterFilter::uploaded, $torMan);
         $Cache->delete_value($uploaded->totalCacheKey());
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $uploaded->total(),
             'better-bad-checksum-uploaded-total',
@@ -210,7 +210,7 @@ class BetterTGroupTest extends TestCase {
 
         $single = new Better\SingleSeeded($this->user, Enum\BetterFilter::uploaded, $torMan);
         $Cache->delete_value($single->totalCacheKey());
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $single->total(),
             'better-single-total',
@@ -219,13 +219,13 @@ class BetterTGroupTest extends TestCase {
         $tagMan = new Manager\Tag();
         $includeTag = new Better\SingleSeeded($this->user, Enum\BetterFilter::any, $torMan);
         $includeTag->setTagIncludeList($tagMan->nameToTagList('bop nosuchtag'));
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $includeTag->total(),
             'better-single-include-tag-total',
         );
         $result = array_first($includeTag->page(2, 0));
-        $this->assertEquals(
+        $this->assertSame(
             $torrent->id,
             $result->id,
             'better-single-include-torrent-id',
@@ -233,7 +233,7 @@ class BetterTGroupTest extends TestCase {
 
         $excludeTag = new Better\SingleSeeded($this->user, Enum\BetterFilter::any, $torMan);
         $excludeTag->setTagExcludeList($tagMan->nameToTagList('bop nosuchtag'));
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $excludeTag->total(),
             'better-single-exclude-tag-total',

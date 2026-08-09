@@ -53,10 +53,10 @@ class PrivilegeTest extends TestCase {
             displayStaff: false
         );
         $find = $manager->findByLevel(FAKE_LEVEL);
-        $this->assertInstanceOf(Privilege::class, $find, 'privilege-find-by-level');
-        $this->assertEquals($privilege->id, $find->id, 'privilege-found-self');
-        $this->assertEquals($badge, $privilege->badge(), 'privilege-badge');
-        $this->assertEquals(FAKE_LEVEL, $privilege->level(), 'privilege-level');
+        $this->assertInstanceOf(Privilege::class, $find, 'privilege-find-by-level'); /** @phpstan-ignore-line method.impossibleType */
+        $this->assertSame($privilege->id, $find->id, 'privilege-found-self');
+        $this->assertSame($badge, $privilege->badge(), 'privilege-badge');
+        $this->assertSame(FAKE_LEVEL, $privilege->level(), 'privilege-level');
         $this->assertCount(0, $privilege->permittedForums(), 'privilege-permitted-forums');
         $this->assertFalse($privilege->displayStaff(), 'privilege-display-staff');
         $this->assertTrue($privilege->isSecondary(), 'privilege-is-secondary');
@@ -71,23 +71,23 @@ class PrivilegeTest extends TestCase {
         );
 
         // assign privilege to user
-        $this->assertEquals(0, $privilege->userTotal(), 'privilege-has-no-users-yet');
-        $this->assertEquals(
+        $this->assertSame(0, $privilege->userTotal(), 'privilege-has-no-users-yet');
+        $this->assertSame(
             0,
             $this->userList['user']->privilege()->secondaryClassesList()[$privilege->name()]['isSet'],
             'privilege-user-no-secondary-yet'
         );
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $this->userList['user']->addClasses([$privilege->id]),
             'privilege-add-secondary'
         );
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $this->userList['user']->privilege()->secondaryClassesList()[$privilege->name()]['isSet'],
             'privilege-user-no-secondary-yet'
         );
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $privilege->flush()->userTotal(),
             'privilege-has-one-user'
@@ -95,16 +95,16 @@ class PrivilegeTest extends TestCase {
 
         // TODO: User\Privilege should take care of adding and removing secondary classes
         $userPriv = $this->userList['user']->privilege();
-        $this->assertEquals(FAKE_LEVEL, $userPriv->maxSecondaryLevel(), 'privilege-user-max-level');
-        $this->assertEquals([$privilege->id => $name], $userPriv->secondaryClassList(), 'privilege-user-list');
-        $this->assertEquals([$badge => $name], $userPriv->badgeList(), 'privilege-user-badge');
+        $this->assertSame(FAKE_LEVEL, $userPriv->maxSecondaryLevel(), 'privilege-user-max-level');
+        $this->assertSame([$privilege->id => $name], $userPriv->secondaryClassList(), 'privilege-user-list');
+        $this->assertSame([$badge => $name], $userPriv->badgeList(), 'privilege-user-badge');
 
         // revoke privilege
-        $this->assertEquals(1, $this->userList['user']->removeClasses([$privilege->id]), 'privilege-remove-secondary');
-        $this->assertEquals(0, $this->userList['user']->privilege()->secondaryClassesList()[$privilege->name()]['isSet'], 'privilege-user-no-more-secondary');
-        $this->assertEquals(0, $privilege->flush()->userTotal(), 'privilege-has-no-users');
+        $this->assertSame(1, $this->userList['user']->removeClasses([$privilege->id]), 'privilege-remove-secondary');
+        $this->assertSame(0, $this->userList['user']->privilege()->secondaryClassesList()[$privilege->name()]['isSet'], 'privilege-user-no-more-secondary');
+        $this->assertSame(0, $privilege->flush()->userTotal(), 'privilege-has-no-users');
 
-        $this->assertEquals(1, $privilege->remove(), 'privilege-remove');
+        $this->assertSame(1, $privilege->remove(), 'privilege-remove');
     }
 
     public static function privilegeProvider(): array {
@@ -121,11 +121,11 @@ class PrivilegeTest extends TestCase {
         $user = $this->userList['user'];
         $privilege = new Privilege($privilegeId);
         $this->assertFalse($user->$method(), "privilege-user-not-$label");
-        $this->assertEquals(1, $user->privilege()->addSecondaryClass($privilegeId, "privilege-add-$label"));
+        $this->assertSame(1, $user->privilege()->addSecondaryClass($privilegeId, "privilege-add-$label"));
         $this->assertTrue($user->$method(), "privilege-user-now-$label");
         // TODO: the method name and parameter could be improved
         $this->assertTrue($user->privilege()->hasSecondaryClassId($privilege->id), "privilege-has-secondary-$label");
-        $this->assertEquals(1, $user->removeClasses([$privilegeId]), "privilege-remove-$label");
+        $this->assertSame(1, $user->removeClasses([$privilegeId]), "privilege-remove-$label");
         $this->assertFalse($user->$method(), "privilege-user-no-longer-$label");
         $this->assertFalse($user->privilege()->hasSecondaryClassId($privilege->id), "privilege-no-longerhas-secondary-$label");
     }
@@ -136,10 +136,10 @@ class PrivilegeTest extends TestCase {
         $total = $flsList[0]['total'];
 
         $user = $this->userList['user'];
-        $this->assertEquals(3, $user->addClasses([FLS_TEAM, INTERVIEWER, RECRUITER]), "privilege-add-multi-secondary");
-        $this->assertEquals(0, $user->addClasses([FLS_TEAM, INTERVIEWER, RECRUITER]), "privilege-add-multi-no-op");
+        $this->assertSame(3, $user->addClasses([FLS_TEAM, INTERVIEWER, RECRUITER]), "privilege-add-multi-secondary");
+        $this->assertSame(0, $user->addClasses([FLS_TEAM, INTERVIEWER, RECRUITER]), "privilege-add-multi-no-op");
         $userPriv = $user->privilege();
-        $this->assertEquals(
+        $this->assertEqualsCanonicalizing(
             [
                 'FLS' => 'First Line Support',
                 'IN'  => 'Interviewer',
@@ -149,15 +149,15 @@ class PrivilegeTest extends TestCase {
         );
         $this->assertGreaterThan(0, count($userPriv->defaultList()), 'privilege-secondary-list');
         $flsList = array_values(array_filter($manager->usageList(), fn($p) => $p['id'] == FLS_TEAM));
-        $this->assertEquals($total + 1, $flsList[0]['total'], 'privilege-one-new-fls');
+        $this->assertSame($total + 1, $flsList[0]['total'], 'privilege-one-new-fls');
     }
 
     public function testPrivilegeCompare(): void {
         $manager = new Manager\Privilege();
         $compare = $manager->compareUserclass(USER, MEMBER);
         $this->assertCount(2, $compare, 'privilege-compare-count');
-        $this->assertEquals([], $compare['remove'], 'privilege-compare-remove');
-        $this->assertEquals(
+        $this->assertSame([], $compare['remove'], 'privilege-compare-remove');
+        $this->assertSame(
             [
                 'site_collages_manage',
                 'site_collages_subscribe',
@@ -178,7 +178,7 @@ class PrivilegeTest extends TestCase {
             $user->permitted('site_debug'),
             'privilege-custom-baseline-user'
         );
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $user->privilege()->modifyCustomList(['site_debug' => true]),
             'privilege-custom-user-add'
@@ -192,7 +192,7 @@ class PrivilegeTest extends TestCase {
             $user->permitted('site_debug'),
             'privilege-custom-user-true'
         );
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $user->privilege()->modifyCustomList(['site_debug' => false]),
             'privilege-custom-user-remove'
@@ -206,7 +206,7 @@ class PrivilegeTest extends TestCase {
             $admin->permitted('site_debug'),
             'privilege-custom-admin-baseline'
         );
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $admin->privilege()->modifyCustomList(['site_debug' => false]),
             'privilege-custom-admin-add'
@@ -220,7 +220,7 @@ class PrivilegeTest extends TestCase {
             $admin->permitted('site_debug'),
             'privilege-custom-admin-false'
         );
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $admin->privilege()->modifyCustomList([]),
             'privilege-custom-admin-reset'

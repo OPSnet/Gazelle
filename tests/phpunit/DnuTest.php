@@ -27,7 +27,7 @@ class DnuTest extends TestCase {
         );
         $this->assertCount(count($initial) + 1, $manager->dnuList(), 'dnu-create');
 
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $manager->modify(
                 id:          $dnu,
@@ -46,7 +46,7 @@ class DnuTest extends TestCase {
             'dnu-user-latest',
         );
 
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $manager->modify(
                 id:          $dnu + 1,
@@ -56,8 +56,8 @@ class DnuTest extends TestCase {
             ),
             'dnu-fail-modify'
         );
-        $this->assertEquals(1, $manager->remove($dnu), 'dnu-remove');
-        $this->assertEquals(0, $manager->remove($dnu), 'dnu-fail-remove');
+        $this->assertSame(1, $manager->remove($dnu), 'dnu-remove');
+        $this->assertSame(0, $manager->remove($dnu), 'dnu-fail-remove');
     }
 
     public function testReorder(): void {
@@ -80,7 +80,7 @@ class DnuTest extends TestCase {
         // If that happens, run again.  We really only want to check that the
         // SQL is correct.
         $reorder = $manager->reorder([...$idList, $second, $first]);
-        $this->assertEquals(2 + count($idList), $reorder, 'dnu-reorder');
+        $this->assertSame(2 + count($idList), $reorder, 'dnu-reorder');
 
         $manager->remove($first);
         $manager->remove($second);

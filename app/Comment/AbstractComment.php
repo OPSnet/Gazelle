@@ -172,7 +172,7 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
     }
 
     public function handleSubscription(\Gazelle\User $user): int {
-        if (empty($this->thread)) {
+        if ($this->thread === []) {
             return 0;
         }
         $lastPost = array_last($this->thread)['ID'];

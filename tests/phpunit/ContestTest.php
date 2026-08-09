@@ -52,7 +52,7 @@ class ContestTest extends TestCase {
         $this->assertIsArray($contestTypes, 'conteest-manager-array-of-types');
         $this->assertCount(4, array_keys($contestTypes), 'contest-manager-types');
         // these may be a bit fragile, time will tell
-        $this->assertEquals(1, $contestTypes[1]['id'], 'contest-type-id');
+        $this->assertSame(1, $contestTypes[1]['id'], 'contest-type-id');
         $name = 'phpunit contest 00 ' . randomString(10);
         $now  = time();
         $this->contest = $manager->create(
@@ -65,37 +65,37 @@ class ContestTest extends TestCase {
             hasPool     : false,
             type        : $contestTypes[1]['id'],
         );
-        $this->assertEquals($contestTypes[1]['name'], $this->contest->contestType(), 'contest-type');
-        $this->assertEquals('http://localhost/banner.jpg', $this->contest->banner(), 'contest-banner');
+        $this->assertSame($contestTypes[1]['name'], $this->contest->contestType(), 'contest-type');
+        $this->assertSame('http://localhost/banner.jpg', $this->contest->banner(), 'contest-banner');
         $this->assertTrue(Helper::recentDate($this->contest->dateBegin()), 'contest-begin');
         $this->assertTrue($this->contest->isOpen(), 'contest-open');
-        $this->assertEquals(
+        $this->assertSame(
             (int)strtotime($this->contest->dateEnd()),
             $now + 15 * 86400,
             'contest-end',
         );
-        $this->assertEquals('phpunit contest description', $this->contest->description(), 'contest-description');
-        $this->assertEquals($name, $this->contest->name(), 'contest-name');
+        $this->assertSame('phpunit contest description', $this->contest->description(), 'contest-description');
+        $this->assertSame($name, $this->contest->name(), 'contest-name');
         $this->assertFalse($this->contest->hasBonusPool(), 'contest-without-pool');
-        $this->assertEquals(0, $this->contest->calculateLeaderboard(), 'contest-no-leaderboard-yet');
-        $this->assertEquals(0, $this->contest->totalUsers(), 'contest-no-users-yet');
-        $this->assertEquals(0, $this->contest->totalEntries(), 'contest-no-entries-yet');
+        $this->assertSame(0, $this->contest->calculateLeaderboard(), 'contest-no-leaderboard-yet');
+        $this->assertSame(0, $this->contest->totalUsers(), 'contest-no-users-yet');
+        $this->assertSame(0, $this->contest->totalEntries(), 'contest-no-entries-yet');
         $this->assertNull($this->contest->rank($this->userList[0]), 'contest-no-rank-yet');
-        $this->assertEquals('none', $this->contest->bonusStatus(), 'contest-status-no-bonus-pool');
-        $this->assertEquals(
+        $this->assertSame('none', $this->contest->bonusStatus(), 'contest-status-no-bonus-pool');
+        $this->assertSame(
             $this->contest->id,
             $manager->findById($this->contest->id)?->id,
             'contest-find-by-id',
         );
 
-        $this->assertEquals(1, $this->contest->remove(), 'contest-remove');
+        $this->assertSame(1, $this->contest->remove(), 'contest-remove');
         unset($this->contest);
     }
 
     public function testContestUploadFlacSimple(): void {
         $manager = new Manager\Contest();
         $contestTypes = $manager->contestTypes();
-        $this->assertEquals('upload-flac', $contestTypes[1]['name'], 'ct-up-flac-type-name');
+        $this->assertSame('upload-flac', $contestTypes[1]['name'], 'ct-up-flac-type-name');
         $this->contest = $manager->create(
             banner      : 'http://localhost/banner.jpg',
             dateBegin   : date('Y-m-d H:i:s', time() - 1),
@@ -107,13 +107,13 @@ class ContestTest extends TestCase {
             type        : $contestTypes[1]['id'],
         );
         $this->assertTrue($this->contest->hasBonusPool(), 'ct-up-flac-has-pool');
-        $this->assertEquals("open", $this->contest->bonusStatus(), 'ct-up-flac-pool-open');
+        $this->assertSame("open", $this->contest->bonusStatus(), 'ct-up-flac-pool-open');
 
         [$sql, $args] = $this->contest->type()->ranker();
         $this->assertIsString($sql, 'ct-up-flac-ranker-sql');
         $this->assertIsArray($args, 'ct-up-flac-ranker-args');
         DB::DB()->prepared_query($sql, ...$args);
-        $this->assertEquals(
+        $this->assertSame(
             [],
             DB::DB()->to_array(false, MYSQLI_ASSOC),
             'ct-up-flac-ranker-output'
@@ -138,10 +138,10 @@ class ContestTest extends TestCase {
                 seed: true,
             ),
         ];
-        $this->assertEquals(1, $this->contest->calculateLeaderboard(), 'ct-up-flac-leaderboard-1');
-        $this->assertEquals(1, $this->contest->totalUsers(), 'ct-up-flac-user-1');
-        $this->assertEquals(1, $this->contest->totalEntries(), 'ct-up-flac-entry-1');
-        $this->assertEquals(
+        $this->assertSame(1, $this->contest->calculateLeaderboard(), 'ct-up-flac-leaderboard-1');
+        $this->assertSame(1, $this->contest->totalUsers(), 'ct-up-flac-user-1');
+        $this->assertSame(1, $this->contest->totalEntries(), 'ct-up-flac-entry-1');
+        $this->assertSame(
             [
                 "position" => 1,
                 "total"    => 1,
@@ -163,10 +163,10 @@ class ContestTest extends TestCase {
             seed: true,
         );
         $this->contest->flush();
-        $this->assertEquals(2, $this->contest->calculateLeaderboard(), 'ct-up-flac-leaderboard-2');
-        $this->assertEquals(2, $this->contest->totalUsers(), 'ct-up-flac-user-2');
-        $this->assertEquals(2, $this->contest->totalEntries(), 'ct-up-flac-entry-2');
-        $this->assertEquals(
+        $this->assertSame(2, $this->contest->calculateLeaderboard(), 'ct-up-flac-leaderboard-2');
+        $this->assertSame(2, $this->contest->totalUsers(), 'ct-up-flac-user-2');
+        $this->assertSame(2, $this->contest->totalEntries(), 'ct-up-flac-entry-2');
+        $this->assertSame(
             [
                 "position" => 1,
                 "total"    => 1,
@@ -174,7 +174,7 @@ class ContestTest extends TestCase {
             $this->contest->rank($this->userList[0]),
             'ct-up-flac-rank-2-1',
         );
-        $this->assertEquals(
+        $this->assertSame(
             [
                 "position" => 2,
                 "total"    => 1,
@@ -195,10 +195,10 @@ class ContestTest extends TestCase {
             seed: true,
         );
         $this->contest->flush();
-        $this->assertEquals(2, $this->contest->calculateLeaderboard(), 'ct-up-flac-leaderboard-3');
-        $this->assertEquals(2, $this->contest->totalUsers(), 'ct-up-flac-user-3');
-        $this->assertEquals(3, $this->contest->totalEntries(), 'ct-up-flac-entry-3');
-        $this->assertEquals(
+        $this->assertSame(2, $this->contest->calculateLeaderboard(), 'ct-up-flac-leaderboard-3');
+        $this->assertSame(2, $this->contest->totalUsers(), 'ct-up-flac-user-3');
+        $this->assertSame(3, $this->contest->totalEntries(), 'ct-up-flac-entry-3');
+        $this->assertSame(
             [
                 "position" => 2,
                 "total"    => 1,
@@ -206,7 +206,7 @@ class ContestTest extends TestCase {
             $this->contest->rank($this->userList[0]),
             'ct-up-flac-rank-3-1',
         );
-        $this->assertEquals(
+        $this->assertSame(
             [
                 "position" => 1,
                 "total"    => 2,
@@ -251,9 +251,9 @@ class ContestTest extends TestCase {
             seed     : true,
         );
         $this->contest->flush();
-        $this->assertEquals(2, $this->contest->calculateLeaderboard(), 'ct-up-flac-leaderboard-4');
-        $this->assertEquals(2, $this->contest->totalUsers(), 'ct-up-flac-user-no-mp3');
-        $this->assertEquals(3, $this->contest->totalEntries(), 'ct-up-flac-entry-no-mp3');
+        $this->assertSame(2, $this->contest->calculateLeaderboard(), 'ct-up-flac-leaderboard-4');
+        $this->assertSame(2, $this->contest->totalUsers(), 'ct-up-flac-user-no-mp3');
+        $this->assertSame(3, $this->contest->totalEntries(), 'ct-up-flac-entry-no-mp3');
 
         // close the contest
         $this->assertFalse($this->contest->paymentReady(), 'ct-up-flac-payment-not-ready');
@@ -272,32 +272,32 @@ class ContestTest extends TestCase {
             'ct-up-flac-do-payout',
         );
 
-        $this->assertEquals(
+        $this->assertSame(
             $this->contest->bonusPerContestValue()
                 + $this->contest->bonusPerUserValue()
                 + $this->contest->bonusPerEntryValue(),
             $this->userList[0]->flush()->bonusPointsTotal(),
             "ct-up-bonus-payout-0-{$this->userList[0]->id}"
         );
-        $this->assertEquals(
+        $this->assertSame(
             $this->contest->bonusPerContestValue()
                 + $this->contest->bonusPerUserValue()
                 + 2 * $this->contest->bonusPerEntryValue(),
             $this->userList[1]->flush()->bonusPointsTotal(),
             "ct-up-bonus-payout-1-{$this->userList[1]->id}"
         );
-        $this->assertEquals(
+        $this->assertSame(
             $this->contest->bonusPerUserValue(),
             $this->userList[2]->flush()->bonusPointsTotal(),
             "ct-up-bonus-payout-2-{$this->userList[2]->id}"
         );
-        $this->assertEquals(1, $this->contest->setPaymentClosed(), 'ct-up-flac-payout-closed');
+        $this->assertSame(1, $this->contest->setPaymentClosed(), 'ct-up-flac-payout-closed');
     }
 
     public function testContestRequestFill(): void {
         $manager  = new Manager\Contest();
         $reqFill = $manager->contestTypes()[2];
-        $this->assertEquals('request-fill', $reqFill['name'], 'ct-reqfill-type');
+        $this->assertSame('request-fill', $reqFill['name'], 'ct-reqfill-type');
         $this->contest = $manager->create(
             banner      : 'http://localhost/banner.jpg',
             dateBegin   : date('Y-m-d H:i:s', time() - 1),
@@ -346,46 +346,46 @@ class ContestTest extends TestCase {
         ];
 
         // first request is a self-fill, contest leaderboard should be empty
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $this->requestList[0]->fill($this->userList[0], $this->torrentList[0]),
             'ct-reqfill-0'
         );
-        $this->assertEquals(0, $this->contest->calculateLeaderboard(), 'ct-reqfill-leaderboard-1');
-        $this->assertEquals(0, $this->contest->totalUsers(), 'ct-reqfill-user-1');
-        $this->assertEquals(0, $this->contest->totalEntries(), 'ct-reqfill-entry-1');
+        $this->assertSame(0, $this->contest->calculateLeaderboard(), 'ct-reqfill-leaderboard-1');
+        $this->assertSame(0, $this->contest->totalUsers(), 'ct-reqfill-user-1');
+        $this->assertSame(0, $this->contest->totalEntries(), 'ct-reqfill-entry-1');
 
         // user 0 fills for user 1
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $this->requestList[2]->fill($this->userList[0], $this->torrentList[1]),
             'ct-reqfill-1'
         );
         $this->contest->flush();
-        $this->assertEquals(1, $this->contest->calculateLeaderboard(), 'ct-reqfill-leaderboard-2');
-        $this->assertEquals(1, $this->contest->totalUsers(), 'ct-reqfill-user-2');
-        $this->assertEquals(1, $this->contest->totalEntries(), 'ct-reqfill-entry-2');
+        $this->assertSame(1, $this->contest->calculateLeaderboard(), 'ct-reqfill-leaderboard-2');
+        $this->assertSame(1, $this->contest->totalUsers(), 'ct-reqfill-user-2');
+        $this->assertSame(1, $this->contest->totalEntries(), 'ct-reqfill-entry-2');
 
         // user 1 fills for user 0
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $this->requestList[1]->fill($this->userList[1], $this->torrentList[2]),
             'ct-reqfill-2'
         );
         $this->contest->flush();
-        $this->assertEquals(2, $this->contest->calculateLeaderboard(), 'ct-reqfill-leaderboard-3');
-        $this->assertEquals(2, $this->contest->totalUsers(), 'ct-reqfill-user-3');
-        $this->assertEquals(2, $this->contest->totalEntries(), 'ct-reqfill-entry-3');
+        $this->assertSame(2, $this->contest->calculateLeaderboard(), 'ct-reqfill-leaderboard-3');
+        $this->assertSame(2, $this->contest->totalUsers(), 'ct-reqfill-user-3');
+        $this->assertSame(2, $this->contest->totalEntries(), 'ct-reqfill-entry-3');
 
         // unfill first request, and fill with other user
         $this->requestList[0]->unfill($this->userList[0], 'phpunit contest');
         $this->requestList[0]->fill($this->userList[1], $this->torrentList[2]);
         $this->contest->flush();
-        $this->assertEquals(2, $this->contest->calculateLeaderboard(), 'ct-reqfill-leaderboard-4');
-        $this->assertEquals(2, $this->contest->totalUsers(), 'ct-reqfill-user-4');
-        $this->assertEquals(3, $this->contest->totalEntries(), 'ct-reqfill-entry-4');
+        $this->assertSame(2, $this->contest->calculateLeaderboard(), 'ct-reqfill-leaderboard-4');
+        $this->assertSame(2, $this->contest->totalUsers(), 'ct-reqfill-user-4');
+        $this->assertSame(3, $this->contest->totalEntries(), 'ct-reqfill-entry-4');
 
-        $this->assertEquals(
+        $this->assertSame(
             [[
                 'id_filler' => $this->userList[1]->id,
                 'id_user'   => $this->userList[0]->id,
@@ -411,14 +411,14 @@ class ContestTest extends TestCase {
             'ct-reqfill-do-payout',
         );
 
-        $this->assertEquals(
+        $this->assertSame(
             $this->contest->bonusPerContestValue()
                 + $this->contest->bonusPerUserValue()
                 + $this->contest->bonusPerEntryValue(),
             $this->userList[0]->flush()->bonusPointsTotal(),
             "ct-reqfill-bonus-payout-0-{$this->userList[0]->id}"
         );
-        $this->assertEquals(
+        $this->assertSame(
             $this->contest->bonusPerContestValue()
                 + $this->contest->bonusPerUserValue()
                 + 2 * $this->contest->bonusPerEntryValue(),
@@ -430,7 +430,7 @@ class ContestTest extends TestCase {
     public function testContestUploadFlacNoSingle(): void {
         $manager  = new Manager\Contest();
         $noSingle = $manager->contestTypes()[3];
-        $this->assertEquals('upload-flac-no-single', $noSingle['name'], 'ct-up-nosngl-type');
+        $this->assertSame('upload-flac-no-single', $noSingle['name'], 'ct-up-nosngl-type');
         $this->contest = $manager->create(
             banner      : 'http://localhost/banner.jpg',
             dateBegin   : date('Y-m-d H:i:s', time() - 1),
@@ -456,9 +456,9 @@ class ContestTest extends TestCase {
                 seed: true,
             ),
         ];
-        $this->assertEquals(0, $this->contest->calculateLeaderboard(), 'ct-up-nosngl-leaderboard-1');
-        $this->assertEquals(0, $this->contest->totalUsers(), 'ct-up-nosngl-user-1');
-        $this->assertEquals(0, $this->contest->totalEntries(), 'ct-up-nosngl-entry-1');
+        $this->assertSame(0, $this->contest->calculateLeaderboard(), 'ct-up-nosngl-leaderboard-1');
+        $this->assertSame(0, $this->contest->totalUsers(), 'ct-up-nosngl-user-1');
+        $this->assertSame(0, $this->contest->totalEntries(), 'ct-up-nosngl-entry-1');
 
         $this->userList[0]->refreshLastAccess();
         $this->userList[1]->refreshLastAccess();
@@ -476,9 +476,9 @@ class ContestTest extends TestCase {
             seed: true,
         );
         $this->contest->flush();
-        $this->assertEquals(1, $this->contest->calculateLeaderboard(), 'ct-up-nosngl-leaderboard-2');
-        $this->assertEquals(1, $this->contest->totalUsers(), 'ct-up-nosngl-user-2');
-        $this->assertEquals(1, $this->contest->totalEntries(), 'ct-up-nosngl-entry-2');
+        $this->assertSame(1, $this->contest->calculateLeaderboard(), 'ct-up-nosngl-leaderboard-2');
+        $this->assertSame(1, $this->contest->totalUsers(), 'ct-up-nosngl-user-2');
+        $this->assertSame(1, $this->contest->totalEntries(), 'ct-up-nosngl-entry-2');
 
         // payout
         $donorBonus = new User\Bonus($this->userList[1]);
@@ -496,12 +496,12 @@ class ContestTest extends TestCase {
             'ct-up-nosngl-do-payout',
         );
 
-        $this->assertEquals(
+        $this->assertSame(
             $this->contest->bonusPerUserValue(),
             $this->userList[0]->flush()->bonusPointsTotal(),
             "ct-up-nosngl-bonus-payout-0-{$this->userList[0]->id}"
         );
-        $this->assertEquals(
+        $this->assertSame(
             $this->contest->bonusPerContestValue()
                 + $this->contest->bonusPerUserValue()
                 + $this->contest->bonusPerEntryValue(),
@@ -513,7 +513,7 @@ class ContestTest extends TestCase {
     public function testContestPerfectFlac(): void {
         $manager  = new Manager\Contest();
         $perfect = $manager->contestTypes()[4];
-        $this->assertEquals('upload-perfect-flac', $perfect['name'], 'ct-perfect-type');
+        $this->assertSame('upload-perfect-flac', $perfect['name'], 'ct-perfect-type');
         $this->contest = $manager->create(
             banner      : 'http://localhost/banner.jpg',
             dateBegin   : date('Y-m-d H:i:s', time() - 1),
@@ -551,19 +551,19 @@ class ContestTest extends TestCase {
         $this->assertIsString($sql, 'ct-perfect-ranker-sql');
         $this->assertIsArray($args, 'ct-perfect-ranker-args');
         DB::DB()->prepared_query($sql, ...$args);
-        $this->assertEquals(
-            [[
+        $this->assertEqualsCanonicalizing(
+            [
                 "nr"           => 1,
                 "last_torrent" => $this->torrentList[0]->id,
                 "user_id"      => $this->userList[0]->id,
-            ]],
-            DB::DB()->to_array(false, MYSQLI_ASSOC),
+            ],
+            array_first(DB::DB()->to_array(false, MYSQLI_ASSOC)),
             'ct-perfect-ranker-output',
         );
 
-        $this->assertEquals(1, $this->contest->calculateLeaderboard(), 'ct-perfect-leaderboard-1');
-        $this->assertEquals(1, $this->contest->totalUsers(), 'ct-perfect-user-1');
-        $this->assertEquals(1, $this->contest->totalEntries(), 'ct-perfect-entry-1');
+        $this->assertSame(1, $this->contest->calculateLeaderboard(), 'ct-perfect-leaderboard-1');
+        $this->assertSame(1, $this->contest->totalUsers(), 'ct-perfect-user-1');
+        $this->assertSame(1, $this->contest->totalEntries(), 'ct-perfect-entry-1');
 
         $donorBonus = new User\Bonus($this->userList[0]);
         $donorBonus->setPoints(1000);

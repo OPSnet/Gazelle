@@ -39,12 +39,12 @@ class ListMatcherTest extends TestCase {
         $this->assertEmpty($this->matcher->extract(''), 'listmatcher-extract-empty');
         $this->assertEmpty($this->matcher->extract('garbage'), 'listmatcher-extract-garbage');
         $this->assertEmpty($this->matcher->extract('1.2.333.4'), 'listmatcher-extract-invalid');
-        $this->assertEquals([['1.2.3.4', null, null]], $this->matcher->extract('1.2.3.4'), 'listmatcher-extract-simple');
-        $this->assertEquals([['1.2.3.4', null, null]],
+        $this->assertSame([['1.2.3.4', null, null]], $this->matcher->extract('1.2.3.4'), 'listmatcher-extract-simple');
+        $this->assertSame([['1.2.3.4', null, null]],
             $this->matcher->extract("aaaaaaa\naaaaa 1.2.3.4 aaaaaaa\naaaaaaa"),
             'listmatcher-extract-simple-extra'
         );
-        $this->assertEquals([
+        $this->assertSame([
                 ['1.2.3.4', null, null],
                 ['2.3.4.5', null, null],
             ],
@@ -57,7 +57,7 @@ class ListMatcherTest extends TestCase {
             $this->matcher->extract("1.2.3.4 2020-02-03 12:34"),
             'listmatcher-extract-single-date'
         );
-        $this->assertEquals([
+        $this->assertEqualsCanonicalizing([
                 ['1.2.3.4', new \DateTimeImmutable('2020-02-03 12:34'), new \DateTimeImmutable('2021-03-04 23:12:03.123')],
                 ['2.3.4.5', null, null],
                 ['4.4.4.4', new \DateTimeImmutable('2022-05-20T22:11:01'), null]
@@ -74,8 +74,8 @@ class ListMatcherTest extends TestCase {
 
     public function testAddIps(): void {
         $this->matcher->create();
-        $this->assertEquals(0, $this->matcher->addIps([]), 'listmatcher-addips-empty');
-        $this->assertEquals(2, $this->matcher->addIps(['1.2.3.4', '2.3.4.5', '1.2.3.4']), 'listmatcher-addips-dupe');
+        $this->assertSame(0, $this->matcher->addIps([]), 'listmatcher-addips-empty');
+        $this->assertSame(2, $this->matcher->addIps(['1.2.3.4', '2.3.4.5', '1.2.3.4']), 'listmatcher-addips-dupe');
     }
 
     public function testFindCandidates(): void {
@@ -104,10 +104,10 @@ class ListMatcherTest extends TestCase {
         $this->matcher->create();
 
         $this->assertEmpty($this->matcher->findCandidates($candidate, false), 'listmatcher-findcandidates-strict-nomatch');
-        $this->assertEquals([$user->id], $this->matcher->findCandidates($candidate), 'listmatcher-findcandidates-loose');
+        $this->assertSame([$user->id], $this->matcher->findCandidates($candidate), 'listmatcher-findcandidates-loose');
 
         $ipMan->registerApi($user, $ips[0][0]);
-        $this->assertEquals([$user->id], $this->matcher->findCandidates($candidate, false), 'listmatcher-findcandidates-strict-ip');
+        $this->assertSame([$user->id], $this->matcher->findCandidates($candidate, false), 'listmatcher-findcandidates-strict-ip');
 
         $ipMan->registerApi($user2, $ips[0][0]);
         $this->assertEqualsCanonicalizing([$user2->id, $user->id], $this->matcher->findCandidates($candidate), 'listmatcher-findcandidates-loose-ip');
@@ -136,8 +136,8 @@ class ListMatcherTest extends TestCase {
         $matches = $this->matcher->findUsers($candidate, true, true);
         $this->assertCount(2, $matches, 'listmatcher-findusers-count');
         $this->assertGreaterThan($matches[1]['match']->score(), $matches[0]['match']->score(), 'listmatcher-findusers-scoreorder');
-        $this->assertEquals($matches[0]['user']->id, $user->id, 'listmatcher-findusers-userid');
-        $this->assertEquals($matches[1]['user']->id, $user3->id, 'listmatcher-findusers-userid2');
+        $this->assertSame($matches[0]['user']->id, $user->id, 'listmatcher-findusers-userid');
+        $this->assertSame($matches[1]['user']->id, $user3->id, 'listmatcher-findusers-userid2');
     }
 
     public function testSort(): void {
@@ -151,17 +151,17 @@ class ListMatcherTest extends TestCase {
 
         $list = [['id' => 1, 'match' => $m1], ['id' => 2, 'match' => $m2]];
         UserMatch\ListMatcher::sortMatches($list, Enum\UserMatchSort::score, Enum\Direction::descending);
-        $this->assertEquals(1, $list[0]['id'], 'listmatcher-sort-score-desc');
+        $this->assertSame(1, $list[0]['id'], 'listmatcher-sort-score-desc');
         UserMatch\ListMatcher::sortMatches($list, Enum\UserMatchSort::score, Enum\Direction::ascending);
-        $this->assertEquals(2, $list[0]['id'], 'listmatcher-sort-score-asc');
+        $this->assertSame(2, $list[0]['id'], 'listmatcher-sort-score-asc');
         UserMatch\ListMatcher::sortMatches($list, Enum\UserMatchSort::firstDate, Enum\Direction::descending);
-        $this->assertEquals(2, $list[0]['id'], 'listmatcher-sort-firstDate-desc');
+        $this->assertSame(2, $list[0]['id'], 'listmatcher-sort-firstDate-desc');
         UserMatch\ListMatcher::sortMatches($list, Enum\UserMatchSort::firstDate, Enum\Direction::ascending);
-        $this->assertEquals(1, $list[0]['id'], 'listmatcher-sort-firstDate-asc');
+        $this->assertSame(1, $list[0]['id'], 'listmatcher-sort-firstDate-asc');
         UserMatch\ListMatcher::sortMatches($list, Enum\UserMatchSort::lastDate, Enum\Direction::descending);
-        $this->assertEquals(1, $list[0]['id'], 'listmatcher-sort-lastDate-desc');
+        $this->assertSame(1, $list[0]['id'], 'listmatcher-sort-lastDate-desc');
         UserMatch\ListMatcher::sortMatches($list, Enum\UserMatchSort::lastDate, Enum\Direction::ascending);
-        $this->assertEquals(2, $list[0]['id'], 'listmatcher-sort-lastDate-asc');
+        $this->assertSame(2, $list[0]['id'], 'listmatcher-sort-lastDate-asc');
     }
 
     public function testCache(): void {
@@ -178,6 +178,6 @@ class ListMatcherTest extends TestCase {
 
         $token = UserMatch\ListMatcher::cache($candidate, ['somedata'], 'otherdata', $user);
         $this->assertFalse(UserMatch\ListMatcher::fromCache($token, $user2), 'listmatcher-fromcache-baduser');
-        $this->assertEquals([['somedata'], 'otherdata', 2, 1], UserMatch\ListMatcher::fromCache($token, $user), 'listmatcher-fromcache-good');
+        $this->assertSame([['somedata'], 'otherdata', 2, 1], UserMatch\ListMatcher::fromCache($token, $user), 'listmatcher-fromcache-good');
     }
 }

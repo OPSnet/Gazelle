@@ -34,24 +34,24 @@ class GiftEventTest extends TestCase {
         $manager   = new Manager\GiftEvent();
         $giftEvent = $manager->create($name, $begin, $end, $this->user);
 
-        $this->assertEquals(
+        $this->assertSame(
             $giftEvent->id,
             $manager->findById($giftEvent->id)->id,
             'gift-event-find-by-id',
         );
-        $this->assertEquals($this->user->id, $giftEvent->userId(), 'gift-event-creator');
-        $this->assertEquals($name, $giftEvent->flush()->name(), 'gift-event-name-and-flush');
-        $this->assertEquals(
+        $this->assertSame($this->user->id, $giftEvent->userId(), 'gift-event-creator');
+        $this->assertSame($name, $giftEvent->flush()->name(), 'gift-event-name-and-flush');
+        $this->assertSame(
             "<a href=\"tools.php?action=gift-event&amp;id={$giftEvent->id}\">{$name}</a>",
             $giftEvent->link(),
             'gift-event-link'
         );
-        $this->assertEquals(
+        $this->assertSame(
             "tools.php?action=gift-event&id={$giftEvent->id}",
             $giftEvent->location(),
             'gift-event-location'
         );
-        $this->assertEquals(0.0, $giftEvent->averageWeight(), 'gift-event-avg-weight');
+        $this->assertSame(0.0, $giftEvent->averageWeight(), 'gift-event-avg-weight');
         $this->assertEqualsWithDelta(
             $now,
             (float)$giftEvent->openBegin()->format('U.u'),
@@ -66,10 +66,10 @@ class GiftEventTest extends TestCase {
         );
 
         $this->assertTrue($giftEvent->isOpen(), 'gift-event-open');
-        $this->assertEquals(1, $giftEvent->close(), 'gift-event-close');
+        $this->assertSame(1, $giftEvent->close(), 'gift-event-close');
         $this->assertFalse($giftEvent->isOpen(), 'gift-event-is-closed');
-        $this->assertEquals(0, $giftEvent->close(), 'gift-event-reclose');
-        $this->assertEquals(1, $giftEvent->remove(), 'gift-event-remove');
+        $this->assertSame(0, $giftEvent->close(), 'gift-event-reclose');
+        $this->assertSame(1, $giftEvent->remove(), 'gift-event-remove');
     }
 
     public function testGiftEventAllocate(): void {
@@ -87,7 +87,7 @@ class GiftEventTest extends TestCase {
             $giftEvent->signature($this->user),
             $this->user->id,
         );
-        $this->assertEquals(GiftStatus::success, $status, 'gift-alloc-status-success');
+        $this->assertSame(GiftStatus::success, $status, 'gift-alloc-status-success');
         $this->assertInstanceOf(Gift::class, $gift, 'gift-alloc-gift-success');
 
         [$status, $gift] = $giftEvent->allocateGift(
@@ -95,7 +95,7 @@ class GiftEventTest extends TestCase {
             $giftEvent->signature($this->user),
             $this->user->id,
         );
-        $this->assertEquals(GiftStatus::tooEarly, $status, 'gift-alloc-status-too-early');
+        $this->assertSame(GiftStatus::tooEarly, $status, 'gift-alloc-status-too-early');
         $this->assertNull($gift, 'gift-alloc-gift-too-early');
 
         $this->extra = Helper::makeUser('gift.' . randomString(6), 'gift', true);
@@ -104,7 +104,7 @@ class GiftEventTest extends TestCase {
             signature(implode('|', [$giftEvent->id, date('Y-m-d'), $this->extra->id + 1]), GIFT_SALT),
             $this->extra->id + 1,
         );
-        $this->assertEquals(GiftStatus::badParameter, $status, 'gift-alloc-status-bad');
+        $this->assertSame(GiftStatus::badParameter, $status, 'gift-alloc-status-bad');
         $this->assertNull($gift, 'gift-alloc-gift-bad');
 
         [$status, $gift] = $giftEvent->allocateGift(
@@ -112,7 +112,7 @@ class GiftEventTest extends TestCase {
             $giftEvent->signature($this->extra),
             $this->user->id,
         );
-        $this->assertEquals(GiftStatus::linkExpired, $status, 'gift-alloc-status-expired');
+        $this->assertSame(GiftStatus::linkExpired, $status, 'gift-alloc-status-expired');
         $this->assertNull($gift, 'gift-alloc-gift-expired');
 
         [$status, $gift] = $giftEvent->allocateGift(
@@ -120,7 +120,7 @@ class GiftEventTest extends TestCase {
             'nope',
             $this->user->id,
         );
-        $this->assertEquals(GiftStatus::invalidParameter, $status, 'gift-alloc-status-invalid');
+        $this->assertSame(GiftStatus::invalidParameter, $status, 'gift-alloc-status-invalid');
         $this->assertNull($gift, 'gift-alloc-gift-invalid');
 
         [$status, $gift] = $giftEvent->allocateGift(
@@ -128,7 +128,7 @@ class GiftEventTest extends TestCase {
             $giftEvent->signature($this->user),
             $this->user->id + 1,
         );
-        $this->assertEquals(GiftStatus::invalidParameter, $status, 'gift-alloc-status-u-invalid');
+        $this->assertSame(GiftStatus::invalidParameter, $status, 'gift-alloc-status-u-invalid');
         $this->assertNull($gift, 'gift-alloc-gift-u-invalid');
 
         [$status, $gift] = $giftEvent->allocateGift(
@@ -136,22 +136,22 @@ class GiftEventTest extends TestCase {
             $giftEvent->signature($this->user),
             $this->user->id,
         );
-        $this->assertEquals(GiftStatus::tooEarly, $status, 'gift-alloc-status-too-early');
+        $this->assertSame(GiftStatus::tooEarly, $status, 'gift-alloc-status-too-early');
         $this->assertNull($gift, 'gift-alloc-gift-too-early');
 
         $dayStats = $giftEvent->dayStats();
         $this->assertCount(1, $dayStats, 'gift-event-day-stats-count');
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $dayStats[0]['total'],
             'gift-event-day-stats-total',
         );
-        $this->assertEquals(
+        $this->assertSame(
             $giftEvent->openBegin()->format('Y-m-d'),
             $dayStats[0]['day']->format('Y-m-d'),
             'gift-event-day-stats-day',
         );
-        $this->assertEquals(
+        $this->assertSame(
             [
                 [
                     'activity' => 1,
@@ -168,7 +168,7 @@ class GiftEventTest extends TestCase {
             $giftEvent->signature($this->user),
             $this->user->id,
         );
-        $this->assertEquals(GiftStatus::eventClosed, $status, 'gift-alloc-status-closed');
+        $this->assertSame(GiftStatus::eventClosed, $status, 'gift-alloc-status-closed');
         $this->assertNull($gift, 'gift-alloc-gift-closed');
 
         $giftEvent->remove();
@@ -187,7 +187,7 @@ class GiftEventTest extends TestCase {
         $this->assertGreaterThan(0, count($eventList), 'gift-event-manager-summary');
 
         [$day, $hour, $minute] = explode(' ', date('Y-m-d H i'));
-        $this->assertEquals(
+        $this->assertSame(
             43,
             strlen($giftEvent->signature($this->user)),
             'gift-event-signature',
@@ -198,15 +198,15 @@ class GiftEventTest extends TestCase {
             fn ($e) => $e->id === $giftEvent->id
         );
         $this->assertCount(1, $current, 'gift-event-current');
-        $this->assertEquals(1, $giftEvent->totalUser(), 'gift-event-total-user');
-        $this->assertEquals(1, $giftEvent->totalGift(), 'gift-event-total-gift');
+        $this->assertSame(1, $giftEvent->totalUser(), 'gift-event-total-user');
+        $this->assertSame(1, $giftEvent->totalGift(), 'gift-event-total-gift');
 
         $list = $giftEvent->userPage(10, 0, 'total', 'desc');
         $this->assertCount(1, $list, 'gift-event-user-page-total');
         $row = array_first($list);
-        $this->assertEquals($this->user->id, $row['id_user'], 'gift-event-user-page-id');
-        $this->assertEquals(1, $row['total'], 'gift-event-user-page-total');
-        $this->assertEquals(
+        $this->assertSame($this->user->id, $row['id_user'], 'gift-event-user-page-id');
+        $this->assertSame(1, $row['total'], 'gift-event-user-page-total');
+        $this->assertSame(
             ['id_user', 'username', 'total', 'first', 'last'],
             array_keys($row),
             'gift-event-user-page-key'
@@ -214,23 +214,23 @@ class GiftEventTest extends TestCase {
 
         $giftList = $giftEvent->userGiftList($this->user);
         $this->assertCount(1, $giftList, 'gift-event-user-gift-total');
-        $this->assertEquals(
+        $this->assertSame(
             ['id_user_has_gift', 'id_gift', 'created', 'gift'],
             array_keys($giftList[0]),
             'gift-event-user-gift-key'
         );
 
         $statsList = $giftEvent->giftStats();
-        $this->assertEquals(
+        $this->assertCount(
             count($statsList),
-            count(new Manager\Gift()->giftList()),
+            new Manager\Gift()->giftList(),
             'gift-event-gift-stats-list',
         );
         $stats = array_filter(
             $statsList,
             fn ($s) => $s['id_gift'] === $giftList[0]['id_gift']
         );
-        $this->assertEquals(
+        $this->assertSame(
             1,
             array_first($stats)['total'],
             'gift-event-gift-stats-item-total',

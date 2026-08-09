@@ -30,8 +30,8 @@ class UploadTest extends TestCase {
             'upload-foot'
         );
 
-        $this->assertEquals("TextareaPreview.factory([[0, 'album_desc'],[1, 'release_desc']]);", $upload->albumReleaseJS(), 'upload-album-js');
-        $this->assertEquals("TextareaPreview.factory([[0, 'desc']]);", $upload->descriptionJS(), 'upload-description-js');
+        $this->assertSame("TextareaPreview.factory([[0, 'album_desc'],[1, 'release_desc']]);", $upload->albumReleaseJS(), 'upload-album-js');
+        $this->assertSame("TextareaPreview.factory([[0, 'desc']]);", $upload->descriptionJS(), 'upload-description-js');
 
         $textarea = $upload->textarea('t', 'contents')->emit();
         $this->assertStringContainsString('<textarea name="t" ', $textarea, 'upload-textarea-name');

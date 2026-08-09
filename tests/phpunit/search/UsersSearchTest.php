@@ -32,7 +32,7 @@ class UsersSearchTest extends TestCase {
             'bptotal-max' => 10500,
             'view'        => 'username.bprate.bptotal',
         ]);
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $bonus->total(),
             'advs-bonus-total',
@@ -61,7 +61,7 @@ class UsersSearchTest extends TestCase {
             'disable'    => $disable,
             'disable-op' => 'all'
         ]);
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $disableAll->total(),
             'advs-disable-all-total',
@@ -73,7 +73,7 @@ class UsersSearchTest extends TestCase {
             'disable-op' => 'all',
             'view'       => 'joined.disable',
         ]);
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $disableMore->total(),
             'advs-disable-more-total',
@@ -84,12 +84,12 @@ class UsersSearchTest extends TestCase {
             'userid-min' => $user->id, // to cut out any crosstalk
             'view'       => 'username.disable',
         ]);
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $disableAny->total(),
             'advs-disable-any-total',
         );
-        $this->assertEquals(
+        $this->assertSame(
             [[
                 'c0' => $user->id,
                 'c1' => ['disable-avatar', 'disable-irc'],
@@ -107,17 +107,17 @@ class UsersSearchTest extends TestCase {
             'username-op' => 'equals',
             'view'        => 'username.lastseen'
         ]);
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $unconfirmed->total(),
             'advs-unconfirmed-equals-total-result',
         );
-        $this->assertEquals(
+        $this->assertSame(
             'select um."ID" as c0, ula.last_access as c1, um."Username" as username from relay.users_main um left join relay.user_last_access ula on (ula.user_id = um."ID") where um."Enabled" = $1 and um."Username" = $2 order by username asc, c1 desc  limit $3 offset $4',
             $unconfirmed->pageSql(),
             'advs-unconfirmed-page-sql',
         );
-        $this->assertEquals(
+        $this->assertSame(
             [[
                 'c0' => $user->id,
                 'c1' => null,
@@ -130,7 +130,7 @@ class UsersSearchTest extends TestCase {
         // totals of a specific search are cached for three minutes
         global $Cache;
         $Cache->delete_value($unconfirmed->totalKey());
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $unconfirmed->total(),
             'advs-enabled-equals-total-result',
@@ -143,7 +143,7 @@ class UsersSearchTest extends TestCase {
             'view'        => 'username.lastseen.enabled'
         ]);
         $Cache->delete_value($disabled->totalKey());
-        $this->assertEquals(
+        $this->assertSame(
             [[
                 'c0' => $user->id,
                 'c1' => null,
@@ -161,12 +161,12 @@ class UsersSearchTest extends TestCase {
             'email-op' => 'equals',
             'view'     => 'username',
         ]);
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $email->total(),
             'advs-email-equals-total-result',
         );
-        $this->assertEquals(
+        $this->assertSame(
             [[
                 'c0' => $user->id,
             ]],
@@ -184,7 +184,7 @@ class UsersSearchTest extends TestCase {
             'view'     => 'username',
         ]);
         $Cache->delete_value($notFound->totalKey());
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $notFound->total(),
             'advs-email-hist-not-found',
@@ -195,7 +195,7 @@ class UsersSearchTest extends TestCase {
             'view'       => 'username',
             'email-hist' => 'on',
         ]);
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $found->total(),
             'advs-email-hist-found',
@@ -207,7 +207,7 @@ class UsersSearchTest extends TestCase {
             'userid-min' => 3, // step past CI default users
             'view'       => 'userid.email',
         ]);
-        $this->assertEquals(
+        $this->assertSame(
             [[
                 'c0' => $user->id,
                 'c1' => $user->email(),
@@ -227,17 +227,17 @@ class UsersSearchTest extends TestCase {
             'fltoken-max' => $n + 1,
             'view'       => 'userid.fltoken',
         ]);
-        $this->assertEquals(
+        $this->assertSame(
             'select count(*) from relay.users_main um inner join relay.user_flt uf on (uf.user_id = um."ID") where uf.tokens >= $1 and uf.tokens <= $2',
             $fltoken->totalSql(),
             'advs-fltoken-sql-total',
         );
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $fltoken->total(),
             'advs-fltoken-total',
         );
-        $this->assertEquals(
+        $this->assertSame(
             [[
                 'c0' => $user->id,
                 'c1' => $user->tokenCount(),
@@ -262,12 +262,12 @@ class UsersSearchTest extends TestCase {
             'username-op' => 'regexp',
             'view'        => 'username.fltoken.flrx',
         ]);
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $flrx->total(),
             'advs-flrx-total',
         );
-        $this->assertEquals(
+        $this->assertSame(
             [[
                 'c0' => $u2->id,
                 'c1' => $item->amount() * $n,
@@ -284,12 +284,12 @@ class UsersSearchTest extends TestCase {
             'username-op' => 'regexp',
             'view'        => 'username.fltoken.fltx',
         ]);
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $fltx->total(),
             'advs-fltx-total',
         );
-        $this->assertEquals(
+        $this->assertSame(
             [[
                 'c0' => $u1->id,
                 'c1' => 0,
@@ -311,17 +311,17 @@ class UsersSearchTest extends TestCase {
             'inviter-op' => 'equals',
             'view'       => 'username.inviter.downloadgb.uploadgb'
         ]);
-        $this->assertEquals(
+        $this->assertSame(
             'select count(*) from relay.users_main um left join relay.users_main uinv on (uinv."ID" = um.inviter_user_id) inner join relay.users_leech_stats uls on (uls."UserID" = um."ID") where uinv."Username" = $1',
             $inviter->totalSql(),
             'advs-inviter-equals-total-sql',
         );
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $inviter->total(),
             'advs-inviter-equals-total-result',
         );
-        $this->assertEquals(
+        $this->assertSame(
             [[
                 'c0' => $this->userList[1]->id, // inviter
                 'c1' => $this->userList[0]->id, // invitee
@@ -337,12 +337,12 @@ class UsersSearchTest extends TestCase {
             'invited-max' => 2,
             'view'        => 'username.invited'
         ]);
-        $this->assertEquals(
+        $this->assertSame(
             'select count(*) from relay.users_main um inner join user_summary_misc usm on (usm.id_user = um."ID") where usm.invited >= $1 and usm.invited <= $2',
             $invitedLow->totalSql(),
             'advs-invited-min-too-many-sql',
         );
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $invitedLow->total(),
             'advs-invited-min-too-many-total',
@@ -355,12 +355,12 @@ class UsersSearchTest extends TestCase {
         ]);
         global $Cache;
         $Cache->delete_value($invitedOk->totalKey());
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $invitedOk->total(),
             'advs-invited-min-ok-total',
         );
-        $this->assertEquals(
+        $this->assertSame(
             [[
                 'c0' => $this->userList[0]->id,
                 'c1' => 1,
@@ -402,12 +402,12 @@ class UsersSearchTest extends TestCase {
             'invsource' => $sourceId,
             'view'      => 'username.inviter.invsource.extprofile'
         ]);
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $inviteSrc->total(),
             'advs-invite-source-total',
         );
-        $this->assertEquals(
+        $this->assertSame(
             [[
                 'c0' => $this->userList[1]->id,
                 'c1' => $this->userList[0]->id,
@@ -423,12 +423,12 @@ class UsersSearchTest extends TestCase {
             'extprofile-op' => 'equal',
             'view'          => 'username.invsource.extprofile'
         ]);
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $extProfile->total(),
             'advs-extprofile-total',
         );
-        $this->assertEquals(
+        $this->assertSame(
             [[
                 'c0' => $this->userList[1]->id,
                 'c1' => $sourceName,
@@ -475,7 +475,7 @@ class UsersSearchTest extends TestCase {
             'email-op'   => 'contains',
             'view'       => 'userid.inviter.email'
         ]);
-        $this->assertEquals(
+        $this->assertSame(
             [
                 [
                     'c0' => $this->userList[1]->id, // invitee
@@ -491,7 +491,7 @@ class UsersSearchTest extends TestCase {
             $inviter->page(2, 0),
             'advs-inviter-regexp-page-result',
         );
-        $this->assertEquals(
+        $this->assertSame(
             2,
             $inviter->total(),
             'advs-inviter-regexp',
@@ -504,7 +504,7 @@ class UsersSearchTest extends TestCase {
             'userid-min'  => 3, // step past CI default users
             'view'        => 'userid.email'
         ]);
-        $this->assertEquals(
+        $this->assertSame(
             [
                 [
                     'c0' => $this->userList[0]->id,
@@ -526,12 +526,12 @@ class UsersSearchTest extends TestCase {
         new Stats\Users()->refresh();
         global $Cache;
         $Cache->delete_value($invited->totalKey());
-        $this->assertEquals(
+        $this->assertSame(
             2,
             $invited->total(),
             'advs-invited-total'
         );
-        $this->assertEquals(
+        $this->assertEqualsCanonicalizing(
             [
                 [
                     'c0' => new \DateTimeImmutable($this->userList[1]->created()),
@@ -586,12 +586,12 @@ class UsersSearchTest extends TestCase {
             'mfa'      => 'no',
             'view'     => 'email.mfa',
         ]);
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $mfaNo->total(),
             'advs-mfano-total'
         );
-        $this->assertEquals(
+        $this->assertSame(
             [[
                 'c0' => $user->email(),
                 'c1' => null,
@@ -609,12 +609,12 @@ class UsersSearchTest extends TestCase {
             'mfa'      => 'yes',
             'view'     => 'email.mfa',
         ]);
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $mfaYes->total(),
             'advs-mfayes-total'
         );
-        $this->assertEquals(
+        $this->assertSame(
             [[
                 'c0' => $user->email(),
                 'c1' => $user->id, // not null is all we need to display the correct glyph
@@ -636,12 +636,12 @@ class UsersSearchTest extends TestCase {
             'uploads-max'   => 6000,
             'view'          => 'email.tdownload.uploads'
         ]);
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $minmax->total(),
             'advs-1-total'
         );
-        $this->assertEquals(
+        $this->assertSame(
             [[
                 'c0' => $user->email(),
                 'c1' => 2345,
@@ -664,12 +664,12 @@ class UsersSearchTest extends TestCase {
             'uploadgb-max'   => 7000,
             'view'          => 'email.downloadgb.uploadgb'
         ]);
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $minmaxgb->total(),
             'advs-minmaxgb-total'
         );
-        $this->assertEquals(
+        $this->assertSame(
             [[
                 'c0' => $user->email(),
                 'c1' => $user->downloadedSize(),
@@ -703,12 +703,12 @@ class UsersSearchTest extends TestCase {
             'referral-uid' => $referralId,
             'view'         => 'username.referral'
         ]);
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $refer->total(),
             'advs-refer-total'
         );
-        $this->assertEquals(
+        $this->assertSame(
             [[
                 'c0' => $user->id,
                 'c1' => "$site:$referralId",
@@ -721,12 +721,12 @@ class UsersSearchTest extends TestCase {
             'referral-uid' => '', // uid unknown
             'view'         => 'username.referral'
         ]);
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $loose->total(),
             'advs-refer-loose-total'
         );
-        $this->assertEquals(
+        $this->assertSame(
             [[
                 'c0' => $user->id,
                 'c1' => "$site:$referralId",
@@ -753,12 +753,12 @@ class UsersSearchTest extends TestCase {
             'siteip-op' => 'subnet',
             'view'      => 'username.siteip',
         ]);
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $siteip->total(),
             'advs-siteip-total-result',
         );
-        $this->assertEquals(
+        $this->assertSame(
             [[
                 'c0' => $this->userList[0]->id,
                 'c1' => $ip,
@@ -784,12 +784,12 @@ class UsersSearchTest extends TestCase {
             'trackerip-hist' => false,
             'view'           => 'email.trackerip',
         ]);
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $trackerip->total(),
             'advs-trackerip-total-result',
         );
-        $this->assertEquals(
+        $this->assertSame(
             [[
                 'c0' => $user->email(),
                 'c1' => $ip,
@@ -802,12 +802,12 @@ class UsersSearchTest extends TestCase {
             'email-op' => 'equals',
             'view'     => 'email.trackerip',
         ]);
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $trackerview->total(),
             'advs-trackerview-total-result',
         );
-        $this->assertEquals(
+        $this->assertSame(
             [[
                 'c0' => $user->email(),
                 'c1' => $ip,
@@ -837,12 +837,12 @@ class UsersSearchTest extends TestCase {
             'trackerip-hist' => true,
             'view'           => 'email.trackerip'
         ]);
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $trhistip->total(),
             'advs-trhistip-total-result',
         );
-        $this->assertEquals(
+        $this->assertSame(
             [[
                 'c0' => $user->email(),
                 'c1' => $histip,
@@ -870,12 +870,12 @@ class UsersSearchTest extends TestCase {
             'joined-from' => new \DateTimeImmutable('1 minute ago')->format('Y-m-d H:i:s'),
             'view'        => 'userid.secclass'
         ]);
-        $this->assertEquals(
+        $this->assertSame(
             2,
             $secclass->total(),
             'advs-secclass-total'
         );
-        $this->assertEquals(
+        $this->assertEqualsCanonicalizing(
             [
                 [
                     'c0' => $this->userList[0]->id,
@@ -903,12 +903,12 @@ class UsersSearchTest extends TestCase {
             'staffnote-op' => 'webquery',
             'view'         => 'username.staffnote'
         ]);
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $staffnote->total(),
             'advs-staffnote-wq-total-result',
         );
-        $this->assertEquals(
+        $this->assertSame(
             [[
                 'c0' => $this->userList[0]->id,
                 'c1' => ['ghijkl', 'abcdef'],
@@ -921,12 +921,12 @@ class UsersSearchTest extends TestCase {
             'staffnote-op' => 'regexp',
             'view'         => 'username.staffnote'
         ]);
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $staffnote->total(),
             'advs-staffnote-re-total-result',
         );
-        $this->assertEquals(
+        $this->assertSame(
             [[
                 'c0' => $this->userList[0]->id,
                 'c1' => ['ghijkl', 'abcdef'],
@@ -948,12 +948,12 @@ class UsersSearchTest extends TestCase {
             'stylesheet'  => $kuro['id'],
             'view'        => 'username.stylesheet'
         ]);
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $stylesheet->total(),
             'advs-stylesheet-total-result',
         );
-        $this->assertEquals(
+        $this->assertSame(
             [[
                 'c0' => $this->userList[0]->id,
                 'c1' => $kuro['name'],
@@ -971,12 +971,12 @@ class UsersSearchTest extends TestCase {
             'userclass' => [USER],
             'view'      => 'email.userclass'
         ]);
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $userclass->total(),
             'advs-userclass-total'
         );
-        $this->assertEquals(
+        $this->assertSame(
             [[
                 'c0' => $user->email(),
                 'c1' => $user->userclassName(),
@@ -993,7 +993,7 @@ class UsersSearchTest extends TestCase {
             'username-op' => 'equals',
             'view'        => 'joined.email'
         ]);
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $search->total(),
             'advs-username-equals-total-result',
@@ -1016,7 +1016,7 @@ class UsersSearchTest extends TestCase {
             'email-op' => 'equal',
             'view'     => 'email.warned',
         ]);
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $search->total(),
             'advs-warned-total'
@@ -1029,7 +1029,7 @@ class UsersSearchTest extends TestCase {
             $search->page(2, 0),
             'advs-warned-page',
         );
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $search->total(),
             'advs-warn-total'
@@ -1040,7 +1040,7 @@ class UsersSearchTest extends TestCase {
             'warned'   => 'on',
             'view'     => 'username',
         ]);
-        $this->assertEquals(
+        $this->assertSame(
             [[
                 'c0' => $user->id,
             ]],
@@ -1055,39 +1055,39 @@ class UsersSearchTest extends TestCase {
             'inviter-op' => 'equals',
             'view'       => 'username.userid.email.joined.lastseen.userclass.secclass.enabled.disable.locked.inviter.invited.invsource.referral.siteip.trackerip.staffnote.bprate.bptotal.fltoken.uploads.tdownload.tdownload-uniq.leech.snatch.snatch-uniq.seedhour.seeding.requestcreate.uploadgb.downloadgb.requestvotegb.requestgaingb.warned'
         ]);
-        $this->assertEquals('Username', $search->heading()->alias('c0'), 'advs-heading-alias-c0');
-        $this->assertEquals('User ID', $search->heading()->alias('c1'), 'advs-heading-alias-c1');
-        $this->assertEquals('Email', $search->heading()->alias('c2'), 'advs-heading-alias-c2');
-        $this->assertEquals('Joined', $search->heading()->alias('c3'), 'advs-heading-alias-c3');
-        $this->assertEquals('Last seen', $search->heading()->alias('c4'), 'advs-heading-alias-c4');
-        $this->assertEquals('Userclass', $search->heading()->alias('c5'), 'advs-heading-alias-c5');
-        $this->assertEquals('Secondary', $search->heading()->alias('c6'), 'advs-heading-alias-c6');
-        $this->assertEquals('Enabled', $search->heading()->alias('c7'), 'advs-heading-alias-c7');
-        $this->assertEquals('Revoked?', $search->heading()->alias('c8'), 'advs-heading-alias-c8');
-        $this->assertEquals('Locked', $search->heading()->alias('c9'), 'advs-heading-alias-c9');
-        $this->assertEquals('Invited by', $search->heading()->alias('c10'), 'advs-heading-alias-c10');
-        $this->assertEquals('# Invited', $search->heading()->alias('c11'), 'advs-heading-alias-c11');
-        $this->assertEquals('Recruit site', $search->heading()->alias('c12'), 'advs-heading-alias-c12');
-        $this->assertEquals('Referral site', $search->heading()->alias('c13'), 'advs-heading-alias-c13');
-        $this->assertEquals('Site IP', $search->heading()->alias('c14'), 'advs-heading-alias-c14');
-        $this->assertEquals('Tracker IP', $search->heading()->alias('c15'), 'advs-heading-alias-c15');
-        $this->assertEquals('Staff note', $search->heading()->alias('c16'), 'advs-heading-alias-c16');
-        $this->assertEquals('BP/hour', $search->heading()->alias('c17'), 'advs-heading-alias-c17');
-        $this->assertEquals('BP total', $search->heading()->alias('c18'), 'advs-heading-alias-c18');
-        $this->assertEquals('FL tokens', $search->heading()->alias('c19'), 'advs-heading-alias-c19');
-        $this->assertEquals('# Uploads', $search->heading()->alias('c20'), 'advs-heading-alias-c20');
-        $this->assertEquals('Torrents DLed', $search->heading()->alias('c21'), 'advs-heading-alias-c21');
-        $this->assertEquals('Torrents DLed (Uniq)', $search->heading()->alias('c22'), 'advs-heading-alias-c22');
-        $this->assertEquals('Leeching', $search->heading()->alias('c23'), 'advs-heading-alias-c23');
-        $this->assertEquals('Snatched', $search->heading()->alias('c24'), 'advs-heading-alias-c24');
-        $this->assertEquals('Snatched (Uniq)', $search->heading()->alias('c25'), 'advs-heading-alias-c25');
-        $this->assertEquals('Seedtime (h)', $search->heading()->alias('c26'), 'advs-heading-alias-c26');
-        $this->assertEquals('Seeding', $search->heading()->alias('c27'), 'advs-heading-alias-c27');
-        $this->assertEquals('# Requests', $search->heading()->alias('c28'), 'advs-heading-alias-c28');
-        $this->assertEquals('Up (GiB)', $search->heading()->alias('c29'), 'advs-heading-alias-c29');
-        $this->assertEquals('Down (GiB)', $search->heading()->alias('c30'), 'advs-heading-alias-c30');
-        $this->assertEquals('Voted (GiB)', $search->heading()->alias('c31'), 'advs-heading-alias-c31');
-        $this->assertEquals('Bounty (GiB)', $search->heading()->alias('c32'), 'advs-heading-alias-c32');
+        $this->assertSame('Username', $search->heading()->alias('c0'), 'advs-heading-alias-c0');
+        $this->assertSame('User ID', $search->heading()->alias('c1'), 'advs-heading-alias-c1');
+        $this->assertSame('Email', $search->heading()->alias('c2'), 'advs-heading-alias-c2');
+        $this->assertSame('Joined', $search->heading()->alias('c3'), 'advs-heading-alias-c3');
+        $this->assertSame('Last seen', $search->heading()->alias('c4'), 'advs-heading-alias-c4');
+        $this->assertSame('Userclass', $search->heading()->alias('c5'), 'advs-heading-alias-c5');
+        $this->assertSame('Secondary', $search->heading()->alias('c6'), 'advs-heading-alias-c6');
+        $this->assertSame('Enabled', $search->heading()->alias('c7'), 'advs-heading-alias-c7');
+        $this->assertSame('Revoked?', $search->heading()->alias('c8'), 'advs-heading-alias-c8');
+        $this->assertSame('Locked', $search->heading()->alias('c9'), 'advs-heading-alias-c9');
+        $this->assertSame('Invited by', $search->heading()->alias('c10'), 'advs-heading-alias-c10');
+        $this->assertSame('# Invited', $search->heading()->alias('c11'), 'advs-heading-alias-c11');
+        $this->assertSame('Recruit site', $search->heading()->alias('c12'), 'advs-heading-alias-c12');
+        $this->assertSame('Referral site', $search->heading()->alias('c13'), 'advs-heading-alias-c13');
+        $this->assertSame('Site IP', $search->heading()->alias('c14'), 'advs-heading-alias-c14');
+        $this->assertSame('Tracker IP', $search->heading()->alias('c15'), 'advs-heading-alias-c15');
+        $this->assertSame('Staff note', $search->heading()->alias('c16'), 'advs-heading-alias-c16');
+        $this->assertSame('BP/hour', $search->heading()->alias('c17'), 'advs-heading-alias-c17');
+        $this->assertSame('BP total', $search->heading()->alias('c18'), 'advs-heading-alias-c18');
+        $this->assertSame('FL tokens', $search->heading()->alias('c19'), 'advs-heading-alias-c19');
+        $this->assertSame('# Uploads', $search->heading()->alias('c20'), 'advs-heading-alias-c20');
+        $this->assertSame('Torrents DLed', $search->heading()->alias('c21'), 'advs-heading-alias-c21');
+        $this->assertSame('Torrents DLed (Uniq)', $search->heading()->alias('c22'), 'advs-heading-alias-c22');
+        $this->assertSame('Leeching', $search->heading()->alias('c23'), 'advs-heading-alias-c23');
+        $this->assertSame('Snatched', $search->heading()->alias('c24'), 'advs-heading-alias-c24');
+        $this->assertSame('Snatched (Uniq)', $search->heading()->alias('c25'), 'advs-heading-alias-c25');
+        $this->assertSame('Seedtime (h)', $search->heading()->alias('c26'), 'advs-heading-alias-c26');
+        $this->assertSame('Seeding', $search->heading()->alias('c27'), 'advs-heading-alias-c27');
+        $this->assertSame('# Requests', $search->heading()->alias('c28'), 'advs-heading-alias-c28');
+        $this->assertSame('Up (GiB)', $search->heading()->alias('c29'), 'advs-heading-alias-c29');
+        $this->assertSame('Down (GiB)', $search->heading()->alias('c30'), 'advs-heading-alias-c30');
+        $this->assertSame('Voted (GiB)', $search->heading()->alias('c31'), 'advs-heading-alias-c31');
+        $this->assertSame('Bounty (GiB)', $search->heading()->alias('c32'), 'advs-heading-alias-c32');
     }
 
     public function testSearchUsersFiltered(): void {

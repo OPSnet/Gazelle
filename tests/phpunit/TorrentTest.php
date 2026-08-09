@@ -44,7 +44,7 @@ class TorrentTest extends TestCase {
             $this->torrent->hasFlag(TorrentFlag::badFile),
             'torrent-no-bad-file-flag',
         );
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $this->torrent->addFlag(TorrentFlag::badFile, $this->user),
             'torrent-add-bad-file-flag',
@@ -54,12 +54,12 @@ class TorrentTest extends TestCase {
             'torrent-has-bad-file-flag',
         );
 
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $this->torrent->removeFlag(TorrentFlag::badFile, $this->user),
             'torrent-remove-bad-file-flag',
         );
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $this->torrent->removeFlag(TorrentFlag::badFolder, $this->user),
             'torrent-remove-no-flag',
@@ -72,12 +72,12 @@ class TorrentTest extends TestCase {
         $log = new Manager\SiteLog()->tgroupLogList($this->torrent->group());
         $this->assertCount(3, $log, 'torrent-flag-log-count');
         // reverse chronological, remove then add
-        $this->assertEquals(
+        $this->assertSame(
             "\"Bad Files\" flag removed from torrent {$this->torrent->id}",
             $log[0]['note'],
             'torrent-flag-log-add',
         );
-        $this->assertEquals(
+        $this->assertSame(
             "\"Bad Files\" flag added to torrent {$this->torrent->id}",
             $log[1]['note'],
             'torrent-flag-log-add',
@@ -110,13 +110,13 @@ class TorrentTest extends TestCase {
             'total_size' => $totalSize,
         ] = $bencoder->getFileList();
         $this->assertCount(3, $fileList, 'torrent-file-list');
-        $this->assertEquals(8215612, $totalSize, 'torrent-file-total-size');
-        $this->assertEquals(
+        $this->assertSame(8215612, $totalSize, 'torrent-file-total-size');
+        $this->assertSame(
             3,
             $torrent->regenerateFilelist(new BencodeTorrent()),
             'torrent-regenerate-file-list',
         );
-        $this->assertEquals(
+        $this->assertSame(
             "torrents.php?action=download&id={$torrent->id}&torrent_pass={$this->user->announceKey()}",
              $torrent->downloadLocation($this->user),
              'torrent-download-location',
@@ -124,13 +124,13 @@ class TorrentTest extends TestCase {
 
         $torMan = new Manager\Torrent();
         ['path' => $filename, 'size' => $size] = $fileList[0];
-        $this->assertEquals(
+        $this->assertSame(
             ".flac s2056192s 1 track1.flac ÷",
             $torMan->metaFilename($filename, $size),
             'torrent-file-meta-filename',
         );
         $tgroup = $torrent->group();
-        $this->assertEquals(
+        $this->assertSame(
             implode(
                 '.',
                 [
@@ -157,22 +157,22 @@ class TorrentTest extends TestCase {
         $torrent->setField('FileList', implode("\n", $dbFileList))
             ->modify();
 
-        $this->assertEquals(
+        $this->assertSame(
             ['flac' => 2],
             $torrent->fileListPrimaryMap(),
             'torrent-file-primary-map'
         );
-        $this->assertEquals(
+        $this->assertSame(
             2,
             $torrent->fileListPrimaryTotal(),
             'torrent-file-primary-total'
         );
-        $this->assertEquals(
+        $this->assertSame(
             7228,
             $torrent->fileListNonPrimarySize(),
             'torrent-file-non-primary-size'
         );
-        $this->assertEquals(
+        $this->assertSame(
             "1 track1.flac{{{2056192}}}|||2 track2.flac{{{6152192}}}|||Test Album.log{{{7228}}}",
             $torrent->fileListLegacyAPI(),
             'torrent-file-legacy-list'
@@ -194,13 +194,13 @@ class TorrentTest extends TestCase {
             'torrent-upload-unlocked'
         );
 
-        $this->assertEquals(
+        $this->assertSame(
             "<a href=\"torrents.php?id={$tgroup->id}&amp;torrentid={$torrent->id}#torrent{$torrent->id}\">[WEB / FLAC / Lossless]</a>",
             $torrent->shortLabelLink(),
             'torrent-short-label-link',
         );
 
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $torrentFile->remove(),
             'torrent-file-remove'
@@ -215,7 +215,7 @@ class TorrentTest extends TestCase {
         );
 
         // downloader
-        $this->assertEquals(
+        $this->assertSame(
             new Download($torrent, new User\UserclassRateLimit($this->user), false)->status(),
             Enum\DownloadStatus::ok,
             'torrent-user-json-download-ok'
@@ -228,8 +228,8 @@ class TorrentTest extends TestCase {
             2,
             0
         )->payload();
-        $this->assertEquals(1, $download['total'], 'torrent-user-json-download-total');
-        $this->assertEquals(
+        $this->assertSame(1, $download['total'], 'torrent-user-json-download-total');
+        $this->assertSame(
             $torrent->groupId(),
             $download['downloaded'][0]['groupId'],
             'torrent-user-json-download-id',
@@ -243,8 +243,8 @@ class TorrentTest extends TestCase {
             2,
             0
         )->payload();
-        $this->assertEquals(2, $upload['total'], 'torrent-user-json-upload-total');
-        $this->assertEquals(
+        $this->assertSame(2, $upload['total'], 'torrent-user-json-upload-total');
+        $this->assertSame(
             $torrent->groupId(),
             $upload['uploaded'][0]['groupId'],
             'torrent-user-json-upload-id',
@@ -258,8 +258,8 @@ class TorrentTest extends TestCase {
             2,
             0
         )->payload();
-        $this->assertEquals(2, $upUnseed['total'], 'torrent-user-json-up-unseed-total');
-        $this->assertEquals(
+        $this->assertSame(2, $upUnseed['total'], 'torrent-user-json-up-unseed-total');
+        $this->assertSame(
             $torrent->groupId(),
             $upUnseed['uploaded-unseeded'][0]['groupId'],
             'torrent-user-json-up-uneed-id',
@@ -273,7 +273,7 @@ class TorrentTest extends TestCase {
             2,
             0
         )->payload();
-        $this->assertEquals(0, $leech['total'], 'torrent-user-json-leech-total');
+        $this->assertSame(0, $leech['total'], 'torrent-user-json-leech-total');
 
         // snatcher
         $snatch = new Json\UserTorrents(
@@ -283,7 +283,7 @@ class TorrentTest extends TestCase {
             2,
             0
         )->payload();
-        $this->assertEquals(0, $snatch['total'], 'torrent-user-json-snatch-total');
+        $this->assertSame(0, $snatch['total'], 'torrent-user-json-snatch-total');
 
         // snatched-unseeded
         $snatchUnseed = new Json\UserTorrents(
@@ -293,7 +293,7 @@ class TorrentTest extends TestCase {
             2,
             0
         )->payload();
-        $this->assertEquals(0, $snatchUnseed['total'], 'torrent-user-json-snatch-unseed-total');
+        $this->assertSame(0, $snatchUnseed['total'], 'torrent-user-json-snatch-unseed-total');
 
         // seeder
         $seed = new Json\UserTorrents(
@@ -303,7 +303,7 @@ class TorrentTest extends TestCase {
             2,
             0
         )->payload();
-        $this->assertEquals(0, $seed['total'], 'torrent-user-json-seed-total');
+        $this->assertSame(0, $seed['total'], 'torrent-user-json-seed-total');
     }
 
     public function testRemovalPm(): void {
@@ -316,14 +316,14 @@ class TorrentTest extends TestCase {
         // a downloader
         $this->userList['downloader'] = Helper::makeUser('torrent.' . randomString(10), 'rent', clearInbox: true);
         $status = new Download($torrent, new User\UserclassRateLimit($this->userList['downloader']), false);
-        $this->assertEquals(DownloadStatus::ok, $status->status(), 'torrent-removal-download');
+        $this->assertSame(DownloadStatus::ok, $status->status(), 'torrent-removal-download');
 
         // a snatcher
         $this->userList['snatcher'] = Helper::makeUser('torrent.' . randomString(10), 'rent', clearInbox: true);
         Helper::generateTorrentSnatch($torrent, $this->userList['snatcher']);
 
         // check recent snatchlist
-        $this->assertEquals(
+        $this->assertSame(
             [$torrent->groupId()],
             $this->userList['snatcher']->snatch()->recentSnatchList(),
             'utest-recent-snatch'
@@ -341,7 +341,7 @@ class TorrentTest extends TestCase {
 
         // This is as good a place as any to test this
         new Stats\Users()->refreshUseragentTracker();
-        $this->assertEquals(
+        $this->assertSame(
             [[
                 "useragent" => $useragent,
                 "total"     => 1,
@@ -352,7 +352,7 @@ class TorrentTest extends TestCase {
 
         $name = $torrent->fullName();
         $path = $torrent->path();
-        $this->assertEquals(
+        $this->assertSame(
             4,
             new Manager\User()->sendRemovalPm(
                 $this->user,
@@ -368,7 +368,7 @@ class TorrentTest extends TestCase {
 
         // uploader
         $inbox = $this->user->inbox();
-        $this->assertEquals(1, $inbox->messageTotal(), 'torrent-removal-uploader-message-count');
+        $this->assertSame(1, $inbox->messageTotal(), 'torrent-removal-uploader-message-count');
         $list = $inbox->messageList(new Manager\PM($this->user), 2, 0);
         $pm = $list[0];
         $this->assertStringStartsWith(
@@ -385,7 +385,7 @@ class TorrentTest extends TestCase {
 
         // downloader
         $inbox = $this->userList['downloader']->inbox();
-        $this->assertEquals(1, $inbox->messageTotal(), 'torrent-removal-downloader-message-count');
+        $this->assertSame(1, $inbox->messageTotal(), 'torrent-removal-downloader-message-count');
         $list = $inbox->messageList(new Manager\PM($this->userList['downloader']), 2, 0);
         $pm = $list[0];
         $this->assertStringStartsWith(
@@ -402,7 +402,7 @@ class TorrentTest extends TestCase {
 
         // snatcher
         $inbox = $this->userList['snatcher']->inbox();
-        $this->assertEquals(1, $inbox->messageTotal(), 'torrent-removal-snatcher-message-count');
+        $this->assertSame(1, $inbox->messageTotal(), 'torrent-removal-snatcher-message-count');
         $list = $inbox->messageList(new Manager\PM($this->userList['snatcher']), 2, 0);
         $pm = $list[0];
         $this->assertStringStartsWith(
@@ -419,7 +419,7 @@ class TorrentTest extends TestCase {
 
         // seeder
         $inbox = $this->userList['seeder']->inbox();
-        $this->assertEquals(1, $inbox->messageTotal(), 'torrent-removal-seeder-message-count');
+        $this->assertSame(1, $inbox->messageTotal(), 'torrent-removal-seeder-message-count');
         $list = $inbox->messageList(new Manager\PM($this->userList['seeder']), 2, 0);
         $pm = $list[0];
         $this->assertStringStartsWith(
@@ -447,9 +447,9 @@ class TorrentTest extends TestCase {
         $this->assertCount($count, $list, 'torrent-large-filelist');
         // if things do not line up then there is an off-by-one somewhere
         for ($n = 0; $n < $count; $n++) {
-            $this->assertEquals('ABCDEFGH.flac', $list[$n]['name'], "torrent-filelist-name-$n");
-            $this->assertEquals('.flac',         $list[$n]['ext'],  "torrent-filelist-ext-$n");
-            $this->assertEquals(1234,            $list[$n]['size'], "torrent-filelist-size-$n");
+            $this->assertSame('ABCDEFGH.flac', $list[$n]['name'], "torrent-filelist-name-$n");
+            $this->assertSame('.flac',         $list[$n]['ext'],  "torrent-filelist-ext-$n");
+            $this->assertSame(1234,            $list[$n]['size'], "torrent-filelist-size-$n");
         }
     }
 
@@ -490,8 +490,7 @@ class TorrentTest extends TestCase {
         $this->assertTrue($collector->prepare([]), 'collect-tlist-prepare');
 
         $zip = Util\Zip::make($title);
-        $this->assertInstanceOf(\ZipStream\ZipStream::class, $zip, 'collect-zipper');
-        $this->assertEquals(1, $collector->fillZip($zip), 'collect-tlist-fill');
+        $this->assertSame(1, $collector->fillZip($zip), 'collect-tlist-fill');
         $this->assertStringContainsString(
             "Torrent groups scanned: 1\n",
             $collector->summary(),
@@ -500,7 +499,7 @@ class TorrentTest extends TestCase {
     }
 
     public function testTorrentReseed(): void {
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $this->torrent->issueReseedRequest($this->user),
             'torrent-issue-reseed-request',
@@ -511,7 +510,7 @@ class TorrentTest extends TestCase {
         );
         $tgroup = $this->torrent->group();
         $artist = array_first($tgroup->artistRole()->roleList()['main'])['name'];
-        $this->assertEquals(
+        $this->assertSame(
             "Re-seed request for torrent $artist – {$tgroup->name()} [{$tgroup->year()} Album]",
             $thread->subject(),
             'torrent-reseed-subject',

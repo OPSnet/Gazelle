@@ -23,15 +23,15 @@ class UserHistoryTest extends TestCase {
         $email    = $user->email();
         $newEmail = "new-$email";
 
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $user->history()->registerNewEmail($newEmail, true),
             'userhist-record-email'
         );
-        $this->assertEquals(2, $user->history()->emailTotal(), 'userhist-email-total');
+        $this->assertSame(2, $user->history()->emailTotal(), 'userhist-email-total');
         $list = $user->history()->email(new Search\ASN());
-        $this->assertEquals($newEmail, $list[0]['email'], 'userhist-list-0');
-        $this->assertEquals($email,    $list[1]['email'], 'userhist-list-1');
+        $this->assertSame($newEmail, $list[0]['email'], 'userhist-list-0');
+        $this->assertSame($email,    $list[1]['email'], 'userhist-list-1');
     }
 
     public function testEmailDuplicate(): void {
@@ -44,7 +44,7 @@ class UserHistoryTest extends TestCase {
 
         $duplicate = $user->history()->emailDuplicate(new Search\ASN());
         $this->assertCount(1, $duplicate, 'email-duplicate-count');
-        $this->assertEquals(
+        $this->assertSame(
             $this->userList[0]->id,
             $duplicate[0]['user_id'],
             'email-duplicate-user-id',
@@ -54,12 +54,12 @@ class UserHistoryTest extends TestCase {
     public function testEmailReset(): void {
         $user  = $this->userList[0];
         $email = 'reset@phpunit';
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $user->history()->resetEmail($email, '127.2.3.4'),
             'email-reset-action',
         );
-        $this->assertEquals(
+        $this->assertSame(
             $email,
             array_first($user->history()->email(new Search\ASN()))['email'],
             'email-reset-address',
@@ -68,19 +68,19 @@ class UserHistoryTest extends TestCase {
 
     public function testIpHistory(): void {
         $user  = $this->userList[0];
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $user->history()->registerSiteIp('127.10.11.12'),
             'ipaddr-register',
         );
-        $this->assertEquals(
+        $this->assertSame(
             2,
             $user->history()->registerSiteIp('127.10.11.12'),
             'ipaddr-reregister',
         );
         $list = $user->history()->siteIP();
         $this->assertCount(1, $list, 'ipaddr-site-history');
-        $this->assertEquals('127.10.11.12', $list[0]['ip'], 'ipaddr-site-ip');
+        $this->assertSame('127.10.11.12', $list[0]['ip'], 'ipaddr-site-ip');
         $this->assertTrue(
             Helper::recentDateTimeImmutable($list[0]['last_seen']),
             'ipaddr-site-last-seen',

@@ -12,11 +12,11 @@ class PaginatorTest extends TestCase {
         $paginator = new Util\Paginator($perPage, $currentPage);
 
         $paginator->setTotal(5);
-        $this->assertEquals(5, $paginator->total(), 'paginatior-1page-total');
-        $this->assertEquals($currentPage, $paginator->page(), 'paginatior-1page-page');
-        $this->assertEquals(1, $paginator->pages(), 'paginatior-1page-pages');
-        $this->assertEquals($perPage, $paginator->limit(), 'paginatior-1page-limit');
-        $this->assertEquals(0, $paginator->offset(), 'paginatior-1page-offset');
+        $this->assertSame(5, $paginator->total(), 'paginatior-1page-total');
+        $this->assertSame($currentPage, $paginator->page(), 'paginatior-1page-page');
+        $this->assertSame(1, $paginator->pages(), 'paginatior-1page-pages');
+        $this->assertSame($perPage, $paginator->limit(), 'paginatior-1page-limit');
+        $this->assertSame(0, $paginator->offset(), 'paginatior-1page-offset');
     }
 
     public function testPageCountFirst(): void {
@@ -25,11 +25,11 @@ class PaginatorTest extends TestCase {
         $paginator = new Util\Paginator($perPage, $currentPage);
 
         $paginator->setTotal(55);
-        $this->assertEquals(55, $paginator->total(), 'paginatior-first-total');
-        $this->assertEquals($currentPage, $paginator->page(), 'paginatior-first-page');
-        $this->assertEquals(7, $paginator->pages(), 'paginatior-first-pages');
-        $this->assertEquals($perPage, $paginator->limit(), 'paginatior-first-limit');
-        $this->assertEquals(0, $paginator->offset(), 'paginatior-first-offset');
+        $this->assertSame(55, $paginator->total(), 'paginatior-first-total');
+        $this->assertSame($currentPage, $paginator->page(), 'paginatior-first-page');
+        $this->assertSame(7, $paginator->pages(), 'paginatior-first-pages');
+        $this->assertSame($perPage, $paginator->limit(), 'paginatior-first-limit');
+        $this->assertSame(0, $paginator->offset(), 'paginatior-first-offset');
     }
 
     public function testPageCountLast(): void {
@@ -38,11 +38,11 @@ class PaginatorTest extends TestCase {
         $paginator = new Util\Paginator($perPage, $currentPage);
 
         $paginator->setTotal(55);
-        $this->assertEquals(55, $paginator->total(), 'paginatior-last-total');
-        $this->assertEquals($currentPage, $paginator->page(), 'paginatior-last-page');
-        $this->assertEquals(7, $paginator->pages(), 'paginatior-last-pages');
-        $this->assertEquals($perPage, $paginator->limit(), 'paginatior-last-limit');
-        $this->assertEquals(54, $paginator->offset(), 'paginatior-last-offset');
+        $this->assertSame(55, $paginator->total(), 'paginatior-last-total');
+        $this->assertSame($currentPage, $paginator->page(), 'paginatior-last-page');
+        $this->assertSame(7, $paginator->pages(), 'paginatior-last-pages');
+        $this->assertSame($perPage, $paginator->limit(), 'paginatior-last-limit');
+        $this->assertSame(54, $paginator->offset(), 'paginatior-last-offset');
     }
 
     public function testPageCountLastFull(): void {
@@ -51,11 +51,11 @@ class PaginatorTest extends TestCase {
         $paginator = new Util\Paginator($perPage, $currentPage);
 
         $paginator->setTotal(54);
-        $this->assertEquals(54, $paginator->total(), 'paginatior-last-total');
-        $this->assertEquals($currentPage, $paginator->page(), 'paginatior-last-page');
-        $this->assertEquals(6, $paginator->pages(), 'paginatior-last-pages');
-        $this->assertEquals($perPage, $paginator->limit(), 'paginatior-last-limit');
-        $this->assertEquals(45, $paginator->offset(), 'paginatior-last-offset');
+        $this->assertSame(54, $paginator->total(), 'paginatior-last-total');
+        $this->assertSame($currentPage, $paginator->page(), 'paginatior-last-page');
+        $this->assertSame(6, $paginator->pages(), 'paginatior-last-pages');
+        $this->assertSame($perPage, $paginator->limit(), 'paginatior-last-limit');
+        $this->assertSame(45, $paginator->offset(), 'paginatior-last-offset');
     }
 
     public function testLinkboxAnchor(): void {
@@ -82,13 +82,13 @@ class PaginatorTest extends TestCase {
         $_GET = ['stay' => 'on'];
         $paginator = new Util\Paginator($perPage, $currentPage);
         $paginator->setTotal(15)->removeParam('remove');
-        $this->assertEquals('stay=on', $paginator->params(), 'paginator-remove-params-noop');
+        $this->assertSame('stay=on', $paginator->params(), 'paginator-remove-params-noop');
 
         $_GET = ['stay' => 'on', 'remove' => 'this'];
-        $this->assertEquals('stay=on', $paginator->params(), 'paginator-remove-params-1');
+        $this->assertSame('stay=on', $paginator->params(), 'paginator-remove-params-1');
 
         $_GET = ['stay' => '=<bad>', 'remove' => ''];
-        $this->assertEquals('stay=%3D%3Cbad%3E', $paginator->params(), 'paginator-linkbox-params-2');
+        $this->assertSame('stay=%3D%3Cbad%3E', $paginator->params(), 'paginator-linkbox-params-2');
     }
 
     public function testSetParam(): void {
@@ -98,10 +98,10 @@ class PaginatorTest extends TestCase {
         $_GET = [];
         $paginator = new Util\Paginator($perPage, $currentPage);
         $paginator->setTotal(15)->setParam('new5', '1')->setParam('morenew', 'yes');
-        $this->assertEquals('new5=1&morenew=yes', $paginator->params(), 'paginator-setparam-1');
+        $this->assertSame('new5=1&morenew=yes', $paginator->params(), 'paginator-setparam-1');
 
         $_GET = ['stay' => 'on'];
-        $this->assertEquals(
+        $this->assertSame(
             'stay=on&new5=1&morenew=yes',
             $paginator->params([], false), 'paginator-setparam-2');
     }
@@ -112,17 +112,17 @@ class PaginatorTest extends TestCase {
         $paginator = new Util\Paginator($perPage, $currentPage);
 
         $_GET = ['page' => (string)$currentPage];
-        $this->assertEquals('', $paginator->params(), 'paginatior-params-without-page-1');
-        $this->assertEquals('page=3', $paginator->params([], true), 'paginatior-params-with-page-1');
+        $this->assertSame('', $paginator->params(), 'paginatior-params-without-page-1');
+        $this->assertSame('page=3', $paginator->params([], true), 'paginatior-params-with-page-1');
 
         $_GET = ['action' => 'stuff', 'page' => $currentPage];
-        $this->assertEquals('action=stuff', $paginator->params(), 'paginatior-params-without-page-2');
-        $this->assertEquals('action=stuff&page=3', $paginator->params([], true), 'paginatior-params-with-page-2');
-        $this->assertEquals('', $paginator->params(['action']), 'paginatior-params-exclude-without');
-        $this->assertEquals('page=3', $paginator->params(['action'], true), 'paginatior-params-exclude-with');
+        $this->assertSame('action=stuff', $paginator->params(), 'paginatior-params-without-page-2');
+        $this->assertSame('action=stuff&page=3', $paginator->params([], true), 'paginatior-params-with-page-2');
+        $this->assertSame('', $paginator->params(['action']), 'paginatior-params-exclude-without');
+        $this->assertSame('page=3', $paginator->params(['action'], true), 'paginatior-params-exclude-with');
 
         $_GET = ['action' => ['array', 'stuff'], 'page' => $currentPage];
-        $this->assertEquals('action%5B0%5D=array&action%5B1%5D=stuff', $paginator->params(), 'paginatior-params-array');
+        $this->assertSame('action%5B0%5D=array&action%5B1%5D=stuff', $paginator->params(), 'paginatior-params-array');
     }
 
     public function testLinkboxFullPage(): void {

@@ -56,13 +56,13 @@ class DbTest extends TestCase {
         $this->assertCount(5, $pgAttrTableList, 'db-pg-attr-table-total');
 
         // Are the tables the same?
-        $this->assertEquals(
+        $this->assertSame(
             // during migration
             [],
             array_diff($mysqlAttrTableList, $pgAttrTableList),
             'db-mysql-has-pg-attr-tables'
         );
-        $this->assertEquals(
+        $this->assertSame(
             [],
             array_values(array_diff($pgAttrTableList, $mysqlAttrTableList)),
             'db-pg-has-mysql-attr-tables'
@@ -88,7 +88,7 @@ class DbTest extends TestCase {
                 order by 1
             ");
 
-            $this->assertEquals(
+            $this->assertSame(
                 [],
                 array_diff(
                     array_map(fn ($t) => $t['id'], $mysql),
@@ -96,7 +96,7 @@ class DbTest extends TestCase {
                 ),
                 "db-attr-identical-id-$table",
             );
-            $this->assertEquals(
+            $this->assertSame(
                 [],
                 array_diff(
                     array_map(fn ($t) => $t['name'], $mysql),
@@ -122,41 +122,41 @@ class DbTest extends TestCase {
         $tableName = "phpunit_" . randomString(10);
         $db->prepared_query("create temporary table if not exists $tableName (test int)");
         $db->prepared_query("create temporary table if not exists $tableName (test int)");
-        $this->assertEquals(1, $db->loadPreviousWarning(), 'db-load-warning');
+        $this->assertSame(1, $db->loadPreviousWarning(), 'db-load-warning');
         $this->assertGreaterThan(0.0, $db->elapsed(), 'db-elapsed');
 
         $queryList = $db->queryList();
-        $this->assertEquals($initial + 2, count($queryList), 'db-querylist');
+        $this->assertCount($initial + 2, $queryList, 'db-querylist');
         $last = array_last($queryList);
         $this->assertIsArray($last['warning'], 'db-has-warning');
         $warning = $last['warning'];
         $this->assertCount(1, $warning, 'db-warning');
-        $this->assertEquals(1050, $warning[0]['code'], 'db-error-code');
-        $this->assertEquals("Table '$tableName' already exists", $warning[0]['message'], 'db-error-message');
+        $this->assertSame(1050, $warning[0]['code'], 'db-error-code');
+        $this->assertSame("Table '$tableName' already exists", $warning[0]['message'], 'db-error-message');
 
         $db->disableQueryLog();
         $db->prepared_query('select now()');
         $n = count($queryList);
-        $this->assertEquals($n, count($db->queryList()), 'db-query-log-off');
+        $this->assertCount($n, $db->queryList(), 'db-query-log-off');
         $db->enableQueryLog();
         $db->prepared_query('select now()');
-        $this->assertEquals($n + 1, count($db->queryList()), 'db-query-log-on');
+        $this->assertCount($n + 1, $db->queryList(), 'db-query-log-on');
     }
 
     public function testGlobalStatus(): void {
         $status = new DB()->globalStatus();
         $this->assertGreaterThan(500, count($status), 'db-global-status');
-        $this->assertEquals('server-cert.pem', $status['Current_tls_cert']['Value'], 'db-current-tls-cert');
+        $this->assertSame('server-cert.pem', $status['Current_tls_cert']['Value'], 'db-current-tls-cert');
     }
 
     public function testGlobalVariables(): void {
         $list = new DB()->globalVariables();
         $this->assertGreaterThan(500, count($list), 'db-global-variables');
-        $this->assertEquals('ON', $list['foreign_key_checks']['Value'], 'db-foreign-key-checks-on');
+        $this->assertSame('ON', $list['foreign_key_checks']['Value'], 'db-foreign-key-checks-on');
     }
 
     public function testLongRunning(): void {
-        $this->assertEquals(0, new DB()->longRunning(), 'db-long-running');
+        $this->assertSame(0, new DB()->longRunning(), 'db-long-running');
     }
 
     public function testIndexLists(): void {
@@ -176,18 +176,18 @@ class DbTest extends TestCase {
         $list = array_filter($db->redundantIndexList(), fn ($t) => $t['table_name'] === $tableName);
         $this->assertCount(1, $list, 'db-index-redundant');
         $redundant = array_first($list);
-        $this->assertEquals($tableName, $redundant['table_name'], 'redundant-table-name');
-        $this->assertEquals('t1 (t1,t2)', $redundant['covering_index'], 'covering-index-name');
-        $this->assertEquals('t1_2 (t1)', $redundant['redundant_index'], 'redundant-index-name');
-        $this->assertEquals(0, $redundant['redundant_read'], 'redundant-redundant-read');
-        $this->assertEquals(0, $redundant['covering_read'], 'redundant-covering-read');
+        $this->assertSame($tableName, $redundant['table_name'], 'redundant-table-name');
+        $this->assertSame('t1 (t1,t2)', $redundant['covering_index'], 'covering-index-name');
+        $this->assertSame('t1_2 (t1)', $redundant['redundant_index'], 'redundant-index-name');
+        $this->assertSame(0, $redundant['redundant_read'], 'redundant-redundant-read');
+        $this->assertSame(0, $redundant['covering_read'], 'redundant-covering-read');
 
         $list = array_filter($db->unusedIndexList(), fn ($t) => $t['table_name'] === $tableName);
         $this->assertCount(2, $list, 'db-index-unused');
         $unused = array_first($list);
-        $this->assertEquals($tableName, $unused['table_name'], 'unused-table-name');
-        $this->assertEquals('t1', $unused['index_name'], 'unused-index-name');
-        $this->assertEquals('t1 {0}, t2 {0}', $unused['column_list'], 'unused-column-list');
+        $this->assertSame($tableName, $unused['table_name'], 'unused-table-name');
+        $this->assertSame('t1', $unused['index_name'], 'unused-index-name');
+        $this->assertSame('t1 {0}, t2 {0}', $unused['column_list'], 'unused-column-list');
         $dbh->prepared_query("
             DROP TABLE $tableName
         ");
@@ -202,43 +202,42 @@ class DbTest extends TestCase {
                 created timestamptz not null default current_date
             )
         ");
-        $this->assertInstanceOf(\PDOStatement::class, $st, 'db-pg-st');
         $this->assertTrue($st->execute(), 'db-pg-create-tmp-table');
 
         $id = $this->pg()->insert("
             insert into t (label) values (?)
             ", 'phpunit'
         );
-        $this->assertEquals(1, $id, 'db-pg-last-id');
-        $this->assertEquals(
+        $this->assertSame(1, $id, 'db-pg-last-id');
+        $this->assertSame(
             ['phpunit'],
             $this->pg()->row(
                 'select label from t where id_t = ?', $id
             ),
             'db-pg-row-assoc-one'
         );
-        $this->assertEquals(
+        $this->assertSame(
             ['label' => 'phpunit'],
             $this->pg()->rowAssoc(
                 'select label from t where id_t = ?', $id
             ),
             'db-pg-row-assoc-one'
         );
-        $this->assertEquals(
+        $this->assertSame(
             [],
             $this->pg()->row(
                 'select label from t where id_t = ?', $id + 1
             ),
             'db-pg-row-assoc-none'
         );
-        $this->assertEquals(
+        $this->assertSame(
             [],
             $this->pg()->rowAssoc(
                 'select label from t where id_t = ?', $id + 1
             ),
             'db-pg-row-assoc-none'
         );
-        $this->assertEquals(4, $this->pg()->insert("
+        $this->assertSame(4, $this->pg()->insert("
             insert into t (label) values (?), (?), (?)
             ", 'abc', 'def', 'ghi'),
             'db-pg-triple-insert'
@@ -247,9 +246,9 @@ class DbTest extends TestCase {
             select id_t, label, created from t order by id_t desc
         ");
         $this->assertCount(4, $all, 'pg-all-total');
-        $this->assertEquals(['id_t', 'label', 'created'], array_keys($all[0]), 'pg-all-column-names');
-        $this->assertEquals('ghi', $all[0]['label'], 'pg-all-row-value');
-        $this->assertEquals(
+        $this->assertSame(['id_t', 'label', 'created'], array_keys($all[0]), 'pg-all-column-names');
+        $this->assertSame('ghi', $all[0]['label'], 'pg-all-row-value');
+        $this->assertSame(
             3,
             $this->pg()->prepared_query("
                 update t set label = upper(label) where char_length(label) = ?
@@ -261,10 +260,10 @@ class DbTest extends TestCase {
 
     public function testPgBasicex(): void {
         $num = random_int(100, 999);
-        $this->assertEquals($num, $this->pg()->scalarex("select $1", $num), 'db-pg-scalar-int');
-        $this->assertEquals(true, $this->pg()->scalarex("select $1", true), 'db-pg-scalar-true');
-        $this->assertEquals("test", $this->pg()->scalarex("select $1", "test"), 'db-pg-scalar-string');
-        $this->assertEquals("test", $this->pg()->scalarex("select '\\x74657374'::bytea"), 'db-pg-scalar-bytea');
+        $this->assertSame($num, $this->pg()->scalarex("select $1::integer", $num), 'db-pg-scalar-int');
+        $this->assertTrue($this->pg()->scalarex("select $1::bool", true), 'db-pg-scalar-true');
+        $this->assertSame("test", $this->pg()->scalarex("select $1", "test"), 'db-pg-scalar-string');
+        $this->assertSame("test", $this->pg()->scalarex("select '\\x74657374'::bytea"), 'db-pg-scalar-bytea');
 
         $this->pg()->query("
             create temporary table t (
@@ -278,46 +277,46 @@ class DbTest extends TestCase {
             insert into t (label) values ($1) returning id_t
             ", 'phpunit'
         );
-        $this->assertEquals(1, $id, 'db-pg-last-id');
-        $this->assertEquals(
+        $this->assertSame(1, $id, 'db-pg-last-id');
+        $this->assertSame(
             ['phpunit'],
             $this->pg()->rowex(
                 'select label from t where id_t = $1', $id
             ),
             'db-pg-row-assocex-one'
         );
-        $this->assertEquals(
+        $this->assertSame(
             ['label' => 'phpunit'],
             $this->pg()->rowAssocex(
                 'select label from t where id_t = $1', $id
             ),
             'db-pg-row-assocex-one'
         );
-        $this->assertEquals(
+        $this->assertSame(
             [],
             $this->pg()->rowex(
                 'select label from t where id_t = $1', $id + 1
             ),
             'db-pg-row-assocex-none'
         );
-        $this->assertEquals(
+        $this->assertSame(
             [],
             $this->pg()->rowAssocex(
                 'select label from t where id_t = $1', $id + 1
             ),
             'db-pg-row-assocex-none'
         );
-        $this->assertEquals([2, 3, 4], $this->pg()->columnex("
+        $this->assertSame([2, 3, 4], $this->pg()->columnex("
             insert into t (label) values ($1), ($2), ($3) returning id_t
             ", 'abc', 'def', 'ghi'),
             'db-pg-triple-insert'
         );
-        $this->assertEquals(
+        $this->assertSame(
             ['phpunit', 'abc', 'def', 'ghi'],
             $this->pg()->columnex("select label from t order by id_t"),
             'db-pg-column'
         );
-        $this->assertEquals(
+        $this->assertSame(
             [],
             $this->pg()->allex("
                 select id_t, label, created from t where id_t < 0 order by id_t desc
@@ -328,9 +327,9 @@ class DbTest extends TestCase {
             select id_t, label, created from t order by id_t desc
         ");
         $this->assertCount(4, $all, 'pg-all-total');
-        $this->assertEquals(['id_t', 'label', 'created'], array_keys($all[0]), 'pg-all-column-names');
-        $this->assertEquals('ghi', $all[0]['label'], 'pg-all-row-value');
-        $this->assertEquals(
+        $this->assertSame(['id_t', 'label', 'created'], array_keys($all[0]), 'pg-all-column-names');
+        $this->assertSame('ghi', $all[0]['label'], 'pg-all-row-value');
+        $this->assertSame(
             3,
             $this->pg()->query("
                 update t set label = upper(label) where char_length(label) = $1
@@ -341,7 +340,7 @@ class DbTest extends TestCase {
         $all = $this->pg()->allByKeyex('label', "
             select id_t, label from t where label = 'ABC'
         ");
-        $this->assertEquals(['id_t' => 2, 'label' => 'ABC'], $all['ABC'], 'pg-all-column-names-by-key');
+        $this->assertSame(['id_t' => 2, 'label' => 'ABC'], $all['ABC'], 'pg-all-column-names-by-key');
     }
 
     public function testPgStats(): void {
@@ -362,20 +361,20 @@ class DbTest extends TestCase {
             'db-pg-stats-epoch'
         );
         $last = array_last($queryList);
-        $this->assertEquals(
+        $this->assertSame(
             "select now() + $1 * '1 day'::interval",
             trim($last['query']),
             'pg-stats-query',
         );
-        $this->assertEquals([3], $last['args'], 'pg-stats-args');
-        $this->assertEquals(1, $last['metric'], 'pg-stats-metric');
+        $this->assertSame([3], $last['args'], 'pg-stats-args');
+        $this->assertSame(1, $last['metric'], 'pg-stats-metric');
 
         $this->pg()->stats()->error('computer says no', [123]);
         $errorList = $this->pg()->stats()->errorList();
         $this->assertCount(1, $errorList, 'db-pg-error-count');
-        $this->assertEquals('computer says no', $errorList[0]['query'], 'db-pg-error-query');
+        $this->assertSame('computer says no', $errorList[0]['query'], 'db-pg-error-query');
         $this->assertArrayHasKey('epoch', $errorList[0], 'db-pg-error-epoch');
-        $this->assertEquals([123], $errorList[0]['args'], 'db-pg-error-args');
+        $this->assertSame([123], $errorList[0]['args'], 'db-pg-error-args');
     }
 
     public function testPgBadQuery(): void {
@@ -387,11 +386,11 @@ class DbTest extends TestCase {
             $this->pg()->query("select 1 from nonexistent_table");
             $this->fail('pg-bad-exception-not-thrown');
         } catch (ProgrammingException $e) {
-            $this->assertEquals(ProgrammingException::class, $e::class, 'pg-bad-exception-class');
+            $this->assertSame(ProgrammingException::class, $e::class, 'pg-bad-exception-class');
         }
 
-        $this->assertEquals($queryTotal, count($stats->queryList()), 'pg-bad-query-count');
-        $this->assertEquals($errorTotal + 1, count($stats->errorList()), 'pg-bad-error-count');
+        $this->assertCount($queryTotal, $stats->queryList(), 'pg-bad-query-count');
+        $this->assertCount($errorTotal + 1, $stats->errorList(), 'pg-bad-error-count');
     }
 
     public function testPgAbort(): void {
@@ -401,29 +400,29 @@ class DbTest extends TestCase {
         $this->pg()->abort();
 
         $this->pg()->begin();
-        $this->assertEquals(1, $this->pg()->scalarex('select 1'), 'pg-abort-qry1');
+        $this->assertSame(1, $this->pg()->scalarex('select 1'), 'pg-abort-qry1');
 
         try {
             $this->pg()->prepared_query('select 1');
             $this->fail('pg-abort-exception-not-thrown');
         } catch (\Exception $e) {
-            $this->assertEquals(\Exception::class, $e::class, 'pg-abort-exception-class');
-            $this->assertEquals('ongoing pg_wrapper transaction', $e->getMessage(), 'pg-abort-exception-msg');
+            $this->assertSame(\Exception::class, $e::class, 'pg-abort-exception-class');
+            $this->assertSame('ongoing pg_wrapper transaction', $e->getMessage(), 'pg-abort-exception-msg');
         }
 
-        $this->assertEquals(1, $this->pg()->scalarex('select 1'), 'pg-abort-qry2');
+        $this->assertSame(1, $this->pg()->scalarex('select 1'), 'pg-abort-qry2');
 
         $this->pg()->abort();
-        $this->assertEquals(2, $this->pg()->scalarex('select 2'), 'pg-abort-qry3');
+        $this->assertSame(2, $this->pg()->scalarex('select 2'), 'pg-abort-qry3');
     }
 
     public function testMysqlReadView(): void {
-        $this->assertEquals(
+        $this->assertSame(
             0,
             DB::DB()->scalar("select count(*) from v_summary_seed_seeding"),
             'mysql-view-ro'
         );
-        $this->assertEquals(
+        $this->assertSame(
             0,
             DB::DB(readWrite: true)->scalar("select count(*) from v_summary_seed_seeding"),
             'mysql-view-rw'
@@ -445,7 +444,7 @@ class DbTest extends TestCase {
             $db->entityExists('users_main', 'Username'),
             'db-mysql-entity-exists'
         );
-        $this->assertEquals($db->info(), 'mysql via TCP/IP', 'db-mysql-info');
+        $this->assertSame($db->info(), 'mysql via TCP/IP', 'db-mysql-info');
     }
 
     public function testMysqlTable(): void {
@@ -454,12 +453,12 @@ class DbTest extends TestCase {
 
         $table = new DB\MysqlTable('collages');
         $this->assertTrue($table->exists(), 'mysql-table-exists');
-        $this->assertEquals(
+        $this->assertSame(
             "tools.php?action=db-mysql&table={$table->name}",
             $table->location(),
             'mysql-table-location',
         );
-        $this->assertEquals(
+        $this->assertSame(
             "<a href=\"tools.php?action=db-mysql&amp;table=collages\">collages</a>",
             $table->link(),
             'mysql-table-link',
@@ -471,21 +470,21 @@ class DbTest extends TestCase {
         );
 
         // if this fails, check the permissions on information_schema.table_statistics
-        $this->assertEquals(
+        $this->assertSame(
             [
                 "ROWS_READ", "ROWS_CHANGED", "ROWS_CHANGED_X_INDEXES",
             ],
             array_keys($table->tableRead()),
             'mysql-table-table-read',
         );
-        $this->assertEquals(
+        $this->assertSame(
             [
                 "index_name", "rows_read", "column_list",
             ],
             array_keys($table->indexRead()[0]),
             'mysql-table-index-read',
         );
-        $this->assertEquals(
+        $this->assertSame(
             [
                 "TABLE_ROWS", "AVG_ROW_LENGTH", "DATA_LENGTH", "INDEX_LENGTH",
                 "DATA_FREE", "ROWS_READ", "ROWS_CHANGED", "ROWS_CHANGED_X_INDEXES",
@@ -494,7 +493,7 @@ class DbTest extends TestCase {
             array_keys($table->stats()),
             'mysql-table-stats',
         );
-        $this->assertEquals(
+        $this->assertSame(
             [
                 'collage_has_attr',
                 'collages_artists',
@@ -518,12 +517,12 @@ class DbTest extends TestCase {
         $name  = 'counter';
         $table = new DB\PgTable($name);
         $this->assertTrue($table->exists(), 'pg-table-exists');
-        $this->assertEquals(
+        $this->assertSame(
             "tools.php?action=db-pg&table={$table->name}",
             $table->location(),
             'pg-table-location',
         );
-        $this->assertEquals(
+        $this->assertSame(
             "<a href=\"tools.php?action=db-pg&amp;table=$name\">$name</a>",
             $table->link(),
             'pg-table-link',
@@ -534,7 +533,7 @@ class DbTest extends TestCase {
             'pg-table-definition',
         );
 
-        $this->assertEquals(
+        $this->assertSame(
             [
                 "seq_scan", "last_seq_scan", "seq_tup_read", "idx_scan",
                 "last_idx_scan", "idx_tup_fetch", "n_tup_ins", "n_tup_upd",
@@ -551,7 +550,7 @@ class DbTest extends TestCase {
         $indexRead = $table->indexRead();
         $this->assertCount(1, $indexRead, 'pg-table-index-read-total');
         $index = $indexRead[0];
-        $this->assertEquals(
+        $this->assertSame(
             [
                 "indexrelname", "idx_scan", "idx_tup_read",
                 "idx_tup_fetch", "last_idx_scan",
@@ -560,7 +559,7 @@ class DbTest extends TestCase {
             'pg-table-index-read'
         );
 
-        $this->assertEquals(
+        $this->assertSame(
             [
                 "table_size", "index_size", "live", "dead", "dead_ratio",
                 "analyze_delta", "vacuum_delta", "analyze_total",
@@ -578,7 +577,7 @@ class DbTest extends TestCase {
             )
         ");
         $payload = pack('C*', array_map(chr(...), range(0, 255)));
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $this->pg()->query("
                 insert into test_bytea (payload) values ($1)
@@ -586,7 +585,7 @@ class DbTest extends TestCase {
             ),
             'db-pg-insert-bytea'
         );
-        $this->assertEquals(
+        $this->assertSame(
             $payload,
             $this->pg()->scalarex("select payload from test_bytea"),
             'db-pg-scalar-bytea'
@@ -608,7 +607,7 @@ class DbTest extends TestCase {
             insert into test_bytea (payload) values (?), (?)
             ", $payload, $payload
         );
-        $this->assertEquals(
+        $this->assertSame(
             [
                 ['id' => 1, 'payload' => $payload],
                 ['id' => 2, 'payload' => $payload],
@@ -633,7 +632,7 @@ class DbTest extends TestCase {
             insert into test_bytea (payload) values ($1), ($2)
             ", $payload, $payload
         );
-        $this->assertEquals(
+        $this->assertSame(
             [
                 ['id' => 1, 'payload' => $payload],
                 ['id' => 2, 'payload' => $payload],
@@ -647,12 +646,12 @@ class DbTest extends TestCase {
     }
 
     public function testPgReadView(): void {
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $this->pgro()->scalarex("select count(*) from relay.v_summary_seed_seeding"),
             'mysql-view-ro'
         );
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $this->pg()->scalarex("select count(*) from relay.v_summary_seed_seeding"),
             'mysql-view-rw'
@@ -704,7 +703,7 @@ class DbTest extends TestCase {
             "select word from phpunit_pg_wrapper where $1 = any(num);",
             3
         );
-        $this->assertEquals(
+        $this->assertSame(
             [
                 ["word" => ["prime", "primal"]],
                 ["word" => ["fib"]],
@@ -722,7 +721,7 @@ class DbTest extends TestCase {
         $output = [
             ['num' =>  100, 'name' => "abc\ndef", 'flag' =>  true],
             ['num' => -100, 'name' => "ghi\tjkl", 'flag' => false],
-            ['num' =>   17, 'name' =>       null, 'flag' =>     0],
+            ['num' =>   17, 'name' =>       null, 'flag' => false],
             ['num' => null, 'name' =>       null, 'flag' =>  null],
         ];
         $input = array_map(array_values(...), $output);
@@ -734,7 +733,7 @@ class DbTest extends TestCase {
             ),
             'pg-insert-copy',
         );
-        $this->assertEquals(
+        $this->assertSame(
             $output,
             $this->pg()->all("select * from phpunit_insert_copy"),
             'pg-read-insert',

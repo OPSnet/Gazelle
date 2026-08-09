@@ -20,7 +20,7 @@ class TextTest extends TestCase {
 
     #[DataProvider('dataTeX')]
     public function testTeX(string $name, string $bbcode, string $expected): void {
-        $this->assertEquals($expected, \Text::full_format($bbcode), $name);
+        $this->assertSame($expected, \Text::full_format($bbcode), $name);
     }
 
     public static function dataTeX(): array {
@@ -35,7 +35,7 @@ class TextTest extends TestCase {
     public function testBB(string $name, string $bbcode, string $expected): void {
         $this->userList['user'] = Helper::makeUser('bb.' . randomString(6), 'text');
         \Text::setViewer($this->userList['user']);
-        $this->assertEquals($expected, \Text::full_format($bbcode), $name);
+        $this->assertSame($expected, \Text::full_format($bbcode), $name);
     }
 
     public static function dataBB(): array {
@@ -97,15 +97,15 @@ class TextTest extends TestCase {
 
     public function testImage(): void {
         $bad = "[img]https://www.example.com/a.pdf[/img]";
-        $this->assertEquals($bad, \Text::full_format($bad), "text-image-bad");
+        $this->assertSame($bad, \Text::full_format($bad), "text-image-bad");
 
         foreach (['avif', 'bmp', 'gif', 'jpg', 'jpeg', 'png', 'svg', 'tiff', 'webp'] as $ext) {
             $image     = "https://www.example.com/a.$ext";
             $withCache = '@^<img loading="lazy" class="scale_image" onclick=".*?" alt="\Q' . $image . '\E" src=".*?/i/full/[\w-]+/[\w-]+" data-origin-src="\Q' . $image . '\E">$@';
             $noCache   = "<img loading=\"lazy\" class=\"scale_image\" onclick=\"lightbox.init(this, \$(this).width());\" alt=\"$image\" src=\"$image\">";
 
-            $this->assertEquals($noCache, \Text::full_format("[img=$image]"), "text-image1-nocache-implicit-$ext");
-            $this->assertEquals($noCache, \Text::full_format("[img]{$image}[/img]"), "text-image2-nocache-implicit-$ext");
+            $this->assertSame($noCache, \Text::full_format("[img=$image]"), "text-image1-nocache-implicit-$ext");
+            $this->assertSame($noCache, \Text::full_format("[img]{$image}[/img]"), "text-image2-nocache-implicit-$ext");
             $this->assertMatchesRegularExpression(
                 $withCache, \Text::full_format("[img=$image]", cache: Enum\ImageCacheMode::cache),
                 "text-image1-cache-implicit-$ext"
@@ -122,31 +122,30 @@ class TextTest extends TestCase {
         $this->userList['admin']->setField('PermissionID', SYSOP)->modify();
         $name    = 'collage ' . randomString(6);
         $collage = new Manager\Collage()->create($this->userList['admin'], 1, $name, 'phpunit collage', 'jazz,disco');
-        $this->assertInstanceOf(Collage::class, $collage, 'text-create-collage');
-        $this->assertEquals(
+        $this->assertSame(
             "<a href=\"collages.php?id={$collage->id}\">{$collage->name()}</a>",
             \Text::full_format("[collage]{$collage->id}[/collage]"),
             'text-collage-bb'
         );
-        $this->assertEquals(
+        $this->assertSame(
             "<a href=\"collages.php?id={$collage->id}\">{$collage->name()}</a>",
             \Text::full_format($collage->publicLocation()),
             'text-collage-url'
         );
         $url = SITE_URL . '/collages.php?order=subscribers&sort=desc&page=2';
-        $this->assertEquals(
+        $this->assertSame(
             "<a href=\"$url\">" . htmlentities($url) . "</a>",
             \Text::full_format($url),
             'text-collage-url-no-id',
         );
         $commentMan = new Manager\Comment();
         $comment    = $commentMan->create($this->userList['admin'], 'collages', $collage->id, "nice collage!");
-        $this->assertEquals(
+        $this->assertSame(
             "<a href=\"{$comment->url()}\">Collages Comment #{$comment->id}</a>",
             \Text::full_format($comment->publicLocation()),
             'text-collage-comment-link'
         );
-        $this->assertEquals(1, $collage->hardRemove(), 'text-remove-collage');
+        $this->assertSame(1, $collage->hardRemove(), 'text-remove-collage');
     }
 
     public function testForum(): void {
@@ -162,8 +161,7 @@ class TextTest extends TestCase {
             name:        $name,
             description: 'phpunit forum test',
         );
-        $this->assertInstanceOf(Forum::class, $forum, 'text-create-forum');
-        $this->assertEquals(
+        $this->assertSame(
             "<a href=\"forums.php?action=viewforum&amp;forumid={$forum->id}\" class=\"tooltip\" title=\"{$forum->name()}\">{$forum->name()}</a>",
             \Text::full_format("[forum]{$forum->id}[/forum]"),
             'text-forum'
@@ -205,8 +203,8 @@ class TextTest extends TestCase {
             'text-forum-post-link'
         );
 
-        $this->assertEquals(2, $thread->remove(), 'text-remove-thread');
-        $this->assertEquals(1, $forum->remove(), 'text-remove-forum');
+        $this->assertSame(2, $thread->remove(), 'text-remove-thread');
+        $this->assertSame(1, $forum->remove(), 'text-remove-forum');
         $category->remove();
     }
 
@@ -275,12 +273,12 @@ END_HTML],
 
     #[DataProvider('dataList')]
     public function testList(string $name, string $bbcode, string $expected): void {
-        $this->assertEquals($expected, \Text::full_format($bbcode), $name);
+        $this->assertSame($expected, \Text::full_format($bbcode), $name);
     }
 
     public function testStrip(): void {
         $url = 'https://www.example.com';
-        $this->assertEquals(
+        $this->assertSame(
             'https://www.example.com/a.png https://www.example.com/b.png https://www.example.com here',
             \Text::strip_bbcode("[img]{$url}/a.png[/img] [img={$url}/b.png] [url]{$url}[/url] [url={$url}]here[/url]"),
             'text-strip-bb'
@@ -315,14 +313,14 @@ END_BB);
 <ol>
 <li><a href="#_3033085760"> BIG </a></li></ol></li><li><a href="#_1538387464"> Big </a></li><li><a href="#_175084667"> Also Big </a></li></ol></li><li><a href="#_3540668408"> Smaller </a></li><li><a href="#_442279556"> Small </a></li></ol>
 END_HTML;
-        $this->assertEquals($expected, \Text::parse_toc(), 'text-toc-default');
+        $this->assertSame($expected, \Text::parse_toc(), 'text-toc-default');
 
         $expected = <<<END_HTML
 <ul><li><ul><li>
 <ul>
 <li><a href="#_3033085760"> BIG </a></li></ul></li><li><a href="#_1538387464"> Big </a></li><li><a href="#_175084667"> Also Big </a></li></ul></li><li><a href="#_3540668408"> Smaller </a></li><li><a href="#_442279556"> Small </a></li></ul>
 END_HTML;
-        $this->assertEquals($expected, \Text::parse_toc(3, true), 'text-toc-3-true');
+        $this->assertSame($expected, \Text::parse_toc(3, true), 'text-toc-3-true');
         \Text::$TOC = false;
     }
 
@@ -342,7 +340,7 @@ END_HTML;
 
     #[DataProvider('dataSpan')]
     public function testSpanText(string $name, string $bbcode, string $expected): void {
-        $this->assertEquals($expected, \Text::span_format($bbcode), $name);
+        $this->assertSame($expected, \Text::span_format($bbcode), $name);
     }
 
     public function testUser(): void {
@@ -350,13 +348,13 @@ END_HTML;
         $this->userList['user'] = Helper::makeUser($username, 'text');
         \Text::setViewer($this->userList['user']);
 
-        $this->assertEquals("<a href=\"user.php?action=search&amp;search=$username\">$username</a>", \Text::full_format("[user]{$username}[/user]"), "text-user-1");
+        $this->assertSame("<a href=\"user.php?action=search&amp;search=$username\">$username</a>", \Text::full_format("[user]{$username}[/user]"), "text-user-1");
 
         $url = "<a href=\"user.php?id={$this->userList['user']->id}\">@$username</a>";
-        $this->assertEquals($url, \Text::full_format("@$username"), "text-user-2");
-        $this->assertEquals("$url.", \Text::full_format("@$username."), "text-user-3");
+        $this->assertSame($url, \Text::full_format("@$username"), "text-user-2");
+        $this->assertSame("$url.", \Text::full_format("@$username."), "text-user-3");
 
-        $this->assertEquals(
+        $this->assertSame(
             "<span class=\"mature_blocked\" style=\"font-style: italic;\"><a href=\"wiki.php?action=article&amp;id=1063\">Mature content</a> has been blocked. You can choose to view mature content by editing your <a href=\"user.php?action=edit&amp;id=me\">settings</a>.</span>",
             \Text::full_format("[mature]titties[/mature]"),
             "text-mature",

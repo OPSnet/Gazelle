@@ -22,7 +22,7 @@ class SiteInfo extends Base {
     public function phpinfo(): string {
         ob_start();
         phpinfo();
-        $p = ob_get_contents();
+        $p = (string)ob_get_contents();
         ob_end_clean();
         return substr($p, (int)strpos($p, '<body>') + 6, (int)strpos($p, '</body>'));
     }

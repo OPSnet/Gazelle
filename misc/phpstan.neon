@@ -83,6 +83,7 @@ parameters:
         - DEBUG_TRACKER_TOKEN_EXPIRE
         - DEBUG_TWIG
         - DEBUG_UPLOAD_NOTIFICATION
+        - FAKE_LEVEL
         - FEATURE_EMAIL_REENABLE
         - HTTP_PROXY
         - IMAGE_HOST_BANNED

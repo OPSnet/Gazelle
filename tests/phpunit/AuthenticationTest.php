@@ -90,9 +90,9 @@ class AuthenticationTest extends TestCase {
         $this->user = Helper::makeUser('authn.' . randomString(10), 'authn', true);
         $token = $this->user->createApiToken('phpunit.authn');
         $tokenList = $this->user->apiTokenList();
-        $this->assertSame(1, count($tokenList), 'authn-token-revoked-tokenlist');
+        $this->assertCount(1, $tokenList, 'authn-token-revoked-tokenlist');
         $this->user->revokeApiTokenById($tokenList[0]['id']);
-        $this->assertSame(0, count($this->user->apiTokenList()), 'authn-token-revoked-tokenlist-empty');
+        $this->assertCount(0, $this->user->apiTokenList(), 'authn-token-revoked-tokenlist-empty');
         $authn = new Authentication();
 
         $this->expectException(AuthnError::class);

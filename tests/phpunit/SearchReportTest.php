@@ -55,29 +55,29 @@ class SearchReportTest extends TestCase {
 
     public function testSearchReportId(): void {
         $search = new Search\Report();
-        $this->assertEquals(
+        $this->assertSame(
             Enum\SearchReportOrder::createdDesc,
             $search->order(),
             'search-report-default-order'
         );
 
         $search->setId($this->reportList['collage']->id);
-        $this->assertEquals(1, $search->total(), 'search-report-id-total');
-        $this->assertEquals(
+        $this->assertSame(1, $search->total(), 'search-report-id-total');
+        $this->assertSame(
             [$this->reportList['collage']->id],
             $search->page(limit: 2, offset: 0),
             'search-report-page-id'
         );
 
         $search->setStatus(['Resolved']);
-        $this->assertEquals(0, $search->total(), 'search-not-resolved-report-id');
+        $this->assertSame(0, $search->total(), 'search-not-resolved-report-id');
     }
 
     public function testSearchReportList(): void {
         $search = new Search\Report();
         $search->setStatus(['New']);
 
-        $this->assertEquals(
+        $this->assertSame(
             [
                 $this->reportList['user']->id,
                 $this->reportList['request']->id,
@@ -88,7 +88,7 @@ class SearchReportTest extends TestCase {
         );
 
         $this->reportList['request']->resolve($this->userList[0], new Manager\Report());
-        $this->assertEquals(
+        $this->assertSame(
             [
                 $this->reportList['user']->id,
                 $this->reportList['collage']->id,
@@ -98,7 +98,7 @@ class SearchReportTest extends TestCase {
         );
 
         $search->setTypeFilter(['collage']);
-        $this->assertEquals(
+        $this->assertSame(
             [$this->reportList['collage']->id],
             $search->page(limit: 1, offset: 0),
             'search-report-page-id'

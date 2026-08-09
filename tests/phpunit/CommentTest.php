@@ -38,23 +38,23 @@ class CommentTest extends TestCase {
 
         $comment = $manager->create($this->user, 'artist', $this->artist->id, 'phpunit comment ' . randomString(10));
         $this->assertInstanceOf(Comment\Artist::class, $comment, 'comment-artist-create');
-        $this->assertEquals('artist', $comment->page(), 'comment-artist-page');
-        $this->assertEquals(
+        $this->assertSame('artist', $comment->page(), 'comment-artist-page');
+        $this->assertSame(
             "<a href=\"artist.php?id={$this->artist->id}&amp;postid={$comment->id}#post{$comment->id}\">Comment #{$comment->id}</a>",
             $comment->link(),
             'comment-artist-link'
         );
-        $this->assertEquals(0, $comment->lastRead(), 'comment-artist-last-read');
-        $this->assertEquals(0, $comment->pageNum(), 'comment-artist-page-num');
+        $this->assertSame(0, $comment->lastRead(), 'comment-artist-last-read');
+        $this->assertSame(0, $comment->pageNum(), 'comment-artist-page-num');
 
         $reply = $manager->create($this->user, 'artist', $this->artist->id, 'phpunit reply ' . randomString(10));
-        $this->assertInstanceOf(Comment\Artist::class, $comment->load(), 'comment-artist-load');
+        $comment->load();
         $thread = $comment->thread();
         $this->assertCount(2, $thread, 'comment-artist-thread');
         $this->assertCount(2, $comment->threadList(new Manager\User()), 'comment-artist-threadlist');
-        $this->assertEquals(2, $comment->total(), 'comment-artist-total');
-        $this->assertEquals($this->user->id, $reply->userId(), 'comment-artist-user-id');
-        $this->assertEquals(0, $comment->handleSubscription($this->user), 'comment-artist-handle-subscription');
+        $this->assertSame(2, $comment->total(), 'comment-artist-total');
+        $this->assertSame($this->user->id, $reply->userId(), 'comment-artist-user-id');
+        $this->assertSame(0, $comment->handleSubscription($this->user), 'comment-artist-handle-subscription');
 
         $this->assertInstanceOf(
             Comment\Artist::class,
@@ -75,15 +75,15 @@ class CommentTest extends TestCase {
         $manager = new Manager\Comment();
         $body    = 'phpunit comment ' . randomString(10);
         $comment = $manager->create($this->user, 'collages', $this->collage->id, $body);
-        $this->assertEquals($body, $manager->findBodyById($comment->id), 'comment-find-body');
+        $this->assertSame($body, $manager->findBodyById($comment->id), 'comment-find-body');
         $this->assertInstanceOf(Comment\Collage::class, $comment, 'comment-collage-create');
-        $this->assertEquals('collages', $comment->page(), 'comment-collage-page');
-        $this->assertEquals(
+        $this->assertSame('collages', $comment->page(), 'comment-collage-page');
+        $this->assertSame(
             "<a href=\"collages.php?action=comments&amp;collageid={$this->collage->id}&amp;postid={$comment->id}#post{$comment->id}\">Comment #{$comment->id}</a>",
             $comment->link(),
             'comment-collage-link'
         );
-        $this->assertEquals(1, $manager->remove($comment->page(), $this->collage->id), 'comment-collage-remove-all');
+        $this->assertSame(1, $manager->remove($comment->page(), $this->collage->id), 'comment-collage-remove-all');
     }
 
     public function testCommentRequest(): void {
@@ -95,8 +95,8 @@ class CommentTest extends TestCase {
         $manager = new Manager\Comment();
         $comment = $manager->create($this->user, 'requests', $this->request->id, 'phpunit comment ' . randomString(10));
         $this->assertInstanceOf(Comment\Request::class, $comment, 'comment-request-create');
-        $this->assertEquals('requests', $comment->page(), 'comment-request-page');
-        $this->assertEquals(
+        $this->assertSame('requests', $comment->page(), 'comment-request-page');
+        $this->assertSame(
             "<a href=\"requests.php?action=view&amp;id={$this->request->id}&amp;postid={$comment->id}#post{$comment->id}\">Comment #{$comment->id}</a>",
             $comment->link(),
             'comment-request-link'
@@ -118,8 +118,8 @@ class CommentTest extends TestCase {
 
         $comment = $manager->create($this->user, 'torrents', $tgroupId, 'phpunit comment ' . randomString(10));
         $this->assertInstanceOf(Comment\Torrent::class, $comment, 'comment-torrent-create');
-        $this->assertEquals('torrents', $comment->page(), 'comment-torrent-page');
-        $this->assertEquals('torrents.php?id=', $comment->pageUrl(), 'comment-torrent-page-url');
+        $this->assertSame('torrents', $comment->page(), 'comment-torrent-page');
+        $this->assertSame('torrents.php?id=', $comment->pageUrl(), 'comment-torrent-page-url');
 
         $this->assertTrue($comment->isAuthor($this->user), 'comment-torrent-is-author');
         $this->assertStringStartsWith('phpunit comment ', $comment->body(), 'comment-torrent-body');
@@ -136,7 +136,7 @@ class CommentTest extends TestCase {
             $manager->findById($comment->id),
             'comment-torrent-find-by-id'
         );
-        $this->assertEquals(1, $manager->remove($comment->page(), $tgroupId), 'comment-torrent-remove-all');
+        $this->assertSame(1, $manager->remove($comment->page(), $tgroupId), 'comment-torrent-remove-all');
     }
 
     public function testCommentMerge(): void {

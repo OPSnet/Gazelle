@@ -21,9 +21,9 @@ class BaseObjectTest extends TestCase {
         $this->assertNull($object->field('phpunit'), 'base-object-no-field');
         $this->assertInstanceOf($object::class, $object->setField('phpunit', 'value'), 'base-object-set-field');
         $this->assertTrue($object->dirty(), 'base-object-dirty');
-        $this->assertEquals('value', $object->field('phpunit'), 'base-object-has-field');
+        $this->assertSame('value', $object->field('phpunit'), 'base-object-has-field');
 
-        $this->assertEquals('value', $object->clearField('phpunit'), 'base-object-clear-field');
+        $this->assertSame('value', $object->clearField('phpunit'), 'base-object-clear-field');
         $this->assertFalse($object->dirty(), 'base-object-final');
         $this->assertNull($object->field('phpunit'), 'base-object-no-final');
 
@@ -31,13 +31,13 @@ class BaseObjectTest extends TestCase {
         $this->assertTrue($object->setField('created', '2020-02-02')->modify(), 'base-object-primary-modify');
         $date = $object->created();
         $this->assertTrue($object->setFieldNow('created')->modify(), 'base-object-primary-table-now');
-        $this->assertNotEquals($date, $object->created(), 'base-object-primary-remodified');
+        $this->assertNotSame($date, $object->created(), 'base-object-primary-remodified');
         $this->assertTrue(Helper::recentDate($object->created()), 'base-object-primary-recent');
 
         $this->assertTrue($object->setField('BanDate', '2020-02-02')->modify(), 'base-object-aux-modify');
         $date = $object->banDate();
         $this->assertTrue($object->setFieldNow('BanDate')->modify(), 'base-object-aux-now');
-        $this->assertNotEquals($date, $object->banDate(), 'base-object-aux-remodified');
+        $this->assertNotSame($date, $object->banDate(), 'base-object-aux-remodified');
         $this->assertTrue(Helper::recentDate((string)$object->banDate()), 'base-object-aux-recent');
     }
 
@@ -50,9 +50,9 @@ class BaseObjectTest extends TestCase {
         $gen = object_generator(new Manager\User(), $idList);
         $n = 0;
         foreach ($gen as $user) {
-            $this->assertEquals($idList[$n], $user->id, "base-object-generator-$n");
+            $this->assertSame($idList[$n], $user->id, "base-object-generator-$n");
             $n++;
         }
-        $this->assertEquals(count($idList), $n, "base-object-generator-total");
+        $this->assertSame(count($idList), $n, "base-object-generator-total");
     }
 }

@@ -51,7 +51,7 @@ class TorrentFreeleechTest extends TestCase {
     }
 
     public function testTorrentFreeleechThreshold(): void {
-        $this->assertEquals(
+        $this->assertSame(
             4,
             $this->torrentList[0]->group()->setFreeleech(
                 leechType: LeechType::Free,
@@ -62,11 +62,11 @@ class TorrentFreeleechTest extends TestCase {
             'fl-free-staffpick-22M'
         );
 
-        $this->assertEquals(LeechType::Free,    $this->torrentList[0]->flush()->leechType(), 'torman-0-is-free');
-        $this->assertEquals(LeechType::Free,    $this->torrentList[1]->flush()->leechType(), 'torman-1-is-free');
-        $this->assertEquals(LeechType::Free,    $this->torrentList[2]->flush()->leechType(), 'torman-2-is-free');
-        $this->assertEquals(LeechType::Neutral, $this->torrentList[3]->flush()->leechType(), 'torman-3-is-neutral');
-        $this->assertEquals(LeechType::Normal,  $this->torrentList[4]->flush()->leechType(), 'torman-4-is-normal');
+        $this->assertSame(LeechType::Free,    $this->torrentList[0]->flush()->leechType(), 'torman-0-is-free');
+        $this->assertSame(LeechType::Free,    $this->torrentList[1]->flush()->leechType(), 'torman-1-is-free');
+        $this->assertSame(LeechType::Free,    $this->torrentList[2]->flush()->leechType(), 'torman-2-is-free');
+        $this->assertSame(LeechType::Neutral, $this->torrentList[3]->flush()->leechType(), 'torman-3-is-neutral');
+        $this->assertSame(LeechType::Normal,  $this->torrentList[4]->flush()->leechType(), 'torman-4-is-normal');
 
         // here is as good a place as any to test these methods
         foreach (range(0, 2) as $n) {
@@ -84,7 +84,7 @@ class TorrentFreeleechTest extends TestCase {
             'torrent-is-unseeded',
         );
 
-        $this->assertEquals(
+        $this->assertSame(
             4,
             $this->torrentList[0]->group()->setFreeleech(
                 leechType: LeechType::Normal,
@@ -94,15 +94,15 @@ class TorrentFreeleechTest extends TestCase {
             'fl-normal'
         );
 
-        $this->assertEquals(LeechType::Normal, $this->torrentList[0]->flush()->leechType(), 'torman-0-is-now-normal');
-        $this->assertEquals(LeechType::Normal, $this->torrentList[1]->flush()->leechType(), 'torman-1-is-now-normal');
-        $this->assertEquals(LeechType::Normal, $this->torrentList[2]->flush()->leechType(), 'torman-2-is-now-normal');
-        $this->assertEquals(LeechType::Normal, $this->torrentList[3]->flush()->leechType(), 'torman-3-is-now-normal');
-        $this->assertEquals(LeechType::Normal, $this->torrentList[4]->flush()->leechType(), 'torman-4-is-now-normal');
+        $this->assertSame(LeechType::Normal, $this->torrentList[0]->flush()->leechType(), 'torman-0-is-now-normal');
+        $this->assertSame(LeechType::Normal, $this->torrentList[1]->flush()->leechType(), 'torman-1-is-now-normal');
+        $this->assertSame(LeechType::Normal, $this->torrentList[2]->flush()->leechType(), 'torman-2-is-now-normal');
+        $this->assertSame(LeechType::Normal, $this->torrentList[3]->flush()->leechType(), 'torman-3-is-now-normal');
+        $this->assertSame(LeechType::Normal, $this->torrentList[4]->flush()->leechType(), 'torman-4-is-now-normal');
     }
 
     public function testTorrentFreeleechAllFree(): void {
-        $this->assertEquals(
+        $this->assertSame(
             5,
             $this->torrentList[0]->group()->setFreeleech(
                 all:       true,
@@ -113,7 +113,7 @@ class TorrentFreeleechTest extends TestCase {
             'fl-free-all'
         );
 
-        $this->assertEquals(LeechType::Free, $this->torrentList[3]->flush()->leechType(), 'torman-3-is-free');
-        $this->assertEquals(LeechType::Free, $this->torrentList[4]->flush()->leechType(), 'torman-4-is-free');
+        $this->assertSame(LeechType::Free, $this->torrentList[3]->flush()->leechType(), 'torman-3-is-free');
+        $this->assertSame(LeechType::Free, $this->torrentList[4]->flush()->leechType(), 'torman-4-is-free');
     }
 }

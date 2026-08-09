@@ -32,7 +32,7 @@ class UserRegistrationTest extends TestCase {
     public function testUserRegistrationAfter(): void {
         $reg = new Manager\Registration(new Manager\User());
         $reg->setAfterDate("2600-01-01 00:00:01");
-        $this->assertEquals(2, $reg->total(), 'user-reg-total-after');
+        $this->assertSame(2, $reg->total(), 'user-reg-total-after');
 
         $list = $reg->page(10, 0);
         $this->assertCount(2, $list, 'user-reg-list-after');
@@ -43,7 +43,7 @@ class UserRegistrationTest extends TestCase {
     public function testUserRegistrationBefore(): void {
         $reg = new Manager\Registration(new Manager\User());
         $reg->setBeforeDate("1600-12-31");
-        $this->assertEquals(3, $reg->total(), 'user-reg-total-before');
+        $this->assertSame(3, $reg->total(), 'user-reg-total-before');
 
         $list = $reg->page(10, 0);
         $this->assertCount(3, $list, 'user-reg-list-before');
@@ -55,7 +55,7 @@ class UserRegistrationTest extends TestCase {
     public function testUserRegistrationBetween(): void {
         $reg = new Manager\Registration(new Manager\User());
         $reg->setAfterDate("1600-02-01")->setBeforeDate("1600-03-01");
-        $this->assertEquals(1, $reg->total(), 'user-reg-total-between');
+        $this->assertSame(1, $reg->total(), 'user-reg-total-between');
 
         $list = $reg->page(10, 0);
         $this->assertCount(1, $list, 'user-reg-list-between');
@@ -63,7 +63,7 @@ class UserRegistrationTest extends TestCase {
     }
 
     public function testUserRegistrationUnconfirmed(): void {
-        $this->assertEquals(
+        $this->assertSame(
             3,
             new Manager\User()->disableUnconfirmedUsers() - $this->initialUnconfirmed,
             'user-reg-unconfirmed',

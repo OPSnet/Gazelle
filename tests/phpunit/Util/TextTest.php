@@ -7,10 +7,10 @@ use PHPUnit\Framework\Attributes\DataProvider;
 
 class TextTest extends TestCase {
     public function testB64(): void {
-        $this->assertEquals('d29yZA',  Text::base64UrlEncode('word'), 'text-b64-enc-1');
-        $this->assertEquals('d29yZHM', Text::base64UrlEncode('words'), 'text-b64-enc-2');
-        $this->assertEquals('wordy', Text::base64UrlDecode('d29yZHm'), 'text-b64-dec');
-        $this->assertEquals(
+        $this->assertSame('d29yZA',  Text::base64UrlEncode('word'), 'text-b64-enc-1');
+        $this->assertSame('d29yZHM', Text::base64UrlEncode('words'), 'text-b64-enc-2');
+        $this->assertSame('wordy', Text::base64UrlDecode('d29yZHm'), 'text-b64-dec');
+        $this->assertSame(
             'match',
             Text::base64UrlDecode(Text::base64UrlEncode('match')),
             'text-b64-round-trip'
@@ -98,6 +98,6 @@ class TextTest extends TestCase {
 
     #[DataProvider('dataParse')]
     public function testParseHtml(string $name, string $html, string $expected): void {
-        $this->assertEquals($expected, Text::parseHtml($html), $name);
+        $this->assertSame($expected, Text::parseHtml($html), $name);
     }
 }

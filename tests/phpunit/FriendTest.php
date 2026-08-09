@@ -23,33 +23,33 @@ class FriendTest extends TestCase {
         ];
 
         // in the beginning
-        $this->assertEquals(0, $this->friend[0]->total(), 'friend-i-have-no-friends');
+        $this->assertSame(0, $this->friend[0]->total(), 'friend-i-have-no-friends');
         $this->assertCount(0, $this->friend[1]->page(10, 0), 'friend-empty-page');
         $this->assertCount(0, $this->friend[2]->userList(), 'friend-empty-user-list');
-        $this->assertEquals(-1, $this->friend[0]->add($this->friend[0]->user()), 'friend-0-not-self');
+        $this->assertSame(-1, $this->friend[0]->add($this->friend[0]->user()), 'friend-0-not-self');
 
         // add a friend
         $this->assertFalse($this->friend[0]->isFriend($this->friend[1]->user()), 'friend-1-not-friend');
-        $this->assertEquals(1, $this->friend[0]->add($this->friend[1]->user()), 'friend-1-add-friend');
+        $this->assertSame(1, $this->friend[0]->add($this->friend[1]->user()), 'friend-1-add-friend');
         $this->assertTrue($this->friend[0]->isFriend($this->friend[1]->user()), 'friend-1-now-friend');
         $this->assertFalse($this->friend[0]->isMutual($this->friend[1]->user()), 'friend-1-not-yet-mutual');
         $this->assertFalse($this->friend[1]->isFriend($this->friend[0]->user()), 'friend-1-not-mutual');
 
         // comment
         $comment = 'comment ' . randomString();
-        $this->assertEquals(1, $this->friend[0]->setComment($this->friend[1]->user(), $comment), 'friend-1-add-friend');
+        $this->assertSame(1, $this->friend[0]->setComment($this->friend[1]->user(), $comment), 'friend-1-add-friend');
 
         // get a page
         $page = $this->friend[0]->page(10, 0);
         $this->assertCount(1, $page, 'friend-page');
-        $this->assertEquals(0, $page[$this->friend[1]->user()->id]['mutual'], 'friend-not-mutual');
+        $this->assertSame(0, $page[$this->friend[1]->user()->id]['mutual'], 'friend-not-mutual');
 
         // mutual
-        $this->assertEquals(1, $this->friend[1]->add($this->friend[0]->user()), 'friend-0-add-back');
+        $this->assertSame(1, $this->friend[1]->add($this->friend[0]->user()), 'friend-0-add-back');
         $this->assertTrue($this->friend[0]->isMutual($this->friend[1]->user()), 'friend-1-is-mutual');
         $this->assertTrue($this->friend[1]->isMutual($this->friend[0]->user()), 'friend-reciprocal');
         $page = $this->friend[0]->page(10, 0);
-        $this->assertEquals(1, $page[$this->friend[1]->user()->id]['mutual'], 'friend-the-feeling-is-mutual');
+        $this->assertSame(1, $page[$this->friend[1]->user()->id]['mutual'], 'friend-the-feeling-is-mutual');
 
         // render
         $paginator = new Util\Paginator(FRIENDS_PER_PAGE, 1);
@@ -65,8 +65,8 @@ class FriendTest extends TestCase {
 
         // remove
         $this->friend[0]->add($this->friend[2]->user());
-        $this->assertEquals(2, $this->friend[0]->total(), 'friend-has-friends');
-        $this->assertEquals(
+        $this->assertSame(2, $this->friend[0]->total(), 'friend-has-friends');
+        $this->assertSame(
             1,
             $this->friend[0]->removeFriend($this->friend[1]->user()),
             'friend-unfriend'

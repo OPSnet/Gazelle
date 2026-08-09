@@ -41,7 +41,7 @@ class WikiTest extends TestCase {
 
     #[DataProvider('providerAlias')]
     public function testNormalizeAlias(string $expected, string $input, string $message): void {
-        $this->assertEquals($expected, Wiki::normalizeAlias($input), $message);
+        $this->assertSame($expected, Wiki::normalizeAlias($input), $message);
     }
 
     public function testWikiCreate(): void {
@@ -55,35 +55,33 @@ class WikiTest extends TestCase {
             $this->userList['user']->privilege()->effectiveClassLevel(),
             $this->userList['admin']
         );
-        $this->assertInstanceOf(Wiki::class, $article, 'wiki-create-open');
 
-        $this->assertEquals(
+        $this->assertSame(
             $article->id,
             $manager->findById($article->id)?->id,
             'wiki-find-by-id');
-        $this->assertEquals(
+        $this->assertSame(
             $article->id,
             $manager->findByTitle($article->title())?->id,
             'wiki-find-by-title'
         );
 
-        $this->assertInstanceOf(Wiki::class, $article->flush(), 'wiki-flush');
-        $this->assertEquals("<a href=\"{$article->url()}\">{$article->title()}</a>", $article->link(), 'wiki-link');
-        $this->assertEquals("wiki.php?action=article&id={$article->id}", $article->location(), 'wiki-location');
-        $this->assertEquals($alias, array_keys($article->alias())[0], 'wiki-alias');
-        $this->assertEquals('wiki body', $article->body(), 'wiki-body');
+        $this->assertSame("<a href=\"{$article->url()}\">{$article->title()}</a>", $article->link(), 'wiki-link');
+        $this->assertSame("wiki.php?action=article&id={$article->id}", $article->location(), 'wiki-location');
+        $this->assertSame($alias, array_keys($article->alias())[0], 'wiki-alias');
+        $this->assertSame('wiki body', $article->body(), 'wiki-body');
         $this->assertStringStartsWith(date('Y-m-d H'), $article->date(), 'wiki-date');
-        $this->assertEquals($title, $article->title(), 'wiki-title');
-        $this->assertEquals($title, $article->shortName($title), 'wiki-short-name');
-        $this->assertEquals($this->userList['admin']->id, $article->authorId(), 'wiki-author-id');
-        $this->assertEquals($this->userList['user']->privilege()->effectiveClassLevel(), $article->minClassRead(), 'wiki-min-read');
-        $this->assertEquals($this->userList['user']->privilege()->effectiveClassLevel(), $article->minClassEdit(), 'wiki-min-edit');
+        $this->assertSame($title, $article->title(), 'wiki-title');
+        $this->assertSame($title, $article->shortName($title), 'wiki-short-name');
+        $this->assertSame($this->userList['admin']->id, $article->authorId(), 'wiki-author-id');
+        $this->assertSame($this->userList['user']->privilege()->effectiveClassLevel(), $article->minClassRead(), 'wiki-min-read');
+        $this->assertSame($this->userList['user']->privilege()->effectiveClassLevel(), $article->minClassEdit(), 'wiki-min-edit');
 
         $this->assertTrue($article->editable($this->userList['user']), 'wiki-edit-user');
         $this->assertTrue($article->editable($this->userList['admin']), 'wiki-edit-sysop');
         $this->assertStringStartsWith('<ol', $article->ToC(), 'wiki-toc');
 
-        $this->assertEquals(1, $article->remove(), 'wiki-remove-open');
+        $this->assertSame(1, $article->remove(), 'wiki-remove-open');
     }
 
     public function testBBCodeWiki(): void {
@@ -100,22 +98,22 @@ class WikiTest extends TestCase {
         $this->articleList[] = $article;
         \Text::setViewer($this->userList['user']);
 
-        $this->assertEquals(
+        $this->assertSame(
             "<a href=\"wiki.php\">Wiki</a> › <a href=\"wiki.php?action=article&amp;id={$article->id}\">$title</a>",
             \Text::full_format(SITE_URL . "/wiki.php?action=article&name=$alias"),
             'text-wiki-name-location',
         );
-        $this->assertEquals(
+        $this->assertSame(
             "<a href=\"wiki.php\">Wiki</a> › <a href=\"wiki.php?action=article&amp;id={$article->id}\">$title</a>",
             \Text::full_format("{$article->publicLocation()}"),
             'text-wiki-id-location',
         );
-        $this->assertEquals(
+        $this->assertSame(
             "<a href=\"wiki.php\">Wiki</a> › <a href=\"wiki.php?action=article&amp;id={$article->id}\">$title</a>",
             \Text::full_format("[[{$alias}]]"),
             'wiki-bbcode-alias'
         );
-        $this->assertEquals(
+        $this->assertSame(
             "<a href=\"wiki.php\">Wiki</a> › [[x$alias ???]]",
             \Text::full_format("[[x$alias]]"),
             'wiki-bbcode-bad-alias'
@@ -135,11 +133,11 @@ class WikiTest extends TestCase {
         $this->articleList[] = $article;
 
         $newAlias = Wiki::normalizeAlias('alias' . randomString(20));
-        $this->assertEquals(0, $article->removeAlias($newAlias), 'wiki-remove-missing-alias');
-        $this->assertEquals(1, $article->addAlias($newAlias, $this->userList['admin']), 'wiki-add-alias');
+        $this->assertSame(0, $article->removeAlias($newAlias), 'wiki-remove-missing-alias');
+        $this->assertSame(1, $article->addAlias($newAlias, $this->userList['admin']), 'wiki-add-alias');
         $this->assertCount(2, $article->alias(), 'wiki-alias-list');
-        $this->assertEquals($article->id, $manager->findByAlias($newAlias)?->id, 'wiki-find-by-alias');
-        $this->assertEquals(1, $article->removeAlias($newAlias), 'wiki-remove-alias');
+        $this->assertSame($article->id, $manager->findByAlias($newAlias)?->id, 'wiki-find-by-alias');
+        $this->assertSame(1, $article->removeAlias($newAlias), 'wiki-remove-alias');
     }
 
     public function testWikiException(): void {
@@ -155,7 +153,7 @@ class WikiTest extends TestCase {
         $this->articleList[] = $article;
 
         $newAlias = Wiki::normalizeAlias('alias' . randomString(20));
-        $this->assertEquals(1, $article->addAlias($newAlias, $this->userList['admin']), 'wiki-add-ok-alias');
+        $this->assertSame(1, $article->addAlias($newAlias, $this->userList['admin']), 'wiki-add-ok-alias');
 
         $this->expectException(DB\MysqlDuplicateKeyException::class);
         $article->addAlias($newAlias, $this->userList['admin']);
@@ -220,8 +218,8 @@ class WikiTest extends TestCase {
         $this->assertCount(1, $article->revisionList(), 'wiki-revision');
 
         $clone = $manager->findById($article->id);
-        $this->assertEquals(2, $clone?->revision(), 'wiki-n-revision');
-        $this->assertEquals('wiki body', $clone?->revisionBody(1), 'wiki-body-revision');
+        $this->assertSame(2, $clone?->revision(), 'wiki-n-revision');
+        $this->assertSame('wiki body', $clone->revisionBody(1), 'wiki-body-revision');
     }
 
     public function testConfigureAccess(): void {
@@ -233,7 +231,7 @@ class WikiTest extends TestCase {
             minRead: $user->privilege()->effectiveClassLevel(),
             minEdit: $admin->privilege()->effectiveClassLevel(),
         );
-        $this->assertEquals(
+        $this->assertSame(
             [
                 $user->privilege()->effectiveClassLevel(),
                 $user->privilege()->effectiveClassLevel(),
@@ -251,7 +249,7 @@ class WikiTest extends TestCase {
             minRead: 0,
             minEdit: $user->privilege()->effectiveClassLevel(),
         );
-        $this->assertEquals(
+        $this->assertSame(
             [
                 null,
                 null,
@@ -266,7 +264,7 @@ class WikiTest extends TestCase {
             minRead: $user->privilege()->effectiveClassLevel(),
             minEdit: 0,
         );
-        $this->assertEquals(
+        $this->assertSame(
             [
                 null,
                 null,
@@ -281,7 +279,7 @@ class WikiTest extends TestCase {
             minRead: $admin->privilege()->effectiveClassLevel(),
             minEdit: $user->privilege()->effectiveClassLevel(),
         );
-        $this->assertEquals(
+        $this->assertSame(
             [
                 null,
                 null,
@@ -296,7 +294,7 @@ class WikiTest extends TestCase {
             minRead: $user->privilege()->effectiveClassLevel(),
             minEdit: $admin->privilege()->effectiveClassLevel(),
         );
-        $this->assertEquals(
+        $this->assertSame(
             [
                 null,
                 null,
@@ -311,7 +309,7 @@ class WikiTest extends TestCase {
             minRead: $user->privilege()->effectiveClassLevel(),
             minEdit: $admin->privilege()->effectiveClassLevel(),
         );
-        $this->assertEquals(
+        $this->assertSame(
             [
                 $user->privilege()->effectiveClassLevel(),
                 $admin->privilege()->effectiveClassLevel(),

@@ -47,23 +47,23 @@ class TorrentDeletedTest extends TestCase {
 
         $this->assertTrue($deleted->isDeleted(), 'torrent-is-deleted');
         $this->assertTrue($deleted->hasTGroup(), 'torrent-has-tgroup');
-        $this->assertEquals($torrentId, $deleted->id, 'torrent-deleted-id');
-        $this->assertEquals(
+        $this->assertSame($torrentId, $deleted->id, 'torrent-deleted-id');
+        $this->assertSame(
             "log.php?search=Torrent+{$deleted->id}",
             $deleted->location(),
             'torrent-deleted-location',
         );
-        $this->assertEquals(
+        $this->assertSame(
             $edition,
             $deleted->edition(),
             'torrent-deleted-edition',
         );
-        $this->assertEquals(
+        $this->assertSame(
             $fullName,
             $deleted->fullName(),
             'torrent-deleted-fullname',
         );
-        $this->assertEquals(
+        $this->assertSame(
             $groupLink,
             $deleted->groupLink(),
             'torrent-deleted-groupLink',
@@ -90,17 +90,17 @@ class TorrentDeletedTest extends TestCase {
         $deleted = new Manager\Torrent()->findDeletedById($torrentId);
 
         $this->assertFalse($deleted->hasTGroup(), 'torrent-has-no-tgroup');
-        $this->assertEquals(
+        $this->assertSame(
             "",
             $deleted->edition(),
             'torrent-tg-deleted-edition',
         );
-        $this->assertEquals(
+        $this->assertSame(
             "Torrent {$torrentId} of deleted group {$tgroupId}",
             $deleted->fullName(),
             'torrent-tg-deleted-fullname',
         );
-        $this->assertEquals(
+        $this->assertSame(
             "Deleted group {$tgroupId}",
             $deleted->groupLink(),
             'torrent-tg-deleted-groupLink',

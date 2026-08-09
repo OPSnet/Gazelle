@@ -26,12 +26,12 @@ class Top10Test extends TestCase {
 
         $key = "T10_all_10_" . trim(signature('', TOP10_SALT), '=');
         $Cache->delete_multi([$key, "{$key}_lock"]);
-        $this->assertEquals(
+        $this->assertSame(
             [],
             $top10->getTopTorrents([]),
             'top10-t-basic'
         );
-        $this->assertEquals(
+        $this->assertSame(
             [],
             $top10->getTopTorrents([]),
             'top10-t-cached-basic'
@@ -39,14 +39,14 @@ class Top10Test extends TestCase {
 
         $key = "T10_all_10_" . trim(signature('FLAC', TOP10_SALT), '=');
         $Cache->delete_multi([$key, "{$key}_lock"]);
-        $this->assertEquals(
+        $this->assertSame(
             [],
             $top10->getTopTorrents(['format' => 'FLAC']),
             'top10-t-format'
         );
         $key = "T10_all_10_" . trim(signature('FAKE', TOP10_SALT), '=');
         $Cache->delete_multi([$key, "{$key}_lock"]);
-        $this->assertEquals(
+        $this->assertSame(
             [],
             $top10->getTopTorrents(['format' => 'FAKE']),
             'top10-t-fake-format'
@@ -54,7 +54,7 @@ class Top10Test extends TestCase {
 
         $key = "T10_all_10_" . trim(signature('hide', TOP10_SALT), '=');
         $Cache->delete_multi([$key, "{$key}_lock"]);
-        $this->assertEquals(
+        $this->assertSame(
             [],
             $top10->getTopTorrents(['freeleech' => 'hide']),
             'top10-t-freeleech'
@@ -62,7 +62,7 @@ class Top10Test extends TestCase {
 
         $key = "T10_all_10_" . trim(signature('phpunit.a,phpunit.b', TOP10_SALT), '=');
         $Cache->delete_multi([$key, "{$key}_lock"]);
-        $this->assertEquals(
+        $this->assertSame(
             [],
             $top10->getTopTorrents([
                 'tags' => 'phpunit.a,phpunit.b',
@@ -71,7 +71,7 @@ class Top10Test extends TestCase {
         );
         $key = "T10_all_10_" . trim(signature('', TOP10_SALT), '=');
         $Cache->delete_multi([$key, "{$key}_lock"]);
-        $this->assertEquals(
+        $this->assertSame(
             [],
             $top10->getTopTorrents([
                 'tags' => '',
@@ -81,7 +81,7 @@ class Top10Test extends TestCase {
 
         $key = "T10_all_10_" . trim(signature('phpunit.a,phpunit.b|all', TOP10_SALT), '=');
         $Cache->delete_multi([$key, "{$key}_lock"]);
-        $this->assertEquals(
+        $this->assertSame(
             [],
             $top10->getTopTorrents([
                 'tags'   => 'phpunit.a,phpunit.b',
@@ -92,14 +92,14 @@ class Top10Test extends TestCase {
 
         $key = "T10_all_10_" . trim(signature('xcludedartiste', TOP10_SALT), '=');
         $Cache->delete_multi([$key, "{$key}_lock"]);
-        $this->assertEquals(
+        $this->assertSame(
             [],
             $top10->getTopTorrents(['excluded_artists' => 'xcludedartiste']),
             'top10-t-artist'
         );
         $key = "T10_all_10_" . trim(signature('', TOP10_SALT), '=');
         $Cache->delete_multi([$key, "{$key}_lock"]);
-        $this->assertEquals(
+        $this->assertSame(
             [],
             $top10->getTopTorrents(['excluded_artists' => '']),
             'top10-t-no-artist'
@@ -112,7 +112,7 @@ class Top10Test extends TestCase {
 
         $key = "T10_snatched_10_" . trim(signature('', TOP10_SALT), '=');
         $Cache->delete_multi([$key, "{$key}_lock"]);
-        $this->assertEquals(
+        $this->assertSame(
             [],
             $top10->getTopTorrents([], 'snatched'),
             'top10-t-snatched'
@@ -120,7 +120,7 @@ class Top10Test extends TestCase {
 
         $key = "T10_seeded_10_" . trim(signature('', TOP10_SALT), '=');
         $Cache->delete_multi([$key, "{$key}_lock"]);
-        $this->assertEquals(
+        $this->assertSame(
             [],
             $top10->getTopTorrents([], 'seeded'),
             'top10-t-seeded'
@@ -128,7 +128,7 @@ class Top10Test extends TestCase {
 
         $key = "T10_data_10_" . trim(signature('', TOP10_SALT), '=');
         $Cache->delete_multi([$key, "{$key}_lock"]);
-        $this->assertEquals(
+        $this->assertSame(
             [],
             $top10->getTopTorrents([], 'data'),
             'top10-t-data'
@@ -141,7 +141,7 @@ class Top10Test extends TestCase {
 
         $key = "T10_day_10_" . trim(signature('', TOP10_SALT), '=');
         $Cache->delete_multi([$key, "{$key}_lock"]);
-        $this->assertEquals(
+        $this->assertSame(
             [],
             $top10->getTopTorrents([], 'day'),
             'top10-t-day'
@@ -149,7 +149,7 @@ class Top10Test extends TestCase {
 
         $key = "T10_week_10_" . trim(signature('', TOP10_SALT), '=');
         $Cache->delete_multi([$key, "{$key}_lock"]);
-        $this->assertEquals(
+        $this->assertSame(
             [],
             $top10->getTopTorrents([], 'week'),
             'top10-t-week'
@@ -157,7 +157,7 @@ class Top10Test extends TestCase {
 
         $key = "T10_month_10_" . trim(signature('', TOP10_SALT), '=');
         $Cache->delete_multi([$key, "{$key}_lock"]);
-        $this->assertEquals(
+        $this->assertSame(
             [],
             $top10->getTopTorrents([], 'month'),
             'top10-t-month'
@@ -165,7 +165,7 @@ class Top10Test extends TestCase {
 
         $key = "T10_year_10_" . trim(signature('', TOP10_SALT), '=');
         $Cache->delete_multi([$key, "{$key}_lock"]);
-        $this->assertEquals(
+        $this->assertSame(
             [],
             $top10->getTopTorrents([], 'year'),
             'top10-t-year'
@@ -192,7 +192,7 @@ class Top10Test extends TestCase {
             array_keys($uploader),
             'top10-u-uploader-keys',
         );
-        $this->assertEquals($this->user->id, $uploader['id'], 'top10-u-uploader');
+        $this->assertSame($this->user->id, $uploader['id'], 'top10-u-uploader');
     }
 
     public static function dataUserTop10(): array {

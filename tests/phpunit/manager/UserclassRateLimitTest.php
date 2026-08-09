@@ -7,10 +7,10 @@ use PHPUnit\Framework\TestCase;
 class UserclassRateLimitTest extends TestCase {
     public function testUserclassRateLimit(): void {
         $limiter = new Manager\UserclassRateLimit();
-        $list = $limiter->list(); // validate the SQL query
+        $initial = count($limiter->list()); // validate the SQL query
         $this->assertGreaterThanOrEqual(
             0,
-            count($list),
+            $initial,
             'userclass-ratelimit-initial'
         );
 
@@ -19,7 +19,7 @@ class UserclassRateLimitTest extends TestCase {
          * which will leave existing records alone.
          * If this test fails, you need to create an unused secondary userclass.
          */
-        $freeId = (int)(DB::DB())->scalar("
+        $freeId = (int)DB::DB()->scalar("
             SELECT p.id
             FROM permissions p
             LEFT JOIN permission_rate_limit prl ON (prl.permission_id = p.id)
@@ -27,9 +27,9 @@ class UserclassRateLimitTest extends TestCase {
                 AND prl.permission_id IS NULL
         ");
 
-        $this->assertEquals(1, $limiter->save($freeId, 1.25, 20), 'userclass-ratelimit-save');
-        $this->assertEquals(count($list) + 1, count($limiter->list()), 'userclass-ratelimit-new-list');
-        $this->assertEquals(1, $limiter->remove($freeId), 'userclass-ratelimit-remove');
-        $this->assertEquals(count($list), count($limiter->list()), 'userclass-ratelimit-revert-list');
+        $this->assertSame(1, $limiter->save($freeId, 1.25, 20), 'userclass-ratelimit-save');
+        $this->assertCount($initial + 1, $limiter->list(), 'userclass-ratelimit-new-list');
+        $this->assertSame(1, $limiter->remove($freeId), 'userclass-ratelimit-remove');
+        $this->assertCount($initial, $limiter->list(), 'userclass-ratelimit-revert-list');
     }
 }

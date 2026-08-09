@@ -38,30 +38,30 @@ class GiftTest extends TestCase {
             $gift,
             'gift-by-name'
         );
-        $this->assertEquals(
+        $this->assertSame(
             'Add 1 GiB to your upload stats',
             $gift->flush()->description(),
             'gift-description'
         );
-        $this->assertEquals(
+        $this->assertSame(
             '',
             $gift->link(),
             'gift-link'
         );
-        $this->assertEquals(
+        $this->assertSame(
             '',
             $gift->location(),
             'gift-location'
         );
         $initial = $manager->giftTotal();
         $gift->giveTo($this->user);
-        $this->assertEquals(
+        $this->assertSame(
             STARTING_UPLOAD + $gift->factor() * 1024 * 1024,
             $this->user->uploadedSize(),
             'gift-up-1',
         );
-        $this->assertEquals($initial + 1, $manager->giftTotal(), 'gift-manager-given-total');
-        $this->assertEquals(
+        $this->assertSame($initial + 1, $manager->giftTotal(), 'gift-manager-given-total');
+        $this->assertSame(
             $gift->id,
             $manager->findById($gift->id)->id,
             'gift-man-find-by-id',
@@ -74,7 +74,7 @@ class GiftTest extends TestCase {
         $this->user->setField('leech_download', 2 * 1024 ** 3)->modify(); // 2 GiB down
 
         $manager->findByLabel('down-1')->giveTo($this->user);
-        $this->assertEquals(
+        $this->assertSame(
             1024 ** 3,
             $this->user->downloadedSize(),
             'gift-down-1',
@@ -83,12 +83,12 @@ class GiftTest extends TestCase {
         // overflow download to upload
         // had 1 down: gifted 5 down => 0 down, +4 up
         $manager->findByLabel('down-5')->giveTo($this->user);
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $this->user->downloadedSize(),
             'gift-down-5-down',
         );
-        $this->assertEquals(
+        $this->assertSame(
             STARTING_UPLOAD + 4 * 1024 ** 3,
             $this->user->uploadedSize(),
             'gift-down-5-up',
@@ -100,7 +100,7 @@ class GiftTest extends TestCase {
         $manager->flush();
         $gift = $manager->findByLabel('bonus-10000');
         $gift->giveTo($this->user);
-        $this->assertEquals(
+        $this->assertSame(
             $gift->factor(),
             $this->user->bonusPointsTotal(),
             'gift-bonus',
@@ -109,7 +109,7 @@ class GiftTest extends TestCase {
 
     public function testGiftCollage(): void {
         new Manager\Gift()->findByLabel('collage')->giveTo($this->user);
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $this->user->paidPersonalCollages(),
             'gift-collage',
@@ -121,7 +121,7 @@ class GiftTest extends TestCase {
         $initial       = $this->request->bountyTotal();
         $gift          = new Manager\Gift()->findByLabel('reqc-100');
         $gift->giveTo($this->user);
-        $this->assertEquals(
+        $this->assertSame(
             $gift->factor() * 1024 ** 3,
             $this->request->flush()->bountyTotal() - $initial,
             'gift-request-create',
@@ -134,7 +134,7 @@ class GiftTest extends TestCase {
         $initial = $this->request->bountyTotal();
         $gift    = new Manager\Gift()->findByLabel('reqv-100');
         $gift->giveTo($this->user);
-        $this->assertEquals(
+        $this->assertSame(
             $gift->factor() * 1024 ** 3,
             $this->request->flush()->bountyTotal() - $initial,
             'gift-request-vote',
@@ -143,7 +143,7 @@ class GiftTest extends TestCase {
 
     public function testGiftToken(): void {
         new Manager\Gift()->findByLabel('token-200')->giveTo($this->user);
-        $this->assertEquals(
+        $this->assertSame(
             200,
             $this->user->tokenCount(),
             'gift-token',
@@ -154,7 +154,7 @@ class GiftTest extends TestCase {
         $manager = new Manager\Gift();
         // if this fails, try again
         $manager->findByLabel('coal')->setTemporaryWeight(2 ** 32 - 1000000);
-        $this->assertEquals(
+        $this->assertSame(
             'coal',
             $manager->choose()->label(),
             'gift-choose',

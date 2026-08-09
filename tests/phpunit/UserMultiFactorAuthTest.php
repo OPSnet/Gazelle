@@ -39,10 +39,10 @@ class UserMultiFactorAuthTest extends TestCase {
         $secret  = $mfa->generateSessionSecret();
         $manager = new Manager\UserToken();
 
-        $this->assertEquals(0, $this->countTokens(), 'utest-no-mfa');
+        $this->assertSame(0, $this->countTokens(), 'utest-no-mfa');
         $recovery = $mfa->create($manager, $secret);
         ['ip' => $ip, 'created' => $created] = $mfa->details();
-        $this->assertEquals(
+        $this->assertSame(
             $this->user->requestContext()->remoteAddr(),
             $ip,
             'utest-mfa-ip',
@@ -63,7 +63,7 @@ class UserMultiFactorAuthTest extends TestCase {
         $this->assertFalse($mfa->burnRecovery('no such key'), 'utest-no-burn-mfa');
         $this->assertTrue($mfa->burnRecovery($burn), 'utest-burn-mfa');
         Helper::sleepTick(); // wait until the next second
-        $this->assertEquals(9, $this->countTokens(), 'utest-less-mfa');
+        $this->assertSame(9, $this->countTokens(), 'utest-less-mfa');
         $this->assertFalse($mfa->burnRecovery($burn), 'utest-burn-twice-mfa');
 
         $burn = array_pop($recovery);
@@ -77,7 +77,7 @@ class UserMultiFactorAuthTest extends TestCase {
 
         $mfa->requestContext()->setViewer(($this->user));
         $mfa->remove();
-        $this->assertEquals(0, $this->countTokens(), 'utest-remove-mfa');
+        $this->assertSame(0, $this->countTokens(), 'utest-remove-mfa');
         $mfaList = array_filter(
             $this->user->auditTrail()->fullEventList(),
             fn ($e) => $e['event'] === Enum\UserAuditEvent::mfa->value
@@ -85,7 +85,7 @@ class UserMultiFactorAuthTest extends TestCase {
         );
         $this->assertCount(4, $mfaList, 'utest-audit-mfa-list');
         $this->assertStringStartsWith('removed', $mfaList[0]['note'], 'utest-audit-mfa-0');
-        $this->assertEquals(
+        $this->assertSame(
             "used recovery token $burn from {$this->user->requestContext()->remoteAddr()}",
             $mfaList[1]['note'],
             'utest-audit-mfa-1'
@@ -97,11 +97,6 @@ class UserMultiFactorAuthTest extends TestCase {
     public function testQrCode(): void {
         $mfa = $this->user->MFA();
         $qrcode = $mfa->generateQrCode(secret: SITE_NAME, logo: QRCODE_LOGO);
-        $this->assertInstanceOf(
-            \Endroid\QrCode\Writer\Result\ResultInterface::class,
-            $qrcode,
-            'qrcode-instance-of',
-        );
         $this->assertGreaterThan(
             10000,
             strlen($qrcode->getDataUri()),

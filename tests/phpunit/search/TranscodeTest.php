@@ -68,7 +68,7 @@ class TranscodeTest extends TestCase {
 
         $this->search->setEncoding(BetterEncoding::any);
         $this->assertCount(1, $this->search->page(10, 0), 'searchtranscode-anyenc');
-        $this->assertEquals(['all' => 1, 'total_320' => 0, 'total_v0' => 1], $this->search->total(), 'searchtranscode-total');
+        $this->assertSame(['all' => 1, 'total_320' => 0, 'total_v0' => 1], $this->search->total(), 'searchtranscode-total');
     }
 
     public function testSearchTranscodeSearch(): void {

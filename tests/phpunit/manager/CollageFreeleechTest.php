@@ -64,7 +64,7 @@ class CollageFreeleechTest extends TestCase {
         $torMan = new Manager\Torrent();
         $idList = $this->collage->entryFlacList();
         $this->assertCount(4, $idList, 'collfree-flac-list');
-        $this->assertEquals(
+        $this->assertSame(
             4,
             $this->collage->setFreeleech(
                 leechType: LeechType::Free,
@@ -83,24 +83,24 @@ class CollageFreeleechTest extends TestCase {
                 fn ($id) => $torMan->findById($id)?->flush(),
                 $idList
             );
-            $this->assertEquals(
+            $this->assertSame(
                 LeechType::Free,
                 $torrentList[0]?->leechType(),
                 "collfree-t0-free-$n"
             );
-            $this->assertEquals(
+            $this->assertSame(
                 LeechType::Neutral,
                 $torrentList[1]?->leechType(),
                 "collfree-t1-neutral-$n"
             );
-            $this->assertEquals(
+            $this->assertSame(
                 LeechType::Normal,
                 $torrentList[2]?->leechType(),
                 "collfree-t2-normal-$n"
             );
         }
 
-        $this->assertEquals(
+        $this->assertSame(
             4,
             $this->collage->setFreeleech(
                 torMan:    $torMan,
@@ -121,7 +121,7 @@ class CollageFreeleechTest extends TestCase {
             ) {
                 ++$n;
                 $this->assertInstanceOf(Torrent::class, $torrent, "collfree-tgroup-found-$n");
-                $this->assertEquals(LeechType::Normal, $torrent->leechType(), "collfree-now-normal-$n");
+                $this->assertSame(LeechType::Normal, $torrent->leechType(), "collfree-now-normal-$n");
             }
         }
     }

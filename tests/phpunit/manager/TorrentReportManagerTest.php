@@ -99,22 +99,22 @@ class TorrentReportManagerTest extends TestCase {
         $this->assertCount(0, $report->externalLink(), 'trep-external-link');
         $this->assertCount(0, $report->trackList(), 'trep-track-list');
         $this->assertStringEndsWith("id={$report->id}", $report->location(), 'trep-location');
-        $this->assertEquals('phpunit other report', $report->reason(), 'trep-reason');
-        $this->assertEquals($this->userList[1]->id, $report->reporterId(), 'trep-reporter-id');
-        $this->assertEquals('New', $report->status(), 'trep-report-status');
-        $this->assertEquals('Other', $report->reportType()->name(), 'trep-report-type-name');
-        $this->assertEquals('other', $report->type(), 'trep-name');
-        $this->assertEquals($this->tgroup->torrentIdList()[2], $report->torrentId(), 'trep-torrent-id');
-        $this->assertEquals($this->tgroup->torrentIdList()[2], $report->torrent()?->id, 'trep-torrent-object');
+        $this->assertSame('phpunit other report', $report->reason(), 'trep-reason');
+        $this->assertSame($this->userList[1]->id, $report->reporterId(), 'trep-reporter-id');
+        $this->assertSame('New', $report->status(), 'trep-report-status');
+        $this->assertSame('Other', $report->reportType()->name(), 'trep-report-type-name');
+        $this->assertSame('other', $report->type(), 'trep-name');
+        $this->assertSame($this->tgroup->torrentIdList()[2], $report->torrentId(), 'trep-torrent-id');
+        $this->assertSame($this->tgroup->torrentIdList()[2], $report->torrent()?->id, 'trep-torrent-object');
 
-        $other = current(array_filter($manager->newSummary(), fn ($r) => $r['type'] === 'other'));
-        $this->assertEquals(1, $other['total'], 'trep-new-summary-other');
-        $this->assertEquals(
+        $other = array_first(array_filter($manager->newSummary(), fn ($r) => $r['type'] === 'other'));
+        $this->assertSame(1, $other['total'], 'trep-new-summary-other');
+        $this->assertSame(
             $extraIdList,
             $report->otherIdList(),
             'trep-other-id-list'
         );
-        $this->assertEquals(
+        $this->assertSame(
             $title,
             array_map(
                 fn ($t) => $t->remasterTitle(),
@@ -123,39 +123,39 @@ class TorrentReportManagerTest extends TestCase {
             'trep-other-torrent-list'
         );
 
-        $this->assertEquals(1, $report->claim($this->userList[0]), 'trep-claim');
+        $this->assertSame(1, $report->claim($this->userList[0]), 'trep-claim');
         $summary = $manager->inProgressSummary();
         $this->assertCount(1, $summary, 'trep-in-progress-total');
-        $this->assertEquals($this->userList[0]->id, $summary[0]['user_id'], 'trep-in-progress-mod');
-        $this->assertEquals(
+        $this->assertSame($this->userList[0]->id, $summary[0]['user_id'], 'trep-in-progress-mod');
+        $this->assertSame(
             1,
             $manager->totalReportsTorrent($torrent),
             'trep-in-progress-torrent',
         );
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $manager->totalReportsTGroup($torrent->group()),
             'trep-in-progress-tgroup',
         );
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $manager->totalReportsUploader($this->userList[0]),
             'trep-in-progress-uploader',
         );
 
-        $this->assertEquals('InProgress', $report->status(), 'trep-report-open-status');
-        $this->assertEquals(1, $report->addTorrentFlag(TorrentFlag::badFile, $this->userList[0]), 'trep-add-flag');
-        $this->assertEquals(1, $report->modifyComment('phpunit'), 'trep-modify-comment');
-        $this->assertEquals('phpunit', $report->comment(), 'trep-final-comment');
-        $this->assertEquals(1, $report->unclaim(), 'trep-claim');
+        $this->assertSame('InProgress', $report->status(), 'trep-report-open-status');
+        $this->assertSame(1, $report->addTorrentFlag(TorrentFlag::badFile, $this->userList[0]), 'trep-add-flag');
+        $this->assertSame(1, $report->modifyComment('phpunit'), 'trep-modify-comment');
+        $this->assertSame('phpunit', $report->comment(), 'trep-final-comment');
+        $this->assertSame(1, $report->unclaim(), 'trep-claim');
 
-        $this->assertEquals(1, $report->resolve('phpunit resolve'), 'trep-resolve');
-        $this->assertEquals('phpunit resolve', $report->comment(), 'trep-resolved-comment');
-        $this->assertEquals('', $report->message(), 'trep-message');
-        $this->assertEquals(1, $report->finalize('phpunit final message', 'phpunit final comment'), 'trep-finalize');
-        $this->assertEquals('phpunit final comment', $report->comment(), 'trep-final-comment');
-        $this->assertEquals('phpunit final message', $report->message(), 'trep-final-message');
-        $this->assertEquals('Resolved', $report->status(), 'trep-report-resolved-status');
+        $this->assertSame(1, $report->resolve('phpunit resolve'), 'trep-resolve');
+        $this->assertSame('phpunit resolve', $report->comment(), 'trep-resolved-comment');
+        $this->assertNull($report->message(), 'trep-message');
+        $this->assertSame(1, $report->finalize('phpunit final message', 'phpunit final comment'), 'trep-finalize');
+        $this->assertSame('phpunit final comment', $report->comment(), 'trep-final-comment');
+        $this->assertSame('phpunit final message', $report->message(), 'trep-final-message');
+        $this->assertSame('Resolved', $report->status(), 'trep-report-resolved-status');
     }
 
     public function testModeratorResolve(): void {
@@ -173,8 +173,8 @@ class TorrentReportManagerTest extends TestCase {
             otherIdList: '123 234',
             irc:         new Util\Irc(),
         );
-        $this->assertEquals(1, $report->moderatorResolve($this->userList[0], 'phpunit moderator resolve'), 'trep-moderator-resolve');
-        $this->assertEquals('phpunit moderator resolve', $report->comment(), 'trep-final-comment');
+        $this->assertSame(1, $report->moderatorResolve($this->userList[0], 'phpunit moderator resolve'), 'trep-moderator-resolve');
+        $this->assertSame('phpunit moderator resolve', $report->comment(), 'trep-final-comment');
 
         $this->assertCount(1, $manager->resolvedLastDay(), 'trep-resolve-day');
         $this->assertCount(1, $manager->resolvedLastWeek(), 'trep-resolve-week');
@@ -207,9 +207,9 @@ class TorrentReportManagerTest extends TestCase {
             'uploader'    => $this->userList[0],
             'report-type' => ['other', 'dupe'],
         ]);
-        $this->assertEquals(1, $manager->searchTotal(), 'trep-search-total');
+        $this->assertSame(1, $manager->searchTotal(), 'trep-search-total');
         $list = $manager->searchList(1, 0);
-        $this->assertEquals($report->id, $list[0]['report_id'], 'trep-search-report');
+        $this->assertSame($report->id, $list[0]['report_id'], 'trep-search-report');
     }
 
     public function testModifyReport(): void {
@@ -244,7 +244,7 @@ class TorrentReportManagerTest extends TestCase {
             otherIdList: '',
             irc:         new Util\Irc(),
         );
-        $this->assertEquals([], $torrent->labelList($this->userList[0]), 'uploader-report-label');
+        $this->assertSame([], $torrent->labelList($this->userList[0]), 'uploader-report-label');
 
         $urgent = $torMan->findById($torrentId);
         $this->assertInstanceOf(Torrent::class, $urgent, 'trep-urgent-find');
@@ -269,7 +269,7 @@ class TorrentReportManagerTest extends TestCase {
         $dupe = $manager->findById(1);
         $this->assertInstanceOf(Torrent\ReportType::class, $dupe, 'trep-dupe-find');
         $dupe->flush(); // to trigger coverage
-        $this->assertEquals(
+        $this->assertSame(
             'Dupe',
             $dupe->name(),
             'trep-type-find-by-id',
@@ -279,22 +279,22 @@ class TorrentReportManagerTest extends TestCase {
             $dupe->url(),
             'trep-type-url',
         );
-        $this->assertEquals(
+        $this->assertSame(
             'required',
             $dupe->needSitelink(),
             'trep-type-site-link',
         );
-        $this->assertEquals(
+        $this->assertSame(
             'dupe',
             $manager->findByName('Dupe')?->type(),
             'trep-type-find-by-name',
         );
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $manager->findByType('dupe')?->id,
             'trep-type-find-by-type',
         );
-        $this->assertEquals(
+        $this->assertSame(
             [true, false, 0],
             $dupe->resolveOptions(),
             'trep-resolve-options',
@@ -308,8 +308,8 @@ class TorrentReportManagerTest extends TestCase {
     public function testTorrentReportTypeHistory(): void {
         $manager = new Manager\Torrent\ReportType();
         $config  = $manager->findByType('description'); // a rarely used report type
-        $this->assertEquals('Applications', $config->categoryName(), 'trep-category-name');
-        $this->assertEquals(2, $config->categoryId(), 'trep-category-id');
+        $this->assertSame('Applications', $config->categoryName(), 'trep-category-name');
+        $this->assertSame(2, $config->categoryId(), 'trep-category-id');
         $initial = count($config->history());
 
         $old = $config->field('explanation');
@@ -323,11 +323,7 @@ class TorrentReportManagerTest extends TestCase {
             $config->setChangeset($this->userList[0], $changeset)->modify(),
             'trep-change',
         );
-        $this->assertEquals(
-            $initial + 1,
-            count($config->history()),
-            'trep-history'
-        );
+        $this->assertCount($initial + 1, $config->history(), 'trep-history');
         $this->assertStringContainsString(
             $add,
             $config->explanation(),

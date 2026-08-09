@@ -16,7 +16,7 @@ class TorManagerTest extends TestCase {
         $this->assertFalse($manager->isExitNode('0.0.0.0'), 'tornode-0000-exit-node');
 
         $this->assertFalse($manager->isExitNode('169.254.100.110'), 'tornode-not-exit-node');
-        $this->assertEquals(
+        $this->assertSame(
             2,
             $manager->add(implode(' ', $list) . ' 169.254.100.110 169.254.110.120'),
             'tornode-add-two'

@@ -19,12 +19,12 @@ class UserAdvancedTest extends TestCase {
 
     public function testSearchUserFuzzy(): void {
         $fuzzy = new Search\User('');
-        $this->assertEquals(
+        $this->assertSame(
             "f ~~* concat('%', ?::text, '%')",
             $fuzzy->matchField('f'),
             'usearch-fuzzy-match-field',
         );
-        $this->assertEquals(
+        $this->assertSame(
             "f ~~* concat(?::text, '%')",
             $fuzzy->leftMatch('f'),
             'usearch-fuzzy-match-left',
@@ -33,12 +33,12 @@ class UserAdvancedTest extends TestCase {
 
     public function testSearchUserRegexp(): void {
         $regexp = new Search\User('regexp');
-        $this->assertEquals(
+        $this->assertSame(
             "f ~* ?",
             $regexp->matchField('f'),
             'usearch-regexp-match-field',
         );
-        $this->assertEquals(
+        $this->assertSame(
             // FIXME: should be ^ anchored
             "f ~* ?",
             $regexp->leftMatch('f'),
@@ -48,12 +48,12 @@ class UserAdvancedTest extends TestCase {
 
     public function testSearchUserStrict(): void {
         $strict = new Search\User('strict');
-        $this->assertEquals(
+        $this->assertSame(
             "f = ?",
             $strict->matchField('f'),
             'usearch-strict-match-field',
         );
-        $this->assertEquals(
+        $this->assertSame(
             // FIXME: should be left substring
             "f = ?",
             $strict->leftMatch('f'),
@@ -63,7 +63,7 @@ class UserAdvancedTest extends TestCase {
 
     #[DataProvider('dataDate')]
     public function testSearchUserDate(string $name, string $compare, string $expected): void {
-        $this->assertEquals(
+        $this->assertSame(
             $expected,
             new Search\User('')->date('f', $compare),
             $name,
@@ -81,7 +81,7 @@ class UserAdvancedTest extends TestCase {
 
     #[DataProvider('dataOp')]
     public function testOp(string $name, string $compare, string $expected): void {
-        $this->assertEquals(
+        $this->assertSame(
             $expected,
             new Search\User('')->op('f', $compare),
             $name,

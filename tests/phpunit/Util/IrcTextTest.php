@@ -8,18 +8,18 @@ use Gazelle\Util\IrcText;
 
 class IrcTextTest extends TestCase {
     public function testIrcText(): void {
-        $this->assertEquals('abc', Irc::render('abc'), 'irc-plain');
-        $this->assertEquals(
+        $this->assertSame('abc', Irc::render('abc'), 'irc-plain');
+        $this->assertSame(
             '%02def%02',
             urlencode(Irc::render(IrcText::Bold, 'def', IrcText::Bold)),
             'irc-bold'
         );
-        $this->assertEquals(
+        $this->assertSame(
             '%1Dghi%1D',
             urlencode(Irc::render(IrcText::Italic, 'ghi', IrcText::Italic)),
             'irc-italic'
         );
-        $this->assertEquals(
+        $this->assertSame(
             'a%0345b%0378c',
             urlencode(Irc::render('a', IrcText::Jade, 'b', IrcText::Canary, 'c')),
             'irc-color'

@@ -36,16 +36,16 @@ class RiplogCollectionTest extends TestCase {
             'valid_log_eac.log',
         );
         $collection = $manager->collection($this->torrent);
-        $this->assertEquals(
+        $this->assertSame(
             $riplog->id,
             $collection->riplogList()[0]->id,
             'riplog-collection-list',
         );
 
         $this->assertTrue($collection->checksum(), 'logfilesummary-checksum');
-        $this->assertEquals('1', $collection->checksumStatus(), 'logfilesummary-checksum-status');
-        $this->assertEquals(100, $collection->overallScore(), 'logfilesummary-overall-score');
-        $this->assertEquals(1, $collection->total(), 'logfilesummary-total');
+        $this->assertSame('1', $collection->checksumStatus(), 'logfilesummary-checksum-status');
+        $this->assertSame(100, $collection->overallScore(), 'logfilesummary-overall-score');
+        $this->assertSame(1, $collection->total(), 'logfilesummary-total');
     }
 
     public function testDuplicateFilesIgnored(): void {
@@ -70,8 +70,8 @@ class RiplogCollectionTest extends TestCase {
         $collection = $manager->collection($this->torrent);
 
         $this->assertTrue($collection->checksum(), 'riplog-collection-checksum');
-        $this->assertEquals('1', $collection->checksumStatus(), 'riplog-collection-checksum-status');
-        $this->assertEquals(100, $collection->overallScore(), 'riplog-collection-overall-score');
-        $this->assertEquals(1, $collection->total(), 'riplog-collection-total');
+        $this->assertSame('1', $collection->checksumStatus(), 'riplog-collection-checksum-status');
+        $this->assertSame(100, $collection->overallScore(), 'riplog-collection-overall-score');
+        $this->assertSame(1, $collection->total(), 'riplog-collection-total');
     }
 }

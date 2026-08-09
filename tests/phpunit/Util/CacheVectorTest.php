@@ -11,12 +11,11 @@ define('TEST_EXPIRY', 3600);
 class CacheVectorTest extends TestCase {
     public function testCacheVector(): void {
         $bitvec = new Util\CacheVector(TEST_NAME, TEST_LENGTH, TEST_EXPIRY);
-        $this->assertInstanceOf(Util\CacheVector::class, $bitvec, 'bitvec-ctor');
         $this->assertTrue($bitvec->isEmpty(), 'bitvec-new-empty');
 
         $truth = [1, 5, 8, 20, 27];
         $set = $bitvec->init(0, $truth);
-        $this->assertEquals($set, count($truth), 'bitvec-init');
+        $this->assertCount($set, $truth, 'bitvec-init');
         $this->assertFalse($bitvec->isEmpty(), 'bitvec-not-empty');
 
         $this->assertTrue($bitvec->get(8), 'bitvec-get-8');

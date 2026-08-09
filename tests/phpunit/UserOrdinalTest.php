@@ -19,19 +19,19 @@ class UserOrdinalTest extends TestCase {
     public function testOrdinal(): void {
         $name = 'request-bounty-vote';
 
-        $this->assertEquals(
+        $this->assertSame(
             $this->user->ordinal()->defaultValue($name),
             $this->user->ordinal()->value($name),
             'ordinal-is-default',
         );
-        $this->assertEquals(1, $this->user->ordinal()->set($name, 200), 'ordinal-set');
-        $this->assertEquals(200, $this->user->ordinal()->value($name), 'ordinal-value');
+        $this->assertSame(1, $this->user->ordinal()->set($name, 200), 'ordinal-set');
+        $this->assertSame(200, $this->user->ordinal()->value($name), 'ordinal-value');
 
-        $this->assertEquals(2, $this->user->ordinal()->increment($name, 300), 'ordinal-increment');
-        $this->assertEquals(500, $this->user->ordinal()->value($name), 'ordinal-new-value');
+        $this->assertSame(2, $this->user->ordinal()->increment($name, 300), 'ordinal-increment');
+        $this->assertSame(500, $this->user->ordinal()->value($name), 'ordinal-new-value');
 
-        $this->assertEquals(1, $this->user->ordinal()->removeOrdinal($name), 'ordinal-remove');
-        $this->assertEquals(
+        $this->assertSame(1, $this->user->ordinal()->removeOrdinal($name), 'ordinal-remove');
+        $this->assertSame(
             $this->user->ordinal()->defaultValue($name),
             $this->user->ordinal()->value($name),
             'ordinal-again-default',
@@ -46,7 +46,7 @@ class UserOrdinalTest extends TestCase {
 
     public function testSetInexistent(): void {
         $this->user->ordinal();
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $this->user->ordinal()->set('@nope@', 123),
             'ordinal-set-inexistent',

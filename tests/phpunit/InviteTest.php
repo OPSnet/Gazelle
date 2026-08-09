@@ -30,9 +30,9 @@ class InviteTest extends TestCase {
         $this->assertFalse($this->user->permitted('users_edit_invites'),          'invite-users-edit-invites');
         $this->assertFalse($this->user->permitted('admin_manage_invite_source'),  'invite-admin-manage-invite-source');
 
-        $this->assertEquals(0, $this->user->stats()->invitedTotal(), 'invite-total-0');
-        $this->assertEquals(0, $this->user->unusedInviteTotal(), 'invite-unused-0');
-        $this->assertEquals(0, $this->user->invite()->pendingTotal(), 'invite-pending-0-initial');
+        $this->assertSame(0, $this->user->stats()->invitedTotal(), 'invite-total-0');
+        $this->assertSame(0, $this->user->unusedInviteTotal(), 'invite-unused-0');
+        $this->assertSame(0, $this->user->invite()->pendingTotal(), 'invite-pending-0-initial');
 
         // USER cannot invite, but MEMBER can
         $this->assertFalse($this->user->canInvite(),  'inviter-cannot-invite');
@@ -43,14 +43,14 @@ class InviteTest extends TestCase {
 
         // add some BP to play with
         $bonus = new User\Bonus($this->user);
-        $this->assertEquals(1, $bonus->addPoints(1_000_000), 'inviter-add-bp');
+        $this->assertSame(1, $bonus->addPoints(1_000_000), 'inviter-add-bp');
         $invite = new Manager\Bonus()->findBonusItemByLabel('invite');
-        $this->assertEquals(
+        $this->assertSame(
             Enum\BonusItemPurchaseStatus::success,
             $invite->purchase($this->user, $invite->price()),
             'inviter-purchase-invite'
         );
-        $this->assertEquals(1, $this->user->unusedInviteTotal(), 'inviter-unused-1');
+        $this->assertSame(1, $this->user->unusedInviteTotal(), 'inviter-unused-1');
 
         $this->assertTrue($this->user->invite()->issueInvite(), 'inviter-issue-true');
         $this->assertFalse($this->user->invite()->issueInvite(), 'inviter-decrement-none-left');
@@ -63,9 +63,9 @@ class InviteTest extends TestCase {
         $this->assertFalse($manager->emailExists($this->user, $email), 'invitee-email-not-pending');
         $invitation = $manager->create($this->user, $email, 'unittest notes', 'unittest reason', '');
         $this->assertInstanceOf(Invite::class, $invitation, 'inviter-invitee-created');
-        $this->assertEquals(1, $this->user->invite()->pendingTotal(), 'inviter-pending-1');
-        $this->assertEquals(0, $this->user->unusedInviteTotal(), 'inviter-unused-0-again');
-        $this->assertEquals(
+        $this->assertSame(1, $this->user->invite()->pendingTotal(), 'inviter-pending-1');
+        $this->assertSame(0, $this->user->unusedInviteTotal(), 'inviter-unused-0-again');
+        $this->assertSame(
             $invitation->email(),
             $this->user->invite()->pendingList()[$invitation->key()]['email'],
             'inviter-invitee-email',
@@ -74,14 +74,13 @@ class InviteTest extends TestCase {
         // respond to invite
         $this->assertTrue($manager->inviteExists($invitation->key()), 'invite-key-found');
         $this->invitee = Helper::makeUserByInvite('invitee.' . randomString(6), $invitation->key());
-        $this->assertInstanceOf(User::class, $this->invitee, 'invitee-class');
-        $this->assertEquals($this->user->id, $this->invitee->inviter()?->id, 'invitee-invited-by');
-        $this->assertEquals($this->user->id, $this->invitee->inviterId(), 'invitee-invited-id');
-        $this->assertEquals(1, $this->user->stats()->invitedTotal(), 'invite-total-1');
-        $this->assertEquals(0, $this->user->flush()->invite()->pendingTotal(), 'invite-pending-back-to-0');
+        $this->assertSame($this->user->id, $this->invitee->inviter()?->id, 'invitee-invited-by');
+        $this->assertSame($this->user->id, $this->invitee->inviterId(), 'invitee-invited-id');
+        $this->assertSame(1, $this->user->stats()->invitedTotal(), 'invite-total-1');
+        $this->assertSame(0, $this->user->flush()->invite()->pendingTotal(), 'invite-pending-back-to-0');
         $inviteList = $this->user->invite()->page('um.ID', 'ASC', 1, 0);
         $this->assertCount(1, $inviteList, 'invite-invite-list-total');
-        $this->assertEquals($this->invitee->id, $inviteList[0], 'invite-list-has-invitee');
+        $this->assertSame($this->invitee->id, $inviteList[0], 'invite-list-has-invitee');
 
         $this->assertTrue($this->invitee->isUnconfirmed(), 'invitee-unconfirmed');
         $this->assertInstanceOf(
@@ -92,25 +91,24 @@ class InviteTest extends TestCase {
 
         // invite tree functionality
         $inviteTree = new User\InviteTree($this->user);
-        $this->assertInstanceOf(User\InviteTree::class, $inviteTree, 'invite-tree-ctor');
         $this->assertTrue($inviteTree->hasInvitees(), 'invite-tree-has-invitees');
         $list = $inviteTree->inviteeList();
         $this->assertCount(1, $list, 'invite-tree-list');
-        $this->assertEquals($this->invitee->id, $list[0], 'invite-tree-user-id');
+        $this->assertSame($this->invitee->id, $list[0], 'invite-tree-user-id');
 
         // new invite tree functionality
         $summary = $inviteTree->summary();
         $this->assertCount(10, array_keys($summary), 'invite-tree-summary-keys');
-        $this->assertEquals(1, $summary['branch'], 'invite-tree-branch');
-        $this->assertEquals(1, $summary['depth'], 'invite-tree-depth');
-        $this->assertEquals(1, $summary['total'], 'invite-tree-total');
-        $this->assertEquals(0, $summary['disabled'], 'invite-tree-disabled');
-        $this->assertEquals(0, $summary['donor'], 'invite-tree-donor');
-        $this->assertEquals(0, $summary['downloaded'], 'invite-tree-downloaded');
-        $this->assertEquals(0, $summary['paranoid'], 'invite-tree-paranoid');
-        $this->assertEquals(STARTING_UPLOAD, $summary['direct']['up'], 'invite-tree-direct-up');
-        $this->assertEquals(STARTING_UPLOAD, $summary['uploaded'], 'invite-tree-uploaded');
-        $this->assertEquals(['User' => 1], $summary['userclass'], 'invite-tree-userclass');
+        $this->assertSame(1, $summary['branch'], 'invite-tree-branch');
+        $this->assertSame(1, $summary['depth'], 'invite-tree-depth');
+        $this->assertSame(1, $summary['total'], 'invite-tree-total');
+        $this->assertSame(0, $summary['disabled'], 'invite-tree-disabled');
+        $this->assertSame(0, $summary['donor'], 'invite-tree-donor');
+        $this->assertSame(0, $summary['downloaded'], 'invite-tree-downloaded');
+        $this->assertSame(0, $summary['paranoid'], 'invite-tree-paranoid');
+        $this->assertSame(STARTING_UPLOAD, $summary['direct']['up'], 'invite-tree-direct-up');
+        $this->assertSame(STARTING_UPLOAD, $summary['uploaded'], 'invite-tree-uploaded');
+        $this->assertSame(['User' => 1], $summary['userclass'], 'invite-tree-userclass');
         $this->assertCount(1, $inviteTree->inviteTree(), 'invite-tree-tree');
     }
 
@@ -136,7 +134,7 @@ class InviteTest extends TestCase {
             ->setInviteKey($invite->key())
             ->create();
 
-        $this->assertEquals(
+        $this->assertSame(
             $this->user->username(),
             $userMan->ancestry($this->invitee)[0]->username(),
             'invite-ancestry'
@@ -147,7 +145,7 @@ class InviteTest extends TestCase {
         $userMan = new Manager\User();
         $tracker = new Tracker();
 
-        $this->assertEquals(
+        $this->assertSame(
             "No action specified",
             new User\InviteTree($this->user)
             ->manipulate(
@@ -161,7 +159,7 @@ class InviteTest extends TestCase {
             'invite-tree-manip-none'
         );
 
-        $this->assertEquals(
+        $this->assertSame(
             "No invitees for {$this->user->username()}",
             new User\InviteTree($this->user)
             ->manipulate(
@@ -300,7 +298,7 @@ class InviteTest extends TestCase {
         ]);
         $this->assertNull(
             $inviteSourceMan->findSourceNameByUser($this->user),
-            'invite-source-inviter-source'
+            'invite-source-inviter-source',
         );
 
         // set up an invite source for an inviter
@@ -308,20 +306,20 @@ class InviteTest extends TestCase {
         $this->assertGreaterThanOrEqual(
             0,
             count($initialSource),
-            'invite-source-list-initial'
+            'invite-source-list-initial',
         );
 
         $sourceId = $inviteSourceMan->create('pu.' . randomString(6));
         $this->assertGreaterThan(0, $sourceId, 'invite-source-create');
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $inviteSourceMan->modifyInviterConfiguration($this->user, [$sourceId]),
-            'invite-source-inviter-assign'
+            'invite-source-inviter-assign',
         );
-        $this->assertEquals(
+        $this->assertCount(
             1 + count($initialSource),
-            count($inviteSourceMan->inviterConfiguration($this->user)),
-            'invite-source-inviter-assigned'
+            $inviteSourceMan->inviterConfiguration($this->user),
+            'invite-source-inviter-assigned',
         );
         $this->assertCount(
             1,
@@ -329,7 +327,7 @@ class InviteTest extends TestCase {
                 $inviteSourceMan->summaryByInviter(),
                 fn($s) => $s['user_id'] === $this->user->id
             ),
-            'invite-source-inviter-summary'
+            'invite-source-inviter-summary',
         );
         $config = $inviteSourceMan->inviterConfigurationActive($this->user);
         $this->assertCount(1, $config, 'invite-source-inviter-count');
@@ -347,7 +345,7 @@ class InviteTest extends TestCase {
             source: $sourceName,
         );
         $this->assertInstanceOf(Invite::class, $invite, 'invite-source-found');
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $inviteSourceMan->createPendingInviteSource($sourceId, $invite->key()),
             'invite-source-create-pending'
@@ -360,13 +358,13 @@ class InviteTest extends TestCase {
             ->setPassword(randomString(10))
             ->setInviteKey($invite->key())
             ->create();
-        $this->assertEquals(
+        $this->assertSame(
             $sourceName,
             $inviteSourceMan->findSourceNameByUser($this->invitee),
             'invitee-invite-source'
         );
-        $this->assertEquals($sourceName, $this->invitee->inviteSource(), 'invitee-source-name');
-        $this->assertEquals($profile, $this->invitee->externalProfile()->profile(), 'invite-source-profile');
+        $this->assertSame($sourceName, $this->invitee->inviteSource(), 'invitee-source-name');
+        $this->assertSame($profile, $this->invitee->externalProfile()->profile(), 'invite-source-profile');
         $this->assertStringContainsString(
             'phpunit notes',
             $this->invitee->auditTrail()->fullEventList()[0]['note'],
@@ -375,7 +373,7 @@ class InviteTest extends TestCase {
 
         $inviteeList = $inviteSourceMan->userSource($this->user);
         $this->assertCount(1, $inviteeList, 'invite-source-invited-list');
-        $this->assertEquals(
+        $this->assertSame(
             [
                 "user_id"          => $this->invitee->id,
                 "invite_source_id" => $sourceId,
@@ -389,7 +387,7 @@ class InviteTest extends TestCase {
             $inviteSourceMan->usageList(),
             fn ($s) => $s['invite_source_id'] === $sourceId
         ));
-        $this->assertEquals(
+        $this->assertSame(
             [
                 "invite_source_id" => $sourceId,
                 "name"             => $sourceName,
@@ -409,14 +407,14 @@ class InviteTest extends TestCase {
                 "profile" => $newProfile,
             ]
         ];
-        $this->assertEquals(
+        $this->assertSame(
             2,
             $inviteSourceMan->modifyInviteeSource($new),
             'invite-modify-invitee'
         );
-        $this->assertEquals($newProfile, $this->invitee->externalProfile()->profile(), 'invite-source-new-profile');
+        $this->assertSame($newProfile, $this->invitee->externalProfile()->profile(), 'invite-source-new-profile');
         $inviteeList = $inviteSourceMan->userSource($this->user);
-        $this->assertEquals(
+        $this->assertSame(
             [
                 "user_id"          => $this->invitee->id,
                 "invite_source_id" => null,
@@ -437,12 +435,12 @@ class InviteTest extends TestCase {
             ", $sourceId
         );
 
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $inviteSourceMan->modifyInviterConfiguration($this->user, []),
             'invite-source-user-clear'
         );
-        $this->assertEquals(1, $inviteSourceMan->remove($sourceId), 'invite-source-create-remove');
+        $this->assertSame(1, $inviteSourceMan->remove($sourceId), 'invite-source-create-remove');
     }
 
     public function testRemoveInvite(): void {
@@ -467,7 +465,7 @@ class InviteTest extends TestCase {
 
     public function testExpireInvite(): void {
         $this->user->setField('Invites', 1)->modify();
-        $this->assertEquals(1, $this->user->unusedInviteTotal(), 'invite-user-has-invite');
+        $this->assertSame(1, $this->user->unusedInviteTotal(), 'invite-user-has-invite');
         $manager = new Manager\Invite();
         $invite = $manager->create(
             $this->user,
@@ -476,7 +474,7 @@ class InviteTest extends TestCase {
             'unittest invite remove reason',
             ''
         );
-        $this->assertEquals(0, $this->user->unusedInviteTotal(), 'invite-user-all-used');
+        $this->assertSame(0, $this->user->unusedInviteTotal(), 'invite-user-all-used');
         // invites are not BaseObjects
         DB::DB()->prepared_query("
             UPDATE invites SET
@@ -484,9 +482,9 @@ class InviteTest extends TestCase {
             WHERE InviteKey = ?
             ", (string)$invite?->key()
         );
-        $this->assertEquals(1, DB::DB()->affected_rows(), 'invite-modify-expiry');
-        $this->assertEquals(1, $manager->expire(), 'invite-manager-expire');
-        $this->assertEquals(1, $this->user->flush()->unusedInviteTotal(), 'invite-user-invite-restored');
+        $this->assertSame(1, DB::DB()->affected_rows(), 'invite-modify-expiry');
+        $this->assertSame(1, $manager->expire(), 'invite-manager-expire');
+        $this->assertSame(1, $this->user->flush()->unusedInviteTotal(), 'invite-user-invite-restored');
     }
 
     public function testRevokeInvite(): void {
@@ -506,40 +504,40 @@ class InviteTest extends TestCase {
             'unittest reason',
             ''
         );
-        $this->assertEquals(
+        $this->assertSame(
             $initial + 1,
             $manager->totalPending(),
             'invite-total-pending-invites',
         );
-        $this->assertEquals(
+        $this->assertSame(
             $this->user->id,
             (int)$manager->findUserByKey((string)$invite?->key(), new Manager\User())?->id,
             'invite-manager-find-by-key',
         );
         $pending = $manager->pendingInvites(1, 0);
         $this->assertGreaterThan(0, count($pending), 'invite-list-pending');
-        $this->assertEquals(
+        $this->assertSame(
             ['user_id', 'ipaddr', 'key', 'expires', 'email', 'source_name'],
             array_keys($pending[0]),
             'invite-pending-array-keys',
         );
-        $this->assertEquals($this->user->id, $pending[0]['user_id'], 'invite-pending-id');
-        $this->assertEquals((string)$invite?->key(), $pending[0]['key'], 'invite-pending-id');
+        $this->assertSame($this->user->id, $pending[0]['user_id'], 'invite-pending-id');
+        $this->assertSame((string)$invite?->key(), $pending[0]['key'], 'invite-pending-id');
         $this->assertTrue(
             $manager->emailExists($this->user, $email),
             'invite-email-exists',
         );
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $this->user->invite()->revoke('nosuchthing'),
             'invite-revoke-inexistant',
         );
-        $this->assertEquals(
+        $this->assertSame(
             2,
             $this->user->invite()->revoke((string)$invite?->key()),
             'invite-revoke-existing',
         );
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $this->user->unusedInviteTotal(),
             'invite-unused-1',
@@ -549,7 +547,7 @@ class InviteTest extends TestCase {
     public function testEtm(): void {
         $this->user->setField('PermissionID', ELITE_TM)->modify();
 
-        $this->assertEquals('Elite TM', $this->user->userclassName(),              'etm-userclass-check');
+        $this->assertSame('Elite TM', $this->user->userclassName(),              'etm-userclass-check');
         $this->assertTrue($this->user->permitted('site_send_unlimited_invites'),   'etm-site-send-unlimited-invites');
         $this->assertFalse($this->user->permitted('site_can_invite_always'),       'etm-site-can-invite-always');
         $this->assertTrue(new Stats\Users()->newUsersAllowed($this->user),         'etm-new-users-allowed');

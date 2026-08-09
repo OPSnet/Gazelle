@@ -29,7 +29,7 @@ class BetterArtistTest extends TestCase {
             Enum\BetterFilter::any,
             $artistMan
         );
-        $this->assertEquals(
+        $this->assertSame(
             'artist',
             $better->mode(),
             'better-artist-description-mode'
@@ -41,7 +41,7 @@ class BetterArtistTest extends TestCase {
         );
         $better->setSearch($name);
         $total = $better->total();
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $total,
             'better-artist-description-any',
@@ -55,7 +55,7 @@ class BetterArtistTest extends TestCase {
         global $Cache;
         $snatched = new Better\ArtistDescription($this->user, Enum\BetterFilter::snatched, $artistMan);
         $Cache->delete_value($snatched->totalCacheKey());
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $snatched->total(),
             'better-artist-description-snatched-total',
@@ -63,7 +63,7 @@ class BetterArtistTest extends TestCase {
 
         $uploaded = new Better\ArtistDescription($this->user, Enum\BetterFilter::uploaded, $artistMan);
         $Cache->delete_value($uploaded->totalCacheKey());
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $uploaded->total(),
             'better-artist-description-uploaded-total',
@@ -83,7 +83,7 @@ class BetterArtistTest extends TestCase {
         );
         $discogs->setSearch($name);
         $total = $discogs->total();
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $total,
             'better-artist-discogs-any',
@@ -101,7 +101,7 @@ class BetterArtistTest extends TestCase {
         $this->artist = $artistMan->create($name);
 
         $better = new Better\ArtistImage($this->user, Enum\BetterFilter::any, $artistMan);
-        $this->assertEquals(
+        $this->assertSame(
             'artist',
             $better->mode(),
             'better-artist-image-mode',
@@ -113,7 +113,7 @@ class BetterArtistTest extends TestCase {
         );
         $better->setSearch($name);
         $total = $better->total();
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $total,
             'better-artist-image-all',

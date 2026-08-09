@@ -16,16 +16,16 @@ class BitcoinTest extends TestCase {
         $addr = $b->address($user->id);
         $addr2 = $b->address($user->id);
 
-        $this->assertEquals($addr, $addr2, 'bitcoin-deterministic-address');
-        $this->assertEquals('bc1qseej7kpuldfjjmedq5ehkpd0jqadxsx4j0zkqk', $addr, 'bitcoin-verify-addr');
+        $this->assertSame($addr, $addr2, 'bitcoin-deterministic-address');
+        $this->assertSame('bc1qseej7kpuldfjjmedq5ehkpd0jqadxsx4j0zkqk', $addr, 'bitcoin-verify-addr');
 
-        $this->assertEquals($user->id, $b->findUserIdbyAddress($addr), 'bitcoin-lookup-addr');
+        $this->assertSame($user->id, $b->findUserIdbyAddress($addr), 'bitcoin-lookup-addr');
         $this->assertTrue($b->invalidate($user->id), 'bitcoin-invalidate-success');
         $this->assertFalse($b->invalidate($user->id), 'bitcoin-invalidate-fail');
         $this->assertNull($b->findUserIdbyAddress($addr), 'bitcoin-lookup-addr-fail');
 
         $newAddr = $b->address($user->id);
-        $this->assertEquals('bc1qxpfasx86cav34eupzkxnjdsx7r9sn2490kepjx', $newAddr, 'bitcoin-verify-addr2');
+        $this->assertSame('bc1qxpfasx86cav34eupzkxnjdsx7r9sn2490kepjx', $newAddr, 'bitcoin-verify-addr2');
         $this->assertTrue($b->invalidate($user->id), 'bitcoin-invalidate-reinvalidate');
 
         $user->remove();
@@ -39,7 +39,7 @@ class BitcoinTest extends TestCase {
 
         $user = Helper::makeUser('user.' . randomString(10), 'bitcoinxpub');
         $addr = $b->address($user->id);
-        $this->assertEquals('1JdkxJzyGgUB9m77GsmRZExxLeizmxtQsq', $addr, 'bitcoin-verify-xpub');
+        $this->assertSame('1JdkxJzyGgUB9m77GsmRZExxLeizmxtQsq', $addr, 'bitcoin-verify-xpub');
         $this->assertTrue($b->invalidate($user->id), 'bitcoin-invalidate-xpub'); // cleanup
         $user->remove();
     }
@@ -52,7 +52,7 @@ class BitcoinTest extends TestCase {
 
         $user = Helper::makeUser('user.' . randomString(10), 'bitcoinypub');
         $addr = $b->address($user->id);
-        $this->assertEquals('3DYoBqQ5N6dADzyQjy9FT1Ls4amiYVaqTG', $addr, 'bitcoin-verify-ypub');
+        $this->assertSame('3DYoBqQ5N6dADzyQjy9FT1Ls4amiYVaqTG', $addr, 'bitcoin-verify-ypub');
         $this->assertTrue($b->invalidate($user->id), 'bitcoin-invalidate-ypub'); // cleanup
         $user->remove();
     }

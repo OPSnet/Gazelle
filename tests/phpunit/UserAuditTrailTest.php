@@ -20,26 +20,21 @@ class UserAuditTrailTest extends TestCase {
 
     public function testAuditTrailCreate(): void {
         $this->user = Helper::makeUser('uat.' . randomString(10), 'uat');
-        $this->assertInstanceOf(
-            \Gazelle\User\AuditTrail::class,
-            $this->user->auditTrail(),
-            'uat-instanceof',
-        );
 
         $auditTrail = $this->user->auditTrail();
         $id1 = $auditTrail->addEvent(UserAuditEvent::staffNote, 'phpunit first');
         $this->assertGreaterThan(0, $id1, 'uat-insert');
-        $this->assertEquals($id1, $auditTrail->lastEventId(), 'uat-last-event');
+        $this->assertSame($id1, $auditTrail->lastEventId(), 'uat-last-event');
         $id2 = $auditTrail->addEvent(UserAuditEvent::staffNote, 'phpunit second');
-        $this->assertEquals($id1 + 1, $id2, 'uat-second');
+        $this->assertSame($id1 + 1, $id2, 'uat-second');
 
         $this->assertCount(3, $auditTrail->fullEventList(), 'uat-event-list');
-        $this->assertEquals(1, $auditTrail->removeEvent($id1), 'uat-event-remove');
+        $this->assertSame(1, $auditTrail->removeEvent($id1), 'uat-event-remove');
         $this->assertCount(2, $auditTrail->fullEventList(), 'uat-new-event-list');
 
-        $this->assertEquals(2, $auditTrail->resetAuditTrail(), 'uat-remove');
+        $this->assertSame(2, $auditTrail->resetAuditTrail(), 'uat-remove');
         $this->assertCount(0, $auditTrail->fullEventList(), 'uat-reset');
-        $this->assertEquals(0, $auditTrail->lastEventId(), 'uat-no-last-event');
+        $this->assertSame(0, $auditTrail->lastEventId(), 'uat-no-last-event');
     }
 
     public function testAuditTrailAbsent(): void {
@@ -73,20 +68,20 @@ class UserAuditTrailTest extends TestCase {
         $auditTrail->resetAuditTrail();
         $id1 = $auditTrail->addEvent(UserAuditEvent::staffNote, 'phpunit first');
         $id2 = $auditTrail->addEvent(UserAuditEvent::staffNote, 'phpunit second');
-        $this->assertEquals(
+        $this->assertSame(
             2,
             $auditTrail->modifyEventList([$id1, $id2], 'phpunit rewrite', $this->user),
             'uat-modify-history'
         );
         $eventList = $auditTrail->fullEventList();
         $this->assertCount(1, $eventList, 'uat-after-modify');
-        $this->assertEquals($this->user->id, $eventList[0]['id_user_creator'], 'uat-creator-after-modify');
-        $this->assertEquals(
+        $this->assertSame($this->user->id, $eventList[0]['id_user_creator'], 'uat-creator-after-modify');
+        $this->assertSame(
             1,
             $auditTrail->modifyEventList([$id1], 'phpunit second rewrite', $this->user),
             'uat-remodify-history'
         );
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $auditTrail->modifyEventList([$id1], '', $this->user),
             'uat-remove-history'
@@ -96,16 +91,16 @@ class UserAuditTrailTest extends TestCase {
 
     public function testUserUpdate(): void {
         $this->user  = Helper::makeUser('uat.' . randomString(10), 'uat');
-        $this->assertEquals($this->user->updated(), $this->user->created(), 'user-updated-is-created');
+        $this->assertSame($this->user->updated(), $this->user->created(), 'user-updated-is-created');
         $checkpoint = $this->user->checkpoint();
         Helper::sleepTick(); // ensure created != updated
         $this->user->setField('Username', $this->user->username() . 'x')->modify();
-        $this->assertNotEquals($this->user->updated(), $this->user->created(), 'user-updated-after-created');
-        $this->assertNotEquals($checkpoint, $this->user->checkpoint(), 'user-new-checkpoint');
+        $this->assertNotSame($this->user->updated(), $this->user->created(), 'user-updated-after-created');
+        $this->assertNotSame($checkpoint, $this->user->checkpoint(), 'user-new-checkpoint');
 
         $checkpoint = $this->user->checkpoint();
         $this->user->auditTrail()->addEvent(UserAuditEvent::staffNote, 'update');
-        $this->assertNotEquals($checkpoint, $this->user->checkpoint(), 'user-newer-checkpoint');
+        $this->assertNotSame($checkpoint, $this->user->checkpoint(), 'user-newer-checkpoint');
     }
 
     public function testAuditTrailSearch(): void {
@@ -130,7 +125,7 @@ class UserAuditTrailTest extends TestCase {
         ");
         $after = new Search\AuditTrail();
         $after->setCreatedAfter(date('Y-m-d H:i:s', time() - 3600));
-        $this->assertEquals(
+        $this->assertSame(
             7, // 2 activity, 2 userclass + staff note + 2 invite
             $after->total(),
             'ats-after-total',
@@ -142,43 +137,43 @@ class UserAuditTrailTest extends TestCase {
             array_keys($page[0]),
             'ats-page-keys',
         );
-        $item = current(array_filter(
+        $item = array_first(array_filter(
             $page,
             fn ($a) => $a['event'] === UserAuditEvent::staffNote->value,
         ));
-        $this->assertEquals($staffNote, $item['note'], 'ats-user-note');
+        $this->assertSame($staffNote, $item['note'], 'ats-user-note');
 
         $before = new Search\AuditTrail();
         $before->setCreatedBefore('2000-01-01 00:00:00');
-        $this->assertEquals(0, $before->total(), 'ats-before-total');
+        $this->assertSame(0, $before->total(), 'ats-before-total');
 
         $author = new Search\AuditTrail();
         $author->setAuthorList([$this->admin]);
-        $this->assertEquals(1, $author->total(), 'ats-author-total');
-        $item = current(array_filter(
+        $this->assertSame(1, $author->total(), 'ats-author-total');
+        $item = array_first(array_filter(
             $author->page(2, 0),
             fn ($a) => $a['event'] === UserAuditEvent::staffNote->value,
         ));
-        $this->assertEquals($staffNote, $item['note'], 'ats-author-note');
+        $this->assertSame($staffNote, $item['note'], 'ats-author-note');
 
         $note = new Search\AuditTrail();
         $note->setNote($random, 'webquery');
-        $this->assertEquals(1, $note->total(), 'ats-note-total');
-        $item = current(array_filter(
+        $this->assertSame(1, $note->total(), 'ats-note-total');
+        $item = array_first(array_filter(
             $note->page(2, 0),
             fn ($a) => $a['event'] === UserAuditEvent::staffNote->value,
         ));
-        $this->assertEquals($staffNote, $item['note'], 'ats-note-note');
+        $this->assertSame($staffNote, $item['note'], 'ats-note-note');
 
         $user = new Search\AuditTrail();
         $user->setUserList([$this->user]);
-        $this->assertEquals(4, $user->total(), 'ats-user-total');
+        $this->assertSame(4, $user->total(), 'ats-user-total');
         $this->assertCount(4, $user->page(5, 0), 'ats-user-page');
 
         $event = new Search\AuditTrail();
         $event->setEventList(['activity', 'userclass']);
         $event->setCreatedAfter(date('Y-m-d H:i:s', time() - 3600));
-        $this->assertEquals(4, $event->total(), 'ats-event-total');
+        $this->assertSame(4, $event->total(), 'ats-event-total');
         $this->assertCount(4, $event->page(5, 0), 'ats-event-page');
     }
 }

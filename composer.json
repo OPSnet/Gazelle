@@ -39,14 +39,15 @@
     "robmorgan/phinx": "^0.16",
     "robthree/twofactorauth": "^1.8.2",
     "sad_spirit/pg_wrapper": "^3",
-    "twig/twig": "^3.20",
+    "twig/twig": "^3.28",
     "whichbrowser/parser": "^2.1.8"
   },
   "require-dev": {
-    "brianium/paratest": "^7.22",
+    "brianium/paratest": "^7.24",
     "phpmd/phpmd": "@stable",
-    "phpstan/phpstan": "^2.2.5",
+    "phpstan/phpstan": "^2.2.8",
     "phpstan/extension-installer": "^1.4",
+    "phpstan/phpstan-phpunit": "^2.0",
     "phpstan/phpstan-strict-rules": "^2.0",
     "phpunit/phpcov": "^13",
     "phpunit/php-code-coverage": "^14",

@@ -18,26 +18,26 @@ class ReportAutoTypeTest extends TestCase {
 
     public function testCreate(): void {
         $type = $this->ratMan->create('type name', 'useful description');
-        $this->assertEquals('type name', $type->name(), 'ratman-create-nocat2');
+        $this->assertSame('type name', $type->name(), 'ratman-create-nocat2');
 
         $catId = $this->ratMan->createCategory('somecategory');
         $this->assertGreaterThan(0, $catId, 'ratman-create-cat-valid');
 
         $type2 = $this->ratMan->create('type2 name', 'useful description', 'somecategory');
-        $this->assertEquals($catId, $type2->categoryId(), 'ratman-create-cat2');
+        $this->assertSame($catId, $type2->categoryId(), 'ratman-create-cat2');
 
         $type3 = $this->ratMan->create('type3 name', 'useful description', 'newcat');
-        $this->assertEquals('newcat', $type3->category(), 'ratman-create-newcat2');
+        $this->assertSame('newcat', $type3->category(), 'ratman-create-newcat2');
 
         $type4 = $this->ratMan->create('type4 name', 'useful description', 'newcat');
-        $this->assertEquals('newcat', $type4->category(), 'ratman-create-newcat4');
-        $this->assertEquals($type3->categoryId(), $type4->categoryId(), 'ratman-create-newcat5');
+        $this->assertSame('newcat', $type4->category(), 'ratman-create-newcat4');
+        $this->assertSame($type3->categoryId(), $type4->categoryId(), 'ratman-create-newcat5');
 
         $type4_n = $this->ratMan->findById($type4->id);
         $this->assertInstanceOf(ReportAuto\Type::class, $type4_n, 'ratman-find-instance-n');
-        $this->assertEquals($type4, $type4_n, 'ratman-find-id');
+        $this->assertSame($type4, $type4_n, 'ratman-find-id');
         $type4_nn = $this->ratMan->findByName($type4->name());
         $this->assertInstanceOf(ReportAuto\Type::class, $type4_nn, 'ratman-find-instance-nn');
-        $this->assertEquals($type4, $type4_nn, 'ratman-find-name');
+        $this->assertSame($type4, $type4_nn, 'ratman-find-name');
     }
 }

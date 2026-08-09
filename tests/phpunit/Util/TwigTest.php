@@ -33,19 +33,19 @@ class TwigTest extends TestCase {
 \$('#id').click(function () {\$('#id').frob(); return false;});
 })</script>
 END;
-        $this->assertEquals($expected, $twig->createTemplate('{{ dom.emit|raw }}')->render(), 'twig-dominator');
+        $this->assertSame($expected, $twig->createTemplate('{{ dom.emit|raw }}')->render(), 'twig-dominator');
     }
 
     public function testFilter(): void {
         $article = self::twig('{{ word|article }}');
-        $this->assertEquals('a', $article->render(['word' => 'consonant']), 'twig-article-a');
-        $this->assertEquals('an', $article->render(['word' => 'anticonsonant']), 'twig-article-an');
+        $this->assertSame('a', $article->render(['word' => 'consonant']), 'twig-article-a');
+        $this->assertSame('an', $article->render(['word' => 'anticonsonant']), 'twig-article-an');
 
-        $this->assertEquals('YmxvYg', self::twig('{{ b|b64 }}')->render(['b' => 'blob']), 'twig-b64');
+        $this->assertSame('YmxvYg', self::twig('{{ b|b64 }}')->render(['b' => 'blob']), 'twig-b64');
 
         // badge_list is weird
 
-        $this->assertEquals(
+        $this->assertSame(
             '<strong>bold</strong>',
             self::twig('{{ text|bb_format }}')->render(['text' => '[b]bold[/b]']),
             'twig-bb-format'
@@ -66,12 +66,12 @@ END;
         }
 
         $checked = self::twig('{%- from "macro/form.twig" import checked -%}<input type="checkbox" name="test"{{ checked(truth) }}>');
-        $this->assertEquals(
+        $this->assertSame(
             '<input type="checkbox" name="test" checked>',
             $checked->render(['truth' => true]),
             'twig-checked-true'
         );
-        $this->assertEquals(
+        $this->assertSame(
             '<input type="checkbox" name="test">',
             $checked->render(['truth' => false]),
             'twig-checked-false'
@@ -82,41 +82,41 @@ END;
             'beta'  => ['dbColumn' => 'two', 'defaultSort' => 'desc', 'text' => 'Second'],
         ]);
         $heading = self::twig('{{ heading|column("alpha") }}');
-        $this->assertEquals(
+        $this->assertSame(
             '<a href="?order=alpha&amp;sort=asc">First</a> ↑',
             $heading->render(['heading' => $sth]),
             'twig-heading'
         );
 
         $linkify = self::twig('{{ url|linkify }}');
-        $this->assertEquals(
+        $this->assertSame(
             '<a href="/index.php">/index.php</a>',
             $linkify->render(['url' => '/index.php']),
             'twig-linkify-index'
         );
-        $this->assertEquals(
+        $this->assertSame(
             '<a href="' . SITE_URL . '/index.php">' . SITE_URL . '/index.php</a>',
             $linkify->render(['url' => SITE_URL . '/index.php']),
             'twig-linkify-site-index'
         );
 
-        $this->assertEquals('3.00 MiB', self::twig('{{ size|octet_size }}')->render(['size' => 1024 * 1024 * 3]), 'twig-octet-3.00MiB');
-        $this->assertEquals('3 MiB',    self::twig('{{ size|octet_size(0) }}')->render(['size' => 1024 * 1024 * 3]), 'twig-octet-3MiB');
-        $this->assertEquals('3.675 GiB', self::twig('{{ size|octet_size(3) }}')->render(['size' => 1024 * 1024 * 1024 * 3.675]), 'twig-octet-3.675GiB');
-        $this->assertEquals('3.68 GiB',  self::twig('{{ size|octet_size(2) }}')->render(['size' => 1024 * 1024 * 1024 * 3.675]), 'twig-octet-3.68GiB');
-        $this->assertEquals('3.7 GiB',   self::twig('{{ size|octet_size(1) }}')->render(['size' => 1024 * 1024 * 1024 * 3.675]), 'twig-octet-3.7GiB');
-        $this->assertEquals('4 GiB',     self::twig('{{ size|octet_size(0) }}')->render(['size' => 1024 * 1024 * 1024 * 3.675]), 'twig-octet-4GiB');
+        $this->assertSame('3.00 MiB', self::twig('{{ size|octet_size }}')->render(['size' => 1024 * 1024 * 3]), 'twig-octet-3.00MiB');
+        $this->assertSame('3 MiB',    self::twig('{{ size|octet_size(0) }}')->render(['size' => 1024 * 1024 * 3]), 'twig-octet-3MiB');
+        $this->assertSame('3.675 GiB', self::twig('{{ size|octet_size(3) }}')->render(['size' => 1024 * 1024 * 1024 * 3.675]), 'twig-octet-3.675GiB');
+        $this->assertSame('3.68 GiB',  self::twig('{{ size|octet_size(2) }}')->render(['size' => 1024 * 1024 * 1024 * 3.675]), 'twig-octet-3.68GiB');
+        $this->assertSame('3.7 GiB',   self::twig('{{ size|octet_size(1) }}')->render(['size' => 1024 * 1024 * 1024 * 3.675]), 'twig-octet-3.7GiB');
+        $this->assertSame('4 GiB',     self::twig('{{ size|octet_size(0) }}')->render(['size' => 1024 * 1024 * 1024 * 3.675]), 'twig-octet-4GiB');
 
-        $this->assertEquals('',   self::twig('{{ number|plural }}')->render(['number' => 1]), 'twig-plural-1');
-        $this->assertEquals('s',  self::twig('{{ number|plural }}')->render(['number' => 2]), 'twig-plural-2');
-        $this->assertEquals('es', self::twig('{{ number|plural("es") }}')->render(['number' => 3]), 'twig-plural-3');
+        $this->assertSame('',   self::twig('{{ number|plural }}')->render(['number' => 1]), 'twig-plural-1');
+        $this->assertSame('s',  self::twig('{{ number|plural }}')->render(['number' => 2]), 'twig-plural-2');
+        $this->assertSame('es', self::twig('{{ number|plural("es") }}')->render(['number' => 3]), 'twig-plural-3');
 
-        $this->assertEquals('',           self::twig('{{ value|repeat(0) }}')->render(['value' => 'go']), 'twig-repeat-0');
-        $this->assertEquals('gogo',       self::twig('{{ value|repeat(2) }}')->render(['value' => 'go']), 'twig-repeat-2');
-        $this->assertEquals('gogogogogo', self::twig('{{ value|repeat(5) }}')->render(['value' => 'go']), 'twig-repeat-5');
-        $this->assertEquals('gogogo',     self::twig('{{ value|repeat(n) }}')->render(['value' => 'go', 'n' => 3]), 'twig-repeat-3');
+        $this->assertSame('',           self::twig('{{ value|repeat(0) }}')->render(['value' => 'go']), 'twig-repeat-0');
+        $this->assertSame('gogo',       self::twig('{{ value|repeat(2) }}')->render(['value' => 'go']), 'twig-repeat-2');
+        $this->assertSame('gogogogogo', self::twig('{{ value|repeat(5) }}')->render(['value' => 'go']), 'twig-repeat-5');
+        $this->assertSame('gogogo',     self::twig('{{ value|repeat(n) }}')->render(['value' => 'go', 'n' => 3]), 'twig-repeat-3');
 
-        $this->assertEquals('abc &quot;def&quot;…', self::twig('{{ value|shorten(10) }}')->render(['value' => 'abc "def" ghi']), 'twig-shorten-10');
+        $this->assertSame('abc &quot;def&quot;…', self::twig('{{ value|shorten(10) }}')->render(['value' => 'abc "def" ghi']), 'twig-shorten-10');
 
         $this->assertMatchesRegularExpression(
             '@^<span class="time tooltip" title="[^"]+">1 hour ago</span>$@',
@@ -124,13 +124,13 @@ END;
             'twig-time-diff'
         );
 
-        $this->assertEquals(
+        $this->assertSame(
             '2h7s',
             self::twig('{{ value|time_compact }}')->render(['value' => 3600 * 2 + 7]),
             'twig-time-interval'
         );
 
-        $this->assertEquals(
+        $this->assertSame(
             '2',
             self::twig('{{ value|token_count }}')->render([
                 'value' => new Manager\SiteOption()->freeTokenSize() * 2 - 1
@@ -138,7 +138,7 @@ END;
             'twig-token-count-2'
         );
 
-        $this->assertEquals(
+        $this->assertSame(
             '3',
             self::twig('{{ value|token_count }}')->render([
                 'value' => new Manager\SiteOption()->freeTokenSize() * 2 + 1
@@ -146,14 +146,14 @@ END;
             'twig-token-count-3'
         );
 
-        $this->assertEquals('✅', self::twig('{{ value|truth }}')->render(['value' => true]), 'twig-truth-true');
-        $this->assertEquals('❌', self::twig('{{ value|truth }}')->render(['value' => false]), 'twig-truth-false');
+        $this->assertSame('✅', self::twig('{{ value|truth }}')->render(['value' => true]), 'twig-truth-true');
+        $this->assertSame('❌', self::twig('{{ value|truth }}')->render(['value' => false]), 'twig-truth-false');
 
-        $this->assertEquals('First time', self::twig('{{ value|ucfirst }}')->render(['value' => 'first time']), 'twig-ucfirst-1');
-        $this->assertEquals('A Day In The Life', self::twig('{{ value|ucfirstall }}')->render(['value' => 'a day in the life']), 'twig-ucfirstall');
+        $this->assertSame('First time', self::twig('{{ value|ucfirst }}')->render(['value' => 'first time']), 'twig-ucfirst-1');
+        $this->assertSame('A Day In The Life', self::twig('{{ value|ucfirstall }}')->render(['value' => 'a day in the life']), 'twig-ucfirstall');
 
         Util\Twig::setViewer($this->user);
-        $this->assertEquals(
+        $this->assertSame(
             "<a href=\"user.php?id={$this->user->id}\">{$this->user->username()}</a>",
             self::twig('{{ user_id|user_url }}')->render(['user_id' => $this->user->id]),
             'twig-user-url'
@@ -172,7 +172,7 @@ END;
         );
 
         $status = self::twig('{{ user_id|user_status(viewer) }}');
-        $this->assertEquals(
+        $this->assertSame(
             "<a target=\"_blank\" href=\"donate.php\"><img class=\"donor_icon tooltip\" src=\"/static/common/symbols/donor_6.png\" title=\"Donor\"></a>",
             $status->render(['user_id' => $this->user->id, 'viewer' => $this->user]),
             'twig-user-status'
@@ -242,88 +242,88 @@ END;
         Base::staticRequestContext()->setSessionId($current['SessionID']);
         $this->assertStringEndsWith("</body>\n</html>\n", self::twig('{{ footer() }}')->render(), 'twig-function-footer');
 
-        $this->assertEquals(
+        $this->assertSame(
             'http://localhost/?arg=abc',
             self::twig('{{ build_url("http://localhost/", {"arg": arg}) }}')
                 ->render(['arg' => 'abc']),
             'twig-function-build-url-1'
         );
-        $this->assertEquals(
+        $this->assertSame(
             'http://localhost/?arg=abc&amp;id=10',
             self::twig('{{ build_url("http://localhost/", {"arg": arg, "id": id}) }}')
                 ->render(['arg' => 'abc', 'id' => 10]),
             'twig-function-build-url-2'
         );
-        $this->assertEquals(
+        $this->assertSame(
             'http://localhost/index?x=123&amp;arg=def',
             self::twig('{{ build_url("http://localhost/index?x=123", {"arg": arg}) }}')
                 ->render(['arg' => 'def']),
             'twig-function-build-url-3'
         );
-        $this->assertEquals(
+        $this->assertSame(
             'http://localhost/index?x=123&amp;arg=def&amp;id=20',
             self::twig('{{ build_url("http://localhost/index?x=123", {"arg": arg, "id": id}) }}')
                 ->render(['arg' => 'def', 'id' => 20]),
             'twig-function-build-url-4'
         );
 
-        $this->assertEquals(
+        $this->assertSame(
             '127.0.0.1 <a href="user.php?action=search&amp;ip_history=on&amp;matchtype=strict&amp;ip=127.0.0.1" title="Search" class="brackets tooltip">S</a>',
             self::twig('{{ ipaddr(ip) }}')->render(['ip' => '127.0.0.1']),
             'twig-function-ipaddr'
         );
 
         // these will fail many, many, many years from now
-        $this->assertEquals(6, strlen(self::twig('{{ mtime(asset) }}')->render(['asset' => 'blank.gif'])), 'twig-function-mtime-file');
-        $this->assertEquals(6, strlen(self::twig('{{ mtime_scss(asset) }}')->render(['asset' => 'global.scss'])), 'twig-function-mtime-scss');
+        $this->assertSame(6, strlen(self::twig('{{ mtime(asset) }}')->render(['asset' => 'blank.gif'])), 'twig-function-mtime-file');
+        $this->assertSame(6, strlen(self::twig('{{ mtime_scss(asset) }}')->render(['asset' => 'global.scss'])), 'twig-function-mtime-scss');
 
-        $this->assertEquals(
+        $this->assertSame(
             '<span class="tooltip r20" title="2.00000">2.00</span>',
             self::twig('{{ ratio(up, down) }}')->render(['up' => 100, 'down' => 50]),
             'twig-function-ratio-2'
         );
-        $this->assertEquals(
+        $this->assertSame(
             '<span class="tooltip r10" title="1.00000">1.00</span>',
             self::twig('{{ ratio(up, down) }}')->render(['up' => 100, 'down' => 100]),
             'twig-function-ratio-1'
         );
-        $this->assertEquals(
+        $this->assertSame(
             '<span class="tooltip r05" title="0.50000">0.50</span>',
             self::twig('{{ ratio(up, down) }}')->render(['up' => 50, 'down' => 100]),
             'twig-function-ratio-0.5'
         );
-        $this->assertEquals(
+        $this->assertSame(
             '<span class="tooltip r00" title="0.00000">0.00</span>',
             self::twig('{{ ratio(up, down) }}')->render(['up' => 0, 'down' => 100]),
             'twig-function-ratio-0'
         );
-        $this->assertEquals(
+        $this->assertSame(
             '<span class="tooltip r99" title="Infinite">∞</span>',
             self::twig('{{ ratio(up, down) }}')->render(['up' => 50, 'down' => 0]),
             'twig-function-ratio-infin'
         );
 
-        $this->assertEquals(120, self::twig('{{ upscale(value) }}')->render(['value' => 120]), 'twig-upscale-120');
-        $this->assertEquals(130, self::twig('{{ upscale(value) }}')->render(['value' => 121]), 'twig-upscale-121');
-        $this->assertEquals(130, self::twig('{{ upscale(value) }}')->render(['value' => 129]), 'twig-upscale-129');
+        $this->assertSame('120', self::twig('{{ upscale(value) }}')->render(['value' => 120]), 'twig-upscale-120');
+        $this->assertSame('130', self::twig('{{ upscale(value) }}')->render(['value' => 121]), 'twig-upscale-121');
+        $this->assertSame('130', self::twig('{{ upscale(value) }}')->render(['value' => 129]), 'twig-upscale-129');
 
-        $this->assertEquals(48000, self::twig('{{ upscale(value) }}')->render(['value' => 47133]), 'twig-upscale-47133');
+        $this->assertSame('48000', self::twig('{{ upscale(value) }}')->render(['value' => 47133]), 'twig-upscale-47133');
     }
 
     public function testTwigTestTest(): void {
-        $this->assertEquals(
+        $this->assertSame(
             'yes',
             self::twig("{% if value is instanceof('\\DateTimeImmutable') %}yes{% endif %}")
                 ->render(['value' => new \DateTimeImmutable()]),
             'twig-test-instanceof'
         );
-        $this->assertEquals(
+        $this->assertSame(
             'yes',
             self::twig('{% if value is nan %}yes{% endif %}')
                 ->render(['value' => sqrt(-1)]),
             'twig-test-nan'
         );
-        $this->assertEquals(
+        $this->assertSame(
             'yes',
             self::twig('{% if value is request_fill %}yes{% endif %}')
                 ->render(['value' => new Contest\RequestFill(0, '', '')]),
@@ -349,7 +349,7 @@ END;
         string $label,
         int|float|\DateInterval|\DateTimeImmutable|null $value,
     ): void {
-        $this->assertEquals(
+        $this->assertSame(
             $expected,
             self::twig('{{ value|time_interval(1) }}')->render(['value' => $value]),
             "twig-time-interval-$label",

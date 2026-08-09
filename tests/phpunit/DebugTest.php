@@ -19,17 +19,17 @@ class DebugTest extends TestCase {
         $this->assertTrue($Debug->initDurationHistogram(), 'debug-duration-init');
         $initial = $Debug->durationHistogram();
         $this->assertCount(70, $initial, 'debug-duration-histo-initial');
-        $this->assertEquals(60000, $Debug->storeDuration(59999999.0), 'debug-duration-store');
+        $this->assertSame(60000, $Debug->storeDuration(59999999.0), 'debug-duration-store');
         $after = $Debug->durationHistogram();
-        $this->assertEquals($initial['60s'] + 1, $after['60s'], 'debug-duration-inc');
+        $this->assertSame($initial['60s'] + 1, $after['60s'], 'debug-duration-inc');
 
         $this->assertCount(128, $Debug->memoryHistogramKeyList(), 'debug-memory-histo-key-list');
         $this->assertTrue($Debug->initMemoryHistogram(), 'debug-memory-init');
         $initial = $Debug->memoryHistogram();
         $this->assertCount(128, $initial, 'debug-memory-histo-initial');
-        $this->assertEquals(128, $Debug->storeMemory(134217728), 'debug-memory-store');
+        $this->assertSame(128, $Debug->storeMemory(134217728), 'debug-memory-store');
         $after = $Debug->memoryHistogram();
-        $this->assertEquals($initial['128MiB'] + 1, $after['128MiB'], 'debug-memory-inc');
+        $this->assertSame($initial['128MiB'] + 1, $after['128MiB'], 'debug-memory-inc');
     }
 
     public static function providerDurationRound(): array {
@@ -60,7 +60,7 @@ class DebugTest extends TestCase {
     #[DataProvider('providerDurationRound')]
     public function testDebugDurationRound(string $name, int $rounded, float $input): void {
         global $Debug;
-        $this->assertEquals($rounded, $Debug->durationRound($input), $name);
+        $this->assertSame($rounded, $Debug->durationRound($input), $name);
     }
 
     public static function providerMemoryRound(): array {
@@ -78,7 +78,7 @@ class DebugTest extends TestCase {
     #[DataProvider('providerMemoryRound')]
     public function testDebugMemoryRound(string $name, int $rounded, float $input): void {
         global $Debug;
-        $this->assertEquals($rounded, $Debug->memoryRound($input), $name);
+        $this->assertSame($rounded, $Debug->memoryRound($input), $name);
     }
 
     public function testCreateErrorLog(): void {
@@ -110,40 +110,40 @@ class DebugTest extends TestCase {
         $this->assertGreaterThan(0, $errorLog->id, 'errorlog-create');
         $case = $manager->findById($errorLog->id);
         $this->assertInstanceOf(ErrorLog::class, $case, 'errorlog-find');
-        $this->assertEquals($uri, $case->uri(), 'errorlog-uri');
-        $this->assertEquals(['abc'], $case->request(), 'errorlog-request');
-        $this->assertEquals([2, 4, 6], $case->errorList(), 'errorlog-errrolist');
-        $this->assertEquals(["a", "b"], $case->trace(), 'errorlog-trace');
-        $this->assertEquals(
+        $this->assertSame($uri, $case->uri(), 'errorlog-uri');
+        $this->assertSame(['abc'], $case->request(), 'errorlog-request');
+        $this->assertSame([2, 4, 6], $case->errorList(), 'errorlog-errrolist');
+        $this->assertSame(["a", "b"], $case->trace(), 'errorlog-trace');
+        $this->assertSame(
             $case->id,
             $manager->findByDigest("a\nb", [2, 4, 6])?->id,
             'errorlog-find-by-digest',
         );
 
-        $this->assertEquals(1, $next->id - $errorLog->id, 'errorlog-next-id');
-        $this->assertEquals(
+        $this->assertSame(1, $next->id - $errorLog->id, 'errorlog-next-id');
+        $this->assertSame(
             $next->id,
             $manager->findByPrev($errorLog->id)->id,
             'errorlog-find-prev',
         );
-        $this->assertEquals(
+        $this->assertSame(
             $errorLog->id,
             $manager->findByNext($next->id)->id,
             'errorlog-find-next',
         );
         $manager->setFilter($case->uri());
-        $this->assertEquals(1, $manager->total(), 'errorlog-uri-filter');
+        $this->assertSame(1, $manager->total(), 'errorlog-uri-filter');
         $page = $manager->list('id_error_log', 'desc', 2, 0);
         $this->assertCount(1, $page, 'errorlog-page-items');
-        $this->assertEquals([2, 4, 6], $page[0]['error_list'], 'errorlog-page-items');
+        $this->assertSame([2, 4, 6], $page[0]['error_list'], 'errorlog-page-items');
 
-        $this->assertEquals(1, $case->remove(), 'errorlog-remove-case');
-        $this->assertEquals(
+        $this->assertSame(1, $case->remove(), 'errorlog-remove-case');
+        $this->assertSame(
             1,
             $manager->removeList([$next->id]),
             'errorlog-remove-list',
         );
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $manager->removeSlow(100.0),
             'errorlog-remove',
@@ -163,16 +163,16 @@ class DebugTest extends TestCase {
 
         $trace = $case->trace();
         $this->assertCount(1, $trace, 'debug-case-nr-trace');
-        $this->assertEquals('phpunit-case-1', $trace[0], 'debug-case-trace');
+        $this->assertSame('phpunit-case-1', $trace[0], 'debug-case-trace');
         // if the next assertion fails, try uncommenting the next line to reset
         // $case->remove(); return;
-        $this->assertEquals(1, $case->seen(), 'debug-case-seen');
+        $this->assertSame(1, $case->seen(), 'debug-case-seen');
         $this->assertStringContainsString(
             'bin/phpunit',
             $case->uri(),
             'debug-case-uri',
         );
-        $this->assertEquals(0, $case->userId(), 'debug-case-user-id');
+        $this->assertNull($case->userId(), 'debug-case-user-id');
         $this->assertTrue(
             Helper::recentDateTimeImmutable($case->created()),
             'debug-case-created',
@@ -185,7 +185,7 @@ class DebugTest extends TestCase {
         $this->assertGreaterThan(1000000, $case->memory(), 'debug-case-memory');
         $this->assertGreaterThan(0, $case->nrCache(), 'debug-case-nr-cache');
         $this->assertGreaterThan(0, $case->nrQuery(), 'debug-case-nr-query');
-        $this->assertEquals(89, strlen($case->digest()), 'debug-case-digest'); // depends on the digest algorithm
+        $this->assertSame(89, strlen($case->digest()), 'debug-case-digest'); // depends on the digest algorithm
         $this->assertStringContainsString(
             "Case #{$case->id}",
             $case->link(),
@@ -206,7 +206,7 @@ class DebugTest extends TestCase {
         } catch (\DivisionByZeroError $e) {
             global $Debug;
             $case = $Debug->saveError($e);
-            $this->assertEquals(
+            $this->assertSame(
                 'Division by zero',
                 $case->trace()[0],
                 'debug-error-case-trace'
@@ -225,6 +225,6 @@ class DebugTest extends TestCase {
         $this->assertCount(1, $list, 'debug-marklist');
         $event = array_first($list);
         $this->assertCount(4, $event, 'debug-mark-total');
-        $this->assertEquals($message, $event[0], 'debug-mark-event');
+        $this->assertSame($message, $event[0], 'debug-mark-event');
     }
 }

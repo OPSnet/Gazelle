@@ -16,6 +16,6 @@ class MysqlInfoTest extends TestCase {
             Enum\Direction::descending,
         );
         $list = $mysqlInfo->info();
-        $this->assertEquals('xbt_snatched', array_first($list)['table_name'], 'mysqlinfo-list');
+        $this->assertSame('xbt_snatched', array_first($list)['table_name'], 'mysqlinfo-list');
     }
 }

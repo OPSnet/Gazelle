@@ -74,9 +74,9 @@ class TorrentManagerTest extends TestCase {
         $this->assertGreaterThanOrEqual(2, $latestTotal, 'latest-uploads-two-plus');
         $remove = array_shift($this->torrentList);
         Helper::removeTGroup($remove->group(), $this->user);
-        $this->assertEquals(
+        $this->assertCount(
             $latestTotal - 1,
-            count($manager->latestUploads(5)),
+            $manager->latestUploads(5),
             'latest-uploads-after-remove'
         );
     }
@@ -87,20 +87,20 @@ class TorrentManagerTest extends TestCase {
         $infohash = $torrent->infohash();
         $path     = $torrent->path();
 
-        $this->assertEquals(
+        $this->assertSame(
             $torrent->id,
             $manager->findByInfohash($infohash)->id,
             'torman-find-by-infohash',
         );
         $manager->flushFoldernameCache($path);
-        $this->assertEquals(
+        $this->assertSame(
             $torrent->id,
             array_first(
                 $manager->findAllByFoldername($path)
             )->id,
             'torman-find-all-by-foldername',
         );
-        $this->assertEquals(
+        $this->assertSame(
             $torrent->id,
             array_first(array_keys($manager->missingLogfiles($torrent->uploader()))),
             'torman-missing-log-files',
@@ -125,14 +125,14 @@ class TorrentManagerTest extends TestCase {
         $date = explode(' ', $this->torrentList[0]->created())[0];
         $list = $manager->topTenHistoryList($date, isByDay: true);
         $this->assertCount(2, $list, 'tor-top10-history-by-day');
-        $this->assertEquals(2, $list[1]['sequence'], 'tor-top10-day-1-sequence');
-        $this->assertEquals($this->torrentList[1]->id, $list[0]['torrent_id'], 'tor-top10-day-1-id');
+        $this->assertSame(2, $list[1]['sequence'], 'tor-top10-day-1-sequence');
+        $this->assertSame($this->torrentList[1]->id, $list[0]['torrent_id'], 'tor-top10-day-1-id');
 
-        $this->assertEquals(1, $list[0]['sequence'], 'tor-top10-day-2-sequence');
-        $this->assertEquals($this->torrentList[0]->id, $list[1]['torrent_id'], 'tor-top10-day-2-id');
+        $this->assertSame(1, $list[0]['sequence'], 'tor-top10-day-2-sequence');
+        $this->assertSame($this->torrentList[0]->id, $list[1]['torrent_id'], 'tor-top10-day-2-id');
 
         $this->assertCount(2, $list, 'tor-top10-history-by-week');
-        $this->assertEquals(
+        $this->assertSame(
             [$this->torrentList[1]->id, $this->torrentList[0]->id],
             array_map(fn($t) => $t['torrent_id'], $list),
             'tor-top10-history-week-list'
@@ -180,7 +180,7 @@ class TorrentManagerTest extends TestCase {
         $this->torrentList[1]->setField('LastReseedRequest', date('Y-m-d H:i:s'))->modify();
         $this->assertFalse($this->torrentList[1]->isReseedRequestAllowed());
 
-        $this->assertEquals(
+        $this->assertSame(
             0,
             new Manager\Torrent()->resetReseededRequest(),
             'torman-reset-reseeded-request',
@@ -195,8 +195,7 @@ class TorrentManagerTest extends TestCase {
          * We just want to exercise the code and show that it works
          */
         $stats = new Stats\Torrent();
-        $this->assertInstanceOf(Stats\Torrent::class, $stats->flush(), 'torrents-stats-flush');
-        $this->assertGreaterThanOrEqual(0, $stats->albumTotal(), 'torrent-stats-album-total');
+        $this->assertGreaterThanOrEqual(0, $stats->flush()->albumTotal(), 'torrent-stats-album-total');
         $this->assertGreaterThanOrEqual(0, $stats->amount('day'), 'torrent-stats-interval-amount');
         $this->assertGreaterThanOrEqual(0, $stats->artistTotal(), 'torrent-stats-artist-total');
         $this->assertGreaterThanOrEqual(0, $stats->files('day'), 'torrent-stats-interval-files');

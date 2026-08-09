@@ -34,41 +34,39 @@ class BlogTest extends TestCase {
             thread: null,
             user: $this->userList[0],
         );
-        $this->assertEquals(
+        $this->assertSame(
             $this->blog->id,
             $manager->findById($this->blog->id)?->id,
             'blog-find'
         );
-        $this->assertEquals($this->blog->id, $manager->latestId(), 'blog-latest');
+        $this->assertSame($this->blog->id, $manager->latestId(), 'blog-latest');
         $this->assertTrue(Helper::recentEpoch($this->blog->createdEpoch()), 'blog-created-date');
-        $this->assertEquals('phpunit blog body', $this->blog->body(), 'blog-body');
-        $this->assertEquals($this->blog->createdEpoch(), $manager->latestEpoch(), 'blog-created-epoch');
-        $this->assertEquals('phpunit blog', $this->blog->title(), 'blog-title');
+        $this->assertSame('phpunit blog body', $this->blog->body(), 'blog-body');
+        $this->assertSame($this->blog->createdEpoch(), $manager->latestEpoch(), 'blog-created-epoch');
+        $this->assertSame('phpunit blog', $this->blog->title(), 'blog-title');
         $this->assertNull($this->blog->threadId(), 'blog-thread-id');
-        $this->assertEquals($this->userList[0]->id, $this->blog->userId(), 'blog-userId');
-        $this->assertEquals(
+        $this->assertSame($this->userList[0]->id, $this->blog->userId(), 'blog-userId');
+        $this->assertSame(
             "<a href=\"blog.php?id={$this->blog->id}#blog{$this->blog->id}\">phpunit blog</a>",
             $this->blog->link(),
             'blog-link'
         );
 
-        $this->assertEquals(
+        $this->assertCount(
             min(20, 1 + count($initial)),
-            count($manager->headlines()),
+            $manager->headlines(),
             'blog-headlines'
         );
-        $this->assertEquals($this->blog->id, $manager->latestId(), 'blog-id-latest');
-        $this->assertEquals($this->blog->id, $manager->latest()?->id, 'blog-latest');
+        $this->assertSame($this->blog->id, $manager->latestId(), 'blog-id-latest');
+        $this->assertSame($this->blog->id, $manager->latest()?->id, 'blog-latest');
         $find = $manager->findById($this->blog->id);
-        $this->assertEquals($this->blog->id, $find?->id, 'blog-find');
-        $this->assertEquals(
-            $find?->createdEpoch(),
+        $this->assertSame($this->blog->id, $find?->id, 'blog-find');
+        $this->assertSame(
+            $find->createdEpoch(),
             $manager->latestEpoch(),
             'blog-epoch'
         );
-
-        $this->assertInstanceOf(Blog::class, $this->blog->flush(), 'blog-flush');
-        $this->assertEquals(1, $this->blog->remove(), 'blog-remove');
+        $this->assertSame(1, $this->blog->remove(), 'blog-remove');
         unset($this->blog);
     }
 
@@ -87,13 +85,13 @@ class BlogTest extends TestCase {
                 ),
             user: $this->userList[0],
         );
-        $this->assertEquals(
+        $this->assertSame(
             "thread $title title",
             $this->blog->thread()?->title(),
             'blog-thread-title',
         );
         $this->assertTrue($this->blog->setField('id_thread', null)->modify(), 'blog-thread-remove');
-        $this->assertEquals(1, $this->blog->remove(), 'blog-remove');
+        $this->assertSame(1, $this->blog->remove(), 'blog-remove');
         unset($this->blog);
     }
 
@@ -109,7 +107,7 @@ class BlogTest extends TestCase {
         $witness = new WitnessTable\UserReadBlog();
         $this->assertNull($witness->lastRead($this->userList[1]), 'blog-user-not-read');
         $this->assertTrue($witness->witness($this->userList[1]));
-        $this->assertEquals($this->blog->id, $witness->lastRead($this->userList[1]), 'blog-user-read');
+        $this->assertSame($this->blog->id, $witness->lastRead($this->userList[1]), 'blog-user-read');
     }
 
     public function testBlogNotification(): void {
@@ -131,9 +129,9 @@ class BlogTest extends TestCase {
 
         $alertBlog = $alertList['Blog'];
         $this->assertInstanceOf(User\Notification\Blog::class, $alertBlog, 'alert-blog-instance');
-        $this->assertEquals('Blog', $alertBlog->type(), 'alert-blog-type');
-        $this->assertEquals("Blog: $title", $alertBlog->title(), 'alert-blog-title');
-        $this->assertEquals($this->blog->id, $alertBlog->context(), 'alert-blog-context-is-blog');
-        $this->assertEquals($this->blog->url(), $alertBlog->notificationUrl(), 'alert-blog-url-is-blog');
+        $this->assertSame('Blog', $alertBlog->type(), 'alert-blog-type');
+        $this->assertSame("Blog: $title", $alertBlog->title(), 'alert-blog-title');
+        $this->assertSame($this->blog->id, $alertBlog->context(), 'alert-blog-context-is-blog');
+        $this->assertSame($this->blog->url(), $alertBlog->notificationUrl(), 'alert-blog-url-is-blog');
     }
 }

@@ -36,8 +36,8 @@ class MatchCandidateTest extends TestCase {
             ], $result->emails(), 'matchcandidate-self-emails'
         );
         $this->assertCount(3, $result->ips(), 'matchcandidate-self-ips');
-        $this->assertEquals(400, $result->score(), 'matchcandidate-self-score');
-        $this->assertEquals([
+        $this->assertSame(400, $result->score(), 'matchcandidate-self-score');
+        $this->assertSame([
                 'usernames' => [UserMatchQuality::full->value => 2, UserMatchQuality::partial->value => 2],
                 'emails' => [UserMatchQuality::full->value => 2],
                 'ips' => [UserMatchQuality::full->value => 3]
@@ -51,9 +51,9 @@ class MatchCandidateTest extends TestCase {
         $this->mc->matchNamesEmails($c2, $result);
 
         $this->assertTrue($result->hasMatch(), 'matchcandidate-matchNamesEmails-matches');
-        $this->assertEquals(['usernames' => [UserMatchQuality::partial->value => 1]],
+        $this->assertSame(['usernames' => [UserMatchQuality::partial->value => 1]],
             $result->summary(), 'matchcandidate-matchNamesEmails-summary');
-        $this->assertEquals([['cand1@test.domain', 'cand1', UserMatchQuality::partial]],
+        $this->assertSame([['cand1@test.domain', 'cand1', UserMatchQuality::partial]],
             $result->usernames(), 'matchcandidate-matchNamesEmails-usernames');
     }
 
@@ -63,7 +63,7 @@ class MatchCandidateTest extends TestCase {
         $this->mc->matchNames($c2, $result);
 
         $this->assertTrue($result->hasMatch(), 'matchcandidate-matchNames-matches');
-        $this->assertEquals(['usernames' => [UserMatchQuality::full->value => 1]],
+        $this->assertSame(['usernames' => [UserMatchQuality::full->value => 1]],
             $result->summary(), 'matchcandidate-matchNames-summary');
 
         $c3 = new MatchCandidate(['cand2'], [], []);
@@ -71,7 +71,7 @@ class MatchCandidateTest extends TestCase {
         $this->mc->matchNames($c3, $result);
 
         $this->assertTrue($result->hasMatch(), 'matchcandidate-matchNames-matches2');
-        $this->assertEquals(['usernames' => [UserMatchQuality::partial->value => 1]],
+        $this->assertSame(['usernames' => [UserMatchQuality::partial->value => 1]],
             $result->summary(), 'matchcandidate-matchNames-summary2');
 
         $c4 = new MatchCandidate(['dude'], [], []);
@@ -86,7 +86,7 @@ class MatchCandidateTest extends TestCase {
         $this->mc->matchEmails($c2, $result);
 
         $this->assertTrue($result->hasMatch(), 'matchcandidate-matchEmails-matches');
-        $this->assertEquals(['emails' => [UserMatchQuality::full->value => 1]],
+        $this->assertSame(['emails' => [UserMatchQuality::full->value => 1]],
             $result->summary(), 'matchcandidate-matchEmails-summary');
 
         $c3 = new MatchCandidate([], ['some1@email.example'], []);
@@ -94,7 +94,7 @@ class MatchCandidateTest extends TestCase {
         $this->mc->matchEmails($c3, $result);
 
         $this->assertTrue($result->hasMatch(), 'matchcandidate-matchEmails-matches2');
-        $this->assertEquals(['emails' => [UserMatchQuality::weak->value => 1]],
+        $this->assertSame(['emails' => [UserMatchQuality::weak->value => 1]],
             $result->summary(), 'matchcandidate-matchEmails-summary2');
 
         $c4 = new MatchCandidate([], ['e@b.c'], []);
@@ -109,7 +109,7 @@ class MatchCandidateTest extends TestCase {
         $this->mc->matchIps($c2, $result);
 
         $this->assertTrue($result->hasMatch(), 'matchcandidate-matchIps-matches');
-        $this->assertEquals(['ips' => [UserMatchQuality::full->value => 1]],
+        $this->assertSame(['ips' => [UserMatchQuality::full->value => 1]],
             $result->summary(), 'matchcandidate-matchIps-summary');
 
         $c3 = new MatchCandidate([], [], [['1.2.3.4', new \DateTimeImmutable('2018-04-04 12:34'), new \DateTimeImmutable('2018-06-04 22:43')]]);
@@ -117,7 +117,7 @@ class MatchCandidateTest extends TestCase {
         $this->mc->matchIps($c3, $result);
 
         $this->assertTrue($result->hasMatch(), 'matchcandidate-matchIps-matches2');
-        $this->assertEquals(['ips' => [UserMatchQuality::partial->value => 1]],
+        $this->assertSame(['ips' => [UserMatchQuality::partial->value => 1]],
             $result->summary(), 'matchcandidate-matchIps-summary2');
 
         $c4 = new MatchCandidate([], [], [['1.2.3.4', null, null]]);
@@ -125,7 +125,7 @@ class MatchCandidateTest extends TestCase {
         $this->mc->matchIps($c4, $result);
 
         $this->assertTrue($result->hasMatch(), 'matchcandidate-matchIps-matches3');
-        $this->assertEquals(['ips' => [UserMatchQuality::weak->value => 1]],
+        $this->assertSame(['ips' => [UserMatchQuality::weak->value => 1]],
             $result->summary(), 'matchcandidate-matchIps-summary3');
 
         $c5 = new MatchCandidate([], [], [['6.2.3.4', new \DateTimeImmutable(), new \DateTimeImmutable()]]);
@@ -135,8 +135,8 @@ class MatchCandidateTest extends TestCase {
     }
 
     public function testCleanupEmail(): void {
-        $this->assertEquals(['te.st', 'test.domain'], $this->mc->cleanupEmail('te.st+1@test.domain'), 'matchcandidate-cleanupemail-basic');
-        $this->assertEquals(['te.st', 'proton.me'], $this->mc->cleanupEmail('te.st@pm.me'), 'matchcandidate-cleanupemail-proton');
-        $this->assertEquals(['test', 'gmail.com'], $this->mc->cleanupEmail('t.e.s.t+abc1@googlemail.com'), 'matchcandidate-cleanupemail-gmail');
+        $this->assertSame(['te.st', 'test.domain'], $this->mc->cleanupEmail('te.st+1@test.domain'), 'matchcandidate-cleanupemail-basic');
+        $this->assertSame(['te.st', 'proton.me'], $this->mc->cleanupEmail('te.st@pm.me'), 'matchcandidate-cleanupemail-proton');
+        $this->assertSame(['test', 'gmail.com'], $this->mc->cleanupEmail('t.e.s.t+abc1@googlemail.com'), 'matchcandidate-cleanupemail-gmail');
     }
 }

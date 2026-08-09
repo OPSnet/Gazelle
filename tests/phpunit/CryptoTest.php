@@ -11,7 +11,7 @@ class CryptoTest extends TestCase {
         $dec_cipher = base64_decode($cipher);
         \PHPUnit\Framework\assertFalse(str_contains($dec_cipher, $payload), 'crypto-dataleak');
         $decrypted = Util\Crypto::decrypt($cipher, ENCKEY);
-        \PHPUnit\Framework\assertEquals($payload, $decrypted, 'crypto-encrypt-decrypt');
+        \PHPUnit\Framework\assertSame($payload, $decrypted, 'crypto-encrypt-decrypt');
     }
 
     public function testCryptoNondeterministic(): void {
@@ -21,6 +21,6 @@ class CryptoTest extends TestCase {
         \PHPUnit\Framework\assertNotEquals($cipher1, $cipher2, 'crypto-nondeterministic');
         $decrypted1 = Util\Crypto::decrypt($cipher1, ENCKEY);
         $decrypted2 = Util\Crypto::decrypt($cipher2, ENCKEY);
-        \PHPUnit\Framework\assertEquals($decrypted1, $decrypted2, 'crypto-nondeterministic-decrypt');
+        \PHPUnit\Framework\assertSame($decrypted1, $decrypted2, 'crypto-nondeterministic-decrypt');
     }
 }

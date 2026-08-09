@@ -23,11 +23,11 @@ class SessionCookieTest extends TestCase {
 
         $cookie = new SessionCookie($payload);
         $this->assertTrue($cookie->isValid(), 'cookie-session-valid');
-        $this->assertEquals($sessionKey, $cookie->sessionKey(), 'cookie-session-key');
-        $this->assertEquals($this->user->id, $cookie->userId(), 'cookie-userid');
+        $this->assertSame($sessionKey, $cookie->sessionKey(), 'cookie-session-key');
+        $this->assertSame($this->user->id, $cookie->userId(), 'cookie-userid');
 
         $new = new SessionCookie($cookie->payload());
-        $this->assertEquals($this->user->id, $new->userId(), 'cookie-regenerate');
+        $this->assertSame($this->user->id, $new->userId(), 'cookie-regenerate');
     }
 
     public function testGarbageSessionCookie(): void {
@@ -43,19 +43,19 @@ class SessionCookieTest extends TestCase {
         $headerList = xdebug_get_headers();
         $this->assertCount(1, $headerList, 'session-cookie-header');
         $header = array_first($headerList);
-        $this->assertEquals(
+        $this->assertSame(
             1,
             // Set-Cookie: session=e%2F8GAPo...;
             preg_match('/Set-Cookie: session=([^;]+);/', $header, $match),
             'session-cookie-well-formed'
         );
         $new = new SessionCookie(urldecode($match[1]));
-        $this->assertEquals(
+        $this->assertSame(
             $sessionKey,
             $new->sessionKey(),
             'session-cookie-decoded-key',
         );
-        $this->assertEquals(
+        $this->assertSame(
             $this->user->id,
             $new->userId(),
             'session-cookie-decoded-user',

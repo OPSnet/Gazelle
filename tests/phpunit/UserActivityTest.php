@@ -15,28 +15,35 @@ class UserActivityTest extends TestCase {
         }
     }
 
-    public function testActivity(): void {
+    public function testActivityBasic(): void {
         $this->userList['admin'] = Helper::makeUser('admin.' . randomString(10), 'activity');
         $this->userList['admin']->setField('PermissionID', SYSOP)
             ->setField('Enabled', UserStatus::enabled->value)
             ->modify();
 
         $activity = new User\Activity($this->userList['admin']);
-        $this->assertInstanceOf(User\Activity::class, $activity, 'user-activity-instance');
-
         $this->assertCount(0, $activity->actionList(), 'user-activity-action');
         $activity->setAlert('alert1')->setAlert('alert2');
         $this->assertCount(2, $activity->alertList(), 'user-activity-alert');
+    }
 
-        $this->assertInstanceOf(User\Activity::class, $activity->configure(), 'user-activity-configure');
-        $this->assertInstanceOf(User\Activity::class, $activity->setApplicant(new Manager\Applicant()), 'user-activity-applicant');
-        $this->assertInstanceOf(User\Activity::class, $activity->setPayment(new Manager\Payment()), 'user-activity-payment');
-        $this->assertInstanceOf(User\Activity::class, $activity->setReferral(new Manager\Referral()), 'user-activity-referral');
-        $this->assertInstanceOf(User\Activity::class, $activity->setReport(new Stats\Report()), 'user-activity-report');
-        $this->assertInstanceOf(User\Activity::class, $activity->setSSLHost(new Manager\SSLHost()), 'user-activity-sslhost');
-        $this->assertInstanceOf(User\Activity::class, $activity->setScheduler(new TaskScheduler()), 'user-activity-scheduler');
-        $this->assertInstanceOf(User\Activity::class, $activity->setStaff(new Staff($this->userList['admin'])), 'user-activity-staff-set');
-        $this->assertInstanceOf(User\Activity::class, $activity->setStaffPM(new Manager\StaffPM()), 'user-activity-staffpm');
+    public function testActivityConfigure(): void {
+        // sanity checks + coverage
+        $this->expectNotToPerformAssertions();
+        $this->userList['admin'] = Helper::makeUser('admin.' . randomString(10), 'activity');
+        $this->userList['admin']->setField('PermissionID', SYSOP)
+            ->setField('Enabled', UserStatus::enabled->value)
+            ->modify();
+        $activity = new User\Activity($this->userList['admin']);
+        $activity->configure();
+        $activity->setApplicant(new Manager\Applicant());
+        $activity->setPayment(new Manager\Payment());
+        $activity->setReferral(new Manager\Referral());
+        $activity->setReport(new Stats\Report());
+        $activity->setSSLHost(new Manager\SSLHost());
+        $activity->setScheduler(new TaskScheduler());
+        $activity->setStaff(new Staff($this->userList['admin']));
+        $activity->setStaffPM(new Manager\StaffPM());
     }
 
     public function testGlobal(): void {
@@ -55,8 +62,8 @@ class UserActivityTest extends TestCase {
 
         $alertGlobal = $alertList['Global'];
         $this->assertInstanceOf(User\Notification\GlobalNotification::class, $alertGlobal, 'alert-global-instance');
-        $this->assertEquals($title, $alertGlobal->title(), 'alert-global-title');
-        $this->assertEquals(1, $alertGlobal->clear(), 'alert-global-clear');
+        $this->assertSame($title, $alertGlobal->title(), 'alert-global-title');
+        $this->assertSame(1, $alertGlobal->clear(), 'alert-global-clear');
 
         // tidy up
         $global->remove();
@@ -70,9 +77,8 @@ class UserActivityTest extends TestCase {
         $admin = $this->userList['admin'];
         $user  = $this->userList['user'];
         $notification = new User\Notification\Inbox($user);
-        $this->assertInstanceOf(User\Notification\Inbox::class, $notification, 'alert-notification-inbox-instance');
         $this->assertFalse($notification->load(), 'alert-notification-inbox-none');
-        $this->assertEquals(0, $notification->clear(), 'alert-notification-inbox-clear');
+        $this->assertSame(0, $notification->clear(), 'alert-notification-inbox-clear');
 
         // send a message from admin to user
         $pm = $user->inbox()->create($admin, 'unit test message', 'unit test body');
@@ -88,12 +94,12 @@ class UserActivityTest extends TestCase {
         $this->assertArrayHasKey('Inbox', $alertList, 'alert-has-inbox');
         $alertInbox = $alertList['Inbox'];
         $this->assertInstanceOf(User\Notification\Inbox::class, $alertInbox, 'alert-inbox-instance');
-        $this->assertEquals('You have a new message', $alertInbox->title(), 'alert-inbox-unread');
+        $this->assertSame('You have a new message', $alertInbox->title(), 'alert-inbox-unread');
 
         // read it
         $read = new Manager\PM($user)->findById($pm->id);
         $this->assertInstanceOf(PM::class, $read, 'inbox-unread-pm');
-        $this->assertEquals(1, $read->markRead(), 'alert-pm-read');
+        $this->assertSame(1, $read->markRead(), 'alert-pm-read');
     }
 
     public function testNews(): void {
@@ -124,9 +130,9 @@ class UserActivityTest extends TestCase {
         $this->assertArrayHasKey('News', $alertList, 'alert-has-news');
         $alertNews = $alertList['News'];
         $this->assertInstanceOf(User\Notification\News::class, $alertNews, 'alert-news-instance');
-        $this->assertEquals("Announcement: $title", $alertNews->title(), 'alert-news-unread');
+        $this->assertSame("Announcement: $title", $alertNews->title(), 'alert-news-unread');
 
-        $this->assertEquals(1, $manager->remove($newsId), 'alert-news-remove');
-        $this->assertEquals(0, $manager->remove($newsId), 'alert-news-twice-removed');
+        $this->assertSame(1, $manager->remove($newsId), 'alert-news-remove');
+        $this->assertSame(0, $manager->remove($newsId), 'alert-news-twice-removed');
     }
 }

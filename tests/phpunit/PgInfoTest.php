@@ -13,7 +13,7 @@ class PgInfoTest extends TestCase {
             Enum\Direction::descending,
         );
         $list = $pgInfo->info();
-        $this->assertEquals(
+        $this->assertSame(
             'userclass_has_privilege',
             array_first($list)['table_name'],
             'pginfo-list',

@@ -26,8 +26,8 @@ class UserPromotionTest extends TestCase {
     public function testUploadPromotion(): void {
         // if this fails locally, run again
         $userMan = new Manager\User();
-        $this->assertEquals(0, $userMan->promote(), 'promote-initial');
-        $this->assertEquals(0, $userMan->demote(), 'demote-initial');
+        $this->assertSame(0, $userMan->promote(), 'promote-initial');
+        $this->assertSame(0, $userMan->demote(), 'demote-initial');
 
         // backdate user creation
         DB::DB()->prepared_query("
@@ -38,18 +38,18 @@ class UserPromotionTest extends TestCase {
         );
         // 11GiB to be eligible for User => Member promotion
         $this->user->setField('leech_upload', 11 * 1024 ** 3)->modify();
-        $this->assertEquals(1, $userMan->promote(), 'promote-member-promotion');
+        $this->assertSame(1, $userMan->promote(), 'promote-member-promotion');
 
         $inbox = $this->user->inbox()->setUnreadFirst(true);
-        $this->assertEquals(1, $inbox->messageTotal(), 'promote-inbox-total');
+        $this->assertSame(1, $inbox->messageTotal(), 'promote-inbox-total');
         $list = $inbox->messageList(new Manager\PM($this->user), 1, 0);
-        $this->assertEquals('You have been promoted to Member', $list[0]->subject(), 'promote-pm-subject');
+        $this->assertSame('You have been promoted to Member', $list[0]->subject(), 'promote-pm-subject');
 
         $this->user->setField('leech_upload', 9 * 1024 ** 3)->modify();
-        $this->assertEquals(1, $userMan->demote(), 'promote-member-demotion');
-        $this->assertEquals(2, $inbox->messageTotal(), 'promote-inbox-total');
+        $this->assertSame(1, $userMan->demote(), 'promote-member-demotion');
+        $this->assertSame(2, $inbox->messageTotal(), 'promote-inbox-total');
         $list = $inbox->messageList(new Manager\PM($this->user), 2, 0);
-        $this->assertEquals('You have been demoted to User', $list[0]->subject(), 'demote-pm-subject');
+        $this->assertSame('You have been demoted to User', $list[0]->subject(), 'demote-pm-subject');
         $this->assertStringContainsString(
             '❌ 10.00 GiB uploaded, you have 9.00 GiB',
             $list[0]->postList(1, 0)[0]['body'],
@@ -78,16 +78,16 @@ class UserPromotionTest extends TestCase {
         // recompute user request stats
         $stats = new Stats\Users();
         $stats->refresh();
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $userMan->promote(),
             'promote-member-req-promotion',
         );
 
         $inbox = $this->user->inbox();
-        $this->assertEquals(1, $inbox->messageTotal(), 'promote-req-inbox-total');
+        $this->assertSame(1, $inbox->messageTotal(), 'promote-req-inbox-total');
         $list = $inbox->messageList(new Manager\PM($this->user), 2, 0);
-        $this->assertEquals(
+        $this->assertSame(
             'You have been promoted to Member',
             $list[0]->subject(),
             'promote-req-pm-subject',
@@ -97,13 +97,13 @@ class UserPromotionTest extends TestCase {
         $stats->refresh(); // recompute after removal
         $this->user->flush();   // resync user's cache with reality
 
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $userMan->demote(),
             'promote-member-req-demotion',
         );
         $list = $inbox->messageList(new Manager\PM($this->user), 2, 0);
-        $this->assertEquals(
+        $this->assertSame(
             'You have been demoted to User',
             $list[0]->subject(),
             'demote-req-pm-subject',
@@ -126,21 +126,21 @@ class UserPromotionTest extends TestCase {
         );
         $this->user->setField('leech_upload', 12 * 1024 ** 3)->modify();
         $userMan->promote();
-        $this->assertEquals(
+        $this->assertSame(
             'Member',
             $this->user->flush()->userclassName(),
             'promote-userclass-name'
         );
         // drop to 0.8 ratio
         $this->user->setField('leech_download', 15 * 1024 ** 3)->modify();
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $userMan->demote(),
             'demote-ratio-no',
         );
         // drop to 0.5 ratio
         $this->user->setField('leech_download', 24 * 1024 ** 3)->modify();
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $userMan->demote(),
             'demote-ratio-yes',
@@ -148,7 +148,7 @@ class UserPromotionTest extends TestCase {
 
         $inbox = $this->user->inbox()->setUnreadFirst(true);
         $list  = $inbox->messageList(new Manager\PM($this->user), 2, 0);
-        $this->assertEquals(
+        $this->assertSame(
             'You have been demoted to User',
             $list[0]->subject(),
             'demote-ratio-subject',
@@ -179,7 +179,7 @@ class UserPromotionTest extends TestCase {
         $this->user->flush();
         $userMan->promote();
         $list = $inbox->messageList(new Manager\PM($this->user), 1, 0);
-        $this->assertEquals(
+        $this->assertSame(
             'You have been promoted to Elite',
             $list[0]->subject(),
             'promote-user-elite',
@@ -198,7 +198,7 @@ class UserPromotionTest extends TestCase {
         $this->user->flush();
         $userMan->promote();
         $list = $inbox->messageList(new Manager\PM($this->user), 1, 0);
-        $this->assertEquals(
+        $this->assertSame(
             'You have been promoted to Power TM',
             $list[0]->subject(),
             'promote-user-power-tm',
@@ -211,7 +211,7 @@ class UserPromotionTest extends TestCase {
         $this->user->flush();
         $userMan->demote();
         $list = $inbox->messageList(new Manager\PM($this->user), 1, 0);
-        $this->assertEquals(
+        $this->assertSame(
             'You have been demoted to Torrent Master',
             $list[0]->subject(),
             'demote-user-tm',
@@ -259,8 +259,8 @@ class UserPromotionTest extends TestCase {
             ", $this->user->id
         );
         $this->user->setField('leech_upload', 2048 * 1024 ** 3)->modify();
-        $this->assertEquals(3, $userMan->promote(), 'promote-to-ultimate');
-        $this->assertEquals(
+        $this->assertSame(3, $userMan->promote(), 'promote-to-ultimate');
+        $this->assertSame(
             $this->user->flush()->primaryClass(),
             ULTIMATE_TM,
             'user-is-ultimate',
@@ -273,7 +273,7 @@ class UserPromotionTest extends TestCase {
         $this->user->flush();
         $userMan->demote();
         $list = $inbox->messageList(new Manager\PM($this->user), 1, 0);
-        $this->assertEquals(
+        $this->assertSame(
             'You have been demoted to Elite TM',
             $list[0]->subject(),
             'demote-user-utm',
@@ -322,7 +322,7 @@ class UserPromotionTest extends TestCase {
         $manager = new Manager\User();
         $next    = $manager->userNextClass($this->user);
         $this->assertIsArray($next, 'user-next-array');
-        $this->assertEquals('Member', $next['class'], 'user-next-class-is-member');
+        $this->assertSame('Member', $next['class'], 'user-next-class-is-member');
 
         $goal = $next['goal'];
         $this->assertIsArray($goal, 'user-next-requirements-array');
@@ -347,7 +347,7 @@ class UserPromotionTest extends TestCase {
         $this->assertStringContainsString('100%',  $next['goal']['Upload']['percent'], 'user-next-has-upload');
 
         $manager->promote();
-        $this->assertEquals('Member', $this->user->flush()->userclassName(), 'user-promoted-to-member');
+        $this->assertSame('Member', $this->user->flush()->userclassName(), 'user-promoted-to-member');
 
         $this->user->setField('PermissionId', SYSOP)->modify();
         $this->assertNull($manager->userNextClass($this->user), 'user-next-class-is-null');

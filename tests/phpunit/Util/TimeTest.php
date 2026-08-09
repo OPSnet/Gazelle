@@ -10,15 +10,14 @@ use Gazelle\Util\Time;
 class TimeTest extends TestCase {
     public function testInvalidTimeAgo(): void {
         time();
-        $this->assertEquals(
-            false,
+        $this->assertFalse(
             Time::timeAgo('not a valid timestamp'),
             "time-ago-invalid",
         );
     }
 
     public function testTimestampTimeAgo(): void {
-        $this->assertEquals(
+        $this->assertSame(
             time() - strtotime('2000-01-01 01:01:01'),
             Time::timeAgo('2000-01-01 01:01:01'),
             "time-ago-timestamp",
@@ -26,7 +25,7 @@ class TimeTest extends TestCase {
     }
 
     public function testDateIntervalTimeAgo(): void {
-        $this->assertEquals(
+        $this->assertSame(
             86400,
             Time::timeAgo(\DateInterval::createFromDateString('1 day')),
             "time-ago-interval"
@@ -46,7 +45,7 @@ class TimeTest extends TestCase {
     #[DataProvider('providerTimestamp')]
     public function testTimeAgo(string|int|float $delta, int $expected): void {
         $epoch = time();
-        $this->assertEquals(
+        $this->assertSame(
             $expected,
             Time::timeAgo($epoch - (is_float($delta) ? $delta : (int)$delta)),
             "time-ago-valid-$delta",
@@ -71,7 +70,7 @@ class TimeTest extends TestCase {
 
     #[DataProvider('providerHours')]
     public function testConvertHours(int $hours, int $levels, string $expected): void {
-        $this->assertEquals(
+        $this->assertSame(
             $expected,
             Time::convertHours($hours, $levels, false),
             "time-hours-$levels-$hours"
@@ -79,7 +78,7 @@ class TimeTest extends TestCase {
     }
 
     public function testConvertHoursSpan(): void {
-        $this->assertEquals(
+        $this->assertSame(
             '<span>228y3mo3w1d2h</span>',
             Time::convertHours(2000000, 5),
             'time-convert-span'
@@ -109,7 +108,7 @@ class TimeTest extends TestCase {
 
     #[DataProvider('providerSeconds')]
     public function testConvertSeconds(int $seconds, string $expected): void {
-        $this->assertEquals(
+        $this->assertSame(
             $expected,
             Time::convertSeconds($seconds),
             "time-seconds-$seconds"
@@ -126,7 +125,7 @@ class TimeTest extends TestCase {
 
     #[DataProvider('providerDiff')]
     public function testDiff(int|false|null|\DateTimeImmutable $time, string $label, string $expected, int $levels = 2): void {
-        $this->assertEquals(
+        $this->assertSame(
             $expected,
             Time::diff($time, $levels, false),
             "time-seconds-$label"
@@ -134,7 +133,7 @@ class TimeTest extends TestCase {
     }
 
     public function testImmutableDiff(): void {
-        $this->assertEquals(
+        $this->assertSame(
             '3 days ago',
             Time::diff(new \DateTimeImmutable('3 days ago'), 2, false),
             "time-immutable-3d"
@@ -158,7 +157,7 @@ class TimeTest extends TestCase {
 
     #[DataProvider('providerRealtimeDiff')]
     public function testRealtimeDiff(int $diff, string $label, string $expected, int $levels = 2): void {
-        $this->assertEquals(
+        $this->assertSame(
             $expected,
             Time::diff(time() - $diff, $levels, false),
             "time-seconds-$label"

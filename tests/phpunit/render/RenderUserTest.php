@@ -34,7 +34,7 @@ class RenderUserTest extends TestCase {
             'user'          => $this->userList['user'],
             'viewer'        => $this->userList['viewer'],
         ]);
-        $this->assertEquals(
+        $this->assertSame(
             substr_count($sidebar, '<li>') + substr_count($sidebar, '<li class="paranoia_override"'),
             substr_count($sidebar, '</li>'),
             'user-sidebar-general'
@@ -63,7 +63,7 @@ class RenderUserTest extends TestCase {
         $tag = $twig->render('user/tag-snatch.twig', [
             'user' => $this->userList['admin'],
         ]);
-        $this->assertEquals('', $tag, 'user-header-div-tag-heading');
+        $this->assertSame('', $tag, 'user-header-div-tag-heading');
 
         $stats = $twig->render('user/sidebar-stats.twig', [
             'prl'          => $limiter,

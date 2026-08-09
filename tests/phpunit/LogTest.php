@@ -34,7 +34,7 @@ class LogTest extends TestCase {
 
         $result = $siteLog->page(1, 0, '');
         $latest = array_first($result);
-        $this->assertEquals(['id', 'class', 'message', 'created'], array_keys($latest), 'sitelog-latest-keys');
+        $this->assertSame(['id', 'class', 'message', 'created'], array_keys($latest), 'sitelog-latest-keys');
         $this->assertStringContainsString(
             '<a href="torrents.php?torrentid=123457890">123457890</a>',
             $latest['message'],
@@ -64,8 +64,8 @@ class LogTest extends TestCase {
             array_keys($latest),
             'grouplog-latest-keys'
         );
-        $this->assertEquals(true, $latest['deleted'], 'grouplog-latest-is-deleted');
-        $this->assertEquals(0, $latest['id_torrent'], 'grouplog-latest-no-torrent-id');
+        $this->assertTrue($latest['deleted'], 'grouplog-latest-is-deleted');
+        $this->assertNull($latest['id_torrent'], 'grouplog-latest-no-torrent-id');
 
         $this->tgroupNew = Helper::makeTGroupMusic(
             $this->user,
@@ -75,7 +75,7 @@ class LogTest extends TestCase {
         );
         $logger->group($this->tgroup, null, self::PREFIX . "group extra " . randomString());
         $logger->group($this->tgroupNew, null, self::PREFIX . "group merge " . randomString());
-        $this->assertEquals(3, $logger->merge($this->tgroup, $this->tgroupNew), 'grouplog-merge-result');
+        $this->assertSame(3, $logger->merge($this->tgroup, $this->tgroupNew), 'grouplog-merge-result');
 
         $messageList = array_map(
             fn ($m) => $m['note'],
@@ -111,9 +111,9 @@ class LogTest extends TestCase {
 
         $torrent->removeTorrent($this->user, 'phpunit log delete');
         $latest = array_first($siteLog->tgroupLogList($this->tgroup));
-        $this->assertEquals(true, $latest['deleted'], 'torrentlog-latest-is-deleted');
-        $this->assertEquals($torrent->id, $latest['id_torrent'], 'torrentlog-latest-torrent-id');
-        $this->assertEquals($this->user->id, $latest['id_user'], 'torrentlog-latest-user-id');
+        $this->assertTrue($latest['deleted'], 'torrentlog-latest-is-deleted');
+        $this->assertSame($torrent->id, $latest['id_torrent'], 'torrentlog-latest-torrent-id');
+        $this->assertSame($this->user->id, $latest['id_user'], 'torrentlog-latest-user-id');
     }
 
     public function testRenderLog(): void {

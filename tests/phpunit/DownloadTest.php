@@ -41,12 +41,12 @@ class DownloadTest extends TestCase {
     public function testBasic(): void {
         $user     = $this->userList['up'];
         $uploader = new Download($this->torrent, new User\UserclassRateLimit($user), false);
-        $this->assertEquals(DownloadStatus::ok, $uploader->status(), 'download-uploader-ok');
-        $this->assertEquals(1, $this->torrent->downloadTotal(), 'download-torrent-total');
-        $this->assertEquals(1, $user->torrentDownloadCount($this->torrent), 'user-torrent-download-count');
+        $this->assertSame(DownloadStatus::ok, $uploader->status(), 'download-uploader-ok');
+        $this->assertSame(1, $this->torrent->downloadTotal(), 'download-torrent-total');
+        $this->assertSame(1, $user->torrentDownloadCount($this->torrent), 'user-torrent-download-count');
         $list = $this->torrent->downloadList($user, 2, 0);
         $this->assertCount(1, $list, 'download-torrent-list');
-        $this->assertEquals(
+        $this->assertSame(
             ['user_id', 'timestamp_min', 'timestamp_max', 'is_seeding', 'is_snatched', 'total'],
             array_keys($list[0]),
             'download-torrent-keys'
@@ -54,7 +54,7 @@ class DownloadTest extends TestCase {
         Helper::generateTorrentSeed($this->torrent, $user);
         $list = $this->torrent->seederList($user, 2, 0);
         $this->assertCount(1, $list, 'seeder-torrent-list');
-        $this->assertEquals(
+        $this->assertSame(
             ['active', 'connectable', 'remaining', 'uploaded', 'useragent',
                 'ipv4addr', 'user_id', 'size', 'seedbox', 'is_download', 'is_snatched'],
             array_keys($list[0]),
@@ -71,28 +71,28 @@ class DownloadTest extends TestCase {
         $this->assertFalse($ratelimit->hasExceededFactor(), 'download-ratelimit-factor');
         $this->assertFalse($ratelimit->hasExceededTotal(), 'download-ratelimit-total');
         $downloader = new Download($this->torrent, $ratelimit, false);
-        $this->assertEquals(DownloadStatus::ok, $downloader->status(), 'download-downloader-ok');
+        $this->assertSame(DownloadStatus::ok, $downloader->status(), 'download-downloader-ok');
         $this->assertGreaterThan(0, $ratelimit->register($this->torrent), 'download-register-ratelimit');
 
         $this->userList['down']->setField('can_leech', 0)->modify();
         $ratio = new Download($this->torrent, new User\UserclassRateLimit($this->userList['down']), false);
-        $this->assertEquals(DownloadStatus::ratio, $ratio->status(), 'download-downloader-ratio-watch');
+        $this->assertSame(DownloadStatus::ratio, $ratio->status(), 'download-downloader-ratio-watch');
     }
 
     public function testFreeleech(): void {
         $none = new Download($this->torrent, new User\UserclassRateLimit($this->userList['down']), true);
-        $this->assertEquals(DownloadStatus::too_big, $none->status(), 'download-downloader-no-tokens');
+        $this->assertSame(DownloadStatus::too_big, $none->status(), 'download-downloader-no-tokens');
 
         $this->userList['down']->updateTokens(2);
         $some = new Download($this->torrent, new User\UserclassRateLimit($this->userList['down']), true);
-        $this->assertEquals(DownloadStatus::too_big, $some->status(), 'download-downloader-some-tokens');
+        $this->assertSame(DownloadStatus::too_big, $some->status(), 'download-downloader-some-tokens');
         $this->assertFalse($this->torrent->isFreeleechPersonal(), 'download-downloader-not-yet-free');
 
         $this->userList['down']->updateTokens(5);
         $enough = new Download($this->torrent, new User\UserclassRateLimit($this->userList['down']), true);
-        $this->assertEquals(DownloadStatus::ok, $enough->status(), 'download-downloader-enough-tokens');
+        $this->assertSame(DownloadStatus::ok, $enough->status(), 'download-downloader-enough-tokens');
 
-        $this->assertEquals(2, $this->userList['down']->tokenCount(), 'download-downloader-spent-tokens');
+        $this->assertSame(2, $this->userList['down']->tokenCount(), 'download-downloader-spent-tokens');
         $this->assertTrue($this->userList['down']->hasToken($this->torrent), 'download-downloader-is-free');
         $this->torrent->requestContext()->setViewer($this->userList['down']);
         $this->assertTrue(
@@ -101,12 +101,12 @@ class DownloadTest extends TestCase {
         );
 
         new Stats\Users()->refresh();
-        $this->assertEquals(
+        $this->assertSame(
             3,
             $this->userList['down']->flush()->stats()->flTokenUsed(),
             'download-user-fl-tokens-used',
         );
-        $this->assertEquals(
+        $this->assertSame(
             2,
             $this->userList['down']->tokenCount(),
             'download-user-fl-tokens-remain'
@@ -120,21 +120,21 @@ class DownloadTest extends TestCase {
         $initial = new Download($this->torrent, $limiter, true);
 
         // download with token
-        $this->assertEquals(DownloadStatus::ok, $initial->status(), 'redown-initial');
+        $this->assertSame(DownloadStatus::ok, $initial->status(), 'redown-initial');
         $this->assertTrue($user->hasToken($this->torrent), 'redown-user-has-token');
 
         // time goes by and the user downloads the torrent
         Helper::generateTorrentSnatch($this->torrent, $user);
-        $this->assertEquals(1, $this->torrent->expireToken($user), 'redown-expire-token');
+        $this->assertSame(1, $this->torrent->expireToken($user), 'redown-expire-token');
         $this->assertFalse($user->flush()->hasToken($this->torrent), 'redown-user-no-more-token');
         $this->assertFalse($this->torrent->isFreeleechPersonal(), 'redown-torrent-is-not-pfl');
         $tracker = $user->history()->trackerIP();
         $this->assertCount(1, $tracker, 'tracker-history-total');
-        $this->assertEquals(Helper::IP_ADDR, $tracker[0]['ip'], 'tracker-history-ipv4');
+        $this->assertSame(Helper::IP_ADDR, $tracker[0]['ip'], 'tracker-history-ipv4');
 
         $list = $this->torrent->snatchList($user, 2, 0);
         $this->assertCount(1, $list, 'snatch-torrent-list');
-        $this->assertEquals(
+        $this->assertSame(
             ['user_id', 'timestamp', 'is_download', 'is_seeding'],
             array_keys($list[0]),
             'snatch-torrent-keys'
@@ -142,17 +142,17 @@ class DownloadTest extends TestCase {
 
         // download again without token
         $redownload = new Download($this->torrent, $limiter, false);
-        $this->assertEquals(DownloadStatus::ok, $redownload->status(), 'redown-redownload');
+        $this->assertSame(DownloadStatus::ok, $redownload->status(), 'redown-redownload');
         $this->assertFalse($this->torrent->isFreeleechPersonal(), 'redown-torrent-is-still-not-pfl');
 
         new Stats\Users()->refresh();
-        $this->assertEquals(2, $user->stats()->flush()->downloadTotal(), 'redown-user-download-total');
-        $this->assertEquals(1, $user->stats()->downloadUnique(), 'redown-user-download-unique');
+        $this->assertSame(2, $user->stats()->flush()->downloadTotal(), 'redown-user-download-total');
+        $this->assertSame(1, $user->stats()->downloadUnique(), 'redown-user-download-unique');
 
-        $this->assertEquals(2, $user->history()->resetDownloaded(), 'redown-reset-downloaded');
-        $this->assertEquals(1, $user->history()->resetSnatched(), 'redown-reset-snatched');
+        $this->assertSame(2, $user->history()->resetDownloaded(), 'redown-reset-downloaded');
+        $this->assertSame(1, $user->history()->resetSnatched(), 'redown-reset-snatched');
         new Stats\Users()->refresh();
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $user->flush()->stats()->downloadTotal(),
             'redown-user-reset-download-total'
@@ -166,9 +166,9 @@ class DownloadTest extends TestCase {
         $this->assertCount(3, $initial, 'down-stats-recent-initial');
 
         $download = new Download($this->torrent, new User\UserclassRateLimit($user), false);
-        $this->assertEquals(DownloadStatus::ok, $download->status(), 'down-stats-ok');
+        $this->assertSame(DownloadStatus::ok, $download->status(), 'down-stats-ok');
         $current = $tstats->recentDownloadTotal();
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $current[0]['total'] - $initial[0]['total'],
             'down-stats-increment'
@@ -178,7 +178,7 @@ class DownloadTest extends TestCase {
         $ustats = new Stats\Users();
         $recent = $ustats->topTotalDownloadList(1, 1);
         $this->assertCount(1, $recent, 'down-stats-top-user');
-        $this->assertEquals(
+        $this->assertSame(
             ["total", "user_id", "limited", "disabled"],
             array_keys($recent[0]),
             'down-stats-user-keys'

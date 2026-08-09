@@ -58,7 +58,7 @@ class TGroupManagerTest extends TestCase {
         $manager = new Manager\TGroup();
         $gid = $this->torrentList[0]->groupId();
         $idList = $manager->findByGroupName($this->torrentList[0]->group()->name());
-        $this->assertEquals([$gid], $idList, 'tgman-find-by-group-name');
+        $this->assertSame([$gid], $idList, 'tgman-find-by-group-name');
     }
 
     public function testRefreshBetterTranscode(): void {
@@ -87,12 +87,12 @@ class TGroupManagerTest extends TestCase {
             'json-tgroup-ungrouped-list',
         );
         $result = $ungrouped['results'][0];
-        $this->assertEquals(
+        $this->assertSame(
             $tgroup->id,
             $result['groupId'],
             'json-tgroup-ungrouped-id',
         );
-        $this->assertEquals(
+        $this->assertSame(
             $tgroup->torrentIdList()[0],
             $result['torrentId'],
             'json-tgroup-ungrouped-torrentid',
@@ -115,12 +115,12 @@ class TGroupManagerTest extends TestCase {
             'json-tgroup-grouped-list',
         );
         $result = $grouped['results'][0];
-        $this->assertEquals(
+        $this->assertSame(
             $tgroup->id,
             $result['groupId'],
             'json-tgroup-grouped-id'
         );
-        $this->assertEquals(
+        $this->assertSame(
             $tgroup->torrentIdList()[0],
             $result['torrents'][0]['torrentId'],
             'json-tgroup-grouped-torrentid',
@@ -135,12 +135,12 @@ class TGroupManagerTest extends TestCase {
             user:       $this->user,
         );
         $editor = new Editor\UserBookmark($this->user->id);
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $editor->modify([]),
             'tgroup-bookmark-editor-no-modify',
         );
-        $this->assertEquals(
+        $this->assertSame(
             2,
             $editor->modify([
                 $this->tgroupList[0]->id => 10,
@@ -148,7 +148,7 @@ class TGroupManagerTest extends TestCase {
             ]),
             'tgroup-bookmark-editor-modify',
         );
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $editor->remove([
                 $this->tgroupList[1]->id,

@@ -34,15 +34,15 @@ class RiplogTest extends TestCase {
             'valid_log_eac.log',
         );
 
-        $this->assertEquals($torrent->id, $riplog->torrent->id, 'torrent-riplog-create');
+        $this->assertSame($torrent->id, $riplog->torrent->id, 'torrent-riplog-create');
         $this->assertTrue($riplog->isChecksumOk(), 'torrent-riplog-checksum');
 
         $riplog2 = $riplogManager->findById($torrent, $riplog->id);
         $this->assertInstanceOf(Riplog::class, $riplog2, 'riplog-find-by-logid');
-        $this->assertEquals($riplog->id, $riplog2->id, 'riplog-id');
-        $this->assertEquals($riplog->link(), $riplog2->link(), 'riplog-link');
+        $this->assertSame($riplog->id, $riplog2->id, 'riplog-id');
+        $this->assertSame($riplog->link(), $riplog2->link(), 'riplog-link');
 
-        $this->assertEquals(
+        $this->assertSame(
             [$riplog->id],
             $riplogManager->fetchIdList($torrent),
             'torrent-riplog-id-list',
@@ -74,7 +74,7 @@ class RiplogTest extends TestCase {
         );
 
         $torrent->setField('HasLogDB', '1')->modify();
-        $this->assertEquals(
+        $this->assertSame(
             [
                 $torrent->id => [
                     'id'   => $torrent->id,
@@ -86,14 +86,14 @@ class RiplogTest extends TestCase {
         );
 
         $this->assertTrue($riplog->isChecksumOk(), 'riplog-checksum');
-        $this->assertEquals(Enum\RiplogChecksum::ok, $riplog->checksum(), 'riplog-checksum-state');
-        $this->assertEquals([], $riplog->report(), 'riplog-array-report');
-        $this->assertEquals('valid_log_eac.log', $riplog->filename(), 'riplog-filename');
-        $this->assertEquals(100, $riplog->score(), 'riplog-score');
-        $this->assertEquals('EAC', $riplog->ripper(), 'riplog-ripper');
-        $this->assertEquals('1.3', $riplog->ripperVersion(), 'riplog-ripper-version');
-        $this->assertEquals('en', $riplog->ripperLanguage(), 'riplog-language');
-        $this->assertEquals(100, $riplog->score(), 'riplog-score');
+        $this->assertSame(Enum\RiplogChecksum::ok, $riplog->checksum(), 'riplog-checksum-state');
+        $this->assertSame([], $riplog->report(), 'riplog-array-report');
+        $this->assertSame('valid_log_eac.log', $riplog->filename(), 'riplog-filename');
+        $this->assertSame(100, $riplog->score(), 'riplog-score');
+        $this->assertSame('EAC', $riplog->ripper(), 'riplog-ripper');
+        $this->assertSame('1.3', $riplog->ripperVersion(), 'riplog-ripper-version');
+        $this->assertSame('en', $riplog->ripperLanguage(), 'riplog-language');
+        $this->assertSame(100, $riplog->score(), 'riplog-score');
         $this->assertGreaterThan(2, strlen($riplog->checkerVersion()), 'riplog-checker-version');
 
         $this->assertStringEndsWith(
@@ -104,10 +104,10 @@ class RiplogTest extends TestCase {
 
         $this->assertFalse($riplog->isAdjusted(), 'riplog-is-not-adjusted');
         // FIXME: $this->assertNull($riplog->adjusterUserId(), 'riplog-no-adjuster-user-id');
-        $this->assertEquals(0, $riplog->adjusterUserId(), 'riplog-no-adjuster-user-id');
-        $this->assertEquals([], $riplog->adjustmentList(), 'riplog-no-adjustment');
-        $this->assertEquals('', $riplog->adjustment('nothing'), 'riplog-adjustment-nothing');
-        $this->assertEquals('', $riplog->adjustmentReason(), 'riplog-adjustment-nothing');
+        $this->assertNull($riplog->adjusterUserId(), 'riplog-no-adjuster-user-id');
+        $this->assertSame([], $riplog->adjustmentList(), 'riplog-no-adjustment');
+        $this->assertSame('', $riplog->adjustment('nothing'), 'riplog-adjustment-nothing');
+        $this->assertSame('', $riplog->adjustmentReason(), 'riplog-adjustment-nothing');
     }
 
     public function testRiplogAdjust(): void {
@@ -141,40 +141,40 @@ class RiplogTest extends TestCase {
             'riplog-modify',
         );
         $this->assertTrue($riplog->flush()->isAdjusted(), 'riplog-is-adjusted');
-        $this->assertEquals(
+        $this->assertSame(
             $this->user->id,
             $riplog->adjusterUserId(),
             'riplog-adjuster-user-id'
         );
-        $this->assertEquals(33, $riplog->scoreAdjusted(), 'riplog-score-adjusted');
+        $this->assertSame(33, $riplog->scoreAdjusted(), 'riplog-score-adjusted');
         $this->assertFalse($riplog->isAdjustedChecksumOk(), 'riplog-checksum-adjusted');
         $this->assertFalse($riplog->isActualChecksumOk(), 'riplog-checksum-actual');
         $this->assertFalse($riplog->isActualChecksumOk(), 'riplog-checksum-actual');
-        $this->assertEquals(0, $riplog->adjustmentTrack(''), 'riplog-adjustment-track');
+        $this->assertSame(0, $riplog->adjustmentTrack(''), 'riplog-adjustment-track');
         /*
-        $this->assertEquals(
+        $this->assertSame(
             'C2 Pointers enabled',
             $riplog->adjustment('c2_points'),
             'riplog-adjustment-general',
         );
-        $this->assertEquals(
+        $this->assertSame(
             '13',
             $riplog->adjustmentTrack('crc_mismatches'),
             'riplog-adjustment-track',
         );
         */
         $riplog->setField('Score', 0)->modify();
-        $this->assertEquals(
+        $this->assertSame(
             0,
             $riplogManager->reparse($torrent, $riplog->id + 1),
             'riplog-no-reparse',
         );
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $riplogManager->reparse($torrent, $riplog->id),
             'riplog-reparse-ok',
         );
-        $this->assertEquals(
+        $this->assertSame(
             100,
             $riplog->flush()->score(),
             'riplog-reparse-score'
@@ -201,12 +201,12 @@ class RiplogTest extends TestCase {
             ],
         );
         $payload = $json->payload();
-        $this->assertEquals($torrent->id, $payload['torrentId'], 'json-add-log-tid');
-        $this->assertEquals(100, $payload['score'], 'json-add-log-score');
+        $this->assertSame($torrent->id, $payload['torrentId'], 'json-add-log-tid');
+        $this->assertSame(100, $payload['score'], 'json-add-log-score');
         $this->assertTrue($payload['checksum'], 'json-add-log-checksum');
         $summary = $payload['logSummaries'];
         $this->assertCount(1, $summary, 'json-add-log-count-riplog');
-        $this->assertEquals(100, $summary[0]['score'], 'json-add-log-n-score');
+        $this->assertSame(100, $summary[0]['score'], 'json-add-log-n-score');
         $this->assertEqualsCanonicalizing(
             ['score', 'checksum', 'ripper', 'ripperVersion', 'language', 'details'],
             array_keys($summary[0]),
@@ -244,12 +244,12 @@ class RiplogTest extends TestCase {
             $riplog->isAdjusted(),
             'riplog-adjust-is-adjusted',
         );
-        $this->assertEquals(
+        $this->assertSame(
             Enum\RiplogChecksum::invalid,
             $riplog->checksumAdjusted(),
             'riplog-adjust-checksum-read',
         );
-        $this->assertEquals(
+        $this->assertSame(
             33,
             $riplog->scoreAdjusted(),
             'riplog-adjust-score-read',
@@ -264,12 +264,12 @@ class RiplogTest extends TestCase {
             $riplog->isAdjusted(),
             'riplog-adjust-is-still-adjusted',
         );
-        $this->assertEquals(
+        $this->assertSame(
             44,
             $riplog->scoreAdjusted(),
             'riplog-adjust-new-score',
         );
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $manager->reparse($torrent, $riplog->id),
             'riplog-reparse',
@@ -304,7 +304,7 @@ class RiplogTest extends TestCase {
         );
         $path = $riplog->file()->path();
         $this->assertTrue(file_exists($path), 'riplog-file-exists');
-        $this->assertEquals(1, $riplog->remove(), 'riplog-remove');
+        $this->assertSame(1, $riplog->remove(), 'riplog-remove');
         $this->assertFalse(file_exists($path), 'riplog-file-gone');
 
         $manager->create(
@@ -312,7 +312,7 @@ class RiplogTest extends TestCase {
             __DIR__ . '/../fixture/valid_log_eac.log',
             'valid_log_eac.log',
         );
-        $this->assertEquals(
+        $this->assertSame(
             1,
             $manager->removeAll($torrent, $this->user),
             'riplog-manager-remove-all',

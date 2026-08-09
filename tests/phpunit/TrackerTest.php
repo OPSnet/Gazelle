@@ -26,8 +26,8 @@ class TrackerTest extends TestCase {
         $this->assertTrue($tracker->modifyAnnounceJitter($jitter), 'tracker-announce-modify-jitter');
 
         $info = $tracker->info();
-        $this->assertEquals($interval, $info['announce interval']['value'], 'tracker-announce-interval');
-        $this->assertEquals($jitter, $info['announce jitter']['value'], 'tracker-announce-jitter');
+        $this->assertSame($interval, $info['announce interval']['value'], 'tracker-announce-interval');
+        $this->assertSame($jitter, $info['announce jitter']['value'], 'tracker-announce-jitter');
     }
 
     #[Group('no-ci')]
@@ -48,10 +48,10 @@ class TrackerTest extends TestCase {
         $this->assertTrue($tracker->addToken($torrent, $this->user), 'tracker-add-token');
         $report = $tracker->torrentReport($torrent);
         $this->assertCount(9, array_keys($report), 'tracker-tinfo-count');
-        $this->assertEquals($torrent->id, $report['id'], 'tracker-tinfo-id');
+        $this->assertSame($torrent->id, $report['id'], 'tracker-tinfo-id');
         $this->assertCount(0, $report['leecher_list'], 'tracker-tinfo-leecher');
         $this->assertCount(0, $report['seeder_list'], 'tracker-tinfo-seeder');
-        $this->assertEquals([$this->user->id], $report['fltoken_list'], 'tracker-tinfo-fltoken');
+        $this->assertSame([$this->user->id], $report['fltoken_list'], 'tracker-tinfo-fltoken');
         $this->assertTrue($tracker->removeToken($torrent, $this->user), 'tracker-remove-token');
     }
 
@@ -80,7 +80,7 @@ class TrackerTest extends TestCase {
         $this->assertFalse($tracker->lastError(), 'tracker-init');
 
         $this->user = Helper::makeUser('trk.' . randomString(10), 'tracker');
-        $this->assertEquals(
+        $this->assertSame(
             [
                 'id'        => $this->user->id,
                 'can_leech' => 1,
@@ -97,7 +97,7 @@ class TrackerTest extends TestCase {
         $this->user->setField('can_leech', 0)->setField('Visible', '0')->modify();
         $this->assertTrue($tracker->refreshUser($this->user), 'tracker-refresh-user');
         $this->assertTrue($tracker->traceUser($this->user, true), 'tracker-trace-user');
-        $this->assertEquals(
+        $this->assertSame(
             [
                 'id'        => $this->user->id,
                 'can_leech' => 0,
@@ -112,7 +112,7 @@ class TrackerTest extends TestCase {
         );
 
         $tracker->traceUser($this->user, false);
-        $this->assertEquals(
+        $this->assertSame(
             [
                 'id'        => $this->user->id,
                 'can_leech' => 0,
@@ -131,10 +131,10 @@ class TrackerTest extends TestCase {
         $this->assertTrue($tracker->modifyPasskey($announceKey, $this->user->announceKey()), 'tracker-modify-announce-key');
         $this->assertTrue($tracker->removeUser($this->user), 'tracker-remove-user');
 
-        $initial = current(array_filter($info, fn ($v) => $v['label'] == 'requests handled'));
+        $initial = array_first(array_filter($info, fn ($v) => $v['label'] == 'requests handled'));
         // TODO: something with initial
         $current = $tracker->info();
-        $this->assertEquals($info['requests handled']['value'] + 10, $current['requests handled']['value'], 'tracker-requests-handled');
+        $this->assertSame($info['requests handled']['value'] + 10, $current['requests handled']['value'], 'tracker-requests-handled');
     }
 
     #[Group('no-ci')]
@@ -169,13 +169,13 @@ class TrackerTest extends TestCase {
         $downloader = Helper::makeUser('trkdown.' . randomString(10), 'tracker');
         $downloader->updateTokens(10);
         $download = new Download($torrent, new User\UserclassRateLimit($downloader), true);
-        $this->assertEquals(DownloadStatus::ok, $download->status(), 'tracker-downloader-enough-tokens');
+        $this->assertSame(DownloadStatus::ok, $download->status(), 'tracker-downloader-enough-tokens');
 
         $userId    = $downloader->id;
         $torrentId = $torrent->id;
         $fakeId    = $torrentId + 1;
 
-        $this->assertEquals(1, $tracker->expireFreeleechTokens("$userId:$torrentId,$userId:$fakeId"), 'tracker-expire-tokens');
+        $this->assertSame(1, $tracker->expireFreeleechTokens("$userId:$torrentId,$userId:$fakeId"), 'tracker-expire-tokens');
         $downloader->remove();
     }
 

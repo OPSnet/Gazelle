@@ -30,6 +30,6 @@ class UserNavigationTest extends TestCase {
         );
         $userList = $manager->userControlList($this->user);
         $this->assertCount(3, $userList, 'user-nav-count');
-        $this->assertEquals($fullList[2]["id"], $userList[1]["id"], 'user-nav-order');
+        $this->assertSame($fullList[2]["id"], $userList[1]["id"], 'user-nav-order');
     }
 }

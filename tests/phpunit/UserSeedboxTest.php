@@ -57,12 +57,12 @@ class UserSeedboxTest extends TestCase {
 
     public function testSeedbox(): void {
         $seedbox = new User\Seedbox($this->user);
-        $this->assertEquals($this->user->link(), $seedbox->link(), 'seedbox-link');
-        $this->assertEquals($this->user->location(), $seedbox->location(), 'seedbox-location');
+        $this->assertSame($this->user->link(), $seedbox->link(), 'seedbox-link');
+        $this->assertSame($this->user->location(), $seedbox->location(), 'seedbox-location');
         $this->assertCount(0, $seedbox->hostList(), 'seedbox-initial-hostlist');
         $this->assertCount(0, $seedbox->freeList(), 'seedbox-initial-freelist');
         $seedbox->setViewByPath();
-        $this->assertEquals(User\Seedbox::VIEW_BY_PATH, $seedbox->viewBy(), 'seedbox-view-by');
+        $this->assertSame(User\Seedbox::VIEW_BY_PATH, $seedbox->viewBy(), 'seedbox-view-by');
 
         $ua1   = 'ua-' . randomString(10);
         $pid1  = 'pi-' . randomString(10);
@@ -84,10 +84,10 @@ class UserSeedboxTest extends TestCase {
         $seedbox->flush();
         $hostList = $seedbox->hostList();
         $this->assertEquals([$key1, $key2], array_keys($hostList), 'seedbox-hostlist');
-        $this->assertEquals(2, $hostList[$key1]['total'], 'seedbox-total-1');
-        $this->assertEquals(3, $hostList[$key2]['total'], 'seedbox-total-2');
-        $this->assertEquals($name1, $hostList[$key1]['name'], 'seedbox-name-1');
-        $this->assertEquals($name2, $hostList[$key2]['name'], 'seedbox-name-2');
+        $this->assertSame(2, $hostList[$key1]['total'], 'seedbox-total-1');
+        $this->assertSame(3, $hostList[$key2]['total'], 'seedbox-total-2');
+        $this->assertSame($name1, $hostList[$key1]['name'], 'seedbox-name-1');
+        $this->assertSame($name2, $hostList[$key2]['name'], 'seedbox-name-2');
 
         $changed = $seedbox->updateNames([
             [
@@ -102,31 +102,31 @@ class UserSeedboxTest extends TestCase {
                 'ua'   => $hostList[$key2]['useragent'],
             ]
         ]);
-        $this->assertEquals(2, $changed, 'seedbox-renamed');
+        $this->assertSame(2, $changed, 'seedbox-renamed');
         $hostList = $seedbox->hostList();
-        $this->assertEquals('sbox-1', $hostList[$key1]['name'], 'seedbox-rename-1');
-        $this->assertEquals('sbox-2', $hostList[$key2]['name'], 'seedbox-rename-2');
-        $this->assertEquals('sbox-1', $seedbox->name($hostList[$key1]['id']), 'seedbox-id-1');
-        $this->assertEquals('sbox-2', $seedbox->name($hostList[$key2]['id']), 'seedbox-id-2');
+        $this->assertSame('sbox-1', $hostList[$key1]['name'], 'seedbox-rename-1');
+        $this->assertSame('sbox-2', $hostList[$key2]['name'], 'seedbox-rename-2');
+        $this->assertSame('sbox-1', $seedbox->name($hostList[$key1]['id']), 'seedbox-id-1');
+        $this->assertSame('sbox-2', $seedbox->name($hostList[$key2]['id']), 'seedbox-id-2');
 
         // union (torrentList[1] in common)
         $seedbox->setSource($hostList[$key1]['id'])->setTarget($hostList[$key2]['id'])->setUnion(true);
-        $this->assertEquals([$this->torrentList[1]->id], $seedbox->idList(), 'seedbox-both');
+        $this->assertSame([$this->torrentList[1]->id], $seedbox->idList(), 'seedbox-both');
 
         // intersection (point of view sbox-1)
         $seedbox->setUnion(false);
-        $this->assertEquals([$this->torrentList[0]->id], $seedbox->idList(), 'seedbox-1-not-2');
+        $this->assertSame([$this->torrentList[0]->id], $seedbox->idList(), 'seedbox-1-not-2');
 
         // intersection (point of view sbox-2)
         $seedbox->setSource($hostList[$key2]['id'])->setTarget($hostList[$key1]['id']);
-        $this->assertEquals(
+        $this->assertSame(
             [$this->torrentList[2]->id, $this->torrentList[3]->id],
             $seedbox->idList(),
             'seedbox-2-not-1'
         );
 
         $list = $seedbox->torrentList(new Manager\Torrent(), 3, 0);
-        $this->assertEquals(
+        $this->assertSame(
             [$this->torrentList[2]->id, $this->torrentList[3]->id],
             array_map(fn($t) => $t['id'], $list),
             'seedbox-list',
