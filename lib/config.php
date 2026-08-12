@@ -1254,8 +1254,9 @@ defined('IP_REGEXP')        or define('IP_REGEXP',       '/' . IP_REGEXP_STEM . 
 defined('URL_REGEXP_STEM')  or define('URL_REGEXP_STEM', '(https?:\/\/(?:' . IP_REGEXP_STEM . '|localhost|(?:[\w-]+(?:\.[\w-]+)+))(?::\d{1,5})?(?:\/\S*))');
 defined('URL_REGEXP')       or define('URL_REGEXP',      '/^' . URL_REGEXP_STEM . '$/i');
 defined('CSS_REGEXP')       or define('CSS_REGEXP',      '/^' . URL_REGEXP_STEM . '\.css(?:\?\S*)?$/i');
-defined('IMAGE_REGEXP')     or define('IMAGE_REGEXP',    '/^(' . URL_REGEXP_STEM . '\.(?:gif|png|webm|webp|jpe?g|tiff?)(\?\S*)?)$/i');
-defined('IMAGETEXT_REGEXP') or define('IMAGETEXT_REGEXP', '/\b(' . URL_REGEXP_STEM . '\.(?:gif|png|webm|webp|jpe?g|tiff?)(\?\S*)?)\b/i');
+defined('IMAGEEXT_REGEXP_STEM') or define('IMAGEEXT_REGEXP_STEM', '(?:avif|bmp|gif|jpe?g|svg|tiff?|png|web[mp])');
+defined('IMAGE_REGEXP')     or define('IMAGE_REGEXP',    '/^(' . URL_REGEXP_STEM . '\.' . IMAGEEXT_REGEXP_STEM . '(\?\S*)?)$/i');
+defined('IMAGETEXT_REGEXP') or define('IMAGETEXT_REGEXP', '/\b(' . URL_REGEXP_STEM . '\.' . IMAGEEXT_REGEXP_STEM . '(\?\S*)?)\b/i');
 defined('SITELINK_REGEXP')  or define('SITELINK_REGEXP', '(?:' . preg_quote(SITE_URL, '/') .  '|' . preg_quote(ALT_SITE_URL, '/') . ')');
 defined('ARTIST_REGEXP')    or define('ARTIST_REGEXP',   '/^' . SITELINK_REGEXP . '\/artist\.php\?.*?\bid=(?P<id>\d+)$/');
 defined('COLLAGE_REGEXP')   or define('COLLAGE_REGEXP',  '/^' . SITELINK_REGEXP . '\/collages\.php\?.*?\bid=(?P<id>\d+)\b/');

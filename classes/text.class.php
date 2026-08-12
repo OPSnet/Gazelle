@@ -1084,7 +1084,7 @@ class Text {
                             $Str .= '<a rel="noreferrer" target="_blank" href="' . $Block['Val'] . '">' . $Block['Val'] . '</a> (image)';
                             break;
                         }
-                        if (!self::valid_url($Block['Val'], '\.(?:avif|bmp|gif|jpe?g|png|svg|tiff|webp)')) {
+                        if (!self::valid_url($Block['Val'], '\.' . IMAGEEXT_REGEXP_STEM)) {
                             $Str .= "[img]{$Block['Val']}[/img]";
                         } else {
                             $LocalURL = self::local_url($Block['Val']);
