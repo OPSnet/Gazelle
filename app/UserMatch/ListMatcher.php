@@ -236,8 +236,8 @@ class ListMatcher extends \Gazelle\Base {
 
         $emailSql = 'h.Email';
         if ($loose) {
-            $emailSql = 'SUBSTRING_INDEX(h.Email, \'@\', 1)';
-            $emails = array_map(fn ($e) => explode('@', $e, 2)[0], $emails);
+            $emailSql = "REPLACE(SUBSTRING_INDEX(SUBSTRING_INDEX(h.Email, '+', 1), '@', 1), '.', '')";
+            $emails = array_map(fn ($e) => str_replace('.', '', array_first(explode('@', $e, 2))), $emails);
             array_push($emails, ...$usernames);
             $emails = array_unique($emails);
             $usernames = $emails;
