@@ -205,7 +205,7 @@ if ($sections = $artist->sections()) {
     <table class="torrent_table grouped release_table m_table">
 <?php
     $urlStem = new User\Stylesheet($Viewer)->imagePath();
-    $groupsClosed = (bool)$Viewer->option('TorrentGrouping');
+    $groupsClosed = (int)$Viewer->option('TorrentGrouping') === 1;
     $snatcher = $Viewer->snatch();
 
     foreach ($sections as $sectionId => $groupList) {

@@ -191,23 +191,23 @@ if (!empty($_POST['password']) && !empty($_POST['new_pass_1']) && !empty($_POST[
     }
 }
 
-$option['DisableGrouping2']    = (isset($_POST['disablegrouping']) ? 0 : 1);
-$option['TorrentGrouping']     = (isset($_POST['torrentgrouping']) ? 1 : 0);
-$option['PostsPerPage']        = (int)$_POST['postsperpage'];
+$option['AutoSubscribe']       = isset($_POST['autosubscribe']) ? 1 : 0;
+$option['CoverArt']            = isset($_POST['coverart']) ? 1 : 0;
+$option['DisableAutoSave']     = isset($_POST['disableautosave']) ? 1 : 0;
+$option['DisableGrouping2']    = isset($_POST['disablegrouping']) ? 0 : 1;
+$option['DisableSmileys']      = isset($_POST['disablesmileys']) ? 1 : 0;
+$option['EnableMatureContent'] = isset($_POST['enablematurecontent']) ? 1 : 0;
+$option['ListUnreadPMsFirst']  = isset($_POST['list_unread_pms_first']) ? 1 : 0;
+$option['NoVoteLinks']         = isset($_POST['novotelinks']) ? 1 : 0;
+$option['ShowExtraCovers']     = isset($_POST['show_extra_covers']) ? 1 : 0;
+$option['ShowSnatched']        = isset($_POST['showsnatched']) ? 1 : 0;
+$option['ShowTorFilter']       = isset($_POST['showtfilter']) ? 1 : 0;
+$option['UseOpenDyslexic']     = isset($_POST['useopendyslexic']) ? 1 : 0;
 $option['CollageEntries']      = (int)$_POST['collageentries'];
-$option['ShowTorFilter']       = (isset($_POST['showtfilter']) ? 1 : 0);
-$option['AutoSubscribe']       = (isset($_POST['autosubscribe']) ? 1 : 0);
-$option['DisableSmileys']      = (int)isset($_POST['disablesmileys']);
-$option['EnableMatureContent'] = (isset($_POST['enablematurecontent']) ? 1 : 0);
-$option['UseOpenDyslexic']     = (isset($_POST['useopendyslexic']) ? 1 : 0);
 $option['DisableAvatars']      = (int)($_POST['disableavatars'] ?? 0);
 $option['Identicons']          = (int)($_POST['identicons'] ?? 0);
-$option['ListUnreadPMsFirst']  = (isset($_POST['list_unread_pms_first']) ? 1 : 0);
-$option['ShowSnatched']        = (isset($_POST['showsnatched']) ? 1 : 0);
-$option['DisableAutoSave']     = (isset($_POST['disableautosave']) ? 1 : 0);
-$option['NoVoteLinks']         = (isset($_POST['novotelinks']) ? 1 : 0);
-$option['CoverArt']            = (int)isset($_POST['coverart']);
-$option['ShowExtraCovers']     = (int)isset($_POST['show_extra_covers']);
+$option['PostsPerPage']        = (int)$_POST['postsperpage'];
+$option['TorrentGrouping']     = (int)$_POST['torrentgrouping'];
 
 // user options
 $autocomplete = Enum\Autocomplete::tryFrom((int)$_POST['autocomplete'])

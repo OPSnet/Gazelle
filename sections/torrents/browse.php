@@ -142,7 +142,7 @@ echo $paginator->linkbox();
     </tr>
 <?php
 
-$groupsClosed = (bool)$Viewer->option('TorrentGrouping');
+$groupsClosed = (int)$Viewer->option('TorrentGrouping') === 1;
 foreach ($Results as $Key => $GroupID) {
     $tgroup = $tgMan->findById($GroupID);
     if (is_null($tgroup)) {

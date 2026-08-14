@@ -378,7 +378,7 @@ class UtilTest extends TestCase {
         }
 
         $total = [1 => 0, 2 => 0, 3 => 0, 4 => 0];
-        $n     = 20000;
+        $n     = 30000;
         for ($i = 0; $i < $n; $i++) {
             $total[weightedChoice($list)]++;
         }

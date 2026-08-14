@@ -212,7 +212,7 @@ $urlStem = new User\Stylesheet($Viewer)->imagePath();
             </tr>
 <?php
 
-$groupsClosed = (bool)$Viewer->option('TorrentGrouping');
+$groupsClosed = (int)$Viewer->option('TorrentGrouping') === 1;
 foreach ($bookmarkList as $bm) {
     $tgroupId = $bm['tgroup_id'];
     $tgroup = $tgMan->findById($tgroupId);

@@ -17,7 +17,7 @@ $bookmark     = new User\Bookmark($Viewer);
 $collMan      = new Manager\Collage();
 $urlStem      = new User\Stylesheet($Viewer)->imagePath();
 $vote         = new User\Vote($Viewer);
-$groupsClosed = (bool)$Viewer->option('TorrentGrouping');
+$groupsClosed = (int)$Viewer->option('TorrentGrouping') === 1;
 $snatcher     = $Viewer->snatch();
 
 /** @var Collage $collage required from collage.php */

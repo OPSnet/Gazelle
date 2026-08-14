@@ -54,7 +54,7 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
     </div>
 <?php
 } else {
-    $showGroups = (bool)$Viewer->option('TorrentGrouping');
+    $showGroups = (int)$Viewer->option('TorrentGrouping') === 0;
     foreach ($groupSubs as $s) {
         $tgroupList = $s['tgroup_list'];
         $new = $viewAll ? 0 : count($tgroupList);
