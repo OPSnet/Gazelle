@@ -16,7 +16,7 @@ authorize();
 
 $redirectId = (int)$_POST['redirect'];
 $newName = Artist::sanitize($_POST['name']);
-if (empty($newName)) {
+if (!$newName) {
     Error400::error('The specified name is empty.');
 }
 

@@ -7,7 +7,7 @@ uses Mysql and Sphinx, but work is under way to replace those with
 Postgresql.
 
 ## Gazelle Runtime Dependencies
-* [PHP 8.4.13+](https://www.php.net/) (required)
+* [PHP 8.5.9+](https://www.php.net/) (required)
 * [PostgreSQL 17](https://www.postgresql.org/) (required)
 * [MySQL 8.4](https://www.mysql.com/) (required)
 * [nginx](http://wiki.nginx.org/Main) (required)
@@ -37,21 +37,6 @@ proxies, and tuning TCP configs to obtain proper performance and privacy.
 ## Development
 Docker is used to develop Gazelle. See https://docs.docker.com/engine/install/
 for more information on getting Docker set up locally.
-
-### Docker on WSL
-By default, Windows Subsystem for Linux (WSL) does not support the use of
-`docker compose`. As root, you should to run the following command
-
-```
-apt-get install ca-certificates curl \
-  && install -m 0755 -d /etc/apt/keyrings \
-  && curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-  && chmod a+r /etc/apt/keyrings/docker.asc \
-  && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" \
-    > /etc/apt/sources.list.d/docker.list \
-  && apt-get update \
-  && apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-```
 
 ### Gazelle
 In the root folder of the Gazelle repository, run the following command:
@@ -171,16 +156,6 @@ Similarly, the phpstan container can be built with
 
     docker build -t gazelle-phpstan:latest -f misc/phpstan.Dockerfile --compress misc/docker
 
-## Upgrading Postgresql
-Major Pg versions require a dump and restore. In the docker environment
-this means doing the following;
- - run 'make pgdump' to dump the current contents
- - stop the current postgresql container
- - mv misc/docker/data/pg misc/docker/data/pg.old
- - mkdir ./docker/data/pg
- - docker compose stop && docker compose up -d
- - import the dump to the docker pg container
-
 ## Contact and Discussion
 Feel free to join #develop on irc.orpheus.network to discuss any
 questions concerning Gazelle (or any of the repos published by
@@ -191,4 +166,6 @@ Run `bin/setup-git-hooks` once, to install a git precommit hook that will run li
 checks on PHP, JS, Twig and CSS files at each commit.
 
 Create issues at https://github.com/OPSnet
-Patches welcome!
+
+Patches welcome! AI not welcome, this application is crafted by hand and each
+line is understood.

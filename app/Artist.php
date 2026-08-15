@@ -1012,13 +1012,40 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
     /* STATIC METHODS - for when you do not yet have an ID, e.g. during creation */
 
     /**
-     * Collapse whitespace and directional markers, because people copypaste carelessly.
-     * TODO: make stricter, e.g. on all whitespace characters or Unicode normalisation
+     * Collapse whitespace and directional markers, renormalize Unicode,
+     * because it's a dangerous world out there.
      */
-    public static function sanitize(string $name): ?string {
-        // \u200e is &lrm;
-        $name = preg_replace('/^(?:\xE2\x80\x8E|\s)+/', '', $name);
-        $name = preg_replace('/(?:\xE2\x80\x8E|\s)+$/', '', $name);
-        return preg_replace('/ +/', ' ', $name);
+    public static function sanitize(string $name): string|null {
+        $name = preg_replace(
+            // directional markers
+            '/[\x{200e}\x{200f}\x{202a}-\x{202e}\x{2066}-\x{2069}]/u',
+            '',
+            trim($name),
+        );
+        $name = \Normalizer::normalize(
+            $name,
+            // u + combining diaeresis => latin small letter u with diaresis
+            \Normalizer::NFC,
+        );
+        if ($name === false) {
+            // encoded in wtf-8
+            return null;
+        }
+        $name = preg_replace(
+            // weirdo whitespace
+            '/[\s\x{00A0}\x{2000}-\x{200B}\x{202F}\x{205F}\x{3000}]/u',
+            ' ',
+            $name,
+        );
+        if (!is_string($name)) {
+            return null;
+        }
+        $name = preg_replace(
+            // collapse whitespace
+            '/\s+/',
+            ' ',
+            $name,
+        );
+        return is_string($name) ? $name : null;
     }
 }

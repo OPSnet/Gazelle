@@ -212,7 +212,7 @@ if ($isMusicUpload && !$Properties['GroupID']) {
     ];
     for ($i = 0, $end = count($Artists); $i < $end; $i++) {
         $name = Artist::sanitize($Artists[$i]);
-        if ($name === '') {
+        if (!$name) {
             continue;
         }
         $roleId = $artistRole[$i];

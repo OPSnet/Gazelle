@@ -22,7 +22,7 @@ if (is_null($artist) || empty($_POST['aliasid'])) {
 
 $aliasId = (int)$_POST['aliasid'];
 $newName = Artist::sanitize($_POST['name']);
-if (empty($newName)) {
+if (!$newName) {
     Error400::error('No new name given.');
 } elseif (!isset($artist->aliasList()[$aliasId])) {
     Error400::error('Could not find existing alias ID');
