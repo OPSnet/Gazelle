@@ -31,16 +31,16 @@ class ReportAuto extends BasePgObject {
         if (isset($this->info)) {
             return $this->info;
         }
-        $this->info = $this->pg()->rowAssoc("
-            SELECT
+        $this->info = $this->pg()->rowAssocex("
+            select
                 id_user,
                 id_report_auto_type,
                 created,
                 resolved,
                 id_owner,
                 data
-            FROM report_auto
-            WHERE id_report_auto = ?
+            from report_auto
+            where id_report_auto = $1
             ", $this->id
         );
         return $this->info;
@@ -50,14 +50,14 @@ class ReportAuto extends BasePgObject {
         if (isset($this->comments)) {
             return $this->comments;
         }
-        $this->comments = $this->pg()->all("
-            SELECT
+        $this->comments = $this->pg()->allex("
+            select
                 id_user,
                 created,
                 comment
-            FROM report_auto_comment
-            WHERE id_report_auto = ?
-            ORDER BY created
+            from report_auto_comment
+            where id_report_auto = $1
+            order by created
             ", $this->id
         );
         return $this->comments;
@@ -66,12 +66,12 @@ class ReportAuto extends BasePgObject {
     /**
      * returns an ISO timestring
      */
-    public function created(): string {
+    public function created(): \DateTimeImmutable {
         return $this->info()['created'];
     }
 
     public function state(): Enum\ReportAutoState {
-        if ($this->isResolved()) {
+        if ($this->resolved() !== null) {
             return Enum\ReportAutoState::closed;
         }
         if ($this->isClaimed()) {
@@ -88,15 +88,15 @@ class ReportAuto extends BasePgObject {
         return $this->info()['id_owner'] !== null;
     }
 
-    public function isResolved(): bool {
-        return $this->info()['resolved'] !== null;
+    public function resolved(): \DateTimeImmutable|null {
+        return $this->info()['resolved'];
     }
 
     public function hasComments(): bool {
         return (bool)$this->comments();
     }
 
-    public function ownerId(): ?int {
+    public function ownerId(): int|null {
         return $this->isClaimed() ? (int)$this->info()['id_owner'] : null;
     }
 
@@ -115,23 +115,23 @@ class ReportAuto extends BasePgObject {
         return $type->name();
     }
 
-    public function data(): ?array {
-        return json_decode($this->info()['data'], true);
+    public function data(): array|null {
+        return $this->info()['data'];
     }
 
     /**
-     * returns html string with details about the report
+     * returns a string with the report details, to be rendered by Twig
      *
      * you will want to override this in a custom class for most report types
      */
     public function details(): string {
-        return \Text::full_format('[pre]' . json_encode($this->data(), JSON_PRETTY_PRINT) . '[/pre]');
+        return "<pre>" . json_encode($this->data(), JSON_PRETTY_PRINT) . '</pre>';
     }
 
     /**
      * Claim a report. (Pass null to unclaim a currently claimed report)
      */
-    public function claim(?User $user): bool {
+    public function claim(User|null $user): bool {
         return $this
             ->setField('id_owner', $user?->id)
             ->modify();
@@ -142,9 +142,9 @@ class ReportAuto extends BasePgObject {
     }
 
     /**
-     * returns comment id on success, null otherwise
+     * returns comment id
      */
-    public function addComment(User $user, string $comment): ?int {
+    public function addComment(User $user, string $comment): int {
         $commentId = $this->pg()->scalarex("
             insert into report_auto_comment
                    (id_report_auto, id_user, comment)
@@ -158,11 +158,11 @@ class ReportAuto extends BasePgObject {
 
     public function resolve(User $user): int {
         // can't use setField() because there is no elegant way to say `resolved = now()`
-        $affected = $this->pg()->prepared_query("
-            UPDATE report_auto SET
+        $affected = $this->pg()->query("
+            update report_auto set
                 resolved = now(),
-                id_owner = ?
-            WHERE id_report_auto = ?
+                id_owner = $1
+            where id_report_auto = $2
             ", $user->id, $this->id
         );
         $this->flush();

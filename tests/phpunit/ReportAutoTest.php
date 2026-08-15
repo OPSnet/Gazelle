@@ -29,7 +29,7 @@ class ReportAutoTest extends TestCase {
         $this->assertSame(Enum\ReportAutoState::open, $r->state(), 'reportauto-new-state');
         $this->assertSame($type->id, $r->typeId(), 'reportauto-new-typeid');
         $this->assertFalse($r->isClaimed(), 'reportauto-new-claimed');
-        $this->assertFalse($r->isResolved(), 'reportauto-new-resolved');
+        $this->assertNull($r->resolved(), 'reportauto-new-resolved');
         $this->assertFalse($r->hasComments(), 'reportauto-new-comments');
         $this->assertNull($r->ownerId(), 'reportauto-new-owner');
         $this->assertSame($this->user1->id, $r->userId(), 'reportauto-new-user');
@@ -47,10 +47,10 @@ class ReportAutoTest extends TestCase {
 
         $r = $raMan->create($this->user1, $type, ["someinterestingkey" => 1234]);
         $r->resolve($this->user2);
-        $this->assertTrue($r->isResolved(), 'reportauto-resolve-1');
+        $this->assertInstanceOf(\DateTimeImmutable::class, $r->resolved(), 'reportauto-resolve-1');
         $this->assertSame($this->user2->id, $r->ownerId(), 'reportauto-resolve-2');
         $r->unresolve($this->user2);
-        $this->assertFalse($r->isResolved(), 'reportauto-resolve-3');
+        $this->assertNull($r->resolved(), 'reportauto-resolve-3');
         $this->assertSame($this->user2->id, $r->ownerId(), 'reportauto-resolve-4');
         $this->assertTrue($r->isClaimed(), 'reportauto-resolve-5');
     }

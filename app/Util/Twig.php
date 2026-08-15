@@ -6,6 +6,7 @@ use Gazelle\Enum\CacheBucket;
 use Gazelle\Enum\ImageCacheMode;
 use Gazelle\Manager\SiteOption;
 use Gazelle\View;
+use Twig\Extension\StringLoaderExtension;
 
 class Twig {
     protected static \Gazelle\Manager\User $userMan;
@@ -28,6 +29,8 @@ class Twig {
                 'debug' => DEBUG_TWIG,
                 'cache' => __DIR__ . '/../../cache/twig'
             ]);
+
+        $twig->addExtension(new StringLoaderExtension());
 
         $twig->addFilter(new \Twig\TwigFilter(
             'article',

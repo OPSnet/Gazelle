@@ -35,9 +35,9 @@ class ReportAutoTypeTest extends TestCase {
 
         $type4_n = $this->ratMan->findById($type4->id);
         $this->assertInstanceOf(ReportAuto\Type::class, $type4_n, 'ratman-find-instance-n');
-        $this->assertSame($type4, $type4_n, 'ratman-find-id');
+        $this->assertEquals($type4, $type4_n, 'ratman-find-id');
         $type4_nn = $this->ratMan->findByName($type4->name());
         $this->assertInstanceOf(ReportAuto\Type::class, $type4_nn, 'ratman-find-instance-nn');
-        $this->assertSame($type4, $type4_nn, 'ratman-find-name');
+        $this->assertEquals($type4, $type4_nn, 'ratman-find-name');
     }
 }

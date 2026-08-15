@@ -30,7 +30,11 @@ class ManagerReportAutoTest extends TestCase {
         $this->assertNotEquals($report, $report2, 'raman-create-unique');
 
         $report3 = $raMan->create($this->user1, $type, ['c' => 'd'], '2024-01-01T00:00+0');
-        $this->assertStringStartsWith('2024-01-01 00:00', $report3->created(), 'raman-create-time');
+        $this->assertSame(
+            '2024-01-01 00:00',
+            $report3->created()->format('Y-m-d H:i'),
+            'raman-create-time'
+        );
 
         $report3_n = $raMan->findById($report3->id);
         $this->assertNotNull($report3_n, 'raman-find-id');
@@ -58,13 +62,13 @@ class ManagerReportAutoTest extends TestCase {
         $r3n = $raMan->findById($r3->id);
         $r4n = $raMan->findById($r4->id);
         $this->assertTrue($r1n->isClaimed(), 'raman-claimall-1-1');
-        $this->assertFalse($r1n->isResolved(), 'raman-claimall-1-2');
+        $this->assertNull($r1n->resolved(), 'raman-claimall-1-2');
         $this->assertTrue($r2n->isClaimed(), 'raman-claimall-2-1');
-        $this->assertFalse($r2n->isResolved(), 'raman-claimall-2-2');
+        $this->assertNull($r2n->resolved(), 'raman-claimall-2-2');
         $this->assertFalse($r3n->isClaimed(), 'raman-claimall-3-1');
-        $this->assertFalse($r3n->isResolved(), 'raman-claimall-3-2');
+        $this->assertNull($r3n->resolved(), 'raman-claimall-3-2');
         $this->assertFalse($r4n->isClaimed(), 'raman-claimall-4-1');
-        $this->assertFalse($r4n->isResolved(), 'raman-claimall-4-2');
+        $this->assertNull($r4n->resolved(), 'raman-claimall-4-2');
 
         $raMan->claimAll($this->user1, $this->user1->id, $type2->id);
 
@@ -109,13 +113,13 @@ class ManagerReportAutoTest extends TestCase {
         $r3n = $raMan->findById($r3->id);
         $r4n = $raMan->findById($r4->id);
         $this->assertTrue($r1n->isClaimed(), 'raman-resolveall-1-1');
-        $this->assertTrue($r1n->isResolved(), 'raman-resolveall-1-2');
+        $this->assertInstanceOf(\DateTimeImmutable::class, $r1n->resolved(), 'raman-resolveall-1-2');
         $this->assertTrue($r2n->isClaimed(), 'raman-resolveall-2-1');
-        $this->assertTrue($r2n->isResolved(), 'raman-resolveall-2-2');
+        $this->assertInstanceOf(\DateTimeImmutable::class, $r2n->resolved(), 'raman-resolveall-2-2');
         $this->assertFalse($r3n->isClaimed(), 'raman-resolveall-3-1');
-        $this->assertFalse($r3n->isResolved(), 'raman-resolveall-3-2');
+        $this->assertNull($r3n->resolved(), 'raman-resolveall-3-2');
         $this->assertFalse($r4n->isClaimed(), 'raman-resolveall-4-1');
-        $this->assertFalse($r4n->isResolved(), 'raman-resolveall-4-2');
+        $this->assertNull($r4n->resolved(), 'raman-resolveall-4-2');
 
         $raMan->resolveAll($this->user1, $this->user1->id, $type2->id);
 
@@ -123,10 +127,10 @@ class ManagerReportAutoTest extends TestCase {
         $r2n = $raMan->findById($r2->id);
         $r3n = $raMan->findById($r3->id);
         $r4n = $raMan->findById($r4->id);
-        $this->assertTrue($r1n->isResolved(), 'raman-resolveall-1-3');
-        $this->assertTrue($r2n->isResolved(), 'raman-resolveall-2-3');
-        $this->assertTrue($r3n->isResolved(), 'raman-resolveall-3-3');
-        $this->assertFalse($r4n->isResolved(), 'raman-resolveall-4-3');
+        $this->assertInstanceOf(\DateTimeImmutable::class, $r1n->resolved(), 'raman-resolveall-1-3');
+        $this->assertInstanceOf(\DateTimeImmutable::class, $r2n->resolved(), 'raman-resolveall-2-3');
+        $this->assertInstanceOf(\DateTimeImmutable::class, $r3n->resolved(), 'raman-resolveall-3-3');
+        $this->assertNull($r4n->resolved(), 'raman-resolveall-4-3');
 
         $this->assertSame($this->user2->id, $r1n->ownerId(), 'raman-resolveall-owner-1');
         $this->assertSame($this->user2->id, $r2n->ownerId(), 'raman-resolveall-owner-2');
@@ -136,7 +140,7 @@ class ManagerReportAutoTest extends TestCase {
         $raMan->resolveAll($this->user2, $this->user2->id, null);
         $r4n = $raMan->findById($r4->id);
         $this->assertSame($this->user2->id, $r4n->ownerId(), 'raman-resolveall-owner-5');
-        $this->assertTrue($r4n->isResolved(), 'raman-resolveall-4-4');
+        $this->assertInstanceOf(\DateTimeImmutable::class, $r4n->resolved(), 'raman-resolveall-4-4');
     }
 
     public function testDeleteComment(): void {

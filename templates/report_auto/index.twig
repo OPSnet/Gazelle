@@ -55,18 +55,18 @@
 {%  for report in reports %}
                 <div id="user_report_{{ report.id }}">
                     <div class="report_title">
-{%      if report.isResolved %}(done){% endif %}
+{%      if report.resolved %}(done){% endif %}
                         <a class="report_link" href="{{ report.location }}">#{{ report.id }}</a>
                         <span class="report_type">{{ report.text }}</span>
                         <span class="report_time">{{ report.created|time_diff }}</span>
 {%      if report.isClaimed %}
-                            <span class="report_claimed">{% if report.isResolved %}resolved{% else %}claimed{% endif %}
+                            <span class="report_claimed">{% if report.resolved %}resolved{% else %}claimed{% endif %}
                             by {{ report.ownerId|user_url }}</span>
 {%      endif %}
                     </div>
-                    <div class="details">{{ report.details|raw }}</div>
+                    <div class="details">{% include(template_from_string(report.details)) %}</div>
                     <div class="buttons">
-{%      if report.isResolved %}
+{%      if report.resolved %}
                             <button class="action_button" data-action="unresolve" data-id="{{ report.id }}">Unresolve</button>
 {%      else %}
                             <button class="action_button" data-action="resolve" data-id="{{ report.id }}">Resolve</button>

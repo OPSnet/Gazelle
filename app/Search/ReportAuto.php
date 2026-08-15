@@ -1,18 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\Search;
 
 use Gazelle\Enum\ReportAutoState;
+use Gazelle\Manager\ReportAuto     as ReportAutoManager;
+use Gazelle\Manager\ReportAutoType as ReportAutoTypeManager;
+use Gazelle\Manager\User           as UserManager;
+use Gazelle\ReportAuto\Type        as ReportAutoType;
+use Gazelle\User;
 
 class ReportAuto extends \Gazelle\Base {
-    use \Gazelle\Pg;
-
     protected array $args = [];
     protected array $cond = [];
 
     public function __construct(
-        protected \Gazelle\Manager\ReportAuto $reportMan,
-        protected \Gazelle\Manager\ReportAutoType $typeMan
+        protected ReportAutoManager $reportMan,
+        protected ReportAutoTypeManager $typeMan,
     ) {}
 
     public function setId(int $id): ReportAuto {
@@ -21,7 +26,7 @@ class ReportAuto extends \Gazelle\Base {
         return $this;
     }
 
-    public function setOwner(?\Gazelle\User $user): ReportAuto {
+    public function setOwner(User|null $user): ReportAuto {
         if (!$user) {
             $this->cond[] = 'id_owner is null';
         } else {
@@ -40,13 +45,13 @@ class ReportAuto extends \Gazelle\Base {
         return $this;
     }
 
-    public function setType(\Gazelle\ReportAuto\Type $type): ReportAuto {
+    public function setType(ReportAutoType $type): ReportAuto {
         $this->cond[] = "id_report_auto_type = {$this->pg()->placeholder(count($this->args))}";
         $this->args[] = $type->id;
         return $this;
     }
 
-    public function setUser(\Gazelle\User $user): ReportAuto {
+    public function setUser(User $user): ReportAuto {
         $this->cond[] = "id_user = {$this->pg()->placeholder(count($this->args))}";
         $this->args[] = $user->id;
         return $this;
@@ -102,7 +107,7 @@ class ReportAuto extends \Gazelle\Base {
      */
     public function userTotalList(
         int $limit = 0,
-        \Gazelle\Manager\User $userMan = new \Gazelle\Manager\User(),
+        UserManager $userMan = new UserManager(),
     ): array {
         return array_map(
             fn ($row) => [$userMan->findById($row['key']), $row['total']],

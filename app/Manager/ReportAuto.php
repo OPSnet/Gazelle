@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\Manager;
 
 use Gazelle\User;
@@ -8,18 +10,18 @@ class ReportAuto extends \Gazelle\BaseManager {
     protected array $reportCategories;
 
     public function __construct(
-        protected $typeMan = new \Gazelle\Manager\ReportAutoType(),
+        protected $typeMan = new ReportAutoType(),
     ) {}
 
     protected function categories(): array {
         if (isset($this->reportCategories)) {
             return $this->reportCategories;
         }
-        $types = $this->pg()->all("
-            SELECT
+        $types = $this->pg()->allex("
+            select
                 id_report_auto_category, name
-            FROM report_auto_category
-            ");
+            from report_auto_category
+        ");
         $this->reportCategories = [];
         foreach ($types as $row) {
             $cls = '\\Gazelle\\ReportAuto\\' . $row['name'] . 'Report';
@@ -30,36 +32,49 @@ class ReportAuto extends \Gazelle\BaseManager {
         return $this->reportCategories;
     }
 
-    public function create(User $user, \Gazelle\ReportAuto\Type $type, array $data, string|null $time = null): \Gazelle\ReportAuto {
-        $args = [$user->id, $type->id, json_encode($data)];
+    public function create(
+        User $user,
+        \Gazelle\ReportAuto\Type $type,
+        array $data,
+        string|null $time = null,
+    ): \Gazelle\ReportAuto {
+        $args = [
+            $user->id,
+            $type->id,
+            $this->pg()->jsonConverter()->output($data),
+        ];
         if ($time) {
             // time is an iso timestring
             $qryCols = ', created';
-            $qryPh = ', ?';
+            $qryPh = ', $4';
             $args[] = $time;
         } else {
             $qryCols = '';
             $qryPh = '';
         }
-        [$id, $category] = $this->pg()->row("
-            INSERT INTO report_auto
+        [$id, $category] = $this->pg()->rowex("
+            insert into report_auto
                    (id_user, id_report_auto_type, data $qryCols)
-            VALUES (?,       ?,                   ?    $qryPh)
-            RETURNING id_report_auto, (SELECT id_report_auto_category
-                                       FROM report_auto_type rat
-                                       WHERE rat.id_report_auto_type = report_auto.id_report_auto_type)
+            values ($1,      $2,                  $3    $qryPh)
+            returning
+                id_report_auto,
+                (
+                    select id_report_auto_category
+                    from report_auto_type rat
+                    where rat.id_report_auto_type = report_auto.id_report_auto_type
+                )
             ", ...$args
         );
-        return $this->instantiateReportAuto((int)$id, $category);
+        return $this->instantiateReportAuto($id, $category);
     }
 
-    public function findById(int $id): ?\Gazelle\ReportAuto {
-        [$reportId, $category] = $this->pg()->row("
-            SELECT ra.id_report_auto,
+    public function findById(int $id): \Gazelle\ReportAuto|null {
+        [$reportId, $category] = $this->pg()->rowex("
+            select ra.id_report_auto,
                 rat.id_report_auto_category
-            FROM report_auto ra
-            INNER JOIN report_auto_type rat USING (id_report_auto_type)
-            WHERE ra.id_report_auto = ?
+            from report_auto ra
+            inner join report_auto_type rat using (id_report_auto_type)
+            where ra.id_report_auto = $1
             ", $id
         );
         return $reportId
@@ -70,7 +85,7 @@ class ReportAuto extends \Gazelle\BaseManager {
     /**
      * claim all unclaimed reports for $userId by $claimer
      */
-    public function claimAll(User $claimer, int $userId, ?int $typeId): int {
+    public function claimAll(User $claimer, int $userId, int|null $typeId): int {
         $typeWhere = "";
         $args = [$claimer->id, $userId];
         if (!is_null($typeId)) {
@@ -90,7 +105,7 @@ class ReportAuto extends \Gazelle\BaseManager {
     /**
      * resolve all open reports for $userId by $resolver
      */
-    public function resolveAll(User $resolver, int $userId, ?int $typeId): int {
+    public function resolveAll(User $resolver, int $userId, int|null $typeId): int {
         $typeWhere = "";
         $args = [$resolver->id, $userId];
         if (!is_null($typeId)) {
@@ -137,7 +152,7 @@ class ReportAuto extends \Gazelle\BaseManager {
         );
     }
 
-    protected function instantiateReportAuto(int $id, ?int $category): \Gazelle\ReportAuto {
+    protected function instantiateReportAuto(int $id, int|null $category): \Gazelle\ReportAuto {
         $cls = $this->categories()[$category] ?? \Gazelle\ReportAuto::class;
         return new $cls($id, $this->typeMan);  /* @phpstan-ignore-line */
     }

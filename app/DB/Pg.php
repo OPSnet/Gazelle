@@ -7,6 +7,7 @@ namespace Gazelle\DB;
 use sad_spirit\pg_wrapper\converters\containers\ArrayConverter;
 use sad_spirit\pg_wrapper\converters\EnumConverter;
 use sad_spirit\pg_wrapper\converters\IntegerConverter;
+use sad_spirit\pg_wrapper\converters\JSONConverter;
 use sad_spirit\pg_wrapper\converters\StringConverter;
 use sad_spirit\pg_wrapper\exceptions\server\ProgrammingException;
 use sad_spirit\pg_wrapper\Connection;
@@ -133,6 +134,10 @@ class Pg {
 
     public function integerConverter(): ArrayConverter {
         return new ArrayConverter(new IntegerConverter());
+    }
+
+    public function jsonConverter(): JSONConverter {
+        return new JSONConverter();
     }
 
     public function begin(): void {
