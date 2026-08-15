@@ -95,7 +95,7 @@ class TorrentDeletedTest extends TestCase {
             'torrent-tg-deleted-edition',
         );
         $this->assertSame(
-            "Torrent {$torrentId} of deleted group {$tgroupId}",
+            "Torrent {$torrentId} of deleted group #{$tgroupId}",
             $deleted->fullName(),
             'torrent-tg-deleted-fullname',
         );

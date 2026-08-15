@@ -97,7 +97,13 @@ class DB extends Base {
      * (for copying the row from one table to another)
      */
     public function checkStructureMatch(string $schema, string $source, string $destination): array {
-        $sql = 'SELECT column_name, column_type FROM information_schema.columns WHERE table_schema = ? AND table_name = ? ORDER BY 1';
+        $sql = '
+            SELECT column_name, column_type, is_nullable
+            FROM information_schema.columns
+            WHERE table_schema = ?
+                AND table_name = ?
+            ORDER BY 1
+        ';
         self::$db->prepared_query($sql, $schema, $source);
         $t1 = self::$db->to_array(false, MYSQLI_BOTH);
         $n1 = count($t1);
@@ -118,8 +124,12 @@ class DB extends Base {
         $column = [];
         for ($i = 0; $i < $n1; ++$i) {
             // a column does not have the same name or datatype
-            if (strtolower($t1[$i][0]) != strtolower($t2[$i][0]) || $t1[$i][1] != $t2[$i][1]) {
-                return [false, "{$source}: column {$t1[$i][0]} name or datatype mismatch {$t1[$i][0]}:{$t2[$i][0]} {$t1[$i][1]}:{$t2[$i][1]}"];
+            if (
+                strtolower($t1[$i][0]) != strtolower($t2[$i][0])
+                || $t1[$i][1] != $t2[$i][1]
+                || $t1[$i][2] != $t2[$i][2]
+            ) {
+                return [false, "{$source}: column {$t1[$i][0]} name, datatype or nullable mismatch {$t1[$i][0]}:{$t2[$i][0]} {$t1[$i][1]}:{$t2[$i][1]} {$t1[$i][2]}:{$t2[$i][2]}"];
             }
             $column[] = $t1[$i][0];
         }

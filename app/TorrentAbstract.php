@@ -130,6 +130,9 @@ abstract class TorrentAbstract extends BaseAttrObject {
      * Generate the edition of the torrent
      */
     public function edition(): string {
+        if (!$this->hasTGroup()) {
+            return '';
+        }
         $tgroup = $this->group();
         if ($tgroup->categoryName() !== 'Music') {
             return '';

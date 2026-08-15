@@ -68,19 +68,15 @@ class TorrentDeleted extends TorrentAbstract {
     }
 
     public function fullName(): string {
-        try {
-            return parent::fullName();
-        } catch (\TypeError) {
-            return "Torrent {$this->id} of deleted group {$this->groupId()}";
-        }
+        return $this->hasTGroup()
+            ? parent::fullName()
+            : "Torrent {$this->id} of {$this->group()->name()}";
     }
 
     public function groupLink(): string {
-        try {
-            return parent::groupLink();
-        } catch (\TypeError) {
-            return "Deleted group " . $this->groupId();
-        }
+        return $this->hasTGroup()
+            ? parent::groupLink()
+            : "Deleted group {$this->groupId()}";
     }
 
     public function edition(): string {

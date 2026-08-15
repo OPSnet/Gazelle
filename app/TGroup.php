@@ -221,7 +221,15 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
         $sql .= " WHERE tg.ID = ? GROUP BY tg.ID";
         $args[] = $this->id;
 
-        $info = self::$db->rowAssoc($sql, ...$args);
+        $info = self::$db->rowAssoc($sql, ...$args) ?? [
+            // ... a deleted torrent led to a deleted tgroup
+            'CategoryID'   => 1,
+            'Image'        => null,
+            'Name'         => "deleted group #{$this->id}",
+            'ReleaseType'  => 0,
+            'VanityHouse'  => false,
+            'Year'         => null,
+        ];
 
         // make the values sane (null, boolean as appropriate)
         // TODO: once all get_*_info calls have been ported over, do this prior to caching
@@ -374,7 +382,7 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
     /**
      * @return int Release type (will be null for non-Music categories)
      */
-    public function releaseType(): ?int {
+    public function releaseType(): int|null {
         return $this->info()['ReleaseType'] == 0 ? null : $this->info()['ReleaseType'];
     }
 
@@ -456,7 +464,7 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
         return $this->info()['Time'];
     }
 
-    public function year(): ?int {
+    public function year(): int|null {
         return $this->info()['Year'];
     }
 
