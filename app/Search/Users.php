@@ -398,8 +398,8 @@ class Users extends \Gazelle\Base {
         $ph     = $this->pg()->placeholder(count($this->args));
         return match ($op) {
             'any'      => "$column = any($ph)",
-            'contains' => "position($ph in $column) > 0",
-            'prefix'   => "position($ph in $column) = 1",
+            'contains' => "$column ~~* ('%' || $ph || '%')",
+            'prefix'   => "$column ~~* ($ph || '%')",
             'regexp'   => "$column ~* $ph",
             'le'       => "$column <= $ph",
             'ge'       => "$column >= $ph",

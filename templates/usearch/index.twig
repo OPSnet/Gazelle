@@ -278,9 +278,8 @@
       <div class="widget-body">
         <select name="secclass[]" size="3" multiple>
 {% for c in secondary %}
-{%  if c.badge != '' %}
-          <option value="{{ c.ID }}"{{ selected(c.ID in input['secclass']) }}>{{ c.Name }}</option>
-{%  endif %}
+          <option value="{{ c.ID }}"{{ selected(c.ID in input['secclass']) }}>{{
+            c.Name }}{% if c.badge %} ({{ c.badge }}){% endif %}</option>
 {% endfor %}
         </select>
         <br>Shift- or Ctrl-click to select multiple
