@@ -3,9 +3,9 @@
 namespace Gazelle\Manager;
 
 class Artist extends \Gazelle\BaseManager {
-    protected const string ID_KEY = 'zz_a_%d';
     protected const string ROLE_KEY = 'artist_role';
     public const string ALIAS_KEY = 'alias_artist2_%d';
+    public const string ID_KEY = 'zz_a_%d';
 
     protected array $role;
     protected int $groupId; // torrent or request context

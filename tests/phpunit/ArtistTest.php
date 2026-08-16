@@ -27,10 +27,6 @@ class ArtistTest extends TestCase {
     }
 
     public function tearDown(): void {
-        $manager = new Manager\Artist();
-        foreach ($this->artistIdList as $artistId) {
-            $manager->findById($artistId)?->remove();
-        }
         if (isset($this->extra)) {
             $this->extra->remove();
         }
@@ -41,6 +37,10 @@ class ArtistTest extends TestCase {
             foreach ($this->tgroupList as $tgroup) {
                 Helper::removeTGroup($tgroup, $this->user);
             }
+        }
+        $manager = new Manager\Artist();
+        foreach ($this->artistIdList as $artistId) {
+            $manager->findById($artistId)?->remove();
         }
         $this->user->requestContext()->unsetViewer();
         $this->user->remove();
@@ -282,7 +282,10 @@ class ArtistTest extends TestCase {
             Helper::makeTGroupMusic(
                 $this->user,
                 'phpunit artist merge2 ' . randomString(10),
-                [[ARTIST_MAIN], [$oldName, $newName]],
+                [
+                    [ARTIST_MAIN], [$oldName],
+                    [ARTIST_MAIN], [$newName],
+                ],
                 ['hip.hop'],
             ),
         ];
@@ -373,8 +376,8 @@ class ArtistTest extends TestCase {
             'alias-rename'
         );
         $this->assertContains($rename, $artist->aliasNameList(), 'alias-is-renamed');
-        $newAlias = array_filter($artist->aliasList(), fn($v) => $v['name'] == $rename)[0];
-        $oldAlias = array_filter($artist->aliasList(), fn($v) => $v['name'] == $oldName)[0];
+        $newAlias = array_first(array_filter($artist->aliasList(), fn ($v) => $v['name'] === $rename));
+        $oldAlias = array_first(array_filter($artist->aliasList(), fn ($v) => $v['name'] === $oldName));
         $this->assertSame($newAlias['alias_id'], $oldAlias['redirect_id'], 'alias-is-redirected');
     }
 
@@ -618,7 +621,7 @@ class ArtistTest extends TestCase {
         $this->assertSame($other->id, $similar[0]['artist_id'], 'artist-similar-payload-id');
     }
 
-    public function testArtistAutocomplete(): void {
+    public function testArtistAutocompleteBasic(): void {
         $manager = new Manager\Artist();
         $composer = null;
         $prefix2 = 'qac' . randomString(5) . '.';
@@ -709,7 +712,7 @@ class ArtistTest extends TestCase {
         );
     }
 
-    public function testArtistAutocompleteSortBySnatchTotal(): void {
+    public function testArtistAutocompleteSnatch(): void {
         $manager = new Manager\Artist();
         $rankPrefix = 'qrank.phpunit.' . randomString(6) . '.';
         $rankedList = [];
@@ -757,9 +760,9 @@ class ArtistTest extends TestCase {
         );
     }
 
-    public function testArtistAutocompleteFlushesCachedHtmlOnRevisionChange(): void {
+    public function testArtistAutocompleteFlush(): void {
         $manager = new Manager\Artist();
-        $name = 'qcache.phpunit.' . randomString(6);
+        $name = 'phpunit.' . randomString(6);
         $prefix = substr($name, 0, 6);
         $artist = $manager->create($name);
         $this->artistIdList[] = $artist->id;
@@ -778,12 +781,11 @@ class ArtistTest extends TestCase {
         Helper::makeTorrentMusic($tgroup, $this->user);
         $this->tgroupList[] = $tgroup;
 
-        global $Cache;
-        $Cache->delete_value($manager->autocompleteKey($prefix));
-        $autocomplete = $manager->autocompleteList($prefix);
         $this->assertStringContainsString(
             'before cache body',
-            $this->renderAutocompleteWidget($autocomplete[0]),
+            $this->renderAutocompleteWidget(array_first(
+                $manager->autocompleteList($prefix)
+            )),
             'artist-autocomp-cache-before'
         );
 
@@ -793,8 +795,11 @@ class ArtistTest extends TestCase {
             summary: ['after cache body'],
             user:    $this->user,
         );
-        $autocomplete = $manager->autocompleteList($prefix);
-        $widget = $this->renderAutocompleteWidget($autocomplete[0]);
+        global $Cache;
+        $Cache->delete_value($manager->autocompleteKey($prefix));
+        $widget = $this->renderAutocompleteWidget(array_first(
+            $manager->autocompleteList($prefix)
+        ));
         $this->assertStringContainsString('after cache body', $widget, 'artist-autocomp-cache-after');
         $this->assertStringNotContainsString('before cache body', $widget, 'artist-autocomp-cache-stale');
     }

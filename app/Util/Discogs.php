@@ -8,11 +8,11 @@ class Discogs extends \Gazelle\Base {
 
     public function __construct(
         public readonly int $id,
-        ?int $sequence = null,
-        ?string $name = null,
-        ?string $stem = null,
+        int|null $sequence = null,
+        string|null $name = null,
+        string|null $stem = null,
     ) {
-        if (!is_null($sequence)) {
+        if ($sequence !== null) {
             $this->info = [
                 'sequence' => $sequence,
                 'name'     => $name,
@@ -27,7 +27,12 @@ class Discogs extends \Gazelle\Base {
         }
         $curl = curl_init();
         if ($curl === false) {
-            return [];
+            $this->info = [
+                'sequence' => 0,
+                'name'     => '',
+                'stem'     => '',
+            ];
+            return $this->info;
         }
         curl_setopt_array($curl, [
             CURLOPT_URL            => sprintf(self::DISCOGS_API_URL, $this->id),
@@ -76,10 +81,6 @@ class Discogs extends \Gazelle\Base {
             ];
         }
         return $this->info;
-    }
-
-    public function id(): int {
-        return $this->id;
     }
 
     public function name(): string {

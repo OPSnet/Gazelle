@@ -12,7 +12,7 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
     final public const tableName            = 'artists_group';
     final public const CACHE_REQUEST_ARTIST = 'artists_requests_%d';
 
-    final protected const CACHE_PREFIX = 'artist_%d';
+    final protected const CACHE_PREFIX = 'artist_v2_%d';
     final protected const CACHE_TAG    = 'artist_tag_%d_%d';
     final protected const ObjectName   = 'artist';
     final protected const PkColumn     = 'artist_attr_id';
@@ -45,15 +45,16 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
 
     protected function cacheKey(): string {
         return sprintf(self::CACHE_PREFIX, $this->id)
-            . ($this->revisionId ? '_r' . $this->revisionId : '');
+            . ($this->revisionId ? "_r{$this->revisionId}" : '');
     }
 
     public function flush(): static {
-        $autocompleteNameList = array_map(
-            fn ($alias) => $alias['name'],
-            $this->info()['alias']
+        $autocompleteKeyList = new Manager\Artist()->autocompleteKeyList(
+            array_map(
+                fn ($alias) => $alias['name'],
+                isset($this->info) ? $this->aliasList() : [] // unset if coming from remove()
+            )
         );
-        $autocompleteKeyList = new Manager\Artist()->autocompleteKeyList($autocompleteNameList);
         self::$db->prepared_query("
             SELECT DISTINCT concat('groups_artists_', GroupID)
             FROM torrents_artists ta
@@ -67,7 +68,7 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
             sprintf(self::CACHE_TAG, $this->id, 5),
             sprintf(self::CACHE_TAG, $this->id, 10),
             ...$autocompleteKeyList,
-            ...self::$db->collect(0)
+            ...self::$db->collect(0),
         ]);
         unset($this->info);
         return parent::flush();
@@ -82,13 +83,14 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
     }
 
     public function info(): array {
+        if (isset($this->info)) {
+            return $this->info;
+        }
         $cacheKey = $this->cacheKey();
         $info = self::$cache->get_value($cacheKey);
-        if ($info !== false) {
-            $this->info = $info;
-        } else {
-            $sql = "
-            SELECT ag.PrimaryAlias   AS primary_alias_id,
+        if ($info === false) {
+            $sql = "SELECT
+                ag.PrimaryAlias      AS primary_alias_id,
                 wa.Image             AS image,
                 wa.body              AS body,
                 ag.VanityHouse       AS showcase,
@@ -97,8 +99,8 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
                 dg.stem              AS discogs_stem,
                 dg.sequence,
                 dg.is_preferred
-            FROM artists_group AS ag
-            LEFT JOIN artist_discogs AS dg ON (dg.artist_id = ag.ArtistID)
+            FROM artists_group       ag
+            LEFT JOIN artist_discogs dg ON (dg.artist_id = ag.ArtistID)
             ";
             if ($this->revisionId) {
                 $sql .= "LEFT JOIN wiki_artists AS wa ON (wa.PageID = ag.ArtistID)";
@@ -128,15 +130,15 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
             $info['is_preferred'] = (bool)$info['is_preferred'];
 
             self::$cache->cache_value($cacheKey, $info, 3600);
-            $this->info = $info;
         }
+        $this->info = $info;
 
         // hydrate the Discogs object
         $this->info['discogs'] = new Util\Discogs(
             id:       (int)$this->info['discogs_id'],
-            sequence: (int)$this->info['sequence'],
-            name:     (string)$this->info['discogs_name'],
-            stem:     (string)$this->info['discogs_stem'],
+            sequence: $this->info['sequence'],
+            name:     $this->info['discogs_name'],
+            stem:     $this->info['discogs_stem'],
         );
         return $this->info;
     }
@@ -307,17 +309,17 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
     }
 
     public function createRevision(
-        ?string $body,
-        ?string $image,
-        array   $summary,
-        User    $user,
+        string|null $body,
+        string|null $image,
+        array       $summary,
+        User        $user,
     ): int {
         self::$db->prepared_query("
             INSERT INTO wiki_artists
                    (PageID, Body, Image, UserID, Summary)
             VALUES (?,      ?,    ?,     ?,      ?)
             ", $this->id, $body, $image, $user->id,
-                implode(', ', array_filter($summary, fn($s) => !empty($s)))
+                implode(', ', array_filter($summary, fn ($s) => trim($s) !== ''))
         );
         $revisionId = self::$db->inserted_id();
         self::$db->prepared_query("
@@ -636,8 +638,8 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
         User            $user,
         Manager\Collage $collMan = new Manager\Collage(),
         Manager\Comment $commMan = new Manager\Comment(),
-        Manager\Request $reqMan = new Manager\Request(),
-        Manager\TGroup  $tgMan = new Manager\TGroup(),
+        Manager\Request $reqMan  = new Manager\Request(),
+        Manager\TGroup  $tgMan   = new Manager\TGroup(),
     ): int {
         self::$db->begin_transaction();
 
@@ -1000,10 +1002,13 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
         );
         self::$db->commit();
 
-        self::$cache->delete_multi(
-            array_map(fn (int $id) => sprintf(Manager\Artist::ALIAS_KEY, $id), $aliasIds)
-        );
-        self::$cache->delete_value('zz_a_' . $id);
+        self::$cache->delete_multi([
+            sprintf(Manager\Artist::ID_KEY, $this->id),
+            ...array_map(
+                fn (int $id) => sprintf(Manager\Artist::ALIAS_KEY, $id),
+                $aliasIds,
+            )
+        ]);
         self::$cache->decrement('stats_artist_count');
 
         return $affected;
