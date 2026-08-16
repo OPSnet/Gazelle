@@ -71,45 +71,46 @@ if ($userId == $Viewer->id) {
     // Don't allow any kind of previewing on other profiles
     $Preview = false;
 }
-$previewer = $Preview ? $userMan->findById(PARANOIA_PREVIEW_USER) : $Viewer;
-$Paranoia  = $Preview ? explode(',', $_GET['paranoia']) : $user->paranoia();
+$profileViewer = $Preview ? $userMan->findById(PARANOIA_PREVIEW_USER) : $Viewer;
+if ($Preview) {
+    $user->setOverrideParanoia(Util\Paranoia::calculate(explode(',', $_GET['paranoia'] ?? '')));
+}
 
 View::show_header($username, [
     'js' => 'vendor/jquery.imagesloaded,vendor/jquery.wookmark,bbcode,comments,lastfm,requests,user'
-        . ($Viewer->isStaff() ? ',info_paster' : '')
-        . ($Viewer->permitted('users_view_ips') ? ',resolve-ip' : '')
-        . ($Viewer->permitted('users_mod') ? ',reports' : ''),
+        . ($profileViewer->isStaff() ? ',info_paster' : '')
+        . ($profileViewer->permitted('users_view_ips') ? ',resolve-ip' : '')
+        . ($profileViewer->permitted('users_mod') ? ',reports' : ''),
     'css' => 'tiles'
 ]);
 echo $Twig->render('user/header.twig', [
     'bonus'      => $userBonus,
     'donor'      => $donor,
     'freeleech'  => [
-        'offer'  => $OwnProfile ? [] : $bonusMan->offerTokenOther($Viewer, $user),
+        'offer'  => $OwnProfile || $Preview ? [] : $bonusMan->offerTokenOther($profileViewer, $user),
         'latest' => $viewerBonus->otherLatest($user),
     ],
-    'friend'       => new User\Friend($Viewer),
-    'preview_user' => $previewer,
+    'friend'       => new User\Friend($profileViewer),
     'user'         => $user,
     'user_buffer'  => $userMan->userBuffer($user),
-    'viewer'       => $Viewer,
+    'viewer'       => $profileViewer,
 ]);
 
 echo $Twig->render('user/sidebar.twig', [
     'ancestry'      => $userMan->ancestry($user),
     'applicant'     => new Manager\Applicant(),
-    'invite_source' => $Viewer->permitted('admin_manage_invite_source')
+    'invite_source' => $profileViewer->permitted('admin_manage_invite_source')
         ? new Manager\InviteSource()->findSourceNameByUser($user) : null,
     'next_class'    => $userMan->userNextClass($user),
     'user'          => $user,
-    'viewer'        => $Viewer,
+    'viewer'        => $profileViewer,
 ]);
 
 // Last.fm statistics and comparability
 $lastfmInfo = new Util\LastFM()->userInfo($user);
 if ($lastfmInfo) {
     echo $Twig->render('user/lastfm.twig', [
-        'can_reload'  => ($OwnProfile && $Cache->get_value("lastfm_clear_cache_$userId") === false) || $Viewer->permitted('users_mod'),
+        'can_reload'  => ($OwnProfile && $Cache->get_value("lastfm_clear_cache_$userId") === false) || $profileViewer->permitted('users_mod'),
         'info'        => $lastfmInfo,
         'own_profile' => $OwnProfile,
     ]);
@@ -117,7 +118,7 @@ if ($lastfmInfo) {
 
 $vote    = new User\Vote($user);
 $stats   = $user->stats();
-$Uploads = $user->propertyVisible($Viewer, 'uploads+') ? $stats->uploadTotal() : 0;
+$Uploads = $user->propertyVisible($profileViewer, 'uploads+') ? $stats->uploadTotal() : 0;
 $rank    = new UserRank(
     new UserRank\Configuration(RANKING_WEIGHT),
     [
@@ -127,12 +128,12 @@ $rank    = new UserRank(
         'requests'       => $stats->requestBountyTotal(),
         'posts'          => $stats->forumPostTotal(),
         'bounty'         => $stats->requestVoteSize(),
-        'artists'        => $user->propertyVisible($Viewer, 'artistsadded') ? $stats->artistAddedTotal() : 0,
-        'collage-add'    => $user->propertyVisible($Viewer, 'collagecontribs+') ? $stats->collageContrib() : 0,
-        'collage-create' => $user->propertyVisible($Viewer, 'collagecontribs+') ? $stats->collageTotal() : 0,
+        'artists'        => $user->propertyVisible($profileViewer, 'artistsadded') ? $stats->artistAddedTotal() : 0,
+        'collage-add'    => $user->propertyVisible($profileViewer, 'collagecontribs+') ? $stats->collageContrib() : 0,
+        'collage-create' => $user->propertyVisible($profileViewer, 'collagecontribs+') ? $stats->collageTotal() : 0,
         'votes'          => $vote->userTotal(User\Vote::UPVOTE | User\Vote::DOWNVOTE),
         'bonus'          => $userBonus->pointsSpent(),
-        'comment-t'      => $user->propertyVisible($Viewer, 'torrentcomments++') ? $stats->commentTotal('torrents') : 0,
+        'comment-t'      => $user->propertyVisible($profileViewer, 'torrentcomments++') ? $stats->commentTotal('torrents') : 0,
     ],
 );
 
@@ -159,18 +160,18 @@ $statList = [
             <ul class="stats nobullet">
 <?php
 foreach ($statList as $item) {
-    $Override = is_null($item[1]) ? PARANOIA_ALLOWED : $user->propertyVisible($Viewer, $item[1]);
+    $Override = is_null($item[1]) ? PARANOIA_ALLOWED : $user->propertyVisible($profileViewer, $item[1]);
     if ($Override) {
 ?>
                 <li class="tooltip<?=($Override === PARANOIA_OVERRIDDEN ? ' paranoia_override' : '')?>" title="<?= $item[3]($rank->raw($item[0])) ?> <?= $item[4] ?>"><?= $item[2] ?>: <?= $rank->rank($item[0]) ?></li>
 <?php
     }
 }
-if ($OwnProfile || $Viewer->permitted('admin_bp_history')) { ?>
-                <li class="tooltip<?= !$OwnProfile && $Viewer->permitted('admin_bp_history') ? ' paranoia_override' : '' ?>" title="<?=number_format($rank->raw('bonus')) ?> spent">Bonus points spent: <?= $rank->rank('bonus') ?></li>
+if ($OwnProfile || $profileViewer->permitted('admin_bp_history')) { ?>
+                <li class="tooltip<?= !$OwnProfile && $profileViewer->permitted('admin_bp_history') ? ' paranoia_override' : '' ?>" title="<?=number_format($rank->raw('bonus')) ?> spent">Bonus points spent: <?= $rank->rank('bonus') ?></li>
 <?php
 }
-if ($user->propertyVisibleMulti($previewer, ['artistsadded', 'collagecontribs+', 'downloaded', 'requestsfilled_count', 'requestsvoted_bounty', 'torrentcomments++', 'uploaded', 'uploads+', ])) {
+if ($user->propertyVisibleMulti($profileViewer, ['artistsadded', 'collagecontribs+', 'downloaded', 'requestsfilled_count', 'requestsvoted_bounty', 'torrentcomments++', 'uploaded', 'uploads+', ])) {
 ?>
                 <li<?= $user->userclassLevel() >= 900 ? ' title="Infinite"' : '' ?>><strong>Overall rank: <?= is_null($rank->score())
                     ? 'Server busy'
@@ -178,28 +179,28 @@ if ($user->propertyVisibleMulti($previewer, ['artistsadded', 'collagecontribs+',
 <?php } ?>
             </ul>
         </div>
-<?php if ($Viewer->permitted('users_mod') || $Viewer->permitted('users_view_ips') || $Viewer->permitted('users_view_keys')) { ?>
+<?php if ($profileViewer->permitted('users_mod') || $profileViewer->permitted('users_view_ips') || $profileViewer->permitted('users_view_keys')) { ?>
         <div class="box box_info box_userinfo_history">
             <div class="head colhead_dark">History</div>
             <ul class="stats nobullet">
-<?php if ($Viewer->permitted('users_view_email')) { ?>
+<?php if ($profileViewer->permitted('users_view_email')) { ?>
                 <li>Emails: <?=number_format($user->history()->emailTotal())?> <a href="userhistory.php?action=email&amp;userid=<?=$userId?>" class="brackets">View</a></li>
 <?php
     }
-    if ($Viewer->permitted('users_view_ips')) {
+    if ($profileViewer->permitted('users_view_ips')) {
 ?>
                 <li>IPs: <?=number_format($ipv4->userTotal($user))?> <a href="userhistory.php?action=ips&amp;userid=<?=$userId?>" class="brackets">View</a>&nbsp;<a href="userhistory.php?action=ips&amp;userid=<?=$userId?>&amp;usersonly=1" class="brackets">View users</a></li>
-<?php   if ($Viewer->permitted('users_mod')) { ?>
+<?php   if ($profileViewer->permitted('users_mod')) { ?>
                 <li>Tracker IPs: <?=number_format($user->trackerIPCount())?> <a href="userhistory.php?action=tracker_ips&amp;userid=<?=$userId?>" class="brackets">View</a></li>
 <?php
         }
     }
-    if ($Viewer->permitted('users_view_keys')) {
+    if ($profileViewer->permitted('users_view_keys')) {
 ?>
                 <li>Announce keys: <?=number_format($user->history()->announceKeyTotal())?> <a href="userhistory.php?action=passkeys&amp;userid=<?=$userId?>" class="brackets">View</a></li>
 <?php
     }
-    if ($Viewer->permitted('users_mod')) {
+    if ($profileViewer->permitted('users_mod')) {
         if ($resetToken instanceof User\Token) {
 ?>
                 <li><span class="tooltip" title="User requested a password reset by email">Password reset expiry: <?= time_diff($resetToken->expiry()) ?></li>
@@ -213,7 +214,7 @@ if ($user->propertyVisibleMulti($previewer, ['artistsadded', 'collagecontribs+',
 
 <?php
 
-if ($user->propertyVisible($Viewer, 'snatched')) {
+if ($user->propertyVisible($profileViewer, 'snatched')) {
     echo $Twig->render('user/tag-snatch.twig', [
         'user' => $user,
     ]);
@@ -223,48 +224,48 @@ echo $Twig->render('user/sidebar-stats.twig', [
     'prl'          => $limiter,
     'upload_total' => $Uploads,
     'user'         => $user,
-    'viewer'       => $Viewer,
+    'viewer'       => $profileViewer,
     'visible'      => [
-        'collages+'             => $user->propertyVisible($Viewer, 'collages+'),
-        'collages'              => $user->propertyVisible($Viewer, 'collages'),
-        'collagescontrib+'      => $user->propertyVisible($Viewer, 'collagecontribs+'),
-        'collagecontribs'       => $user->propertyVisible($Viewer, 'collagecontribs'),
-        'downloaded'            => $OwnProfile || $Viewer->permitted('site_view_torrent_snatchlist'),
-        'invitedcount'          => $user->propertyVisible($Viewer, 'invitedcount'),
-        'leeching+'             => $user->propertyVisible($Viewer, 'leeching+'),
-        'leeching'              => $user->propertyVisible($Viewer, 'leeching'),
-        'perfectflacs+'         => $user->propertyVisible($Viewer, 'perfectflacs+'),
-        'perfectflacs'          => $user->propertyVisible($Viewer, 'perfectflacs'),
-        'seeding+'              => $user->propertyVisible($Viewer, 'seeding+'),
-        'seeding'               => $user->propertyVisible($Viewer, 'seeding'),
-        'snatched+'             => $user->propertyVisible($Viewer, 'snatched+'),
-        'snatched'              => $user->propertyVisible($Viewer, 'snatched'),
-        'torrentcomments+'      => $user->propertyVisible($Viewer, 'torrentcomments+'),
-        'torrentcomments'       => $user->propertyVisible($Viewer, 'torrentcomments'),
-        'requestsfilled_list'   => $user->propertyVisible($Viewer, 'requestsfilled_list'),
-        'requestsfilled_count'  => $user->propertyVisible($Viewer, 'requestsfilled_count'),
-        'requestsfilled_bounty' => $user->propertyVisible($Viewer, 'requestsfilled_bounty'),
-        'requestsvoted_list'    => $user->propertyVisible($Viewer, 'requestsvoted_list'),
-        'requestsvoted_count'   => $user->propertyVisible($Viewer, 'requestsvoted_count'),
-        'requestsvoted_bounty'  => $user->propertyVisible($Viewer, 'requestsvoted_bounty'),
-        'uniquegroups+'         => $user->propertyVisible($Viewer, 'uniquegroups+'),
-        'uniquegroups'          => $user->propertyVisible($Viewer, 'uniquegroups'),
-        'uploads+'              => $user->propertyVisible($Viewer, 'uploads+'),
-        'uploads'               => $user->propertyVisible($Viewer, 'uploads'),
+        'collages+'             => $user->propertyVisible($profileViewer, 'collages+'),
+        'collages'              => $user->propertyVisible($profileViewer, 'collages'),
+        'collagescontrib+'      => $user->propertyVisible($profileViewer, 'collagecontribs+'),
+        'collagecontribs'       => $user->propertyVisible($profileViewer, 'collagecontribs'),
+        'downloaded'            => $OwnProfile || $profileViewer->permitted('site_view_torrent_snatchlist'),
+        'invitedcount'          => $user->propertyVisible($profileViewer, 'invitedcount'),
+        'leeching+'             => $user->propertyVisible($profileViewer, 'leeching+'),
+        'leeching'              => $user->propertyVisible($profileViewer, 'leeching'),
+        'perfectflacs+'         => $user->propertyVisible($profileViewer, 'perfectflacs+'),
+        'perfectflacs'          => $user->propertyVisible($profileViewer, 'perfectflacs'),
+        'seeding+'              => $user->propertyVisible($profileViewer, 'seeding+'),
+        'seeding'               => $user->propertyVisible($profileViewer, 'seeding'),
+        'snatched+'             => $user->propertyVisible($profileViewer, 'snatched+'),
+        'snatched'              => $user->propertyVisible($profileViewer, 'snatched'),
+        'torrentcomments+'      => $user->propertyVisible($profileViewer, 'torrentcomments+'),
+        'torrentcomments'       => $user->propertyVisible($profileViewer, 'torrentcomments'),
+        'requestsfilled_list'   => $user->propertyVisible($profileViewer, 'requestsfilled_list'),
+        'requestsfilled_count'  => $user->propertyVisible($profileViewer, 'requestsfilled_count'),
+        'requestsfilled_bounty' => $user->propertyVisible($profileViewer, 'requestsfilled_bounty'),
+        'requestsvoted_list'    => $user->propertyVisible($profileViewer, 'requestsvoted_list'),
+        'requestsvoted_count'   => $user->propertyVisible($profileViewer, 'requestsvoted_count'),
+        'requestsvoted_bounty'  => $user->propertyVisible($profileViewer, 'requestsvoted_bounty'),
+        'uniquegroups+'         => $user->propertyVisible($profileViewer, 'uniquegroups+'),
+        'uniquegroups'          => $user->propertyVisible($profileViewer, 'uniquegroups'),
+        'uploads+'              => $user->propertyVisible($profileViewer, 'uploads+'),
+        'uploads'               => $user->propertyVisible($profileViewer, 'uploads'),
     ],
 ]);
 
-if ($Viewer->permitted("users_mod") || $OwnProfile || $donor->isVisible()) {
+if ($profileViewer->permitted("users_mod") || $OwnProfile || $donor->isVisible()) {
     echo $Twig->render('donation/stats.twig', [
         'donor'  => $donor,
-        'viewer' => $Viewer,
+        'viewer' => $profileViewer,
     ]);
 }
 ?>
     </div><?php /* class="sidebar" */?>
     <div class="main_column">
 <?php
-if ($Viewer->permitted('users_mod') && $user->onRatioWatch()) {
+if ($profileViewer->permitted('users_mod') && $user->onRatioWatch()) {
     echo $Twig->render('user/ratio-watch.twig', [
         'user' => $user,
     ]);
@@ -275,7 +276,7 @@ echo $Twig->render('user/profileinfo.twig', [
     'user'  => $user,
 ]);
 
-if ($user->propertyVisible($Viewer, 'snatched')) {
+if ($user->propertyVisible($profileViewer, 'snatched')) {
     echo $Twig->render('user/recent.twig', [
         'id'     => $userId,
         'recent' => array_map($tgMan->findById(...), $user->snatch()->recentSnatchList()),
@@ -285,7 +286,7 @@ if ($user->propertyVisible($Viewer, 'snatched')) {
     ]);
 }
 
-if ($user->propertyVisible($Viewer, 'uploads')) {
+if ($user->propertyVisible($profileViewer, 'uploads')) {
     echo $Twig->render('user/recent.twig', [
         'id'     => $userId,
         'recent' => array_map($tgMan->findById(...), $user->recentUploadList()),
@@ -295,10 +296,10 @@ if ($user->propertyVisible($Viewer, 'uploads')) {
     ]);
 }
 
-if ($OwnProfile || !$user->hasAttr('hide-vote-recent') || $Viewer->permitted('view-release-votes')) {
+if ($OwnProfile || !$user->hasAttr('hide-vote-recent') || $profileViewer->permitted('view-release-votes')) {
     echo $Twig->render('user/recent-vote.twig', [
         'recent'    => $vote->recent(),
-        'show_link' => $OwnProfile || !$user->hasAttr('hide-vote-history') || $Viewer->permitted('view-release-votes'),
+        'show_link' => $OwnProfile || !$user->hasAttr('hide-vote-history') || $profileViewer->permitted('view-release-votes'),
         'user_id'   => $userId,
     ]);
 }
@@ -310,33 +311,32 @@ echo $Twig->render('user/collage-list.twig', [
 
 echo $Twig->render('user/information.twig', [
     'hash'          => signature($comments ?? '', USER_EDIT_SALT),
-    'previewer'     => $previewer,
     'user'          => $user,
-    'viewer'        => $Viewer,
+    'viewer'        => $profileViewer,
 
     // optional (possibly expensive) elements requiring additional privileges
-    'donor_history' => $Viewer->permitted('users_give_donor')
+    'donor_history' => $profileViewer->permitted('users_give_donor')
         ? $donor->historyList() : [],
 
-    'has_invitees' => $Viewer->permitted('users_view_invites')
+    'has_invitees' => $profileViewer->permitted('users_view_invites')
         ? new User\InviteTree($user)->hasInvitees() : [],
 
-    'report_list' => $Viewer->permitted('admin_reports')
+    'report_list' => $profileViewer->permitted('admin_reports')
         ? new Manager\Report($userMan)->findByReportedUser($user) : [],
 
-    'user_link' => $Viewer->permitted('users_linked_users')
+    'user_link' => $profileViewer->permitted('users_linked_users')
         ? new User\UserLink($user)->info() : [],
 
-    'request_list' => !$Viewer->disableRequests() && $user->propertyVisible($previewer, 'requestsvoted_list')
+    'request_list' => !$profileViewer->disableRequests() && $user->propertyVisible($profileViewer, 'requestsvoted_list')
         ? new Manager\Request()->findUnfilledByUser($user, 100) : [],
 
-    'staffpm_list' => $Viewer->permitted('users_mod') || $Viewer->isStaffPMReader()
-        ? new Staff($Viewer)->userStaffPmList($user) : [],
+    'staffpm_list' => $profileViewer->permitted('users_mod') || $profileViewer->isStaffPMReader()
+        ? new Staff($profileViewer)->userStaffPmList($user) : [],
 
-    'warning_list' => $Viewer->permitted('users_warn')
+    'warning_list' => $profileViewer->permitted('users_warn')
         ? $user->forumWarning() : [],
 
-    'auto_list' => $Viewer->permitted('users_auto_reports')
+    'auto_list' => $profileViewer->permitted('users_auto_reports')
         ? (function ($u) {
             $raTypeMan = new Manager\ReportAutoType();
             $raSearch  = new Search\ReportAuto(new Manager\ReportAuto($raTypeMan), $raTypeMan);
@@ -357,10 +357,10 @@ echo $Twig->render('user/main-column.twig', [
     'donor'         => $donor,
     'forum_man'     => new Manager\Forum(),
     'invite_source' => new Manager\InviteSource()->inviterConfiguration($user),
-    'is_traced'     => $Viewer->permitted('admin_tracker') && new Tracker()->isTraced($user),
+    'is_traced'     => $profileViewer->permitted('admin_tracker') && new Tracker()->isTraced($user),
     'max_level'     => max(array_map(fn ($c) => $c['Level'], $userMan->staffClassList())), /** @phpstan-ignore-line never empty */
     'over_usercap'  => new Stats\Users()->overUsercap(),
     'prl'           => $limiter,
     'user'          => $user,
-    'viewer'        => $Viewer,
+    'viewer'        => $profileViewer,
 ]);

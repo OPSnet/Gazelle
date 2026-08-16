@@ -22,7 +22,7 @@
 {%  include 'donation/history.twig' with {'history': donor_history} only %}
 {% endif %}
 
-{%- if not viewer.disableRequests and user.propertyVisible(previewer, 'requestsvoted_list') %}
+{%- if not viewer.disableRequests and user.propertyVisible(viewer, 'requestsvoted_list') %}
 {%  include 'request/user-unfilled.twig' with {
         'list'   : request_list,
         'viewer' : viewer,

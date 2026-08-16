@@ -522,6 +522,14 @@ class UserTest extends TestCase {
         $this->assertFalse($this->user->isParanoid('lastseen'), 'utest-is-not-last-seen-paranoid');
     }
 
+    public function testParanoiaOverride(): void {
+        $this->assertSame([], $this->user->paranoia(), 'utest-paranoia-override');
+        $this->user->setOverrideParanoia(['lastseen']);
+        $this->assertSame(['lastseen'], $this->user->paranoia(), 'utest-paranoia-override-list');
+        $this->assertSame('Very Low', $this->user->paranoiaLabel(), 'utest-paranoid-label-custom');
+        $this->assertTrue($this->user->isParanoid('lastseen'), 'utest-is-last-seen-paranoid');
+    }
+
     public function testAnnounceKey(): void {
         $key = $this->user->announceKey();
         $url = $this->user->announceUrl();

@@ -7,34 +7,15 @@
     $(function(){
         $('a#preview_paranoia').click(function(event) {
             event.preventDefault();
-            var paranoia = {};
-            // Build an object of unchecked (hidden, not allowed for others to see) paranoias.
-            // We "abuse" object keys to implement sets in JavaScript. This is simpler and
-            // more memory efficient than building a string and working through that each time.
-            $('input[name^="p_"]').each(function() {
-                if (!$(this).prop('checked')) {
-                    var attribute = $(this).attr('name').replace(/^p_/,'');
-                    if (/_c$/.test(attribute)) {
-                        paranoia[attribute.replace(/_.$/,'') + '+'] = 1;
-                    } else if (/_l$/.test(attribute)) {
-                        if (typeof paranoia[attribute.replace(/_.$/,'') + '+'] == "undefined") {
-                            paranoia[attribute.replace(/_.$/,'')] = 1;
-                        }
-                    } else {
-                        paranoia[attribute] = 1;
-                    }
-                }
-            });
-            // Build into a comma-delimited string.
-            var paranoiaString = "";
-            for (var key in paranoia) {
-                if (key === 'length' || !paranoia.hasOwnProperty(key)) {
-                    continue;
-                }
-                paranoiaString += key+',';
-            }
-            // Get rid of trailing comma.
-            paranoiaString = paranoiaString.substring(0, paranoiaString.length - 1);
+            // Collect the names of the checked "p_*" boxes the same way the
+            // browser would on a real submit of the settings form. The
+            // server-side Gazelle\Util\Paranoia::calculate() does the actual
+            // reduction into a consistent set of paranoia settings, the same
+            // as it does for the edit form's $_POST.
+            var form = this.closest('form');
+            var checked = Array.from(new FormData(form).keys())
+                .filter(function(name) { return name.indexOf('p_') === 0; });
+            var paranoiaString = checked.join(',');
             // Get user ID from URL parameter.
             var userId = getURLParameter("id");
             // Open a new tab with specified paranoia settings.

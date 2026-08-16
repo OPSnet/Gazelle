@@ -27,6 +27,7 @@ class User extends BaseAttrObject {
     protected array $tokenCache;
     protected array $forumWarning;
     protected array $staffNote;
+    protected array $overrideParanoia;
 
     protected Stats\User      $stats;
     protected User\AuditTrail $auditTrail;
@@ -551,12 +552,17 @@ class User extends BaseAttrObject {
             ?? Enum\UserStatus::unconfirmed;
     }
 
+    public function setOverrideParanoia(array $paranoia): static {
+        $this->overrideParanoia = $paranoia;
+        return $this;
+    }
+
     public function paranoia(): array {
-        return $this->info()['Paranoia'];
+        return $this->overrideParanoia ?? $this->info()['Paranoia'];
     }
 
     public function isParanoid(string $for): bool {
-        return in_array($for, $this->info()['Paranoia']);
+        return in_array($for, $this->paranoia());
     }
 
     public function paranoiaLevel(): int {

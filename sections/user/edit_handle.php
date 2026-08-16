@@ -50,78 +50,7 @@ if (!$validator->validate($_POST)) {
     Error400::error($validator->errorMessage());
 }
 
-// Begin building $paranoia
-// Reduce the user's input paranoia until it becomes consistent
-if (isset($_POST['p_l_uniquegroups'])) {
-    $_POST['p_l_uploads'] = 'on';
-    $_POST['p_c_uploads'] = 'on';
-}
-
-if (isset($_POST['p_l_uploads'])) {
-    $_POST['p_l_uniquegroups'] = 'on';
-    $_POST['p_l_perfectflacs'] = 'on';
-    $_POST['p_c_uniquegroups'] = 'on';
-    $_POST['p_c_perfectflacs'] = 'on';
-    $_POST['p_artistsadded'] = 'on';
-}
-
-if (isset($_POST['p_collagecontribs'])) {
-    $_POST['p_l_collages'] = 'on';
-    $_POST['p_c_collages'] = 'on';
-}
-
-if (isset($_POST['p_c_snatched'], $_POST['p_c_seeding'], $_POST['p_downloaded'])) {
-    $_POST['p_requiredratio'] = 'on';
-}
-
-// if showing exactly 2 of stats, show all 3 of stats
-$StatsShown = 0;
-$Stats = ['downloaded', 'uploaded', 'ratio'];
-foreach ($Stats as $S) {
-    if (isset($_POST["p_$S"])) {
-        $StatsShown++;
-    }
-}
-
-if ($StatsShown == 2) {
-    foreach ($Stats as $S) {
-        $_POST["p_$S"] = 'on';
-    }
-}
-
-$paranoia = [];
-foreach (
-    [
-        'downloaded', 'uploaded', 'ratio', 'bonuspoints', 'lastseen', 'requiredratio', 'invitedcount', 'artistsadded', 'notifications'
-    ] as $c
-) {
-    if (!isset($_POST["p_$c"])) {
-        $paranoia[] = $c;
-    }
-}
-foreach (
-    [
-        'torrentcomments', 'collages', 'collagecontribs', 'uploads', 'uniquegroups', 'perfectflacs', 'seeding', 'leeching', 'snatched'
-    ] as $c
-) {
-    if (!isset($_POST["p_l_$c"])) {
-        $paranoia[] = isset($_POST["p_c_$c"]) ? $c : "$c+";
-    }
-}
-foreach (['requestsfilled', 'requestsvoted'] as $bounty) {
-    if (isset($_POST["p_list_$bounty"])) {
-        $_POST["p_count_$bounty"] = 'on';
-        $_POST["p_bounty_$bounty"] = 'on';
-    }
-    foreach (['list', 'count', 'bounty'] as $item) {
-        if (!isset($_POST["p_{$item}_{$bounty}"])) {
-            $paranoia[] = "{$bounty}_{$item}";
-        }
-    }
-}
-if (!isset($_POST['p_donor_heart'])) {
-    $paranoia[] = 'hide_donor_heart';
-}
+$paranoia = Util\Paranoia::calculate($_POST);
 $user->setField('Paranoia', serialize($paranoia));
 
 $user->setField('IRCKey', $_POST['irckey']);
