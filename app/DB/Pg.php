@@ -64,14 +64,14 @@ class Pg {
     protected array      $enumRegistration;
     protected Pg\Stats   $stats;
     protected ?string    $tx = null;
-    protected \PDO       $pdo; // deprecated
+    protected \Pdo\Pgsql $pdo; // deprecated
 
     public function __construct(#[\SensitiveParameter] string $dsn) {
         $this->cnxrw = new Connection(
             str_replace(';', ' ', explode(':', $dsn, 2)[1])
         );
         // The DSN of the connection
-        $this->pdo   = new \PDO($dsn);
+        $this->pdo   = new \Pdo\Pgsql($dsn);
         $this->stats = new Pg\Stats();
     }
 
@@ -229,8 +229,7 @@ class Pg {
         return $this->pdo->prepare($query); /** @phpstan-ignore-line let it blow up downstream */
     }
 
-    // phpcs:disable PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function prepared_query(string $query, ...$args): int {
+    public function PDOquery(string $query, ...$args): int {
         if ($this->tx === 'pgw') {
             throw new \Exception('ongoing pg_wrapper transaction');
         }
@@ -248,114 +247,6 @@ class Pg {
         }
         $this->stats->error($query, $args);
         return 0;
-    }
-
-    // phpcs:enable
-
-    public function insert(string $query, ...$args): int {
-        if ($this->tx === 'pgw') {
-            throw new \Exception('ongoing pg_wrapper transaction');
-        }
-        $begin = hrtime(true);
-        $st = $this->prepare($query);
-        try {
-            if ($st->execute([...$args])) {
-                $id = (int)$this->pdo->lastInsertId();
-                $this->stats->register($query, $id, $begin, [...$args]);
-                return $id;
-            }
-        } catch (\PDOException $e) {
-            throw new \PDOException($e->getMessage()
-                . " $query " . json_encode($args, JSON_UNESCAPED_SLASHES));
-        }
-        $this->stats->error($query, $args);
-        return 0;
-    }
-
-    /**
-     * DO NOT USE FOR UNTRUSTED DATA. There can likely be weird cases with specifically crafted data, especially BYTEA.
-     */
-    public function insertCopy(string $table, array $colList, array $rows): bool {
-        if (!$rows) {
-            return false;
-        }
-        static $delimiter = "\t", $nullAs = '\\N';
-        $begin = hrtime(true);
-        $processedRows = [];
-        foreach ($rows as $row) {
-            $vals = [];
-            foreach ($row as $val) {
-                if (is_null($val)) {
-                    $vals[] = $nullAs;
-                } elseif (is_string($val)) {
-                    $vals[] = str_replace(
-                        ["\\",   "\n",   "\r",   $delimiter],
-                        ["\\\\", "\\\n", "\\\r", "\\" . $delimiter],
-                        $val
-                    );
-                } elseif (is_bool($val)) {
-                    $vals[] = $val ? 't' : 'f';
-                } elseif (is_int($val) || is_float($val)) {
-                    $vals[] = $val;
-                } else {
-                    throw new \Exception("invalid column data type");
-                }
-            }
-            $processedRows[] = implode($delimiter, $vals);
-        }
-        $success = $this->pdo->pgsqlCopyFromArray(
-            $table,
-            $processedRows,
-            $delimiter,
-            addslashes($nullAs),
-            implode(',', $colList)
-        );
-        $this->stats->register("copy $table", count($processedRows), $begin, $colList);
-        return $success;
-    }
-
-    protected function fetchRow(string $query, int $mode, ...$args): array {
-        if ($this->tx === 'pgw') {
-            throw new \Exception('ongoing pg_wrapper transaction');
-        }
-        $begin = hrtime(true);
-        $st = $this->pdo->prepare($query);
-        if ($st !== false && $st->execute([...$args])) {
-            $row = $st->fetch($mode);
-            if ($row) {
-                $this->stats->register($query, count($row), $begin, [...$args]);
-                return $row;
-            }
-        }
-        $this->stats->error($query, $args);
-        return [];
-    }
-
-    public function scalar(string $query, ...$args): mixed {
-        if ($this->tx === 'pgw') {
-            throw new \Exception('ongoing pg_wrapper transaction');
-        }
-        $begin = hrtime(true);
-        $st = $this->pdo->prepare($query);
-        if ($st !== false && $st->execute([...$args])) {
-            $result = $st->fetch(\PDO::FETCH_NUM);
-            if ($result) {
-                $this->stats->register($query, 0, $begin, [...$args]);
-                return $st->getColumnMeta(0)['native_type'] == 'bytea' /** @phpstan-ignore-line */
-                    ? stream_get_contents($result[0])
-                    : $result[0];
-            }
-        }
-        $this->stats->error($query, $args);
-        return null;
-    }
-
-    public function row(string $query, ...$args): array {
-        return $this->fetchRow($query, \PDO::FETCH_NUM, ...$args);
-    }
-
-    public function rowAssoc(string $query, ...$args): array {
-        return $this->fetchRow($query, \PDO::FETCH_ASSOC, ...$args);
     }
 
     public function all(string $query, ...$args): array {
@@ -395,27 +286,47 @@ class Pg {
         return $result;
     }
 
-    public function allByKey(string $key, string $query, ...$args): array {
-        $list = [];
-        foreach ($this->all($query, ...$args) as $row) {
-            $list[$row[$key]] = $row;
+    /**
+     * DO NOT USE FOR UNTRUSTED DATA.
+     * There can likely be weird cases with specifically crafted data, especially BYTEA.
+     */
+    public function insertCopy(string $table, array $colList, array $rows): bool {
+        if (!$rows) {
+            return false;
         }
-        return $list;
-    }
-
-    public function column(string $query, ...$args): array {
-        if ($this->tx === 'pgw') {
-            throw new \Exception('ongoing pg_wrapper transaction');
-        }
+        static $delimiter = "\t", $nullAs = '\\N';
         $begin = hrtime(true);
-        $st = $this->pdo->prepare($query);
-        if ($st === false || !$st->execute([...$args])) {
-            $this->stats->error($query, $args);
-            return [];
+        $processedRows = [];
+        foreach ($rows as $row) {
+            $vals = [];
+            foreach ($row as $val) {
+                if (is_null($val)) {
+                    $vals[] = $nullAs;
+                } elseif (is_string($val)) {
+                    $vals[] = str_replace(
+                        ["\\",   "\n",   "\r",   $delimiter],
+                        ["\\\\", "\\\n", "\\\r", "\\" . $delimiter],
+                        $val
+                    );
+                } elseif (is_bool($val)) {
+                    $vals[] = $val ? 't' : 'f';
+                } elseif (is_int($val) || is_float($val)) {
+                    $vals[] = $val;
+                } else {
+                    throw new \Exception("invalid column data type");
+                }
+            }
+            $processedRows[] = implode($delimiter, $vals);
         }
-        $result = $st->fetchAll(\PDO::FETCH_COLUMN);
-        $this->stats->register($query, count($result), $begin, [...$args]);
-        return $result;
+        $success = $this->pdo->copyFromArray(
+            $table,
+            $processedRows,
+            $delimiter,
+            addslashes($nullAs),
+            implode(',', $colList)
+        );
+        $this->stats->register("copy $table", count($processedRows), $begin, $colList);
+        return $success;
     }
 
     public function checkpointInfo(): array {

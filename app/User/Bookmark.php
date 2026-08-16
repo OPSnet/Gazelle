@@ -321,7 +321,7 @@ class Bookmark extends \Gazelle\BaseUser {
                 and id_user = $2
             ", $object->id(), $this->id
         );
-        if ($object->bookmarkType() === BookmarkType::tgroup && self::$db->affected_rows()) {
+        if ($affected && $object->bookmarkType() === BookmarkType::tgroup) {
             new TGroup($object->id())->stats()->increment('bookmark_total', -1);
         }
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $object->bookmarkType()->name, $this->id));

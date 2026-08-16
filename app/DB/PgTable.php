@@ -41,7 +41,7 @@ class PgTable extends AbstractTable {
          */
         return implode(
             "\n",
-            $this->pgro()->column("
+            $this->pgro()->columnex("
                 with pkey as (
                     select cc.conrelid,
                         format(E',\n  constraint %I primary key(%s)', cc.conname,
@@ -74,8 +74,8 @@ class PgTable extends AbstractTable {
                 inner join pg_catalog.pg_namespace n on (n.oid = c.relnamespace)
                 inner join pg_catalog.pg_attribute a on (a.attrelid = c.oid and a.attnum > 0)
                 inner join pg_catalog.pg_type t on (a.atttypid = t.oid)
-                where n.nspname = ?
-                    and c.relname = ?
+                where n.nspname = $1
+                    and c.relname = $2
                 group by c.oid, c.relname, c.relpersistence, n.nspname;
                 ", $schema, $table
             )
@@ -84,22 +84,22 @@ class PgTable extends AbstractTable {
 
     public function indexRead(): array {
         [$schema, $table] = $this->schemaTable();
-        return $this->pgro()->all("
+        return $this->pgro()->allex("
             select indexrelname,
                 idx_scan,
                 idx_tup_read,
                 idx_tup_fetch,
                 last_idx_scan
             from pg_stat_all_indexes
-            where schemaname = ?
-                and relname = ?
+            where schemaname = $1
+                and relname = $2
             ", $schema, $table
         );
     }
 
     public function tableRead(): array {
         [$schema, $table] = $this->schemaTable();
-        return $this->pgro()->rowAssoc("
+        return $this->pgro()->rowAssocex("
             select seq_scan,
                 last_seq_scan,
                 seq_tup_read,
@@ -122,8 +122,8 @@ class PgTable extends AbstractTable {
                 analyze_count,
                 autoanalyze_count
             from pg_stat_user_tables
-            where schemaname = ?
-                and relname = ?
+            where schemaname = $1
+                and relname = $2
             ", $schema, $table
         );
     }
@@ -139,10 +139,10 @@ class PgTable extends AbstractTable {
                     then 0
                     else round(s.n_dead_tup/(s.n_dead_tup + n_live_tup*1.0), 5)
                 end as dead_ratio,
-                now() - s.last_autoanalyze as analyze_delta,
-                now() - s.last_autovacuum  as vacuum_delta,
-                s.autoanalyze_count        as analyze_total,
-                s.autovacuum_count         as vacuum_total
+                s.last_autoanalyze,
+                s.last_autovacuum,
+                s.autoanalyze_count as analyze_total,
+                s.autovacuum_count  as vacuum_total
             from information_schema.tables t
             inner join pg_stat_user_tables s on (
                 s.schemaname = t.table_schema and s.relname = t.table_name

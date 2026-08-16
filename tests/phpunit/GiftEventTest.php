@@ -19,8 +19,8 @@ class GiftEventTest extends TestCase {
             $this->extra->remove();
         }
         $this->user->remove();
-        new DB\Pg(PG_RW_DSN)->prepared_query('
-            delete from gift_event where name ~ ?
+        new DB\Pg(PG_RW_DSN)->query('
+            delete from gift_event where name ~ $1
             ', '^phpunit-'
         );
         new Manager\GiftEvent()->flush();

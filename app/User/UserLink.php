@@ -30,8 +30,8 @@ class UserLink extends \Gazelle\BasePgUser {
         );
     }
 
-    public function linkInfo(): array|null {
-        return $this->pg()->rowAssocex("
+    public function info(): array {
+        $link = $this->pg()->rowAssocex("
             select ulg.id_user_link_group,
                 ulg.comment
             from user_link_group ulg
@@ -39,33 +39,32 @@ class UserLink extends \Gazelle\BasePgUser {
             where ul.id_user = $1
             ", $this->user->id
         );
-    }
-
-    public function info(): array {
-        $linkInfo = $this->linkInfo();
-        return is_null($linkInfo) ? [] : [
-            'id'      => $linkInfo['id_user_link_group'],
-            'comment' => $linkInfo['comment'] ?? '',
-            'list'    => $this->pg()->pair(
-                'user_id',
-                'username',
-                <<<END_SQL
-                    select ul.id_user as user_id,
-                        um."Username" as username
-                    from user_link ul
-                    inner join relay.users_main um on (um."ID" = ul.id_user)
-                    where ul.id_user_link_group = $1
-                        and ul.id_user != $2
-                    order by ul.id_user
-                END_SQL,
-                    $linkInfo['id_user_link_group'], $this->user->id
-            ),
-        ];
+        return $link === []
+            ? [
+                'list' => [],
+            ]
+            : [
+                'id'      => $link['id_user_link_group'],
+                'comment' => $link['comment'],
+                'list'    => $this->pg()->pair(
+                    'user_id',
+                    'username',
+                    <<<END_SQL
+                        select ul.id_user as user_id,
+                            um."Username" as username
+                        from user_link ul
+                        inner join relay.users_main um on (um."ID" = ul.id_user)
+                        where ul.id_user_link_group = $1
+                            and ul.id_user != $2
+                        order by ul.id_user
+                    END_SQL,
+                        $link['id_user_link_group'], $this->user->id
+                ),
+            ];
     }
 
     public function dupe(User $target, User $admin, bool $updateNote): bool {
-        $linkInfo      = $this->linkInfo();
-        $sourceGroupId = $linkInfo['id_user_link_group'] ?? null;
+        $sourceGroupId = $this->info()['id'] ?? null;
         $targetGroupId = $this->groupId($target);
 
         $this->pg()->begin();
@@ -80,12 +79,6 @@ class UserLink extends \Gazelle\BasePgUser {
                         id_user_link_group = $1
                     where id_user_link_group = $2
                     ', $targetGroupId, $sourceGroupId
-                );
-                $this->pg()->query('
-                    update user_link_group set
-                        comment = $1 || comment
-                    where id_user_link_group = $2
-                    ', "{$linkInfo['comment']}\n\n", $targetGroupId
                 );
                 $this->pg()->query('
                     delete from user_link_group where id_user_link_group = $1

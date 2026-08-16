@@ -36,8 +36,8 @@
                 }}</td>
             <td>{{ table.stats.table_size|octet_size }}</td>
             <td>{{ table.stats.index_size|octet_size }}</td>
-            <td>{{ table.stats.analyze_delta|time_diff }}</td>
-            <td>{{ table.stats.vacuum_delta|time_diff }}</td>
+            <td>{{ table.stats.last_autoanalyze|time_diff }}</td>
+            <td>{{ table.stats.last_autovacuum|time_diff }}</td>
             <td>{{ table.stats.analyze_total|number_format }}</td>
             <td>{{ table.stats.vacuum_total|number_format }}</td>
         </tr>

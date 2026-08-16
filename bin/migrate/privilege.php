@@ -32,7 +32,7 @@ function setUserclassHasPrivilege(string $name, array $privilege): void {
     $list = implode(',', array_map(fn ($p) => "('$p')", $privilege));
 
     $pg = new DB\Pg(PG_RW_DSN);
-    $pg->prepared_query("
+    $pg->query("
         insert into userclass_has_privilege (id_privilege, id_userclass)
         select p.id_privilege, uc.id_userclass
         from privilege p

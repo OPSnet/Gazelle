@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Gazelle;
 
 use sad_spirit\pg_wrapper\exceptions\server\ProgrammingException;
+use sad_spirit\pg_wrapper\exceptions\server\InsufficientPrivilegeException;
 use sad_spirit\pg_wrapper\exceptions\server\QueryCanceledException;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\Group;
@@ -82,7 +83,7 @@ class DbTest extends TestCase {
                 ";
             $db->prepared_query($sql);
             $mysql = $db->to_array(false, MYSQLI_ASSOC);
-            $pg    = $this->pg()->all("
+            $pg    = $this->pg()->allex("
                 select id_$table as id, name
                 from $table
                 order by 1
@@ -191,70 +192,6 @@ class DbTest extends TestCase {
         $dbh->prepared_query("
             DROP TABLE $tableName
         ");
-    }
-
-    public function testPgBasic(): void {
-        $st = $this->pg()->prepare("
-            create temporary table t (
-                id_t integer not null primary key generated always as identity,
-                label text not null,
-                created timestamptz not null default current_date
-            )
-        ");
-        $this->assertTrue($st->execute(), 'db-pg-create-tmp-table');
-
-        $id = $this->pg()->insert("
-            insert into t (label) values (?)
-            ", 'phpunit'
-        );
-        $this->assertSame(1, $id, 'db-pg-last-id');
-        $this->assertSame(
-            ['phpunit'],
-            $this->pg()->row(
-                'select label from t where id_t = ?', $id
-            ),
-            'db-pg-row-assoc-one'
-        );
-        $this->assertSame(
-            ['label' => 'phpunit'],
-            $this->pg()->rowAssoc(
-                'select label from t where id_t = ?', $id
-            ),
-            'db-pg-row-assoc-one'
-        );
-        $this->assertSame(
-            [],
-            $this->pg()->row(
-                'select label from t where id_t = ?', $id + 1
-            ),
-            'db-pg-row-assoc-none'
-        );
-        $this->assertSame(
-            [],
-            $this->pg()->rowAssoc(
-                'select label from t where id_t = ?', $id + 1
-            ),
-            'db-pg-row-assoc-none'
-        );
-        $this->assertSame(4, $this->pg()->insert("
-            insert into t (label) values (?), (?), (?)
-            ", 'abc', 'def', 'ghi'),
-            'db-pg-triple-insert'
-        );
-        $all = $this->pg()->all("
-            select id_t, label, created from t order by id_t desc
-        ");
-        $this->assertCount(4, $all, 'pg-all-total');
-        $this->assertSame(['id_t', 'label', 'created'], array_keys($all[0]), 'pg-all-column-names');
-        $this->assertSame('ghi', $all[0]['label'], 'pg-all-row-value');
-        $this->assertSame(
-            3,
-            $this->pg()->prepared_query("
-                update t set label = upper(label) where char_length(label) = ?
-                ", 3
-            ),
-            'db-pg-prepared-update'
-        );
     }
 
     public function testPgBasicex(): void {
@@ -390,29 +327,6 @@ class DbTest extends TestCase {
 
         $this->assertCount($queryTotal, $stats->queryList(), 'pg-bad-query-count');
         $this->assertCount($errorTotal + 1, $stats->errorList(), 'pg-bad-error-count');
-    }
-
-    public function testPgAbort(): void {
-        // make sure we are not in a tx
-        $this->pg()->prepared_query('select 1');
-        // abort non-existent tx, should be noop
-        $this->pg()->abort();
-
-        $this->pg()->begin();
-        $this->assertSame(1, $this->pg()->scalarex('select 1'), 'pg-abort-qry1');
-
-        try {
-            $this->pg()->prepared_query('select 1');
-            $this->fail('pg-abort-exception-not-thrown');
-        } catch (\Exception $e) {
-            $this->assertSame(\Exception::class, $e::class, 'pg-abort-exception-class');
-            $this->assertSame('ongoing pg_wrapper transaction', $e->getMessage(), 'pg-abort-exception-msg');
-        }
-
-        $this->assertSame(1, $this->pg()->scalarex('select 1'), 'pg-abort-qry2');
-
-        $this->pg()->abort();
-        $this->assertSame(2, $this->pg()->scalarex('select 2'), 'pg-abort-qry3');
     }
 
     public function testMysqlReadView(): void {
@@ -561,7 +475,7 @@ class DbTest extends TestCase {
         $this->assertSame(
             [
                 "table_size", "index_size", "live", "dead", "dead_ratio",
-                "analyze_delta", "vacuum_delta", "analyze_total",
+                "last_autoanalyze", "last_autovacuum", "analyze_total",
                 "vacuum_total",
             ],
             array_keys($table->stats()),
@@ -595,26 +509,26 @@ class DbTest extends TestCase {
     }
 
     public function testPgByteaAll(): void {
-        $this->pg()->prepared_query("
+        $this->pg()->query("
             create temporary table test_bytea (
                 id int generated always as identity,
                 payload bytea not null
             )
         ");
         $payload = pack('C*', array_map(chr(...), range(0, 255)));
-        $this->pg()->prepared_query("
-            insert into test_bytea (payload) values (?), (?)
-            ", $payload, $payload
+        $this->pg()->query("
+            insert into test_bytea (payload) values ($1), ($1)
+            ", $payload
         );
         $this->assertSame(
             [
                 ['id' => 1, 'payload' => $payload],
                 ['id' => 2, 'payload' => $payload],
             ],
-            $this->pg()->all("select id, payload from test_bytea order by id"),
+            $this->pg()->allex("select id, payload from test_bytea order by id"),
             'db-pg-all-bytea'
         );
-        $this->pg()->prepared_query("
+        $this->pg()->query("
             drop table test_bytea
         ");
     }
@@ -713,7 +627,7 @@ class DbTest extends TestCase {
     }
 
     public function testPgInsertCopy(): void {
-        $this->pg()->prepared_query("
+        $this->pg()->PDOquery("
             create temporary table phpunit_insert_copy
             (num int, name text, flag bool)
         ");
@@ -750,11 +664,11 @@ class DbTest extends TestCase {
     }
 
     public function testPgWrite(): void {
-        $this->expectException(\PDOException::class);
+        $this->expectException(InsufficientPrivilegeException::class);
         $this->expectExceptionMessageMatches(
-            '/^SQLSTATE\[\d+\]: Insufficient privilege: \d+ ERROR:  permission denied for table counter/'
+            '/ERROR:\s+\d+: permission denied for table counter/'
         );
-        $this->pgro()->prepared_query("
+        $this->pgro()->query("
             insert into counter values ('phpunit-testWrite', 'fail on insert', 0)
         ");
     }

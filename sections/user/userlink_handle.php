@@ -30,7 +30,7 @@ switch ($_REQUEST['dupeaction'] ?? '') {
             $username = trim($_REQUEST['target']);
             $target = $userMan->find($username);
             if (is_null($target)) {
-                Error400::error("User '" . display_str($username) . "' not found.");
+                Error400::error("User '" . html_escape($username) . "' not found.");
             } elseif ($source->id === $target->id) {
                 Error400::error("Cannot link a user to themselves");
             }

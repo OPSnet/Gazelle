@@ -10,8 +10,8 @@ class Torrent extends \Gazelle\Json {
     public function payload(): array {
         $flow = [];
         foreach ($this->stat->flow() as $month) {
-            $flow[$month['Month']] = [
-                'Month' => $month['Month'],
+            $flow[$month['month']] = [
+                'Month'     =>  $month['month'],
                 'uploads'   =>  $month['t_add'],
                 'deletions' => -$month['t_del'],
                 'remaining' =>  $month['t_net'],

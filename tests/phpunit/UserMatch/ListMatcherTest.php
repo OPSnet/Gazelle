@@ -27,8 +27,8 @@ class ListMatcherTest extends TestCase {
                 DELETE FROM xbt_snatched WHERE uid = ?
                 ", $user->id
             );
-            $pg->prepared_query("
-                delete from ip_history where id_user = ?
+            $pg->query("
+                delete from ip_history where id_user = $1
                 ", $user->id
             );
         }

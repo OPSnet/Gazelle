@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Gazelle;
 
+use sad_spirit\pg_wrapper\exceptions\server\ProgrammingException;
+
 if (!$Viewer->permitted('admin_site_debug')) {
     Error403::error();
 }
@@ -34,8 +36,8 @@ if (isset($_POST['query'])) {
             break;
         case 'pg':
             try {
-                $result = new \Gazelle\DB\Pg(PG_RO_DSN)->column($_POST['query']);
-            } catch (\Exception $e) {
+                $result = new DB\Pg(PG_RO_DSN)->columnex($_POST['query']);
+            } catch (ProgrammingException $e) {
                 $error = $e::class . " " . $e->getMessage();
             }
             break;

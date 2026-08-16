@@ -200,15 +200,15 @@ class Torrent extends \Gazelle\Base {
                         and now() - interval '1 month'
                     group by created_month
                 )
-                select to_char(dates.m, 'YYYY-MM') AS Month,
-                    count(distinct t."ID")          AS t_net,
-                    coalesce(delta.t_add, 0)        AS t_add,
-                    coalesce(delta.t_del, 0)        AS t_del
+                select to_char(dates.m, 'YYYY-MM') as month,
+                    count(distinct t."ID")         as t_net,
+                    coalesce(delta.t_add, 0)       as t_add,
+                    coalesce(delta.t_del, 0)       as t_del
                 from dates
                 left join relay.torrents t on (date_trunc('month', t.created) = dates.m)
                 left join delta using (m)
-                group by Month, delta.t_add, delta.t_del
-                order by Month
+                group by month, delta.t_add, delta.t_del
+                order by month
                 END_SQL
             );
             self::$cache->cache_value(
