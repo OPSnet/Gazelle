@@ -154,7 +154,7 @@ class Collage extends \Gazelle\Base {
             'name'        => ['dbColumn' => 'c."Name"',        'defaultSort' => 'asc',  'text' => 'Collage'],
             'subscribers' => ['dbColumn' => 'c."Subscribers"', 'defaultSort' => 'desc', 'text' => 'Subscribers'],
             'torrents'    => ['dbColumn' => 'c."NumTorrents"', 'defaultSort' => 'desc', 'text' => 'Entries'],
-            'updated'     => ['dbColumn' => 'c."Updated"',     'defaultSort' => 'desc', 'text' => 'Updated'],
+            'updated'     => ['dbColumn' => 'c.updated',       'defaultSort' => 'desc', 'text' => 'Updated'],
         ]);
         if ($this->category) {
             sort($this->category);
