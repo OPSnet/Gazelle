@@ -832,7 +832,7 @@ class User extends BaseAttrObject {
     }
 
     /** @phpstan-impure for Enum\Autocomplete */
-    public function modifyOption(string $name, int|string|null $value): static {
+    public function modifyOption(string $name, array|int|string|null $value): static {
         $options = $this->info()['SiteOptions'];
         if (is_null($value)) {
             unset($options[$name]);
