@@ -1,17 +1,18 @@
 {% from 'macro/form.twig' import checked -%}
 {{ header('DB Sandbox') }}
 <div class="linkbox">
-    <a href="tools.php?action=service_stats" class="brackets">Cache/DB stats</a>
-    <a href="tools.php?action=clear_cache" class="brackets">Cache inspector</a>
-    <a href="tools.php?action=db-mysql" class="brackets">Mysql inspector</a>
-    <a href="tools.php?action=db-pg" class="brackets">Postgresql inspector</a>
+    <a href="?action=service_stats" class="brackets">Cache/DB stats</a>
+    <a href="?action=clear_cache" class="brackets">Cache inspector</a>
+    <a href="?action=db-mysql" class="brackets">Mysql inspector</a>
+    <a href="?action=db-pg" class="brackets">Postgresql inspector</a>
+    <a href="?action=db_sandbox" class="brackets" target="_blank">New sandbox</a>
 </div>
 <div class="thin pad box">
     <h3>DB Sandbox</h3>
     <div class="pad">Think about adding a <code>LIMIT 10</code> (or similar) on queries for which you are
     unsure how many rows will be returned. This is to avoid exhausting memory, as the resultset is buffered in memory.</div>
     <div class="pad">If two columns have the same name (<i>e.g.</i> <code>ID</code>), only the first column will be displayed.</div>
-    <form action="tools.php?action=db_sandbox" method='POST'>
+    <form action="?action=db_sandbox" method='POST'>
         <textarea style="width: 98%;" name="query" cols="90" rows="{{ rows }}">{{ query }}</textarea>
         Source
         <label><input type="radio" name="src" value="mysql"{{ checked(source == 'mysql') }}> Mysql</label>
