@@ -59,7 +59,10 @@ class CollageTest extends TestCase {
             Helper::makeTGroupMusic(
                 $user,
                 'Some ' . randomString(8) . ' songs',
-                [[ARTIST_MAIN], [$this->artistName[2], $this->artistName[3]]],
+                [
+                    [ARTIST_MAIN], [$this->artistName[2]],
+                    [ARTIST_MAIN], [$this->artistName[3]],
+                ],
                 $this->tagList(3),
             ),
             Helper::makeTGroupMusic(
