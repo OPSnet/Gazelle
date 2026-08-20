@@ -246,6 +246,29 @@ class TagTest extends TestCase {
         );
     }
 
+    public function testNameListEmpty(): void {
+        $manager = new Manager\Tag();
+
+        $this->user = Helper::makeUser('tag.' . randomString(8), 'tag.tgroup');
+        $manager->softCreate('', $this->user);
+
+        $this->assertSame([], $manager->nameToTagList(''), 'tag-name-tag-list-empty');
+        $this->assertSame([], $manager->nameToTagList('   '), 'tag-name-tag-list-whitespace');
+        $this->assertSame([], $manager->nameToTagList(' , , '), 'tag-name-tag-list-commas-only');
+
+        $tag        = $manager->softCreate('phpunit.trailing', $this->user);
+        $this->assertEqualsCanonicalizing(
+            [$tag],
+            $manager->nameToTagList('phpunit.trailing,'),
+            'tag-name-tag-list-trailing-comma',
+        );
+        $this->assertEqualsCanonicalizing(
+            [$tag],
+            $manager->nameToTagList(' , phpunit.trailing ,, '),
+            'tag-name-tag-list-surrounding-commas',
+        );
+    }
+
     public function testTGroup(): void {
         $this->user = Helper::makeUser('tag.' . randomString(8), 'tag.tgroup');
         $this->user->requestContext()->setViewer($this->user);

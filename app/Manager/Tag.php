@@ -78,7 +78,7 @@ class Tag extends \Gazelle\BaseManager {
     public function nameToTagList(string $name): array {
         $tagList = [];
         /** @phpstan-ignore-next-line foreach.nonIterable regexp is never invalid, will never return false */
-        foreach (preg_split('/(?:\s*,\s*|\s+)/', trim($name)) as $t) {
+        foreach (preg_split('/(?:\s*,\s*|\s+)/', trim($name), -1, PREG_SPLIT_NO_EMPTY) as $t) {
             $tag = $this->findByName($t);
             if ($tag) {
                 $tagList[$t] = $tag;
