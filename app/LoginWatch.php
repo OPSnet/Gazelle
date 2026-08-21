@@ -67,7 +67,9 @@ class LoginWatch extends Base {
         return $this->pg()->query(<<<END_SQL
             update login_watch set
                 block         = block + 1,
-                blocked_until = now() + interval '1 day',
+                blocked_until = case when blocked_until > now()
+                                then blocked_until
+                                else now() + interval '1 day' end,
                 id_user       = $1,
                 capture       = $2
             where ip = $3

@@ -27,7 +27,7 @@ if (isset($_POST['add'])) {
     $note   = trim($_POST['note']);
     $ipList = array_unique(preg_split('/\s+/', trim($_POST['ip'] ?? ''))); /** @phpstan-ignore-line */
     foreach ($ipList as $ip) {
-        $manager->create($ip, trim($_POST['note']), $Viewer);
+        $manager->create($ip, $note, $Viewer);
     }
 } elseif (isset($_POST['toggle'])) {
     $ban = $manager->findById((int)($_POST['id'] ?? 0));
@@ -40,11 +40,11 @@ if (isset($_POST['add'])) {
     $message = "Ban on address {$ban->ip()} "
         . ($ban->isActive() ? "enabled" : "disabled");
 } else {
-    if (!empty($_REQUEST['note'])) {
+    if (($_REQUEST['note'] ?? '') !== '') {
         $manager->setFilterNotes($_REQUEST['note']);
     }
-    if (!empty($_REQUEST['ip']) && preg_match(IP_REGEXP, $_REQUEST['ip'])) {
-        $manager->setFilterIpaddr($_REQUEST['ip']);
+    if (trim($_REQUEST['ip'] ?? '') !== '') {
+        $manager->setFilterIpaddr(trim($_REQUEST['ip']));
     }
 }
 
