@@ -17,13 +17,7 @@
 {% if viewer.permitted('site_collages_delete') or (viewer.permitted('site_edit_wiki') and not collage.isLockedForUser(viewer)) %}
         <a href="collages.php?action=edit&amp;collageid={{ collage.id }}" class="brackets">Edit description</a>
 {% endif %}
-{% if bookmarked %}
-        {{- dom.click('#bookmarklink_collage_' ~ collage.id, "Unbookmark('collage', " ~ collage.id ~ ", 'Bookmark'); return false;") -}}
-        <a href="#" id="bookmarklink_collage_{{ collage.id }}" class="brackets">Remove bookmark</a>
-{% else %}
-        {{- dom.click('#bookmarklink_collage_' ~ collage.id, "Bookmark('collage', " ~ collage.id ~ ", 'Remove bookmark'); return false;") -}}
-        <a href="#" id="bookmarklink_collage_{{ collage.id }}" class="brackets">Bookmark</a>
-{% endif %}
+{% include 'bookmark/action.twig' with {'class': 'collage', 'id': collage.id, 'is_bookmarked': bookmarked} only %}
 {% if collage.userCanContribute(viewer) %}
         <a href="collages.php?action={{ object == 'torrent' ? 'manage' : 'manage_artists' }}&amp;collageid={{ collage.id }}" class="brackets">Manage entries</a>
 {% endif %}

@@ -466,7 +466,6 @@ body#user .main_column {
 }
 
 #covers .stats .remove,
-.add_bookmark,
 .sidebar {
   float: right;
 }
@@ -1175,7 +1174,9 @@ div#flip_view_1 div#similar-artist .name {
   margin-right: 4px;
 }
 
-.add_bookmark {
+.torrent_table .add_bookmark,
+.torrent_table .remove_bookmark {
+  float: right;
   margin-right: 4px;
 }
 
