@@ -126,7 +126,8 @@ Seeding: {{ stats.seedingTotal|number_format }}
 {%  if upload_total and visible['uploads'] %}
             <a href="torrents.php?type=uploaded&amp;userid={{ user.id }}" class="brackets{{ _self.override(visible['uploads']) }}">View</a>
 {%      if user.id == viewer.id or viewer.isStaff %}
-            <a id="collect-upload" href="torrents.php?action=redownload&amp;type=uploads&amp;userid={{
+            <a id="collect-upload" href="torrents.php?action=redownload&amp;type={{
+                enum('Gazelle\\Enum\\UserTorrentSearch').uploaded.value }}&amp;userid={{
                 user.id }}" class="brackets{{ _self.override(visible['uploads']) }}">Download</a>
 {%      endif %}
 {%  endif %}
@@ -175,7 +176,8 @@ Seeding: {{ stats.seedingTotal|number_format }}
 {%  if stats.snatchUnique and visible['snatched'] %}
             <a href="torrents.php?type=snatched&amp;userid={{ user.id }}" class="brackets{{ _self.override(visible['snatched']) }}">View</a>
 {%      if user.id == viewer.id or viewer.isStaff %}
-            <a id="collect-snatch" href="torrents.php?action=redownload&amp;type=snatches&amp;userid={{ user.id }}" class="brackets">Download</a>
+            <a id="collect-snatch" href="torrents.php?action=redownload&amp;type={{
+                enum('Gazelle\\Enum\\UserTorrentSearch').snatched.value }}&amp;userid={{ user.id }}" class="brackets">Download</a>
 {%      endif %}
 {%  endif %}
         </li>
@@ -186,7 +188,8 @@ Seeding: {{ stats.seedingTotal|number_format }}
 {%  if stats.seedingTotal and visible['seeding'] %}
             <a href="torrents.php?type=seeding&amp;userid={{ user.id }}" class="brackets{{ _self.override(visible['seeding']) }}">View</a>
 {%      if user.id == viewer.id or viewer.isStaff %}
-            <a id="collect-seeding" href="torrents.php?action=redownload&amp;type=seeding&amp;userid={{ user.id }}" class="brackets">Download</a>
+            <a id="collect-seeding" href="torrents.php?action=redownload&amp;type={{
+                enum('Gazelle\\Enum\\UserTorrentSearch').seeding.value }}&amp;userid={{ user.id }}" class="brackets">Download</a>
 {%       endif %}
 {%  endif %}
         </li>

@@ -17,10 +17,16 @@ if ($Viewer->isStaff() && isset($_GET['userid'])) {
     $user = $Viewer;
 }
 
+
+$type = UserTorrentSearch::tryFrom($_GET['type'] ?? '');
+if (is_null($type)) {
+    Error404::error();
+}
+
 $userTorrent = new Search\UserTorrent(
     $user,
     $user,
-    UserTorrentSearch::tryFrom($_GET['type'] ?? '') ?? UserTorrentSearch::uploaded,
+    $type,
     0,
     0,
 );
