@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace Gazelle;
 
-if (!$Viewer->permittedAny('users_mod', 'users_view_ips')) {
+if (!$Viewer->permitted('users_view_ips')) {
     Error403::error();
 }
 
@@ -29,12 +29,13 @@ if ($user) {
 $paginator = new Util\Paginator(IPS_PER_PAGE, (int)($_GET['page'] ?? 1));
 $paginator->setTotal($snatchInfo->total());
 
+$summary = $snatchInfo->summary();
+$geoip   = new Search\ASN()->findByIpList(array_map(fn ($e) => $e['IP'], $summary));
 echo $Twig->render('admin/history-ip-tracker.twig', [
-    'details'   => $snatchInfo->page($paginator->limit(), $paginator->offset()),
-    'ipaddr'    => $ipaddr,
-    'is_mod'    => $Viewer->permitted('users_mod'),
-    'paginator' => $paginator,
-    'summary'   => $snatchInfo->summary(),
-    'urlstem'   => $_SERVER['SCRIPT_NAME'] . '?action=tracker_ips&',
-    'user'      => $user,
+    'details'    => $snatchInfo->page($paginator->limit(), $paginator->offset()),
+    'geoip_data' => $geoip,
+    'ipaddr'     => $ipaddr,
+    'paginator'  => $paginator,
+    'summary'    => $summary,
+    'user'       => $user,
 ]);

@@ -322,27 +322,6 @@ class Twig {
             fn ($up, $down) => new \Twig\Markup(ratio_html($up, $down), 'UTF-8'))
         );
 
-        $twig->addFunction(new \Twig\TwigFunction('resolveCountryIpv4', fn ($addr) => new \Twig\Markup(
-            (function ($ip) {
-                static $cache = [];
-                if (!isset($cache[$ip])) {
-                    $Class = strtr($ip, '.', '-');
-                    // phpcs:disable Generic.Strings.UnnecessaryStringConcat.Found
-                    $cache[$ip] = "<span class=\"cc_{$Class}\">Resolving CC..."
-                        . '<script>'
-                            . "document.addEventListener('DOMContentLoaded', function() {"
-                                . "$.get('tools.php?action=get_cc&ip={$ip}', function(cc) {"
-                                    . "$('.cc_{$Class}').html(cc);"
-                                . '});'
-                            . '});'
-                        . '</script></span>';
-                    // phpcs:enable Generic.Strings.UnnecessaryStringConcat.Found
-                }
-                return $cache[$ip];
-            })($addr),
-            'UTF-8'
-        )));
-
         $twig->addFunction(new \Twig\TwigFunction('shorten', fn ($text, $length) => shortenString($text, $length)));
 
         // round up number to next closest power of 10 of n/10

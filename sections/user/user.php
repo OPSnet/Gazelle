@@ -190,10 +190,8 @@ if ($user->propertyVisibleMulti($profileViewer, ['artistsadded', 'collagecontrib
     if ($profileViewer->permitted('users_view_ips')) {
 ?>
                 <li>IPs: <?=number_format($ipv4->userTotal($user))?> <a href="userhistory.php?action=ips&amp;userid=<?=$userId?>" class="brackets">View</a>&nbsp;<a href="userhistory.php?action=ips&amp;userid=<?=$userId?>&amp;usersonly=1" class="brackets">View users</a></li>
-<?php   if ($profileViewer->permitted('users_mod')) { ?>
                 <li>Tracker IPs: <?=number_format($user->trackerIPCount())?> <a href="userhistory.php?action=tracker_ips&amp;userid=<?=$userId?>" class="brackets">View</a></li>
 <?php
-        }
     }
     if ($profileViewer->permitted('users_view_keys')) {
 ?>

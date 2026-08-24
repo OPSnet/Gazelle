@@ -371,9 +371,6 @@ switch ($_REQUEST['action'] ?? '') {
     case 'get_host':
         require __DIR__ . '/services/get_host.php';
         break;
-    case 'get_cc':
-        require __DIR__ . '/services/get_cc.php';
-        break;
 
     default:
         require __DIR__ . '/tools.php';

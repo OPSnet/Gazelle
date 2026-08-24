@@ -16,25 +16,25 @@
     </div>
     <table>
         <tr class="colhead">
-{%      if is_mod %}
-            <td title="Click on an address to view list of users seen on that address">IP address</td>
-{%      else %}
-            <td>IP address</td>
-{%      endif %}
-            <td>Total</td>
-            <td>First Seen</td>
-            <td>Last Seen</td>
+            <th title="Click on an address to view list of users seen on that address">IP</th>
+            <th>CC</th>
+            <th>Total</th>
+            <th>First Seen</th>
+            <th>Last Seen</th>
+            <th>ASN</th>
+            <th>rDNS</th>
         </tr>
 {%  endif %}
+{%  set geoip = geoip_data[s.IP] %}
         <tr>
-{%  if is_mod %}
-            <td><a href="{{ urlstem }}ip={{ s.IP }}">{{ s.IP }}</a></td>
-{%  else %}
-            <td>">{{ s.IP }}</td>
-{%  endif %}
+            <td><a href="userhistory.php?action=tracker_ips&amp;ip={{ s.IP }}">{{ s.IP }}</a></td>
+            <td>{{ geoip.cc }}</td>
             <td>{{ s.total|number_format }}</td>
             <td>{{ s.first|time_diff }}</td>
             <td>{{ s.last|time_diff }}</td>
+            <td>ASN {{ geoip.n }} / {{ geoip.name }}</td>
+            <td><span class="resolve-ipv4" data-ip="{{ s.IP }}">Resolving...</span></td>
+        </tr>
 {%  if loop.last %}
     </table>
 {%  endif %}
@@ -49,23 +49,27 @@
     <table>
         <tr class="colhead">
 {% if user %}
-            <td>IP address</td>
+            <th>IP</th>
+            <th>CC</th>
+            <th>ASN</th>
+            <th>rDNS</th>
 {% else %}
-            <td>Username</td>
+            <th>Username</th>
 {% endif %}
-            <td>Torrent</td>
-            <td>Time</td>
+            <th>Torrent</th>
+            <th>Time</th>
         </tr>
 {% for r in details %}
         <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
-            <td>
-{%-  if user %}
-{{  r.ip }} <span class="resolve-ipv4" data-ip="{{ r.ip }}">Resolving...</span> ({{
-                resolveCountryIpv4(r.ip) }}) {{ ip_search(r.ip, true) }}
+{%- if user %}
+{%      set geoip = geoip_data[r.ip] %}
+            <td><a href="userhistory.php?action=tracker_ips&amp;ip={{ r.ip }}">{{ r.ip }}</a></td>
+            <td>{{ geoip.cc }}</td>
+            <td>ASN {{ geoip.n }} / {{ geoip.name }}</td>
+            <td><span class="resolve-ipv4" data-ip="{{ r.ip }}">Resolving...</span></td>
 {%  else %}
-            <a href="{{ urlstem }}userid={{ r.uid }}">{{ r.username }}</a>
+            <td><a href="userhistory.php?action=tracker_ips&amp;userid={{ r.uid }}">{{ r.username }}</a></td>
 {%  endif -%}
-            </td>
             <td><a href="torrents.php?torrentid={{ r.fid }}">{{ r.name }}</a></td>
             <td>{{ r.date|time_diff }}</td>
         </tr>
