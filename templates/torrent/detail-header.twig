@@ -76,8 +76,7 @@
             </div>
 {%  endfor %}
 </div>
-
-{%  if viewer.permitted('torrents_edit') and tgroup.image != '' %}
+{%  if viewer.permitted('torrents_edit') and tgroup.image is not null %}
     <hr>
     <div id="add_cover_div">
         <div style="padding: 10px;">

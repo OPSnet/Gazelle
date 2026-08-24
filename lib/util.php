@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 // This is a file of miscellaneous functions that are called so damn often
 // that it'd just be annoying to stick them in namespaces.
 
 use Gazelle\Enum\CacheBucket;
+use Gazelle\Image;
 use Gazelle\Util\Irc;
 use Gazelle\Util\Time;
 use Gazelle\Util\Type;
@@ -41,33 +44,33 @@ function article(int $n, $article = 'a'): string {
  * HTML-escape a string for output.
  */
 function display_str(mixed $Str): string {
-    if (is_null($Str) || is_array($Str)) {
+    if (is_null($Str) || is_array($Str) || $Str === false || $Str === '') {
         return '';
     }
-    if ($Str != '' && !is_number($Str)) {
-        $Str = make_utf8($Str);
-        $Str = htmlspecialchars($Str, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8', false);
-        $Str = preg_replace("/&(?![A-Za-z]{0,4}\w{2,3};|#[0-9]{2,6};)/m", '&amp;', $Str);
-
-        $Replace = [
+    if (is_numeric($Str)) {
+        // could be already be a string, but might be an int or float
+        return (string)$Str;
+    }
+    $Str = make_utf8($Str);
+    $Str = htmlspecialchars($Str, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8', false);
+    $Str = preg_replace("/&(?![A-Za-z]{0,4}\w{2,3};|#[0-9]{2,6};)/m", '&amp;', $Str);
+    return str_replace(
+        [
             "<",">",
             '&#128;','&#130;','&#131;','&#132;','&#133;','&#134;','&#135;','&#136;',
             '&#137;','&#138;','&#139;','&#140;','&#142;','&#145;','&#146;','&#147;',
             '&#148;','&#149;','&#150;','&#151;','&#152;','&#153;','&#154;','&#155;',
             '&#156;','&#158;','&#159;'
-        ];
-
-        $With = [
+        ],
+        [
             '&lt;','&gt;',
             '&#8364;','&#8218;','&#402;','&#8222;','&#8230;','&#8224;','&#8225;','&#710;',
             '&#8240;','&#352;','&#8249;','&#338;','&#381;','&#8216;','&#8217;','&#8220;',
             '&#8221;','&#8226;','&#8211;','&#8212;','&#732;','&#8482;','&#353;','&#8250;',
             '&#339;','&#382;','&#376;'
-        ];
-
-        $Str = str_replace($Replace, $With, $Str);
-    }
-    return $Str;
+        ],
+        $Str
+    );
 }
 
 /**
@@ -876,11 +879,11 @@ function check_paranoia(string $Property, string|array $Paranoia, int $UserClass
     return false;
 }
 
-function httpProxy(): ?string {
+function httpProxy(): string|null {
     $proxy = getenv('HTTP_PROXY');
     if ($proxy !== false) {
         return $proxy;
-    } elseif (HTTP_PROXY != false) {
+    } elseif (HTTP_PROXY) {
         return HTTP_PROXY;
     }
     return null;

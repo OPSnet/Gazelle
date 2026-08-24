@@ -25,7 +25,7 @@ please send a Staff PM to ask a moderator to unlock the artist.</p>
     <tr>
         <td class="label" style="width: 120px; vertical-align: top;">Image</td>
         <td>
-        <input type="text" name="image" size="92" value="{{ artist.image }}"><br>
+        <input type="text" name="image" size="92" value="{{ artist.image.url }}"><br>
 {% if constant('IMAGE_HOST_BANNED') %}
         <b>Images hosted on <strong class="important_text">{{ constant('IMAGE_HOST_BANNED')|join(', ')
             }} are not allowed</strong>, please rehost first on one of {{ constant('IMAGE_HOST_RECOMMENDED')|join(', ') }}.</b><br>

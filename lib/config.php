@@ -642,7 +642,7 @@ defined('UNSEEDED_DRAIN_INTERVAL') or define('UNSEEDED_DRAIN_INTERVAL', 3600 * 6
 defined('USERCLASS_PROMOTE') or define('USERCLASS_PROMOTE', ['User', 'Legend']);
 
 // Which image hosts are acceptable and which aren't?
-defined('IMAGE_HOST_BANNED') or define('IMAGE_HOST_BANNED', []);
+defined('IMAGE_HOST_BANNED') or define('IMAGE_HOST_BANNED', ['phpunit.bad']);
 defined('IMAGE_HOST_RECOMMENDED') or define('IMAGE_HOST_RECOMMENDED', []);
 
 // What are the relative weights of user percentiles, in order to calculate
@@ -1255,8 +1255,8 @@ defined('URL_REGEXP_STEM')  or define('URL_REGEXP_STEM', '(https?:\/\/(?:' . IP_
 defined('URL_REGEXP')       or define('URL_REGEXP',      '/^' . URL_REGEXP_STEM . '$/i');
 defined('CSS_REGEXP')       or define('CSS_REGEXP',      '/^' . URL_REGEXP_STEM . '\.css(?:\?\S*)?$/i');
 defined('IMAGEEXT_REGEXP_STEM') or define('IMAGEEXT_REGEXP_STEM', '(?:avif|bmp|gif|jpe?g|svg|tiff?|png|web[mp])');
-defined('IMAGE_REGEXP')     or define('IMAGE_REGEXP',    '/^(' . URL_REGEXP_STEM . '\.' . IMAGEEXT_REGEXP_STEM . '(\?\S*)?)$/i');
-defined('IMAGETEXT_REGEXP') or define('IMAGETEXT_REGEXP', '/\b(' . URL_REGEXP_STEM . '\.' . IMAGEEXT_REGEXP_STEM . '(\?\S*)?)\b/i');
+defined('IMAGE_REGEXP')     or define('IMAGE_REGEXP',    '/^(' . URL_REGEXP_STEM . '\.' . IMAGEEXT_REGEXP_STEM . '(?:[#&?]\S*)?)$/i');
+defined('IMAGETEXT_REGEXP') or define('IMAGETEXT_REGEXP', '/\b(' . URL_REGEXP_STEM . '\.' . IMAGEEXT_REGEXP_STEM . '(?:[#&?]\S*)?)\b/i');
 defined('SITELINK_REGEXP')  or define('SITELINK_REGEXP', '(?:' . preg_quote(SITE_URL, '/') .  '|' . preg_quote(ALT_SITE_URL, '/') . ')');
 defined('ARTIST_REGEXP')    or define('ARTIST_REGEXP',   '/^' . SITELINK_REGEXP . '\/artist\.php\?.*?\bid=(?P<id>\d+)$/');
 defined('COLLAGE_REGEXP')   or define('COLLAGE_REGEXP',  '/^' . SITELINK_REGEXP . '\/collages\.php\?.*?\bid=(?P<id>\d+)\b/');

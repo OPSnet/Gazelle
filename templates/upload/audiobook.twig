@@ -12,6 +12,7 @@
         <td class="label">Year:</td>
         <td><input type="text" id="year" name="year" size="5" value=""></td>
     </tr>
+{%  include 'upload/cover.twig' with {'is_uploaded': is_uploaded, 'image': torrent.Image} only %}
 {% endif %}
 {% include 'upload/format.twig' with {'format': torrent.Format} %}
 {% include 'upload/bitrate.twig' with {'bitrate': torrent.Bitrate} %}

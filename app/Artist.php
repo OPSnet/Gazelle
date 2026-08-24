@@ -231,8 +231,8 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
         return $this->info()['homonyms'];
     }
 
-    public function image(): ?string {
-        return $this->info()['image'];
+    public function image(): Image {
+        return new Image($this->info()['image']);
     }
 
     public function isLocked(): bool {
@@ -310,7 +310,7 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
 
     public function createRevision(
         string|null $body,
-        string|null $image,
+        Image       $image,
         array       $summary,
         User        $user,
     ): int {
@@ -318,7 +318,7 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
             INSERT INTO wiki_artists
                    (PageID, Body, Image, UserID, Summary)
             VALUES (?,      ?,    ?,     ?,      ?)
-            ", $this->id, $body, $image, $user->id,
+            ", $this->id, $body, $image->url(), $user->id,
                 implode(', ', array_filter($summary, fn ($s) => trim($s) !== ''))
         );
         $revisionId = self::$db->inserted_id();
@@ -561,12 +561,13 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
                 $summary[] = 'description changed (len=' . mb_strlen($body) . ')';
             }
         }
-        if ($this->field('image') !== null) {
-            $image = $this->clearField('image');
-            if (is_string($image)) {
-                $revisionData['image'] = $image;
-                $summary[] = "image changed to '$image'";
-            }
+        if ($this->nullField('image')) {
+            $revisionData['image'] = new Image($this->clearField('image'));
+            $summary[] = "image removed";
+        } elseif ($this->field('image')) {
+            $image = new Image($this->clearField('image'));
+            $revisionData['image'] = $image;
+            $summary[] = "image changed to “{$image->url()}”";
         }
         $notes = $this->clearField('summary');
         if (is_array($notes)) {

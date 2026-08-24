@@ -76,24 +76,18 @@ if ($_POST['name'] !== $tgroup->name()) {
 }
 
 $newRevision = false;
-$image = trim($_POST['image'] ?? '');
-if ($image === '') {
-    $image = null;
-}
-if ($image !== $tgroup->image()) {
-    if (!is_null($image)) {
-        if (!preg_match(IMAGE_REGEXP, $image)) {
-            Error400::error(html_escape($image) . " does not look like a valid image url");
-        }
-        $banned = Util\ImageProxy::badHost($image);
-        if ($banned) {
-            Error400::error("Please rehost images from $banned elsewhere.");
-        }
+if (!isset($_POST['image'])) {
+    $image = new Image(null);
+} else {
+    $image = Image::fromUntrusted($_POST['image']);
+    if ($image->errorMessage()) {
+        Error400::error($image->errorMessage());
     }
-    $tgroup->setField('WikiImage', $image);
-    $newRevision = true;
+    if ($tgroup->image()->url() !== $image->url()) {
+        $tgroup->setField('WikiImage', $image->url());
+        $newRevision = true;
+    }
 }
-
 $noArtwork = isset($_POST['no_cover_art']);
 if ($noArtwork !== $tgroup->hasAttr('no-cover-art')) {
     $tgroup->toggleAttr('no-cover-art', $noArtwork);

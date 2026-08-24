@@ -24,7 +24,7 @@ class UserRecent extends \Gazelle\Json {
                 $detail[] = [
                     'ID'        => $tgroup->id,
                     'Name'      => $tgroup->name(),
-                    'WikiImage' => $tgroup->image(),
+                    'WikiImage' => $tgroup->image()->url(),
                     'artists'   => $tgroup->artistRole()->idList(),
                 ];
             }

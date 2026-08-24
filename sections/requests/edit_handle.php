@@ -70,9 +70,13 @@ while (true) {
     }
 
     if (isset($_POST['image'])) {
-        $image = trim($_POST['image']);
-        if ($image != $request->image()) {
-            $request->setField('image', $image);
+        $image = Image::fromUntrusted($_POST['image']);
+        if ($image->errorMessage()) {
+            $error = $image->errorMessage();
+            break;
+        }
+        if ($image->url() !== $request->image()->url()) {
+            $request->setField('image', $image->url());
         }
     }
 

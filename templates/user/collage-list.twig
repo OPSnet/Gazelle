@@ -3,25 +3,25 @@
     <tr class="colhead">
         <td colspan="5">
             <span style="float: left;">{{ collage.link|raw }}</span>
-    {{- dom.click("#cca-" ~ collage.id,
+{{-  dom.click("#cca-" ~ collage.id,
         "$('#collage" ~ collage.id ~ "_box .images').gtoggle(); this.innerHTML = (this.innerHTML == 'Hide' ? 'Show' : 'Hide'); return false;")
-    -}}
+-}}
             <span style="float: right;">
                 <a href="#" id="cca-{{ collage.id }}" class="brackets">{% if loop.first %}Hide{% else %}Show{% endif %}</a>
             </span>
         </td>
         </tr>
     <tr class="images{% if not loop.first %} hidden{% endif %}">
-    {% for tgroup_id in collage.groupIds|slice(0, 5) %}
-        {% set tgroup = manager.findById(tgroup_id) %}
-        {% if tgroup %}
+{%  for tgroup_id in collage.groupIds|slice(0, 5) %}
+{%      set tgroup = manager.findById(tgroup_id) %}
+{%      if tgroup %}
         <td>
             <a href="torrents.php?id={{ tgroup_id }}">
                 <img src="{{ tgroup.cover|image_cache(width = 150) }}" loading="lazy" class="tooltip" width="107" title="{{ tgroup.text }}">
             </a>
         </td>
-        {% endif %}
-    {% endfor %}
+{%      endif %}
+{%  endfor %}
     </tr>
 </table>
 {% endfor %}

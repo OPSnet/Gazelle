@@ -1,5 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Gazelle\Util;
+
 /*-- TODO ---------------------------//
 Add in support for form id checks
 Finish the GenerateJS stuff
@@ -25,8 +29,6 @@ Finish the GenerateJS stuff
  * TODO: investigate how much we can replace in this class with usage of filter_var and its validation flags,
  * such as email and link for sure.
  */
-
-namespace Gazelle\Util;
 
 class Validator {
     protected array $Fields = [];
@@ -139,6 +141,7 @@ class Validator {
                         break;
                     }
                 } elseif ($Field['Type'] == 'number') {
+                    $ValidateVar = (string)$ValidateVar;
                     if (isset($Field['range'])) {
                         [$MinLength, $MaxLength] = $Field['range'];
                     } else {

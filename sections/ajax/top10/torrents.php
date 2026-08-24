@@ -135,7 +135,7 @@ function payload(Manager\Torrent $torMan, array $details): array {
             'leechers'      => $torrent->leecherTotal(),
             'data'          => $torrent->size() * $torrent->snatchTotal() + $torrent->size() * $torrent->leecherTotal() * 0.5,
             'size'          => $torrent->size(),
-            'wikiImage'     => $tgroup->image(),
+            'wikiImage'     => $tgroup->image()->url(),
             'releaseType'   => $tgroup->releaseType(),
         ];
     }

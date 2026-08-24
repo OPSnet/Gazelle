@@ -13,6 +13,9 @@
         <td><input type="text" id="year" name="year" size="5" value=""></td>
     </tr>
 {% endif %}
+{% if not is_uploaded %}
+{%  include 'upload/cover.twig' with {'is_uploaded': is_uploaded, 'image': torrent.Image} only %}
+{% endif %}
 {% include 'upload/format.twig' with {'format': torrent.Format} %}
 {% include 'upload/bitrate.twig' with {'bitrate': torrent.Bitrate} %}
 {% if not is_uploaded %}

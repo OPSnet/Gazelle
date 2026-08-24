@@ -2,6 +2,7 @@
 
 namespace Gazelle\Manager;
 
+use Gazelle\Image;
 use Gazelle\Request\AbstractValue;
 use Gazelle\Request\Encoding;
 use Gazelle\Request\Format;
@@ -18,7 +19,7 @@ class Request extends \Gazelle\BaseManager {
         int      $categoryId,
         int      $year,
         string   $title,
-        ?string  $image,
+        Image    $image,
         string   $description,
         string   $recordLabel,
         string   $catalogueNumber,
@@ -54,7 +55,7 @@ class Request extends \Gazelle\BaseManager {
                 , $user->id, $groupId, $categoryId, $releaseType === 0 ? null : $releaseType,
                 $year === 0 ? null : $year, // 5
                 $description, $title,
-                $image           === '' ? null : $image,
+                $image->url(),
                 $catalogueNumber === '' ? null : $catalogueNumber,
                 $recordLabel     === '' ? null : $recordLabel, // 10
                 $logCue->minScore,

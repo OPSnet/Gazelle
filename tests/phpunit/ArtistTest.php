@@ -95,10 +95,14 @@ class ArtistTest extends TestCase {
         $artist = $manager->create('phpunit.' . randomString(12));
         $this->artistIdList[] = $artist->id;
 
-        $this->assertSame("<a href=\"artist.php?id={$artist->id}\">{$artist->name()}</a>", $artist->link(), 'artist-link');
+        $this->assertSame(
+            "<a href=\"artist.php?id={$artist->id}\">{$artist->name()}</a>",
+            $artist->link(),
+            'artist-link'
+        );
         $this->assertSame("artist.php?id={$artist->id}", $artist->location(), 'artist-location');
         $this->assertNull($artist->body(), 'artist-body-null');
-        $this->assertNull($artist->image(), 'artist-image-null');
+        $this->assertNull($artist->image()->url(), 'artist-image-null');
         $this->assertFalse($artist->isLocked(), 'artist-is-unlocked');
         $this->assertTrue($artist->toggleAttr('locked', true), 'artist-toggle-locked');
         $this->assertTrue($artist->isLocked(), 'artist-is-locked');
@@ -127,7 +131,7 @@ class ArtistTest extends TestCase {
 
         $revision = $artist->createRevision(
             body:    'phpunit body test',
-            image:   'https://example.com/artist.jpg',
+            image:   Image::fromUntrusted('https://example.com/artist.jpg'),
             summary: ['phpunit first revision'],
             user:    $this->user,
         );
@@ -136,12 +140,16 @@ class ArtistTest extends TestCase {
 
         $rev2 = $artist->createRevision(
             body:    'phpunit body test revised',
-            image:   'https://example.com/artist-revised.jpg',
+            image:   Image::fromUntrusted('https://example.com/artist-revised.jpg'),
             summary: ['phpunit second revision'],
             user:    $this->user,
         );
         $this->assertSame($revision + 1, $rev2, 'artist-revision-2');
-        $this->assertSame('https://example.com/artist-revised.jpg', $artist->image(), 'artist-image-revised');
+        $this->assertSame(
+            'https://example.com/artist-revised.jpg',
+            $artist->image()->url(),
+            'artist-image-revised',
+        );
 
         $artistV1 = $manager->findByIdAndRevision($artist->id, $revision);
         $this->assertNotNull($artistV1, 'artist-revision-1-found');
@@ -149,7 +157,11 @@ class ArtistTest extends TestCase {
 
         $artistV2 = $manager->findByIdAndRevision($artist->id, $rev2);
         $this->assertInstanceOf(Artist::class, $artistV2, 'artist-found-by-id-and-rev');
-        $this->assertSame('https://example.com/artist-revised.jpg', $artistV2->image(), 'artist-image-rev-2');
+        $this->assertSame(
+            'https://example.com/artist-revised.jpg',
+            $artistV2->image()->url(),
+            'artist-image-rev-2',
+        );
 
         $list = $artist->revisionList();
         $this->assertSame('phpunit second revision', $list[0]['summary']);
@@ -768,7 +780,7 @@ class ArtistTest extends TestCase {
         $this->artistIdList[] = $artist->id;
         $artist->createRevision(
             body:    'before cache body',
-            image:   null,
+            image:   new Image(null),
             summary: ['before cache body'],
             user:    $this->user,
         );
@@ -791,7 +803,7 @@ class ArtistTest extends TestCase {
 
         $artist->createRevision(
             body:    'after cache body',
-            image:   null,
+            image:   new Image(null),
             summary: ['after cache body'],
             user:    $this->user,
         );

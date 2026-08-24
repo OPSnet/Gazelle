@@ -81,6 +81,7 @@ END;
             'alpha' => ['dbColumn' => 'one', 'defaultSort' => 'desc', 'text' => 'First'],
             'beta'  => ['dbColumn' => 'two', 'defaultSort' => 'desc', 'text' => 'Second'],
         ]);
+        $_SERVER['QUERY_STRING'] = '';
         $heading = self::twig('{{ heading|column("alpha") }}');
         $this->assertSame(
             '<a href="?order=alpha&amp;sort=asc">First</a> ↑',

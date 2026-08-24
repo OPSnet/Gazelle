@@ -32,7 +32,10 @@
 {%  endif %}
     <td>
         <a href="torrents.php?id={{ r.group_id }}">
-        <img src="{{ r.tgroup.cover|image_cache(width = 150) }}" loading="eager" class="tooltip" title="{{ r.tgroup.text }}" alt="{{ r.tgroup.text }}" data-origin-src="{{ r.image }}" width="107">
+        <img width="107" loading="eager" class="tooltip" src="{{
+            r.tgroup.cover|image_cache(width = 150) }}" title="{{
+            r.tgroup.text }}" alt="{{ r.tgroup.text }}" data-origin-src="{{
+            r.image.url }}">
         </a>
     </td>
 {%  if loop.last %}

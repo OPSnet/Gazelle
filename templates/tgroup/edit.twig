@@ -1,13 +1,11 @@
 {% from 'macro/form.twig' import checked, disabled, selected %}
 {% from 'macro/torrent.twig' import freeleech %}
 {{ header('Edit torrent group "' ~ tgroup.name ~ '"') }}
-
 <div class="thin">
     <div class="header">
         <h2>Edit {{ tgroup.link|raw }}</h2>
     </div>
     <div class="box pad">
-
     <form class="edit_form" name="torrent_group" action="torrents.php" method="post">
     <div class="tbx tgroup-edit">
         <div class="tbx-label">Name</div>
@@ -17,7 +15,7 @@
         </div>
         <div class="tbx-label">Image</div>
         <div class="tbx-field">
-            <input type="text" name="image" size="50" value="{{ tgroup.image }}">
+            <input type="text" name="image" size="50" value="{{ tgroup.image.url }}">
 {% if constant('IMAGE_HOST_BANNED') %}
             <br><b>Images hosted on <strong class="important_text">{{ constant('IMAGE_HOST_BANNED')|join(', ') }}
                 are not allowed</strong>, please rehost first on one of {{ constant('IMAGE_HOST_RECOMMENDED')|join(', ') }}.</b>
@@ -39,7 +37,6 @@
             <br>
             <input type="text" name="year" size="5" value="{{ tgroup.year }}">
         </div>
-
 {% if tgroup.categoryName == 'Music' %}
         <div class="tbx-label">Release type</div>
         <div class="tbx-field">
@@ -91,7 +88,6 @@
 
 {% if tgroup.categoryName == 'Music' and viewer.permitted('torrents_edit') %}
     <div class="box pad">
-
     <h4>Merge with another group</h4>
     <form class="merge_form" name="torrent_group" action="torrents.php" method="post">
     <div class="tbx tgroup-merge">
@@ -103,7 +99,6 @@
             exists, this group may be merged into that one. Note: there may be
             some duplicates or trumps that need to be reported as a result.</p>
         </div>
-
         <div class="tbx-label"></div>
         <div class="tbx-field">
             <input type="hidden" name="action" value="tgroup-merge">

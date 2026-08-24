@@ -332,17 +332,16 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
     }
 
     public function cover(): string {
-        return $this->image() === ''
-            ? (STATIC_SERVER . '/common/noartwork/' . CATEGORY_ICON[$this->categoryId() - 1])
-            : $this->image();
+        return $this->image()->url()
+            ?? STATIC_SERVER . '/common/noartwork/' . CATEGORY_ICON[$this->categoryId() - 1];
     }
 
     public function description(): string {
         return $this->info()['Body'] ?? '';
     }
 
-    public function image(): string|null {
-        return $this->info()['Image'];
+    public function image(): Image {
+        return new Image($this->info()['Image']);
     }
 
     public function isOwner(User $user): bool {
@@ -681,10 +680,10 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
      * return int revision id
      */
     public function createRevision(
-        string      $description,
-        string|null $image,
-        string      $summary,
-        User        $user,
+        string $description,
+        Image  $image,
+        string $summary,
+        User   $user,
     ): int {
         // If this is the first revision, stash a copy of the original metadata
         $revisionTotal = self::$db->scalar('
@@ -698,7 +697,7 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
                 VALUES (?,      ?,    ?,     ?,      ?)
                 ", $this->id,
                 $this->description(),
-                $this->image(),
+                $this->image()->url(),
                 $user->id,
                 'original version',
             );
@@ -709,7 +708,7 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
             VALUES (?,      ?,    ?,     ?,      ?)
             ", $this->id,
             $description,
-            $image,
+            $image->url(),
             $this->requestContext()->viewer()->id,
             mb_substr(trim($summary), 0, 100),
         );

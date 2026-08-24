@@ -10,5 +10,5 @@ if (is_null($tgroup)) {
 }
 
 json_print("success", [
-    'wikiImage' => $tgroup->image(),
+    'wikiImage' => $tgroup->image()->url(),
 ]);

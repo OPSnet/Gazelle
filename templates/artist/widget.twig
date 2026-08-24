@@ -7,14 +7,14 @@
 {% set has_advanced_discogs = has_discogs and advanced.discogs_mode in ['text', 'glyph', 'id'] %}
 {% set has_advanced_snatches = true %}
 {% set has_advanced_meta = has_advanced_discogs or has_advanced_snatches %}
-<div class="collage-artist-entry box2 {{ artist.image ? 'cae-has-image' : 'cae-no-image' }} {{ has_meta ? 'cae-has-meta' : 'cae-no-meta' }} {{ artist.body ? 'cae-has-bio' : 'cae-no-bio' }}">
+{% set image_url = artist.image.url %}
+<div class="collage-artist-entry box2 {{ image_url ? 'cae-has-image' : 'cae-no-image' }} {{ has_meta ? 'cae-has-meta' : 'cae-no-meta' }} {{ artist.body ? 'cae-has-bio' : 'cae-no-bio' }}">
     <a class="cae-row-link" href="artist.php?id={{ artist.id }}" aria-label="{{ display_name }}"></a>
-{%- if artist.image -%}
+{%- if image_url -%}
     <div class="cae-img">
-            <img loading="lazy" class="tooltip" src="{{ artist.image|image_cache(width = 150)
+            <img loading="lazy" class="tooltip" src="{{ image_url|image_cache(width = 150)
             }}" alt="{{ artist.name }}" title="{{ artist.name
-            }}" width="150" data-origin-src="{{ artist.image
-            }}">
+            }}" width="150" data-origin-src="{{ image_url }}">
     </div>
 {%- endif -%}
     <div class="cae-copy">

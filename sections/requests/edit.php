@@ -35,7 +35,6 @@ if (isset($returnEdit)) {
     $title           = $request->title();
     $description     = $request->description();
     $year            = $request->year();
-    $image           = $request->image();
     $tags            = implode(', ', $request->tagNameList());
     $releaseType     = $request->releaseType();
     $catalogueNumber = $request->catalogueNumber();
@@ -63,7 +62,7 @@ echo $Twig->render('request/request.twig', [
     'format'           => $format,
     'log_cue'          => $logCue,
     'media'            => $media,
-    'image'            => $image           ?? $request->image(),
+    'image'            => $request->image(),
     'record_label'     => $recordLabel     ?? $request->recordLabel(),
     'release_type'     => $releaseType     ?? $request->releaseType(),
     'tags'             => $tags            ?? implode(', ', $request->tagNameList()),

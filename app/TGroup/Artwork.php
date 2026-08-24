@@ -2,8 +2,9 @@
 
 namespace Gazelle\TGroup;
 
-use Gazelle\TGroup as TGroup;
-use Gazelle\User as User;
+use Gazelle\Image;
+use Gazelle\TGroup;
+use Gazelle\User;
 
 class Artwork extends \Gazelle\Base {
     final public const CACHE_KEY = 'tg_cover_2_%d';
@@ -17,30 +18,30 @@ class Artwork extends \Gazelle\Base {
         return $this;
     }
 
-    public function addArtwork(string $url, string $description, User $user): int {
+    public function addArtwork(Image $image, string $description, User $user): int {
         $idArtwork = $this->pg()->scalarex(<<<END_SQL
             insert into tgroup_artwork
                    (id_tgroup, id_user, url, description)
             values ($1,        $2,      $3,  $4)
             returning id_tgroup_artwork
             END_SQL,
-                $this->tgroup->id, $user->id, $url, $description,
+                $this->tgroup->id, $user->id, $image->url(), $description,
         );
         $this->logger()->group(
             $this->tgroup,
             $user,
-            "Additional cover \"$description - $url\" added to group by {$user->username()}"
+            "Additional cover “{$description} – {$image->url()}” added to group by {$user->username()}"
         );
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->tgroup->id));
         return $idArtwork;
     }
 
     public function removeArtwork(int $idArtwork, User $user): int {
-        [$url, $description] = $this->pg()->rowex("
+        $artwork = $this->pg()->rowAssocex("
             select url, description from tgroup_artwork where id_tgroup_artwork = $1
             ", $idArtwork
         );
-        if (is_null($url)) {
+        if ($artwork === []) {
             // no such id
             return 0;
         }
@@ -52,7 +53,7 @@ class Artwork extends \Gazelle\Base {
             $this->logger()->group(
                 $this->tgroup,
                 $user,
-                "Additional cover \"$description - $url\" removed from group by {$user->username()}"
+                "Additional cover “{$artwork['description']} – {$artwork['url']}” removed from group by {$user->username()}"
             );
             self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->tgroup->id));
         }

@@ -4,17 +4,19 @@
     <td colspan="5"><a href="torrents.php?type={{ type }}&amp;userid={{ id }}">Recent {{ title }}</a></td>
 </tr>
 <tr>
-{% for i in 0..4 %}
-    {% set r = recent[i] %}
+{%  for i in 0..4 %}
+{%      set r = recent[i] %}
     <td style="width: 20%;">
-        {% if r is not null %}
-            <a href="torrents.php?id={{ r.id }}">
-            <img src="{{ r.image|image_cache(width = 150) }}" loading="eager" class="tooltip" title="{{ r.text }}" alt="{{ r.text }}"
-                data-origin-src="{{ r.image }}" width="107">
-            </a>
-        {% endif %}
+{%      if r is not null %}
+{%          set image_url = r.image.url %}
+        <a href="torrents.php?id={{ r.id }}">
+        <img width="107" loading="eager" class="tooltip" src="{{
+            image_url|image_cache(width = 150) }}" title="{{
+            r.text }}" alt="{{ r.text }}" data-origin-src="{{ image_url }}">
+        </a>
+{%      endif %}
     </td>
-{% endfor %}
+{%  endfor %}
     </tr>
 </table>
 {% endif %}

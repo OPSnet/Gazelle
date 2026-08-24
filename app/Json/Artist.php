@@ -134,7 +134,7 @@ class Artist extends \Gazelle\Json {
             'name'                 => $artist->name(),
             'notificationsEnabled' => $this->user->hasArtistNotification($artist->name()),
             'hasBookmarked'        => $this->bookmark->isBookmarked($artist),
-            'image'                => $artist->image(),
+            'image'                => $artist->image()->url(),
             'body'                 => \Text::full_format($artist->body()),
             'bodyBbcode'           => $artist->body(),
             'vanityHouse'          => $artist->isShowcase(),

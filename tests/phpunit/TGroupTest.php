@@ -34,7 +34,7 @@ class TGroupTest extends TestCase {
             name:        $this->name,
             year:        $this->year,
             description: "Description of {$this->name}",
-            image:       'https://example.com/' . randomString(10) . '.jpg',
+            image:       Image::fromUntrusted('https://example.com/' . randomString(10) . '.jpg'),
             releaseType: new ReleaseType()->findIdByName('Live album'),
             showcase:    false,
         );
@@ -89,7 +89,7 @@ class TGroupTest extends TestCase {
         $this->assertSame($this->year, $this->tgroup->year(), 'tgroup-create-year');
         $this->assertSame(0, $this->tgroup->unresolvedReportsTotal(), 'tgroup-create-unresolved-reports');
         $this->assertSame($this->tgroup->name(), $this->tgroup->flush()->name(), 'tgroup-create-flush');
-        $this->assertStringStartsWith('https://example.com/', $this->tgroup->image(), 'tgroup-create-image');
+        $this->assertStringStartsWith('https://example.com/', $this->tgroup->image()->url(), 'tgroup-create-image');
         $this->assertStringStartsWith('https://example.com/', $this->tgroup->cover(), 'tgroup-create-cover');
 
         $this->assertTrue($this->tgroup->isOwner($this->userList['user']), 'tgroup-user-is-owner');
@@ -401,7 +401,7 @@ class TGroupTest extends TestCase {
     public function testTGroupArtwork(): void {
         $user = $this->userList['user'];
         $artworkId = $this->tgroup->artwork()->addArtwork(
-            'https://www.example.com/cover.jpg',
+            Image::fromUntrusted('https://www.example.com/cover.jpg'),
             'cover art description',
             $user,
         );
@@ -432,7 +432,7 @@ class TGroupTest extends TestCase {
         [$description, $image] = [$this->tgroup->description(), $this->tgroup->image()];
         $revisionId = $this->tgroup->createRevision(
             $this->tgroup->description() . "\nmore text",
-            '',
+            new Image(null),
             'phpunit testTGroup summary',
             $this->userList['user'],
         );
@@ -449,7 +449,7 @@ class TGroupTest extends TestCase {
             'tgroup-fallback-image',
         );
         $this->assertSame(
-            [$description, $image],
+            [$description, $image->url()],
             $this->tgroup->revertRevision($revisionId, $this->userList['user']),
             'tgroup-revision-revert',
         );
@@ -461,7 +461,7 @@ class TGroupTest extends TestCase {
             name:        $this->name . ' absorb',
             year:        $this->year,
             description: "Description",
-            image:       'https://example.com/' . randomString(10) . '.jpg',
+            image:       Image::fromUntrusted('https://example.com/' . randomString(10) . '.jpg'),
             releaseType: new ReleaseType()->findIdByName('Bootleg'),
             showcase:    false,
         );
@@ -643,7 +643,7 @@ class TGroupTest extends TestCase {
             name:            $this->name . ' merge ' . randomString(10),
             year:            $this->year,
             description:     "Description of {$this->name} merge",
-            image:           '',
+            image:           new Image(null),
             releaseType:     new ReleaseType()->findIdByName('Live album'),
             showcase:        false,
         );
@@ -735,7 +735,7 @@ class TGroupTest extends TestCase {
             name:            $this->name . ' remove ' . randomString(10),
             year:            $this->year,
             description:     "Description of {$this->name} remove",
-            image:           '',
+            image:           new Image(null),
             releaseType:     new ReleaseType()->findIdByName('Split'),
             showcase:        false,
         );

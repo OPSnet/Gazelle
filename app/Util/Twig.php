@@ -99,7 +99,6 @@ class Twig {
             'bb_forum',
             fn ($text) => new \Twig\Markup(\Text::full_format($text, OutputTOC: false, cache: ImageCacheMode::cache, bucket: CacheBucket::forum), 'UTF-8')
         ));
-
         $twig->addFilter(new \Twig\TwigFilter(
             'column',
             fn (SortableTableHeader $header, string $name) => new \Twig\Markup($header->emit($name), 'UTF-8')

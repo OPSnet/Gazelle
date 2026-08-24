@@ -6,11 +6,11 @@
 {%  set artist = entry.artist %}
     <div class="collage-artist-entry {{ cycle(['rowa', 'rowb'], loop.index0) }}">
         <div class="cae-img">
-{%- if entry.artist.image -%}
-        <img loading="lazy" class="tooltip" src="{{ artist.image|image_cache(width = 150)
+{%- set image_url = entry.artist.image.url %}
+{%- if image_url -%}
+        <img loading="lazy" class="tooltip" src="{{ image_url|image_cache(width = 150)
             }}" alt="{{ artist.name }}" title="{{ artist.name
-            }}" width="150"  data-origin-src="{{ artist.image
-            }}">
+            }}" width="150"  data-origin-src="{{ image_url }}">
 {%- endif -%}
         </div>
         <div class="cae-name">{{ artist.link|raw }}</div>

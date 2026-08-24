@@ -6,13 +6,11 @@ declare(strict_types=1);
 
 namespace Gazelle;
 
-if (!isset($_GET['type'], $_GET['id'])) {
-    Error400::error();
-}
+use Gazelle\Util\Curl;
 
-switch ($_GET['type']) {
+switch ($_GET['type'] ?? '') {
     case 'riplog':
-        if (!preg_match('/^(\d+)\D(\d+)$/', $_GET['id'], $match)) {
+        if (!isset($_GET['id']) || !preg_match('/^(\d+)\D(\d+)$/', $_GET['id'], $match)) {
             Error404::error();
         }
         if ($match[2] === '0') {

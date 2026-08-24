@@ -21,7 +21,7 @@ class NotificationUploadTest extends TestCase {
             releaseType:     new ReleaseType()->findIdByName('Compilation'),
             name:            'phpunit notify ' . randomString(6),
             description:     'phpunit notify description',
-            image:           '',
+            image:           new Image(null),
             year:            2022,
             showcase:        false,
         );

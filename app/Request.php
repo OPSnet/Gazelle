@@ -342,8 +342,8 @@ class Request extends BasePgObject implements Bookmarked, CategoryHasArtist {
         return (bool)$this->info()['filler_id'];
     }
 
-    public function image(): ?string {
-        return $this->info()['image'];
+    public function image(): Image {
+        return new Image($this->info()['image']);
     }
 
     public function lastVoteDate(): string {

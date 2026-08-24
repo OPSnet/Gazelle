@@ -33,18 +33,12 @@ if ($body != $artist->body()) {
     $artist->setField('body', $body);
 }
 
-$image = trim($_POST['image']);
-if ($image != $artist->image()) {
-    if (!empty($image)) {
-        if (!preg_match(IMAGE_REGEXP, $image)) {
-            Error400::error(html_escape($image) . " does not look like a valid image url");
-        }
-        $banned = Util\ImageProxy::badHost($image);
-        if ($banned) {
-            Error400::error("Please rehost images from $banned elsewhere.");
-        }
-    }
-    $artist->setField('image', $image);
+$image = Image::fromUntrusted(trim($_POST['image'] ?? ''));
+if ($image->errorMessage()) {
+    Error400::error($image->errorMessage());
+}
+if ($image->url() !== $artist->image()->url()) {
+    $artist->setField('image', $image->url());
 }
 
 $showcase = isset($_POST['showcase']);

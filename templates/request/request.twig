@@ -119,7 +119,7 @@
         <tr id="image_tr">
           <td class="label">Image</td>
           <td>
-            <input type="text" name="image" size="45" value="{{ image }}">
+            <input type="text" name="image" size="45" value="{{ image.url }}">
 {%  if constant('IMAGE_HOST_BANNED') -%}
             <br><b>Images hosted on <strong class="important_text">{{ constant('IMAGE_HOST_BANNED')|join(', ')
               }} are not allowed</strong>, please rehost first on one of {{ constant('IMAGE_HOST_RECOMMENDED')|join(', ') }}.</b>

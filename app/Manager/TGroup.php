@@ -4,25 +4,27 @@ declare(strict_types=1);
 
 namespace Gazelle\Manager;
 
+use Gazelle\Image;
+
 class TGroup extends \Gazelle\BaseManager {
     final public const ID_KEY = 'zz_tg_%d';
 
     protected const VOTE_SIMILAR = 'tg_sim_%d';
 
     public function create(
-        int     $categoryId,
-        string  $name,
-        string  $description,
-        ?int    $year,
-        ?int    $releaseType,
-        ?string $image,
-        bool    $showcase = false,
+        int    $categoryId,
+        string $name,
+        string $description,
+        ?int   $year,
+        ?int   $releaseType,
+        Image  $image,
+        bool   $showcase = false,
     ): \Gazelle\TGroup {
         self::$db->prepared_query("
             INSERT INTO torrents_group
                    (CategoryID, Name, WikiBody, Year, WikiImage, ReleaseType, VanityHouse)
             VALUES (?,          ?,    ?,        ?,    ?,         ?,           ?)
-            ", $categoryId, $name, $description, $year, $image, $releaseType, (int)$showcase
+            ", $categoryId, $name, $description, $year, $image->url(), $releaseType, (int)$showcase
         );
         $id = self::$db->inserted_id();
         $tgroup = $this->findById($id);

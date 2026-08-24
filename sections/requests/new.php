@@ -65,7 +65,7 @@ echo $Twig->render('request/request.twig', [
     'format'           => $format          ?? new Request\Format(),
     'log_cue'          => $logCue          ?? new Request\LogCue(),
     'media'            => $media           ?? new Request\Media(),
-    'image'            => $image           ?? '',
+    'image'            => $image           ?? new Image(null),
     'record_label'     => $recordLabel     ?? '',
     'release_type'     => $releaseType     ?? null,
     'tags'             => $tags            ?? '',

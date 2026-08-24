@@ -112,7 +112,7 @@ class DebugTest extends TestCase {
         $this->assertInstanceOf(ErrorLog::class, $case, 'errorlog-find');
         $this->assertSame($uri, $case->uri(), 'errorlog-uri');
         $this->assertSame(['abc'], $case->request(), 'errorlog-request');
-        $this->assertSame([2, 4, 6], $case->errorList(), 'errorlog-errrolist');
+        $this->assertSame([2, 4, 6], $case->errorList(), 'errorlog-errolist');
         $this->assertSame(["a", "b"], $case->trace(), 'errorlog-trace');
         $this->assertSame(
             $case->id,

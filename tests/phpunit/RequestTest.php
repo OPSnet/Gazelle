@@ -47,7 +47,7 @@ class RequestTest extends TestCase {
 
         $manager       = new Manager\Request();
         $title         = 'phpunit create (x) ' . randomString(6);
-        $image         = 'https://example.com/req.jpg';
+        $image         = Image::fromUntrusted('https://example.com/req.jpg');
         $year          = 2002;
         $this->request = Helper::makeRequestMusic($admin, $title, image: $image, year: $year);
         $id = $this->request->id;
@@ -140,7 +140,7 @@ class RequestTest extends TestCase {
         );
 
         $this->assertTrue(Helper::recentDate($this->request->created()), 'request-created');
-        $this->assertSame($image, $this->request->image(), 'request-image');
+        $this->assertSame($image->url(), $this->request->image()->url(), 'request-image');
         $this->assertSame($title, $this->request->title(), 'request-title');
         $this->assertSame('Album', $this->request->releaseTypeName(), 'request-release-type-name');
         $this->assertSame($year, $this->request->year(), 'request-year');
@@ -295,7 +295,7 @@ class RequestTest extends TestCase {
             categoryId:      new Manager\Category()->findIdByName('Music'),
             year:            2018,
             title:           $title,
-            image:           '',
+            image:           new Image(null),
             description:     'This is a unit test description',
             recordLabel:     'Unitest Artists',
             catalogueNumber: 'UA-7890',
@@ -650,7 +650,7 @@ class RequestTest extends TestCase {
             categoryId:      new Manager\Category()->findIdByName('Music'),
             year:            2018,
             title:           $title,
-            image:           '',
+            image:           new Image(null),
             description:     'This is a unit test description',
             recordLabel:     'Unitest Artists',
             catalogueNumber: 'UA-7890',
@@ -685,7 +685,7 @@ class RequestTest extends TestCase {
             categoryId:      new Manager\Category()->findIdByName('Music'),
             year:            (int)date('Y'),
             title:           'phpunit request bookmark',
-            image:           '',
+            image:           new Image(null),
             description:     'This is a unit test description',
             recordLabel:     'Unitest Artists',
             catalogueNumber: 'UA-7890',

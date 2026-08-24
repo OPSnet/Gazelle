@@ -48,7 +48,7 @@ $releaseType     = (int)$_POST['releasetype'];
 $description     = trim($_POST['description'] ?? '');
 $title           = trim($_POST['title'] ?? '');
 $tags            = trim($_POST['tags'] ?? '');
-$image           = trim($_POST['image'] ?? '');
+$image           = Image::fromUntrusted($_POST['image'] ?? null);
 $catalogueNumber = trim($_POST['cataloguenumber'] ?? '');
 $recordLabel     = trim($_POST['recordlabel'] ?? '');
 $year            = (int)$_POST['year'];
@@ -133,6 +133,11 @@ while (true) { // break early on error
         }
     }
 
+    if ($image->errorMessage()) {
+        $error = $image->errorMessage();
+        break;
+    }
+
     // GroupID
     if (!isset($_POST['groupid'])) {
         $tgroup = null;
@@ -152,7 +157,6 @@ while (true) { // break early on error
     $validator = new Util\Validator();
     $validator->setFields([
         ['description', true,  'string', 'You forgot to enter a description.', ['maxlength' => 32000]],
-        ['image',       false, 'image',  ''],
         ['title',       true,  'string', 'You forgot to enter the title!', ['maxlength' => 255]],
         ['tags',        true,  'string', 'You forgot to enter any tags!', ['maxlength' => 255]],
     ]);

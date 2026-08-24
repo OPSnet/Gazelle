@@ -314,7 +314,7 @@ class Torrent extends \Gazelle\BaseManager {
                         continue;
                     }
                     $torrent = $this->findById($row['torrent_id']);
-                    if (is_null($torrent) || !$torrent->group()->image()) {
+                    if ($torrent?->group()?->image()?->url() === null) {
                         continue;
                     }
                     $seen[]   = $row['group_id'];
@@ -327,9 +327,9 @@ class Torrent extends \Gazelle\BaseManager {
             // reinstantiate the list as Torrent objects
             $list = array_filter(
                 array_map($this->findById(...), $latest),
-                fn($t) => $t instanceof \Gazelle\Torrent && $t->group()->image() !== ''
+                fn($t) => $t instanceof \Gazelle\Torrent && $t->group()->image()->url() !== null
             );
-            if (count($list) == count($latest)) {
+            if (count($list) === count($latest)) {
                 return $list;
             }
             // a torrent was deleted since the list was cached: must regenerate a new list

@@ -25,7 +25,7 @@ class Artwork extends AbstractBetter {
                 )
             )
             END_SQL;
-        $this->where[] = 'tg."CategoryID" = 1 and coalesce(wt."Image", tg."WikiImage") = \'\' and tgha.id_tgroup is null';
+        $this->where[] = 'tg."CategoryID" = 1 and coalesce(wt."Image", tg."WikiImage") is null and tgha.id_tgroup is null';
         $this->orderBy = 'order by tg."Name"';
 
         if ($this->filter === BetterFilter::snatched) {

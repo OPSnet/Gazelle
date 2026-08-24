@@ -70,7 +70,6 @@ if ($Properties['Encoding'] === 'Other') {
 $Properties['TagList'] = isset($_POST['tags'])
     ? array_unique(array_map(trim(...), explode(',', $_POST['tags']))) // Musicbranes loves to send duplicates
     : [];
-$Properties['Image'] = trim($_POST['image'] ?? '');
 $Properties['GroupDescription'] = trim($_POST['album_desc'] ?? $_POST['desc'] ?? '');
 $Properties['Description'] = trim($_POST['release_desc'] ?? '');
 $Properties['GroupID'] = (int)($_POST['groupid'] ?? 0);
@@ -118,7 +117,6 @@ $Validate->setFields([
 
 if (!$isMusicUpload || !$Properties['GroupID']) {
     $Validate->setFields([
-        ['image', false, 'link','The image URL you entered was invalid.', ['range' => [255, 12]]],
         ['tags', true, 'string','You must enter at least one tag. Maximum length is 200 characters.', ['range' => [2, 200]]],
         ['title', true, 'string','Title must be less than 200 characters.', ['maxlength' => 200]],
     ]);
@@ -237,18 +235,9 @@ if (!$Validate->validate($_POST)) {
     json_error($Validate->errorMessage());
 }
 
-if ($Properties['Image']) {
-    // Strip out Amazon's padding
-    if (preg_match('/(http:\/\/ecx.images-amazon.com\/images\/.+)(\._.*_\.jpg)/i', $Properties['Image'], $match)) {
-        $Properties['Image'] = $match[1] . '.jpg';
-    }
-    if (!preg_match(IMAGE_REGEXP, $Properties['Image'])) {
-        json_error(display_str($Properties['Image']) . " does not look like a valid image url");
-    }
-    $banned = Util\ImageProxy::badHost($Properties['Image']);
-    if ($banned) {
-        json_error("Please rehost images from $banned elsewhere.");
-    }
+$image = Image::fromUntrusted(trim($_POST['image'] ?? ''));
+if ($image->errorMessage()) {
+    json_error($image->errorMessage());
 }
 
 $File = $_FILES['file_input']; // This is our torrent file
@@ -476,13 +465,13 @@ if ($tgroup) {
     $tgroup->touch();
 } else {
     $tgroup = $tgMan->create(
-        categoryId:      $categoryId,
-        name:            $Properties['Title'],
-        year:            $Properties['Year'],
-        description:     $Properties['GroupDescription'],
-        image:           $Properties['Image'],
-        releaseType:     $Properties['ReleaseType'],
-        showcase:        $Viewer->permitted('torrents_edit_vanityhouse') && isset($_POST['vanity_house']),
+        categoryId:  $categoryId,
+        name:        $Properties['Title'],
+        year:        $Properties['Year'],
+        description: $Properties['GroupDescription'],
+        image:       $image,
+        releaseType: $Properties['ReleaseType'],
+        showcase:    $Viewer->permitted('torrents_edit_vanityhouse') && isset($_POST['vanity_house']),
     );
 
     // Tags
@@ -610,7 +599,7 @@ if ($torrent->isPerfectFlac()) {
 
 // Update the various cache keys affected by this
 $Cache->increment_value('stats_torrent_count', $totalNew);
-if ($Properties['Image'] != '') {
+if ($image->url() !== null) {
     $Cache->delete_value('user_recent_up_' . $Viewer->id);
 }
 

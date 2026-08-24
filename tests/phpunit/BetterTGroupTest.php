@@ -53,7 +53,7 @@ class BetterTGroupTest extends TestCase {
             name: 'phpunit better artwork ' . randomString(6),
             artistName: [[ARTIST_MAIN], ['phpunit better ' . randomString(12)]],
             tagName: ['bop'],
-            image: '',
+            imageUrl: null,
         );
         $Cache->delete_value($artwork->totalCacheKey());
         $this->assertSame(
@@ -88,7 +88,7 @@ class BetterTGroupTest extends TestCase {
             name: 'phpunit better bad ' . randomString(6),
             artistName: [[ARTIST_MAIN], ['phpunit better ' . randomString(12)]],
             tagName: ['bop'],
-            image: '',
+            imageUrl: null,
         );
         $torrent = Helper::makeTorrentMusic(
             tgroup: $this->tgroup,
@@ -139,7 +139,7 @@ class BetterTGroupTest extends TestCase {
             name: 'phpunit better checksum ' . randomString(6),
             artistName: [[ARTIST_MAIN], ['phpunit better ' . randomString(12)]],
             tagName: ['bop'],
-            image: '',
+            imageUrl: null,
         );
         $torrent = Helper::makeTorrentMusic(
             tgroup: $this->tgroup,
@@ -197,7 +197,7 @@ class BetterTGroupTest extends TestCase {
             name: 'phpunit better single seed ' . randomString(6),
             artistName: [[ARTIST_MAIN], ['phpunit better ' . randomString(12)]],
             tagName: ['bop'],
-            image: '',
+            imageUrl: null,
         );
         $torrent = Helper::makeTorrentMusic(
             tgroup: $this->tgroup,

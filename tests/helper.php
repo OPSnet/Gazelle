@@ -4,6 +4,7 @@ namespace GazelleUnitTest;
 
 use Gazelle\Enum\UserStatus;
 use Gazelle\ForumCategory;
+use Gazelle\Image;
 use Gazelle\Manager\Category;
 use Gazelle\Request\Encoding;
 use Gazelle\Request\Format;
@@ -51,7 +52,7 @@ class Helper {
         int      $releaseType     = 1,
         int      $year            = 2001,
         string   $description     = 'This is a unit test description',
-        string   $image           = '',
+        Image    $image           = new Image(null),
         string   $recordLabel     = 'Unitest Artists',
         string   $catalogueNumber =  'UA-7890',
         array    $tagList         = [],
@@ -99,7 +100,7 @@ class Helper {
             categoryId:      (int)new Category()->findIdByName('Comics'),
             year:            (int)date('Y'),
             title:           $title,
-            image:           null,
+            image:           new Image(null),
             description:     $description,
             recordLabel:     '',
             catalogueNumber: '',
@@ -119,21 +120,22 @@ class Helper {
             categoryId:      (int)new Category()->findIdByName('E-Books'),
             name:            $name,
             description:     'phpunit ebook description',
-            image:           '',
+            image:           new Image(null),
             releaseType:     null,
             year:            null,
         );
     }
 
     public static function makeTGroupMusic(
-        User    $user,
-        string  $name,
-        array   $artistName,
-        array   $tagName,
-        int     $releaseType = 1,
-        ?int    $year        = null,
-        ?string $image       = 'https://example.com/phpunit-tgroup/image.jpg',
+        User        $user,
+        string      $name,
+        array       $artistName,
+        array       $tagName,
+        int         $releaseType = 1,
+        int|null    $year        = null,
+        string|null $imageUrl    = 'https://example.com/phpunit-tgroup/image.jpg',
     ): TGroup {
+        $image = Image::fromUntrusted($imageUrl);
         $user->requestContext()->setViewer($user);
         $tgroup = new \Gazelle\Manager\TGroup()->create(
             categoryId:  (int)new Category()->findIdByName('Music'),

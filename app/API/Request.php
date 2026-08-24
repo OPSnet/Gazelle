@@ -17,7 +17,7 @@ class Request extends AbstractAPI {
             'CategoryID'      => $request->categoryId(),
             'Title'           => $request->title(),
             'Year'            => $request->year(),
-            'Image'           => (string)$request->image(),
+            'Image'           => $request->image()->url(),
             'Description'     => $request->description(),
             'CatalogueNumber' => $request->catalogueNumber(),
             'RecordLabel'     => $request->recordLabel(),

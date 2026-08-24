@@ -22,8 +22,8 @@ class TGroup extends \Gazelle\Json {
         return [
             'wikiBody'        => \Text::full_format($tgroup->description()),
             'wikiBBcode'      => $tgroup->description(),
-            'wikiImage'       => $tgroup->image(),
-            'proxyImage'      => image_cache_encode($tgroup->image()),
+            'wikiImage'       => $tgroup->image()->url(),
+            'proxyImage'      => image_cache_encode($tgroup->image()->url()),
             'id'              => $tgroup->id,
             'name'            => $tgroup->name(),
             'year'            => $tgroup->year(),

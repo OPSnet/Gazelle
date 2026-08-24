@@ -47,13 +47,14 @@
         </div>
     </div>
     <div class="sidebar">
-{% if artist.image %}
+{% set image_url = artist.image.url %}
+{% if image_url %}
         <div class="box box_image">
             <div class="head"><strong>{{ artist.name }}</strong></div>
             <div style="text-align: center; padding: 10px 0px;">
-                <img loading="eager" style="max-width: 220px;" src="{{ artist.image|image_cache }}" alt="artist image"
-                     onclick="lightbox.init('{{ artist.image|image_cache }}', 220);"
-                     data-origin-src="{{ artist.image }}">
+                <img loading="eager" alt="artist image" style="max-width: 220px;" src="{{
+                    image_url|image_cache }}" onclick="lightbox.init('{{
+                    image_url|image_cache }}', 220);" data-origin-src="{{ image_url }}">
             </div>
         </div>
 {% endif %}

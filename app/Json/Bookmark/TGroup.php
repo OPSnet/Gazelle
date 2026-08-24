@@ -55,7 +55,7 @@ class TGroup extends \Gazelle\Json {
                 'tagList'         => $tgroup->tagList(),
                 'releaseType'     => $tgroup->releaseType(),
                 'vanityHouse'     => $tgroup->isShowcase(),
-                'image'           => $tgroup->image(),
+                'image'           => $tgroup->image()->url(),
                 'torrents'        => $torrentList,
             ];
         }
