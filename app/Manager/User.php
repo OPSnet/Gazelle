@@ -257,8 +257,10 @@ class User extends \Gazelle\BaseManager {
      *
      * @return string class name
      */
-    public function userclassName(int $id): ?string {
-        return $this->classList()[$id]['Name'];
+    public function userclassName(int $id): string|null {
+        return isset($this->classList()[$id])
+            ? $this->classList()[$id]['Name']
+            : null;
     }
 
     /**
