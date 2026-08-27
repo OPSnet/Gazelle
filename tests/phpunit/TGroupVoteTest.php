@@ -85,7 +85,6 @@ class TGroupVoteTest extends TestCase {
         $this->assertSame(1, $top[$this->tgroupList[0]->id]['tier'], 'tgroup-vote-top-1');
         $this->assertSame(2, $top[$this->tgroupList[1]->id]['tier'], 'tgroup-vote-top-2');
         $this->assertSame(1, $top[$this->tgroupList[1]->id]['upvote'], 'tgroup-vote-up-2');
-        $this->assertCount(2, $vote[1]->userVotes(), 'tgroup-vote-user-count');
 
         $manager = new Manager\TGroup();
         $this->assertSame(

@@ -215,7 +215,8 @@ class Vote extends \Gazelle\BasePgUser {
     }
 
     public function topVotes(bool $bypassCache = false): array {
-        $key = "top10_votes_{$this->config['limit']}"
+        $key = "top10_votes_"
+            . ($this->config['limit'] ?? '')
             . ($this->where !== []
                 ? signature(
                     implode('|', array_merge($this->where, $this->args, [(int)isset($this->config['tagAll'])])),
@@ -324,30 +325,6 @@ class Vote extends \Gazelle\BasePgUser {
             self::$cache->cache_value($key, $tgroupInfo, 259200); // 3 days
         }
         return $tgroupInfo;
-    }
-
-    /**
-     * Returns an array with User Vote data: GroupID and vote type
-     * @return array [groupId => 0|1]
-     */
-    public function userVotes(): array {
-        $key = sprintf(self::VOTED_USER, $this->user->id);
-        $votes = self::$cache->get_value($key);
-        if ($votes === false) {
-            $votes = $this->pg()->pair(
-                'id_tgroup',
-                'vote',
-                <<<END_SQL
-                    select id_tgroup,
-                        upvote
-                    from tgroup_vote
-                    where id_user = $1
-                END_SQL,
-                    $this->user->id
-            );
-            self::$cache->cache_value($key, $votes, 86400);
-        }
-        return $votes;
     }
 
     public function score(\Gazelle\TGroup $tgroup): float {
