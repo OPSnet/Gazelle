@@ -12,6 +12,7 @@ class ErrorTest extends TestCase {
         $this->user = Helper::makeUser('error.' . randomString(6), 'error');
         Base::staticRequestContext()->setViewer($this->user);
         Base::staticRequestContext()->setSessionId('phpunit');
+        $_SERVER['SERVER_PROTOCOL'] = 'http';
     }
 
     public function tearDown(): void {
