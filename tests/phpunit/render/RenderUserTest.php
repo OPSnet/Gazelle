@@ -32,7 +32,7 @@ class RenderUserTest extends TestCase {
             'applicant'     => new Manager\Applicant(),
             'invite_source' => 'invsrc',
             'user'          => $this->userList['user'],
-            'viewer'        => $this->userList['viewer'],
+            'viewer'        => $this->userList['admin'],
         ]);
         $this->assertSame(
             substr_count($sidebar, '<li>') + substr_count($sidebar, '<li class="paranoia_override"'),
@@ -69,7 +69,7 @@ class RenderUserTest extends TestCase {
             'prl'          => $limiter,
             'upload_total' => [],
             'user'         => $this->userList['user'],
-            'viewer'       => $this->userList['viewer'],
+            'viewer'       => $this->userList['admin'],
             'visible'      => [
                 'collages+'  => PARANOIA_ALLOWED,
                 'downloaded' => PARANOIA_HIDE,
