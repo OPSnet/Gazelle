@@ -30,17 +30,28 @@ class UserOrdinalTest extends TestCase {
         $this->assertSame(2, $this->user->ordinal()->increment($name, 300), 'ordinal-increment');
         $this->assertSame(500, $this->user->ordinal()->value($name), 'ordinal-new-value');
 
-        $this->assertSame(1, $this->user->ordinal()->removeOrdinal($name), 'ordinal-remove');
+        $this->assertSame(
+            1,
+            $this->user->ordinal()->removeOrdinal($name),
+            'ordinal-remove',
+        );
         $this->assertSame(
             $this->user->ordinal()->defaultValue($name),
             $this->user->ordinal()->value($name),
             'ordinal-again-default',
         );
+        $this->assertSame(
+            0,
+            $this->user->ordinal()->set(
+                $name,
+                $this->user->ordinal()->defaultValue($name)
+            ),
+            'ordinal-set-default',
+        );
     }
 
     public function testMissing(): void {
-        $this->user->ordinal();
-        $this->expectException(\TypeError::class);
+        $this->expectException(\UnexpectedValueException::class);
         $this->user->ordinal()->defaultValue('@nope@');
     }
 

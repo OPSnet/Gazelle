@@ -56,7 +56,10 @@ class Ordinal extends \Gazelle\BaseUser {
     }
 
     public function defaultValue(string $name): int {
-        return $this->info()[$name]['default_value'];
+        if (array_key_exists($name, $this->info())) {
+            return $this->info()[$name]['default_value'];
+        }
+        throw new \UnexpectedValueException($name);
     }
 
     public function value(string $name): int {
