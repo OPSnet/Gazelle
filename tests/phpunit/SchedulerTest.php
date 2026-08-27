@@ -191,8 +191,8 @@ class SchedulerTest extends TestCase {
             'task-created'
         );
         $this->assertSame('completed', $item->status, 'task-status');
-        $this->assertNull($item->nrErrors, 'task-nr-error');
-        $this->assertNull($item->nrItems, 'task-nr-item');
+        $this->assertSame(0, $item->errorTotal, 'task-error-total');
+        $this->assertSame(0, $item->itemTotal, 'task-item-total');
     }
 
     public function testTaskEnqueue(): void {
