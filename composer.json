@@ -37,7 +37,7 @@
     "orpheusnet/logchecker": "^0.14.4",
     "protonlabs/bitcoin": "^1.0",
     "robmorgan/phinx": "^0.16",
-    "robthree/twofactorauth": "^1.8.2",
+    "robthree/twofactorauth": "^3.0",
     "sad_spirit/pg_wrapper": "^3",
     "twig/twig": "^3.28",
     "whichbrowser/parser": "^2.1.8"

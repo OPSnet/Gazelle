@@ -18,12 +18,19 @@ use Endroid\QrCode\QrCode;
 use Endroid\QrCode\RoundBlockSizeMode;
 use Endroid\QrCode\Writer\PngWriter;
 use Endroid\QrCode\Writer\Result\ResultInterface;
+use RobThree\Auth\Providers\Qr\EndroidQrCodeProvider;
 use RobThree\Auth\TwoFactorAuth;
 
 class MultiFactorAuth extends \Gazelle\BaseUser {
     protected const RECOVERY_KEY_LEN = 20;
 
-    private string|false $secret;
+    private string|false  $secret;
+    private TwoFactorAuth $auth;
+
+    public function __construct(\Gazelle\User $user) {
+        parent::__construct($user);
+        $this->auth = new TwoFactorAuth(new EndroidQrCodeProvider(), SITE_NAME);
+    }
 
     public function flush(): static {
         unset($this->secret);
@@ -68,27 +75,27 @@ class MultiFactorAuth extends \Gazelle\BaseUser {
     }
 
     public function generateSessionSecret(): string {
-        return new TwoFactorAuth()->createSecret();
+        return $this->auth->createSecret();
     }
 
     public function generateQrCode(string $secret, string $logo): ResultInterface {
         $qrCode = new QrCode(
-            data:     'otpauth://totp/' . SITE_NAME . "?secret=$secret",
-            encoding: new Encoding('UTF-8'),
+            data:                 'otpauth://totp/' . SITE_NAME . "?secret=$secret",
+            encoding:             new Encoding('UTF-8'),
             errorCorrectionLevel: ErrorCorrectionLevel::Medium,
-            size: 400,
-            margin: 16,
-            roundBlockSizeMode: RoundBlockSizeMode::None,
-            backgroundColor: new Color(1, 8, 1),
-            foregroundColor: new Color(250, 250, 250)
+            size:                 400,
+            margin:               16,
+            roundBlockSizeMode:   RoundBlockSizeMode::None,
+            backgroundColor:      new Color(1, 8, 1),
+            foregroundColor:      new Color(250, 250, 250),
         );
         $logo = new Logo(
-            path: $logo,
-            resizeToWidth: 96,
+            path:               $logo,
+            resizeToWidth:      96,
             punchoutBackground: false,
         );
         $label = new Label(
-            text: SITE_NAME,
+            text:      SITE_NAME,
             textColor: new Color(0, 192, 0),
         );
         $writer = new PngWriter();
@@ -144,11 +151,11 @@ class MultiFactorAuth extends \Gazelle\BaseUser {
     }
 
     public function verifyCode(string $truth, string $code): bool {
-        return new TwoFactorAuth()->verifyCode($truth, $code, 2);
+        return $this->auth->verifyCode($truth, $code, 2);
     }
 
     public function verify(string $token): bool {
-        if (!new TwoFactorAuth()->verifyCode($this->secret() ?: '', $token, 2)) {
+        if (!$this->auth->verifyCode($this->secret() ?: '', $token, 2)) {
             // They have MFA but the device key did not match
             // Fallback to considering it as a recovery key.
             if (strlen($token) === self::RECOVERY_KEY_LEN) {

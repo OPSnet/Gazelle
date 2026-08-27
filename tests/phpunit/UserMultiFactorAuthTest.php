@@ -4,6 +4,7 @@ namespace Gazelle;
 
 use PHPUnit\Framework\TestCase;
 use GazelleUnitTest\Helper;
+use RobThree\Auth\Providers\Qr\EndroidQrCodeProvider;
 use RobThree\Auth\TwoFactorAuth;
 
 class UserMultiFactorAuthTest extends TestCase {
@@ -70,8 +71,10 @@ class UserMultiFactorAuthTest extends TestCase {
         $this->assertTrue($mfa->verify($burn), 'utest-burn-verify-mfa');
         $this->assertFalse($mfa->verify('invalid'), 'utest-verify-bad-mfa');
         $this->assertTrue(
-            $mfa->verify(new TwoFactorAuth()->getCode($secret)),
-            'utest-verify-good-mfa'
+            $mfa->verify(
+                new TwoFactorAuth(new EndroidQrCodeProvider(), SITE_NAME)->getCode($secret)
+            ),
+            'utest-verify-good-mfa',
         );
         $this->assertTrue($mfa->enabled(), 'utest-has-mfa-key');
 
