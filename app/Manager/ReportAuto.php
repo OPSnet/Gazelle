@@ -55,7 +55,7 @@ class ReportAuto extends \Gazelle\BaseManager {
         [$id, $category] = $this->pg()->rowex("
             insert into report_auto
                    (id_user, id_report_auto_type, data $qryCols)
-            values ($1,      $2,                  $3    $qryPh)
+            values ($1,      $2,                  $3   $qryPh)
             returning
                 id_report_auto,
                 (
@@ -152,8 +152,13 @@ class ReportAuto extends \Gazelle\BaseManager {
         );
     }
 
-    protected function instantiateReportAuto(int $id, int|null $category): \Gazelle\ReportAuto {
-        $cls = $this->categories()[$category] ?? \Gazelle\ReportAuto::class;
-        return new $cls($id, $this->typeMan);  /* @phpstan-ignore-line */
+    protected function instantiateReportAuto(
+        int $id,
+        int|null $category,
+    ): \Gazelle\ReportAuto {
+        $className = $category === null || !array_key_exists($category, $this->categories())
+            ? \Gazelle\ReportAuto::class
+            : $this->categories()[$category];
+        return new $className($id, $this->typeMan); /* @phpstan-ignore-line return.type */
     }
 }

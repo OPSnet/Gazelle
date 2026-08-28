@@ -15,6 +15,19 @@ class ReportAutoTest extends TestCase {
     }
 
     public function tearDown(): void {
+        $pgrw   = new DB\Pg(PG_RW_DSN);
+        $regexp = '^ra test (?:claim|comment|new|resolve) type';
+        $pgrw->query("
+            delete from report_auto ra
+            using report_auto_type rat
+            where rat.id_report_auto_type = ra.id_report_auto_type and rat.name ~ '$regexp'
+        ");
+        $pgrw->query("
+            delete from report_auto_type where name ~ '$regexp'
+        ");
+        $pgrw->query("
+            delete from report_auto_category where name = 'ReportAutoTest'
+        ");
         $this->user1->remove();
         $this->user2->remove();
     }

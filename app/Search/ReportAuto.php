@@ -86,7 +86,7 @@ class ReportAuto extends \Gazelle\Base {
             from report_auto
             $where
             group by $key
-            order by count(*) desc
+            order by count(*) desc, $key asc
             $limitPh
             ", ...$args
         );

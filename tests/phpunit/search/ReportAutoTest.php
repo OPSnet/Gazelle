@@ -44,6 +44,16 @@ class SearchReportAutoTest extends TestCase {
     }
 
     public static function tearDownAfterClass(): void {
+        $pgrw = new DB\Pg(PG_RW_DSN);
+        $pgrw->query("
+            delete from report_auto ra
+            using report_auto_type rat
+            where rat.id_report_auto_type = ra.id_report_auto_type
+                and rat.name ~ '^rasearch test type'
+        ");
+        $pgrw->query("
+            delete from report_auto_type where name ~ '^rasearch test type'
+        ");
         self::$user1->remove();
         self::$user2->remove();
     }
@@ -60,21 +70,29 @@ class SearchReportAutoTest extends TestCase {
     public function testAll(): void {
         $search = new Search\ReportAuto(self::$raMan, self::$ratMan);
 
-        foreach ($search->typeTotalList() as $typeList) {
-            match ($typeList[0]) {
-                self::$type1 => $this->assertSame(3 + 5, $typeList[1], 'rasearch-all-2'),
-                self::$type2 => $this->assertSame(7 + 11, $typeList[1], 'rasearch-all-3'),
-                default => null,  // created by other tests
-            };
-        }
+        $totalReport = $search->typeTotalList();
+        $this->assertSame(
+            3 + 5,
+            array_first(array_filter($totalReport, fn ($t) => $t[0]->id === self::$type1->id))[1],
+            'rasearch-all-2'
+        );
+        $this->assertSame(
+            7 + 11,
+            array_first(array_filter($totalReport, fn ($t) => $t[0]->id === self::$type2->id))[1],
+            'rasearch-all-3'
+        );
 
-        foreach ($search->userTotalList() as $userList) {
-            match ($userList[0]) {
-                self::$user1 => $this->assertSame(3 + 7, $userList[1], 'rasearch-all-4'),
-                self::$user2 => $this->assertSame(5 + 11, $userList[1], 'rasearch-all-5'),
-                default => null,  // created by other tests
-            };
-        }
+        $userReport = $search->userTotalList();
+        $this->assertSame(
+            3 + 7,
+            array_first(array_filter($userReport, fn ($t) => $t[0]->id === self::$user1->id))[1],
+            'rasearch-all-4'
+        );
+        $this->assertSame(
+            5 + 11,
+            array_first(array_filter($userReport, fn ($t) => $t[0]->id === self::$user2->id))[1],
+            'rasearch-all-5'
+        );
     }
 
     public function testStateOpen(): void {

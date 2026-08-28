@@ -11,6 +11,22 @@ class ReportAutoTypeTest extends TestCase {
         $this->ratMan = new Manager\ReportAutoType();
     }
 
+    public function tearDown(): void {
+        $pgrw   = new DB\Pg(PG_RW_DSN);
+        $regexp = '^type name[234]?$';
+        $pgrw->query("
+            delete from report_auto ra
+            using report_auto_type rat
+            where rat.id_report_auto_type = ra.id_report_auto_type and rat.name ~ '$regexp'
+        ");
+        $pgrw->query("
+            delete from report_auto_type where name ~ '$regexp'
+        ");
+        $pgrw->query("
+            delete from report_auto_category where name ~ '^(?:ReportAutoTest|somecategory|newcat)$'
+        ");
+    }
+
     public function testfindByNull(): void {
         $this->assertNull($this->ratMan->findById(1337), 'ratman-find-id-null');
         $this->assertNull($this->ratMan->findByName('doesnotexist'), 'ratman-find-name-null');
