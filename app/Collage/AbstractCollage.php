@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\Collage;
 
 use Gazelle\Intf\CollageEntry;
@@ -15,6 +17,8 @@ abstract class AbstractCollage extends \Gazelle\Base {
     abstract public function entryColumn(): string;
 
     abstract public function entryList(): array;
+
+    abstract public function objectList(): array;
 
     abstract public function load(): int;
 

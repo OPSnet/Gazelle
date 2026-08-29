@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\Collage;
 
 use Gazelle\Intf\CollageEntry;
+use Gazelle\Manager\Artist as ArtistManager;
 
 class Artist extends AbstractCollage {
     public function entryTable(): string {
@@ -14,7 +17,7 @@ class Artist extends AbstractCollage {
     }
 
     public function load(): int {
-        $manager = new \Gazelle\Manager\Artist();
+        $manager = new ArtistManager();
         self::$db->prepared_query("
             SELECT ca.ArtistID,
                 ca.UserID,
@@ -58,6 +61,13 @@ class Artist extends AbstractCollage {
 
     public function entryList(): array {
         return array_keys($this->artistList());
+    }
+
+    public function objectList(ArtistManager $manager = new ArtistManager()): array {
+        return array_map(
+            $manager->findById(...),
+            $this->entryList(),
+        );
     }
 
     public function nameList(): array {

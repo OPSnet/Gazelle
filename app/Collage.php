@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle;
 
 use Gazelle\Enum\CollageType;
@@ -125,6 +127,13 @@ class Collage extends BaseAttrObject implements Bookmarked {
 
     public function updated(): ?string {
         return $this->info()['updated'];
+    }
+
+    /**
+     * @return array<CollageEntry>
+     */
+    public function objectList(): array {
+        return $this->collage->objectList();
     }
 
     public function groupIds(): array {

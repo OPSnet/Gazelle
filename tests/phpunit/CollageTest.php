@@ -461,6 +461,20 @@ class CollageTest extends TestCase {
         $this->collageList[1]->addEntry($artistList[2], $this->userList['u2']);
         $this->collageList[1]->addEntry($artistList[3], $this->userList['u3']);
 
+        $this->assertSame(
+            [
+                $artistList[0]->id,
+                $artistList[1]->id,
+                $artistList[2]->id,
+                $artistList[3]->id,
+            ],
+            array_map(
+                fn ($c) => $c->id,
+                $this->collageList[1]->objectList(),
+            ),
+            'collage-artist-object-list',
+        );
+
         $this->assertSame(3, $this->collageList[1]->numContributors(), 'collage-artist-contributor');
         $artist = $artistMan->findByName($this->artistName[2]);
         $this->assertInstanceOf(Artist::class, $artist, 'collage-artist-found');
@@ -504,7 +518,7 @@ class CollageTest extends TestCase {
                 'ID'         => $this->collageList[0]->id,
                 'Name'       => $this->collageList[0]->name(),
                 'CategoryID' => $this->collageList[0]->categoryId(),
-                'Category'   => null,
+                'Category'   => 'Label',
             ],
             new API\Collage([])->run(),
             'collage-api',
@@ -779,8 +793,6 @@ class CollageTest extends TestCase {
             tagList:     implode(',', $this->tagList(3)),
         );
         $collage = $this->collageList[0];
-        // $this->userList['u1']->addCustomPrivilege('site_collages_manage');
-        // $this->userList['u2']->addCustomPrivilege('site_collages_manage');
 
         $this->assertTrue($collage->isPersonal(), 'collage-is-not-personal');
         $this->assertTrue($collage->userCanContribute($this->userList['u1']), 'collage-can-contribute-personal');
@@ -800,6 +812,18 @@ class CollageTest extends TestCase {
         );
         $this->assertTrue($collage->hasEntry($this->tgroupList[1]), 'collage-entry-present');
         $this->assertFalse($collage->hasEntry($this->tgroupList[2]), 'collage-entry-absent');
+        $this->assertSame(
+            [
+                $this->tgroupList[3]->id,
+                $this->tgroupList[1]->id,
+                $this->tgroupList[0]->id,
+            ],
+            array_map(
+                fn ($c) => $c->id,
+                $collage->objectList(),
+            ),
+            'collage-tgroup-object-list',
+        );
 
         $this->assertTrue($collage->toggleAttr('sort-newest', true), 'collage-personal-sort-newest');
         $collage->addEntry($this->tgroupList[2], $this->userList['u2']);

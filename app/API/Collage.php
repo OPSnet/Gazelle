@@ -1,6 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\API;
+
+use Gazelle\Enum\CollageType;
 
 class Collage extends AbstractAPI {
     public function run(): array {
@@ -19,7 +23,7 @@ class Collage extends AbstractAPI {
         if (is_null($collage)) {
             json_error('Collage not found');
         }
-        $collage['Category'] = $this->config['CollageCats'][$collage['CategoryID']];
+        $collage['Category'] = CollageType::from($collage['CategoryID'])->label();
 
         return $collage;
     }

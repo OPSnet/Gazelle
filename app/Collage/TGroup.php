@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\Collage;
 
 use Gazelle\Intf\CollageEntry;
+use Gazelle\Manager\TGroup as TGroupManager;
 
 class TGroup extends AbstractCollage {
     protected array $groupIds;
@@ -15,6 +18,13 @@ class TGroup extends AbstractCollage {
 
     public function entryColumn(): string {
         return 'GroupID';
+    }
+
+    public function objectList(TGroupManager $manager = new TGroupManager()): array {
+        return array_map(
+            $manager->findById(...),
+            $this->groupIdList(),
+        );
     }
 
     public function groupIdList(): array {
@@ -64,7 +74,7 @@ class TGroup extends AbstractCollage {
         $this->groupIds     = [];
         $this->contributors = [];
         $this->created      = [];
-        $tgMan              = new \Gazelle\Manager\TGroup();
+        $tgMan              = new TGroupManager();
         foreach ($groupIds as $groupId) {
             $tgroup = $tgMan->findById($groupId);
             if (is_null($tgroup)) {

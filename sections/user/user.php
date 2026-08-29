@@ -303,8 +303,7 @@ if ($OwnProfile || !$user->hasAttr('hide-vote-recent') || $profileViewer->permit
 }
 
 echo $Twig->render('user/collage-list.twig', [
-    'list'    => new Manager\Collage()->findPersonalByUser($user),
-    'manager' => $tgMan,
+    'list' => new Manager\Collage()->findPersonalByUser($user),
 ]);
 
 echo $Twig->render('user/information.twig', [
