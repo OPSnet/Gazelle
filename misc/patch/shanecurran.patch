@@ -1,0 +1,239 @@
+--- a/vendor/shanecurran/phpecc/src/Curves/SecgCurve.php	2023-03-08 19:51:13.000000000 +0000
++++ b/vendor/shanecurran/phpecc/src/Curves/SecgCurve.php	2026-08-29 00:00:00.000000000 +0000
+@@ -71,10 +71,10 @@
+     }
+ 
+     /**
+-     * @param RandomNumberGeneratorInterface $randomGenerator
++     * @param RandomNumberGeneratorInterface|null $randomGenerator
+      * @return GeneratorPoint
+      */
+-    public function generator112r1(RandomNumberGeneratorInterface $randomGenerator = null): GeneratorPoint
++    public function generator112r1(RandomNumberGeneratorInterface|null $randomGenerator = null): GeneratorPoint
+     {
+         $curve = $this->curve112r1();
+ 
+@@ -100,10 +100,10 @@
+     }
+ 
+     /**
+-     * @param RandomNumberGeneratorInterface $randomGenerator
++     * @param RandomNumberGeneratorInterface|null $randomGenerator
+      * @return \Mdanter\Ecc\Primitives\GeneratorPoint
+      */
+-    public function generator192k1(RandomNumberGeneratorInterface $randomGenerator = null): GeneratorPoint
++    public function generator192k1(RandomNumberGeneratorInterface|null $randomGenerator = null): GeneratorPoint
+     {
+         $curve = $this->curve192k1();
+ 
+@@ -129,10 +129,10 @@
+     }
+ 
+     /**
+-     * @param RandomNumberGeneratorInterface $randomGenerator
++     * @param RandomNumberGeneratorInterface|null $randomGenerator
+      * @return GeneratorPoint
+      */
+-    public function generator256k1(RandomNumberGeneratorInterface $randomGenerator = null): GeneratorPoint
++    public function generator256k1(RandomNumberGeneratorInterface|null $randomGenerator = null): GeneratorPoint
+     {
+         $curve = $this->curve256k1();
+ 
+@@ -158,10 +158,10 @@
+     }
+ 
+     /**
+-     * @param RandomNumberGeneratorInterface $randomGenerator
++     * @param RandomNumberGeneratorInterface|null $randomGenerator
+      * @return GeneratorPoint
+      */
+-    public function generator256r1(RandomNumberGeneratorInterface $randomGenerator = null): GeneratorPoint
++    public function generator256r1(RandomNumberGeneratorInterface|null $randomGenerator = null): GeneratorPoint
+     {
+         $curve = $this->curve256r1();
+ 
+@@ -187,10 +187,10 @@
+     }
+ 
+     /**
+-     * @param RandomNumberGeneratorInterface $randomGenerator
++     * @param RandomNumberGeneratorInterface|null $randomGenerator
+      * @return GeneratorPoint
+      */
+-    public function generator384r1(RandomNumberGeneratorInterface $randomGenerator = null): GeneratorPoint
++    public function generator384r1(RandomNumberGeneratorInterface|null $randomGenerator = null): GeneratorPoint
+     {
+         $curve = $this->curve384r1();
+ 
+--- a/vendor/shanecurran/phpecc/src/Primitives/GeneratorPoint.php	2023-03-08 19:51:13.000000000 +0000
++++ b/vendor/shanecurran/phpecc/src/Primitives/GeneratorPoint.php	2026-08-29 00:00:00.000000000 +0000
+@@ -22,12 +22,12 @@
+     private $generator;
+ 
+     /**
+-     * @param GmpMathInterface               $adapter
+-     * @param CurveFpInterface               $curve
+-     * @param \GMP                           $x
+-     * @param \GMP                           $y
+-     * @param \GMP                           $order
+-     * @param RandomNumberGeneratorInterface $generator
++     * @param GmpMathInterface                    $adapter
++     * @param CurveFpInterface                    $curve
++     * @param \GMP                                $x
++     * @param \GMP                                $y
++     * @param \GMP                                $order
++     * @param RandomNumberGeneratorInterface|null $generator
+      */
+     public function __construct(
+         GmpMathInterface $adapter,
+@@ -35,7 +35,7 @@
+         \GMP $x,
+         \GMP $y,
+         \GMP $order,
+-        RandomNumberGeneratorInterface $generator = null
++        RandomNumberGeneratorInterface|null $generator = null
+     ) {
+         $this->generator = $generator ?: RandomGeneratorFactory::getRandomGenerator();
+         parent::__construct($adapter, $curve, $x, $y, $order);
+--- a/vendor/shanecurran/phpecc/src/Primitives/CurveFpInterface.php	2023-03-08 19:51:13.000000000 +0000
++++ b/vendor/shanecurran/phpecc/src/Primitives/CurveFpInterface.php	2026-08-29 00:00:00.000000000 +0000
+@@ -46,12 +46,12 @@
+     /**
+      * Returns the point identified by given coordinates.
+      *
+-     * @param  \GMP $x
+-     * @param  \GMP $y
+-     * @param  \GMP $order
++     * @param  \GMP      $x
++     * @param  \GMP      $y
++     * @param  \GMP|null $order
+      * @return PointInterface
+      */
+-    public function getPoint(\GMP $x, \GMP $y, \GMP $order = null): PointInterface;
++    public function getPoint(\GMP $x, \GMP $y, \GMP|null $order = null): PointInterface;
+ 
+     /**
+      * @param bool $wasOdd
+@@ -69,13 +69,13 @@
+ 
+     /**
+      *
+-     * @param  \GMP $x
+-     * @param  \GMP $y
+-     * @param  \GMP $order
+-     * @param  RandomNumberGeneratorInterface $randomGenerator
++     * @param  \GMP                                $x
++     * @param  \GMP                                $y
++     * @param  \GMP                                $order
++     * @param  RandomNumberGeneratorInterface|null $randomGenerator
+      * @return GeneratorPoint
+      */
+-    public function getGenerator(\GMP $x, \GMP $y, \GMP $order, RandomNumberGeneratorInterface $randomGenerator = null): GeneratorPoint;
++    public function getGenerator(\GMP $x, \GMP $y, \GMP $order, RandomNumberGeneratorInterface|null $randomGenerator = null): GeneratorPoint;
+ 
+     /**
+      * Checks whether the curve contains the given coordinates.
+--- a/vendor/shanecurran/phpecc/src/Primitives/Point.php	2023-03-08 19:51:13.000000000 +0000
++++ b/vendor/shanecurran/phpecc/src/Primitives/Point.php	2026-08-29 00:00:00.000000000 +0000
+@@ -83,13 +83,13 @@
+      * @param CurveFpInterface     $curve
+      * @param \GMP                 $x
+      * @param \GMP                 $y
+-     * @param \GMP                 $order
++     * @param \GMP|null            $order
+      * @param bool                 $infinity
+      *
+      * @throws \RuntimeException    when either the curve does not contain the given coordinates or
+      *                                      when order is not null and P(x, y) * order is not equal to infinity.
+      */
+-    public function __construct(GmpMathInterface $adapter, CurveFpInterface $curve, \GMP $x, \GMP $y, \GMP $order = null, bool $infinity = false)
++    public function __construct(GmpMathInterface $adapter, CurveFpInterface $curve, \GMP $x, \GMP $y, \GMP|null $order = null, bool $infinity = false)
+     {
+         $this->adapter    = $adapter;
+         $this->modAdapter = $curve->getModAdapter();
+--- a/vendor/shanecurran/phpecc/src/Primitives/CurveFp.php	2023-03-08 19:51:13.000000000 +0000
++++ b/vendor/shanecurran/phpecc/src/Primitives/CurveFp.php	2026-08-29 00:00:00.000000000 +0000
+@@ -83,7 +83,7 @@
+      * {@inheritDoc}
+      * @see \Mdanter\Ecc\Primitives\CurveFpInterface::getPoint()
+      */
+-    public function getPoint(\GMP $x, \GMP $y, \GMP $order = null): PointInterface
++    public function getPoint(\GMP $x, \GMP $y, \GMP|null $order = null): PointInterface
+     {
+         return new Point($this->adapter, $this, $x, $y, $order);
+     }
+@@ -101,7 +101,7 @@
+      * {@inheritDoc}
+      * @see \Mdanter\Ecc\Primitives\CurveFpInterface::getGenerator()
+      */
+-    public function getGenerator(\GMP $x, \GMP $y, \GMP $order, RandomNumberGeneratorInterface $randomGenerator = null): GeneratorPoint
++    public function getGenerator(\GMP $x, \GMP $y, \GMP $order, RandomNumberGeneratorInterface|null $randomGenerator = null): GeneratorPoint
+     {
+         return new GeneratorPoint($this->adapter, $this, $x, $y, $order, $randomGenerator);
+     }
+--- a/vendor/shanecurran/phpecc/src/EccFactory.php	2023-03-08 19:51:13.000000000 +0000
++++ b/vendor/shanecurran/phpecc/src/EccFactory.php	2026-08-29 00:00:00.000000000 +0000
+@@ -36,7 +36,7 @@
+      * @param  GmpMathInterface $adapter [optional] Defaults to the return value of EccFactory::getAdapter().
+      * @return NistCurve
+      */
+-    public static function getNistCurves(GmpMathInterface $adapter = null): NistCurve
++    public static function getNistCurves(GmpMathInterface|null $adapter = null): NistCurve
+     {
+         return new NistCurve($adapter ?: self::getAdapter());
+     }
+@@ -47,7 +47,7 @@
+      * @param  GmpMathInterface $adapter [optional] Defaults to the return value of EccFactory::getAdapter().
+      * @return SecgCurve
+      */
+-    public static function getSecgCurves(GmpMathInterface $adapter = null): SecgCurve
++    public static function getSecgCurves(GmpMathInterface|null $adapter = null): SecgCurve
+     {
+         return new SecgCurve($adapter ?: self::getAdapter());
+     }
+@@ -55,23 +55,23 @@
+     /**
+      * Creates a new curve from arbitrary parameters.
+      *
+-     * @param  int              $bitSize
+-     * @param  \GMP             $prime
+-     * @param  \GMP             $a
+-     * @param  \GMP             $b
+-     * @param  GmpMathInterface $adapter [optional] Defaults to the return value of EccFactory::getAdapter().
++     * @param  int                   $bitSize
++     * @param  \GMP                  $prime
++     * @param  \GMP                  $a
++     * @param  \GMP                  $b
++     * @param  GmpMathInterface|null $adapter [optional] Defaults to the return value of EccFactory::getAdapter().
+      * @return CurveFpInterface
+      */
+-    public static function createCurve(int $bitSize, \GMP $prime, \GMP $a, \GMP $b, GmpMathInterface $adapter = null): CurveFpInterface
++    public static function createCurve(int $bitSize, \GMP $prime, \GMP $a, \GMP $b, GmpMathInterface|null $adapter = null): CurveFpInterface
+     {
+         return new CurveFp(new CurveParameters($bitSize, $prime, $a, $b), $adapter ?: self::getAdapter());
+     }
+ 
+     /**
+-     * @param  GmpMathInterface $adapter [optional] Defaults to the return value of EccFactory::getAdapteR()
++     * @param  GmpMathInterface|null $adapter [optional] Defaults to the return value of EccFactory::getAdapteR()
+      * @return Signer
+      */
+-    public static function getSigner(GmpMathInterface $adapter = null): Signer
++    public static function getSigner(GmpMathInterface|null $adapter = null): Signer
+     {
+         return new Signer($adapter ?: self::getAdapter());
+     }
+--- a/vendor/shanecurran/phpecc/src/Math/MathAdapterFactory.php	2023-03-08 19:51:13.000000000 +0000
++++ b/vendor/shanecurran/phpecc/src/Math/MathAdapterFactory.php	2026-08-29 00:00:00.000000000 +0000
+@@ -10,9 +10,9 @@
+     private static $forcedAdapter = null;
+ 
+     /**
+-     * @param GmpMathInterface $adapter
++     * @param GmpMathInterface|null $adapter
+      */
+-    public static function forceAdapter(GmpMathInterface $adapter = null)
++    public static function forceAdapter(GmpMathInterface|null $adapter = null)
+     {
+         self::$forcedAdapter = $adapter;
+     }
