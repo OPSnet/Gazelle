@@ -8,6 +8,23 @@ abstract class File extends BaseObject {
      */
     abstract public function path(): string;
 
+    protected function setupWarningHandler(): void {
+        // PHP should really make it easier to deal with missing files than this.
+        set_error_handler(
+            function (
+                int    $severity,
+                string $message,
+                string $file,
+                int    $line,
+            ): bool {
+                if ($severity === E_WARNING) {
+                    throw new Exception\FileNotFoundException("$file($line): $message");
+                }
+                return false; // punt to next handler
+            }
+        );
+    }
+
     /**
      * Does the file exist?
      */
@@ -26,7 +43,15 @@ abstract class File extends BaseObject {
      * Retrieve the contents of the stored file.
      */
     public function get(): string|false {
-        return file_get_contents($this->path());
+        $this->setupWarningHandler();
+        try {
+            $result = file_get_contents($this->path());
+        } catch (Exception\FileNotFoundException) {
+            $result = false;
+        } finally {
+            restore_error_handler();
+        }
+        return $result;
     }
 
     /**
@@ -47,12 +72,21 @@ abstract class File extends BaseObject {
     }
 
     /**
-     * Get the hash of the file
+     * Generate a digest hash of the file
+     * @throw \Exception if the file does not exist or it cannot be hashed
+     *   (most likely an unknown hash algorithm).
      */
     public function hash(): string {
-        $hash = hash_file(DIGEST_ALGO, $this->path());
-        if (!$hash) {
-            throw new \Exception("Failed to compute hash for file: {$this->path()}");
+        $this->setupWarningHandler();
+        try {
+            $hash = hash_file(DIGEST_ALGO, $this->path());
+            if ($hash === false) {
+                throw new \Exception("Failed to compute hash for file: {$this->path()}");
+            }
+        } catch (Exception\FileNotFoundException) {
+            throw new \Exception("Failed to compute hash for inexistent file: {$this->path()}");
+        } finally {
+            restore_error_handler();
         }
         return $hash;
     }
