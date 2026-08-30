@@ -342,16 +342,24 @@ class Helper {
     }
 
     public static function removeUser(User $user): void {
-        \Gazelle\DB::DB()->prepared_query("
+        $db = \Gazelle\DB::DB();
+        $db->prepared_query("
             DELETE FROM bonus_pool_contrib WHERE user_id = ?
             ", $user->id
         );
-        \Gazelle\DB::DB()->prepared_query("
+        $db->prepared_query("
             DELETE FROM locked_accounts WHERE UserID = ?
             ", $user->id
         );
+        $db->prepared_query("
+            SELECT tg.ID
+            FROM torrents_group tg
+            INNER JOIN torrents t ON (t.GroupID = tg.ID)
+            WHERE t.UserID = ?
+            ", $user->id
+        );
         $tgMan = new \Gazelle\Manager\TGroup();
-        foreach ($user->recentUploadList(100, true) as $tgroupId) {
+        foreach ($db->collect(0) as $tgroupId) {
             $tgroup = $tgMan->findById($tgroupId);
             if ($tgroup) {
                 static::removeTGroup($tgroup, $user);

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\Manager;
 
 class Category extends \Gazelle\Base {
@@ -8,17 +10,17 @@ class Category extends \Gazelle\Base {
 
     protected array $info = [];
 
-    public function findNameById(int $id): ?string {
+    public function findNameById(int $id): string|null {
         $list = $this->nameList();
         return !isset($list[$id]) ? null : $list[$id]['name'];
     }
 
-    public function findIdByName(string $name): ?int {
+    public function findIdByName(string $name): int|null {
         $found = array_first(array_filter(
             $this->nameList(),
-            fn($n) => $n['name'] == $name
+            fn ($n) => $n['name'] === $name
         ));
-        return $found === false ? null : $found['id'];
+        return $found === null ? null : $found['id'];
     }
 
     public function nameList(): array {

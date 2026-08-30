@@ -76,7 +76,7 @@ class Torrent extends \Gazelle\Base {
             $filteredWhere[] = "ta.ArtistCount IS NULL";
         }
 
-        if (count($joinParameters)) {
+        if ($joinParameters !== []) {
             $joinParameters = $this->flatten($joinParameters);
             $parameters = array_merge($joinParameters, $parameters);
         }

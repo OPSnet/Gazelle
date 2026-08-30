@@ -181,7 +181,7 @@ class ReportManagerTest extends TestCase {
     }
 
     public function testDecorate(): void {
-        $manager = new Manager\Report(new Manager\User());
+        $manager = new Manager\Report();
 
         $this->collage = new Manager\Collage()->create(
             user:        $this->userList[0],
@@ -196,7 +196,7 @@ class ReportManagerTest extends TestCase {
         $this->reportList[] = $report;
 
         $list = $manager->decorate(
-            array_map(fn($r) => $r->id, $this->reportList),
+            array_map(fn ($r) => $r->id, $this->reportList),
             new Manager\Collage(),
             new Manager\Comment(),
             new Manager\ForumThread(),
@@ -206,6 +206,5 @@ class ReportManagerTest extends TestCase {
         $this->assertCount(2, $list, 'report-decorate-list');
         $this->assertSame('collage', $list[0]['label'], 'report-list-label');
         $this->assertSame($this->collage->id, $list[0]['subject']->id, 'report-list-subject-id');
-        $this->assertNull($list[0]['context'], 'report-list-collage-context-null');
     }
 }

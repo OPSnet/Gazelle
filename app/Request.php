@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle;
 
 use Gazelle\Enum\UserAuditEvent;
@@ -161,7 +163,7 @@ class Request extends BasePgObject implements Bookmarked, CategoryHasArtist {
             }
             $info['user_vote_list'] = $this->pg()->allex("
                 select rv.id_user as user_id,
-                    sum(rv.bounty) as bounty
+                    sum(rv.bounty)::bigint as bounty
                 from request_vote rv
                 where rv.id_request = $1
                 group by id_user
@@ -815,16 +817,17 @@ class Request extends BasePgObject implements Bookmarked, CategoryHasArtist {
         User         $admin,
         Manager\User $manager = new Manager\User(),
     ): int {
-        [$fillerId, $fillDate] = $this->pg()->rowex("
-            select id_filler, date(filled)
+        $filler = $this->pg()->rowAssocex("
+            select id_filler as id,
+                date(filled) as fill_date
             from request
             where filled is not null and id_request = $1
             ", $this->id
         );
-        if (!$fillerId) {
+        if ($filler === []) {
             return 0;
         }
-        $user = $manager->findById($fillerId);
+        $user = $manager->findById($filler['id']);
         $user->auditTrail()->addEvent(
             UserAuditEvent::request,
             "Reduction of " . byte_format($bounty)
@@ -835,7 +838,7 @@ class Request extends BasePgObject implements Bookmarked, CategoryHasArtist {
             UPDATE users_leech_stats SET
                 Uploaded = Uploaded - ?
             WHERE UserId = ?
-            ", $bounty, $fillerId
+            ", $bounty, $filler['id'],
         );
         $affected = self::$db->affected_rows();
         if ($affected) {
@@ -843,7 +846,7 @@ class Request extends BasePgObject implements Bookmarked, CategoryHasArtist {
                 "Bounty was reduced on a request you filled",
                 self::$twig->render('request/bounty-reduction.bbcode.twig', [
                     'bounty'      => $bounty,
-                    'fill_date'   => $fillDate->format('Y-m-d H:i:s'),
+                    'fill_date'   => $filler['fill_date']->format('Y-m-d H:i:s'),
                     'request_url' => $this->url(),
                     'staff_name'  => $admin->username(),
                 ])

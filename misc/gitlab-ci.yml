@@ -114,7 +114,7 @@ e2e-tests:
     - su gazelle -c "bin/twig-parse \$(find templates -type f)"
     - /bin/bash "${CI_PROJECT_DIR}/misc/docker/web/start-services.sh"
     - su gazelle -s /usr/bin/php ${CI_PROJECT_DIR}/bin/setup-check
-    - su gazelle -c "${CI_PROJECT_DIR}/vendor/bin/phpunit -c misc/phpunit.xml --coverage-php /tmp/coverage/phpunit.cov --exclude-group no-ci"
+    - su gazelle -c "${CI_PROJECT_DIR}/vendor/bin/phpunit -c misc/phpunit.xml --coverage-php /tmp/coverage/phpunit.cov --exclude-group no-ci --display-warnings --display-deprecations --display-notices"
     - /bin/bash "${CI_PROJECT_DIR}/misc/docker/web/bootstrap-npm.sh"
     - su gazelle -c "make lint-js"
     - su gazelle -c "npm exec stylelint -- --config misc/stylelint.json sass"

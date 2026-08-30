@@ -31,14 +31,14 @@ class TagTest extends TestCase {
             FROM tags t
             LEFT JOIN torrents_tags tt ON (tt.TagID = t.ID)
             LEFT JOIN torrents_tags_votes ttv ON (ttv.TagID = t.ID)
-            WHERE t.Name REGEXP '^(phpunit\.|ut\.|[1-9][0-9]+)'
+            WHERE t.Name REGEXP '^(phpunit\.|ut\.|[1-9][0-9]+)' OR t.Name = ''
         ");
         $pg = new DB\Pg(PG_RW_DSN);
         $pg->query("
             delete from tag_alias where alias_allow ~ '^phpunit'
         ");
         $pg->query("
-            delete from tag where name ~ '^(phpunit\.|ut\.|[1-9][0-9]+)'
+            delete from tag where name ~ '^(phpunit\.|ut\.|[1-9][0-9]+)' or name = ''
         ");
     }
 

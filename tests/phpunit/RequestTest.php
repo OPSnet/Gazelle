@@ -958,7 +958,7 @@ class RequestTest extends TestCase {
     public function testRequestJson(): void {
         $this->request = Helper::makeRequestMusic(
             $this->userList['admin'],
-            'phpunit json ' . randomString()
+            'phpunit json ' . randomString(6)
         );
         $payload = new Json\Requests(
                 new Search\Request(),

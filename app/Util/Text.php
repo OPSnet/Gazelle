@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\Util;
 
 class Text {
@@ -43,7 +45,6 @@ class Text {
 
         $elementList = $dom->getElementsByTagName('div');
         for ($i = $elementList->length - 1; $i >= 0; $i--) {
-            /** @var \DOMElement $element */
             $element = $elementList->item($i);
             if (str_contains($element->getAttribute('style'), 'text-align')) {
                 $new = $dom->createElement('align');
@@ -55,7 +56,6 @@ class Text {
 
         $elementList = $dom->getElementsByTagName('span');
         for ($i = $elementList->length - 1; $i >= 0; $i--) {
-            /** @var \DOMElement $element */
             $element = $elementList->item($i);
             if (str_contains($element->getAttribute('class'), 'size')) {
                 $new = $dom->createElement('size');
@@ -99,7 +99,6 @@ class Text {
 
         $elementList = $dom->getElementsByTagName('ol');
         for ($i = 0; $i < $elementList->length; $i++) {
-            /** @var \DOMElement $element */
             $element = $elementList->item($i);
             $InnerElements = $element->getElementsByTagName('li');
             for ($j = $InnerElements->length - 1; $j >= 0; $j--) {
@@ -112,7 +111,6 @@ class Text {
 
         $elementList = $dom->getElementsByTagName('strong');
         for ($i = $elementList->length - 1; $i >= 0; $i--) {
-            /** @var \DOMElement $element */
             $element = $elementList->item($i);
             if (in_array('important_text', explode(' ', $element->getAttribute('class')))) {
                 $new = $dom->createElement('important');
@@ -123,7 +121,6 @@ class Text {
 
         $elementList = $dom->getElementsByTagName('a');
         for ($i = $elementList->length - 1; $i >= 0; $i--) {
-            /** @var \DOMElement $element */
             $element = $elementList->item($i);
             if ($element->hasAttribute('href')) {
                 $element->removeAttribute('rel');
@@ -136,7 +133,6 @@ class Text {
                 ) {
                     $spoilers = $dom->getElementsByTagName('blockquote');
                     for ($j = $spoilers->length - 1; $j >= 0; $j--) {
-                        /** @var \DOMElement $spoiler */
                         $spoiler = $spoilers->item($j);
                         if ($spoiler->hasAttribute('class') && $spoiler->getAttribute('class') === 'hidden spoiler') {
                             $new = $dom->createElement('spoiler');

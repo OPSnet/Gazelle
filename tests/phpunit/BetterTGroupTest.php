@@ -189,8 +189,16 @@ class BetterTGroupTest extends TestCase {
             'better-single-heading',
         );
 
+        $initialSingle     = new Better\SingleSeeded($this->user, Enum\BetterFilter::uploaded, $torMan);
+        $initialExcludeTag = new Better\SingleSeeded($this->user, Enum\BetterFilter::any, $torMan);
         global $Cache;
-        $Cache->delete_value($initial->totalCacheKey());
+        $Cache->delete_multi([
+            $initial->totalCacheKey(),
+            $initialSingle->totalCacheKey(),
+            $initialExcludeTag->totalCacheKey(),
+        ]);
+        $initialSingleTotal     = $initialSingle->total();
+        $initialExcludeTagTotal = $initialExcludeTag->total();
 
         $this->tgroup = Helper::makeTGroupMusic(
             user: $this->user,
@@ -211,7 +219,7 @@ class BetterTGroupTest extends TestCase {
         $Cache->delete_value($single->totalCacheKey());
         $this->assertSame(
             1,
-            $single->total(),
+            $single->total() - $initialSingleTotal,
             'better-single-total',
         );
 
@@ -234,7 +242,7 @@ class BetterTGroupTest extends TestCase {
         $excludeTag->setTagExcludeList($tagMan->nameToTagList('bop nosuchtag'));
         $this->assertSame(
             0,
-            $excludeTag->total(),
+            $excludeTag->total() - $initialExcludeTagTotal,
             'better-single-exclude-tag-total',
         );
     }

@@ -596,7 +596,7 @@ class ArtistTest extends TestCase {
         $this->tgroupList = [
             Helper::makeTGroupMusic(
                 $this->user,
-                'phpunit json ' . randomString(10),
+                'phpunit json ' . randomString(6),
                 [[ARTIST_MAIN], [$artist->name()]],
                 ['metal'],
             ),

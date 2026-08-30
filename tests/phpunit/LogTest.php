@@ -122,8 +122,9 @@ class LogTest extends TestCase {
         $message = self::PREFIX . "general " . randomString();
         $logger->general($message);
 
-        $siteLog   = new Manager\SiteLog();
+        $_SERVER['DOCUMENT_URI'] = '/paginator_test.php';
         $paginator = new Util\Paginator(LOG_ENTRIES_PER_PAGE, 1);
+        $siteLog   = new Manager\SiteLog();
         $page      = $siteLog->page($paginator->page(), $paginator->offset(), '');
         $paginator->setTotal($siteLog->total(''));
 

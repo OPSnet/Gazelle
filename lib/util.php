@@ -940,12 +940,16 @@ function image_cache_encode(
 function image_cache_valid(
     string $url,
     int|null $epoch = null,
-    string $secret = IMAGE_CACHE_SECRET
+    string $secret = IMAGE_CACHE_SECRET,
 ): bool {
     // skip over slashes in http://xxx/
     // if the /proxy specifier has been used, it is combined in $encode
-    [,,, $bucket, $spec, $sig, $encode] = explode('/', $url, 7);
-    return $sig === image_cache_signature($bucket . '/' . $encode, $epoch, $secret);
+    // [ 0, 1, 2, 3: bucket, 4: spec, 5: signature, 6: encode]
+    $info = explode('/', $url, 7);
+    if (count($info) < 7) {
+        return false;
+    }
+    return $info[5] === image_cache_signature($info[3] . '/' . $info[6], $epoch, $secret);
 }
 
 /**

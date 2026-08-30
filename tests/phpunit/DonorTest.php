@@ -432,6 +432,7 @@ class DonorTest extends TestCase {
         Helper::flushDonationMonth(1);
         $this->assertLessThanOrEqual($manager->totalMonth(1), $last['Amount'], 'donor-manager-timeline');
 
+        $_SERVER['DOCUMENT_URI'] = '/paginator_test.php';
         $paginator = new Util\Paginator(USERS_PER_PAGE, 1)->setTotal($manager->rewardTotal());
         Base::staticRequestContext()->setViewer($this->donor->user());
         Util\Twig::setViewer($this->donor->user());

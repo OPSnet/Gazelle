@@ -63,8 +63,8 @@ class DownloadTest extends TestCase {
         // torrent snatch list is handled in another test
 
         $ratelimit = new User\UserclassRateLimit($this->userList['down']);
-        $this->assertFalse(
-            is_nan($ratelimit->userclassFactor()),
+        $this->assertNull(
+            $ratelimit->userclassFactor(),
             'download-ratelimit-userclass-factor',
         );
         $this->assertTrue(is_nan($ratelimit->userFactor()), 'download-ratelimit-user-factor');

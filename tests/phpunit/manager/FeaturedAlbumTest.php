@@ -32,7 +32,7 @@ class FeaturedAlbumTest extends TestCase {
                 ", $this->user->id
             )
         );
-        new Manager\FeaturedAlbum()->findById($this->tgroup->id)?->remove();
+        Helper::removeTGroup($this->tgroup, $this->user);
         Helper::removeUser($this->user);
     }
 

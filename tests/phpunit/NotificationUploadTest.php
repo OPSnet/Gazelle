@@ -378,6 +378,8 @@ class NotificationUploadTest extends TestCase {
     }
 
     public function testNewGroup(): void {
+        $manager = new Manager\Notification();
+        $initial = $manager->ticketStats();
         $this->userList = [
             'new.grp' => Helper::makeUser('new.grp.' . randomString(10), 'notification-ticket'),
         ];
@@ -392,8 +394,6 @@ class NotificationUploadTest extends TestCase {
         $ticket        = $ticketManager->create($this->torrent);
         Helper::generateTorrentSeed($this->torrent, $this->torrent->uploader());
 
-        // handle the ticket
-        $manager = new Manager\Notification();
         $manager->handleTicket($ticket, $this->torMan);
 
         $notifier = new Notification\Torrent($this->userList['new.grp']);
@@ -431,7 +431,11 @@ class NotificationUploadTest extends TestCase {
         $this->assertSame(0, $stats['active']['total'], 'notifier-ticket-stats-active');
         $this->assertSame(0, $stats['pending']['total'], 'notifier-ticket-stats-pending');
         $this->assertSame(0, $stats['removed']['total'], 'notifier-ticket-stats-removed');
-        $this->assertSame(0, $stats['stale']['total'], 'notifier-ticket-stats-stale');
+        $this->assertSame(
+            $initial['stale']['total'],
+            $stats['stale']['total'],
+            'notifier-ticket-stats-stale',
+        );
 
         $newTorrent->removeTorrent($this->torrent->uploader(), 'notify second unit test');
     }

@@ -16,7 +16,21 @@ class SiteInfo extends Base {
     }
 
     public function gitHashRemote(): string {
-        return trim((string)shell_exec(BIN_GIT . ' rev-parse origin/' . $this->gitBranch()));
+        $process = proc_open(
+            [BIN_GIT, 'rev-parse', "origin/{$this->gitBranch()}"],
+            [
+               0 => ["pipe", "r"],  // stdin
+               1 => ["pipe", "w"],  // stdout
+               2 => ["pipe", "w"],  // stderr
+            ],
+            $output,
+        );
+        if ($process === false) {
+            return '';
+        }
+        $remote = (string)stream_get_contents($output[1]);
+        proc_close($process);
+        return $remote;
     }
 
     public function phpinfo(): string {

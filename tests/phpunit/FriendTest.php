@@ -52,6 +52,7 @@ class FriendTest extends TestCase {
         $this->assertSame(1, $page[$this->friend[1]->user()->id]['mutual'], 'friend-the-feeling-is-mutual');
 
         // render
+        $_SERVER['DOCUMENT_URI'] = '/paginator_test.php';
         $paginator = new Util\Paginator(FRIENDS_PER_PAGE, 1);
         $paginator->setTotal($this->friend[0]->total());
         Util\Twig::setViewer($this->friend[0]->user());

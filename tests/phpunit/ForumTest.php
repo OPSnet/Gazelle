@@ -608,6 +608,7 @@ class ForumTest extends TestCase {
             name:           'phpunit render forum',
             description:    'This is where it renders',
         );
+        $_SERVER['DOCUMENT_URI'] = '/paginator_test.php';
         $paginator = new Util\Paginator(TOPICS_PER_PAGE, 1)->setTotal(1);
         Base::setRequestContext(new RequestContext('/forum.php', '127.0.0.1', ''));
         Base::staticRequestContext()->setSessionId('phpunit');

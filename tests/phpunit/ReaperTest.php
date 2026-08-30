@@ -165,6 +165,7 @@ class ReaperTest extends TestCase {
         $torMan = new Manager\Torrent();
         $reaper = new Torrent\Reaper();
         $initialUnseededStats = $reaper->stats();
+        $initialNeverSeededFinal = $reaper->finalNeverSeededList();
 
         // reset the time of the never seeded alert back in time to hit the initial timeout
         $hour = NOTIFY_NEVER_SEEDED_INITIAL_HOUR + 1;
@@ -182,7 +183,7 @@ class ReaperTest extends TestCase {
         $this->assertSame(
             [
                 "never_seeded_initial" => $initialUnseededStats['never_seeded_initial'] + 1,
-                "unseeded_initial"     => 0,
+                "unseeded_initial"     => $initialUnseededStats['unseeded_initial'],
                 "never_seeded_final"   => $initialUnseededStats['never_seeded_final'],
                 "unseeded_final"       => 0,
             ],
@@ -211,7 +212,7 @@ class ReaperTest extends TestCase {
             [
                 "never_seeded_initial" => $initialUnseededStats['never_seeded_initial'] + 2,
                 "never_seeded_final"   => $initialUnseededStats['never_seeded_final'],
-                "unseeded_initial"     => 0,
+                "unseeded_initial"     => $initialUnseededStats['unseeded_initial'],
                 "unseeded_final"       => 0,
             ],
             $reaper->stats(),
@@ -244,7 +245,12 @@ class ReaperTest extends TestCase {
 
         $this->assertSame(0, $user->inbox()->messageTotal(), 'never-message-final-none');
         $neverFinal = $reaper->finalNeverSeededList();
-        $this->assertCount(1, $neverFinal, 'never-final-0'); // one user ...
+        $this->assertSame(
+            // one user ...
+            1,
+            count($neverFinal) - count($initialNeverSeededFinal),
+            'never-final-0'
+        );
         $this->assertSame(1,                               // ... with one upload
             $reaper->process($neverFinal, ReaperState::NEVER, ReaperNotify::FINAL),
             'never-final-process'
@@ -253,7 +259,7 @@ class ReaperTest extends TestCase {
             [
                 "never_seeded_initial" => $initialUnseededStats['never_seeded_initial'] + 1,
                 "never_seeded_final"   => $initialUnseededStats['never_seeded_final'] + 1,
-                "unseeded_initial"     => 0,
+                "unseeded_initial"     => $initialUnseededStats['unseeded_initial'],
                 "unseeded_final"       => 0,
             ],
             $reaper->stats(),
@@ -323,11 +329,11 @@ class ReaperTest extends TestCase {
             [
                 "never_seeded_initial" => $initialUnseededStats['never_seeded_initial'],
                 "never_seeded_final"   => 0,
-                "unseeded_initial"     => $initialUnseededStats['unseeded_seeded_initial'] + 2,
+                "unseeded_initial"     => $initialUnseededStats['unseeded_initial'] + 2,
                 "unseeded_final"       => 0,
             ],
             $reaper->stats(),
-            'reaper-unseeded-stats-0'
+            'reaper-unseeded-stats-1'
         );
 
         $inboxList = [
@@ -407,7 +413,7 @@ class ReaperTest extends TestCase {
             [
                 "never_seeded_initial" => $initialUnseededStats['never_seeded_initial'],
                 "never_seeded_final"   => 0,
-                "unseeded_initial"     => 0,
+                "unseeded_initial"     => $unseededStats['unseeded_initial'] - 1,
                 "unseeded_final"       => $unseededStats['unseeded_final'] + 1,
             ],
             $reaper->stats(),

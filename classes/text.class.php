@@ -318,22 +318,25 @@ class Text {
 
     public static function local_url(string $Str): string|false {
         $URLInfo = parse_url($Str);
-        if (!$URLInfo) {
+        if ($URLInfo === false) {
             return false;
         }
-        $Host = $URLInfo['host'];
-        if (empty($URLInfo['port']) && in_array($Host, [SITE_HOST, ALT_SITE_HOST])) {
+        if (
+            !isset($URLInfo['port'])
+            && isset($URLInfo['host'])
+            && in_array($URLInfo['host'], [SITE_HOST, ALT_SITE_HOST])
+        ) {
             $URL = '';
-            if (!empty($URLInfo['path'])) {
+            if (isset($URLInfo['path'])) {
                 $URL .= ltrim($URLInfo['path'], '/'); // Things break if the path starts with '//'
             }
-            if (!empty($URLInfo['query'])) {
+            if (isset($URLInfo['query'])) {
                 $URL .= "?{$URLInfo['query']}";
             }
-            if (!empty($URLInfo['fragment'])) {
+            if (isset($URLInfo['fragment'])) {
                 $URL .= "#{$URLInfo['fragment']}";
             }
-            return $URL ? "/$URL" : false;
+            return $URL !== '' ? "/$URL" : false;
         } else {
             return false;
         }

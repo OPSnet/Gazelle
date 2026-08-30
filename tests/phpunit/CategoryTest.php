@@ -113,18 +113,6 @@ class CategoryTest extends TestCase {
         $this->assertInstanceOf(TGroup::class, $new, 'cat-change-to-comedy');
         $this->assertNull($tgMan->findById($tgroupId), 'cat-old-tgroup-removed');
 
-        $torrentList = array_map($torMan->findById(...), $idList);
-
-        // clean up
-        foreach ($torrentList as $torrent) {
-            $torrent?->removeTorrent($user, 'phpunit');
-        }
-        $tgroup->remove();
-        $this->assertSame(0, (int)DB::DB()->scalar("
-            SELECT count(*) FROM torrents_artists WHERE GroupID = ?
-            ", $tgroupId),
-            'cat-old-group-no-artists'
-        );
-        $user->remove();
+        Helper::removeUser($user);
     }
 }

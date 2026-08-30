@@ -19,11 +19,9 @@ class TextTest extends TestCase {
 
     public static function dataParse(): array {
         return [
-            ['text-parse-code',      '<code>abc</code>',                   '[code]abc[/code]'],
-            ['text-parse-important', '<important>def</important>',         '[important]def[/important]'],
-            ['text-parse-pad',       '<pad pad="10px">abc</pad>',          '[pad=10px]abc[/pad]'],
-            ['text-parse-pre',       '<pre>abc</pre>',                     '[pre]abc[/pre]'],
-            ['text-parse-strong',    '<strong>abc</strong>',               '[b]abc[/b]'],
+            ['text-parse-code',      '<code>abc</code>',     '[code]abc[/code]'],
+            ['text-parse-pre',       '<pre>abc</pre>',       '[pre]abc[/pre]'],
+            ['text-parse-strong',    '<strong>abc</strong>', '[b]abc[/b]'],
             [
                 'text-parse-align',
                 '<div style="text-align: center;">abc</div>',
@@ -42,6 +40,11 @@ class TextTest extends TestCase {
                 'text-parse-img',
                 '<img src="http://to.be/some.jpg">',
                 '[img]http://to.be/some.jpg[/img]',
+            ],
+            [
+                'text-parse-important',
+                '<strong class="important_text">def</strong>',
+                '[important]def[/important]'
             ],
             [
                 'text-parse-italic',
@@ -90,7 +93,7 @@ class TextTest extends TestCase {
             ],
             [
                 'text-parse-user',
-                '<a href="user.php?action=search&search=abc">abc</a>',
+                '<a href="user.php?action=search&amp;search=abc">abc</a>',
                 '[user]abc[/user]'
             ],
         ];
