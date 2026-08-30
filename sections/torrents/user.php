@@ -514,7 +514,7 @@ foreach (CATEGORY as $catKey => $catName) {
             <td class="td_info big_info">
 <?php    if ($Viewer->option('CoverArt')) { ?>
                 <div class="group_image float_left clear">
-                    <?= Util\ImageProxy::tgroupThumbnail($tgroup) ?>
+                    <?= $tgroup->coverThumbnail() ?>
                 </div>
 <?php    } ?>
                 <div class="group_info clear">

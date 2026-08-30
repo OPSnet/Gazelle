@@ -16,7 +16,7 @@ $tgMan     = new Manager\TGroup();
 $torMan    = new Manager\Torrent();
 $snatcher  = $Viewer->snatch();
 
-if (!empty($_GET['searchstr']) || !empty($_GET['groupname'])) {
+if (isset($_GET['searchstr']) || isset($_GET['groupname'])) {
     $torrent = $torMan->findByInfohash($_GET['searchstr'] ?? $_GET['groupname']);
     if ($torrent) {
         header('Location: ' . $torrent->location());
@@ -55,7 +55,7 @@ if (isset($_GET['setdefault'])) {
 
 // Terms were not submitted via the search form
 if (isset($_GET['searchsubmit'])) {
-    $GroupResults = !empty($_GET['group_results']);
+    $GroupResults = isset($_GET['group_results']);
 } else {
     $GroupResults = (bool)$Viewer->option('DisableGrouping2') === false;
 }
@@ -170,7 +170,7 @@ foreach ($Results as $Key => $GroupID) {
         <td class="td_info big_info">
 <?php    if ($Viewer->option('CoverArt')) { ?>
             <div class="group_image float_left clear">
-                <?= Util\ImageProxy::tgroupThumbnail($tgroup) ?>
+                <?= $tgroup->coverThumbnail() ?>
             </div>
 <?php    } ?>
             <div class="group_info clear">
@@ -274,7 +274,7 @@ foreach ($Results as $Key => $GroupID) {
         <td class="td_info big_info">
 <?php       if ($Viewer->option('CoverArt')) { ?>
             <div class="group_image float_left clear">
-                <?= Util\ImageProxy::tgroupThumbnail($tgroup) ?>
+                <?= $tgroup->coverThumbnail() ?>
             </div>
 <?php       } ?>
             <div class="group_info clear">

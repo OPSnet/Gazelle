@@ -112,7 +112,7 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
         <td colspan="<?= $Viewer->ordinal()->value('file-count-display') ? 6 : 5 ?>" class="big_info">
 <?php if ($Viewer->option('CoverArt')) { ?>
             <div class="group_image float_left clear">
-                <?= Util\ImageProxy::tgroupThumbnail($tgroup) ?>
+                <?= $tgroup->coverThumbnail() ?>
             </div>
 <?php } ?>
             <div class="group_info clear">
@@ -148,7 +148,7 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
         <td class="td_info big_info">
 <?php           if ($Viewer->option('CoverArt')) { ?>
             <div class="group_image float_left clear">
-                <?= Util\ImageProxy::tgroupThumbnail($tgroup) ?>
+                <?= $tgroup->coverThumbnail() ?>
             </div>
 <?php           } ?>
             <div class="group_info clear">

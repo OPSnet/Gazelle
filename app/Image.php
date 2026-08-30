@@ -50,7 +50,10 @@ class Image {
         if (!preg_match(IMAGE_REGEXP, $url)) {
             $image->setErrorMessage(html_escape("“{$url}” does not look like a valid image url"));
         }
-        $banned = Util\ImageProxy::badHost($url);
+        $banned = array_find(
+            IMAGE_HOST_BANNED,
+            fn ($host) => stripos($url, $host) !== false
+        );
         if ($banned) {
             $image->setErrorMessage(html_escape("Please rehost images from $banned elsewhere."));
         }

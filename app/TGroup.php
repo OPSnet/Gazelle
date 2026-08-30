@@ -336,6 +336,17 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
             ?? STATIC_SERVER . '/common/noartwork/' . CATEGORY_ICON[$this->categoryId() - 1];
     }
 
+    public function coverThumbnail(): string {
+        $image = $this->cover();
+        return '<img src="'
+            . html_escape(image_cache_encode($image, height: 150, width: 150))
+            . '" width="90" height="90" loading="lazy" alt="Cover" onclick="lightbox.init(\''
+            . html_escape(image_cache_encode($image))
+            . '\', 90)" data-origin-src="'
+            . html_escape($image)
+            . '">';
+    }
+
     public function description(): string {
         return $this->info()['Body'] ?? '';
     }

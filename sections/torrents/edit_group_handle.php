@@ -34,11 +34,13 @@ if (($_GET['action'] ?? '') === 'revert') {
         ]);
         exit;
     }
-    [$body, $image] = $tgroup->revertRevision($revisionId, $Viewer);
+    [$body, $imageUrl] = $tgroup->revertRevision($revisionId, $Viewer);
     if (is_null($body)) {
         Error404::error("Unable to find revision {$revisionId}");
     }
-    $tgroup->setField('WikiImage', $image)
+    // Not worried about bad hosts, but we do want to rewrite the url
+    // with rules that may now exist after this revision was created.
+    $tgroup->setField('WikiImage', Image::fromUntrusted($imageUrl)->url())
         ->setField('WikiBody', $body)
         ->modify();
     $tgroup->refresh();
