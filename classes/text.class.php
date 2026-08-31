@@ -301,15 +301,25 @@ class Text {
             . ')'
             . '(:[0-9]{1,5})?' // port
             . '\/?' // slash?
-            . '(\/?[0-9a-z\-_.,&=@~%\/:;()+|!#]+)*' // /file
+            . '(\/?[0-9a-z\-_.,&=@~%\/:;()+|!#\p{L}\p{N}\p{M}]+)*' // /file
             . (empty($Extension) ? '' : $Extension)
             . ($Inline
-                ? '(\?([0-9a-z\-_.,%\/\@~&=:;()+*\^$!#|?]|\[\d*\])*)?'
-                : '(\?[0-9a-z\-_.,%\/\@[\]~&=:;()+*\^$!#|?]*)?')
-            . '(#[a-z0-9\-_.,%\/\@[\]~&=:;()+*\^$!]*)?' // #anchor
-            . '$/i';
+                ? '(\?([0-9a-z\-_.,%\/\@~&=:;()+*\^$!#|?\p{L}\p{N}\p{M}]|\[\d*\])*)?'
+                : '(\?[0-9a-z\-_.,%\/\@[\]~&=:;()+*\^$!#|?\p{L}\p{N}\p{M}]*)?')
+            . '(#[a-z0-9\-_.,%\/\@[\]~&=:;()+*\^$!\p{L}\p{N}\p{M}]*)?' // #anchor
+            . '$/iu';
         // phpcs:enable Generic.Strings.UnnecessaryStringConcat.Found
         return preg_match($re, $Str, $Matches);
+    }
+
+    /**
+     * Percent-encode any non-ASCII bytes in a URL for use in a href/src attribute.
+     * While most modern browers allow pasting UTF-8 URLs into the address bar and
+     * they'll silently transform it to ASCII, we do it here as well for people who
+     * might be using old/bad browsers.
+     */
+    private static function encode_url(string $Str): string {
+        return preg_replace_callback('/[\x80-\xFF]+/', fn(array $m): string => rawurlencode($m[0]), $Str);
     }
 
     private static function relative_url(string $str): bool {
@@ -1084,7 +1094,7 @@ class Text {
                         break;
                     case 'img':
                         if (self::$NoImg > 0 && self::valid_url($Block['Val'])) {
-                            $Str .= '<a rel="noreferrer" target="_blank" href="' . $Block['Val'] . '">' . $Block['Val'] . '</a> (image)';
+                            $Str .= '<a rel="noreferrer" target="_blank" href="' . self::encode_url($Block['Val']) . '">' . $Block['Val'] . '</a> (image)';
                             break;
                         }
                         if (!self::valid_url($Block['Val'], '\.' . IMAGEEXT_REGEXP_STEM)) {
@@ -1109,7 +1119,7 @@ class Text {
 
                     case 'aud':
                         if (self::$NoImg > 0 && self::valid_url($Block['Val'])) {
-                            $Str .= '<a rel="noreferrer" target="_blank" href="' . $Block['Val'] . '">' . $Block['Val'] . '</a> (audio)';
+                            $Str .= '<a rel="noreferrer" target="_blank" href="' . self::encode_url($Block['Val']) . '">' . $Block['Val'] . '</a> (audio)';
                             break;
                         }
                         if (!self::valid_url($Block['Val'], '\.(?:mp3|ogg|wav)')) {
@@ -1145,13 +1155,13 @@ class Text {
                                 if ($resolved = self::resolve_url($Block['Val'])) {
                                     $Str .= $resolved;
                                 } else {
-                                    $Str .= '<a href="' . $LocalURL . '">' . $Block['Val'] . '</a>';
+                                    $Str .= '<a href="' . self::encode_url($LocalURL) . '">' . $Block['Val'] . '</a>';
                                 }
                             } else {
                                 if ($resolved = self::resolve_url($Block['Val'])) {
                                     $Str .= $resolved;
                                 } else {
-                                    $Str .= '<a rel="noreferrer" target="_blank" href="' . $Block['Attr'] . '">' . $Block['Val'] . '</a>';
+                                    $Str .= '<a rel="noreferrer" target="_blank" href="' . self::encode_url($Block['Attr']) . '">' . $Block['Val'] . '</a>';
                                 }
                             }
                         }
@@ -1166,10 +1176,10 @@ class Text {
                             $LocalURL = self::local_url($Block['Attr']);
                             if ($LocalURL) {
                                 $Str .= self::resolve_url($Block['Attr'])
-                                ?? ('<a href="' . $LocalURL . '">' . substr($LocalURL, 1) . '</a>');
+                                ?? ('<a href="' . self::encode_url($LocalURL) . '">' . substr($LocalURL, 1) . '</a>');
                             } else {
                                 $Str .= self::resolve_url($Block['Attr'])
-                                ?? sprintf('<a rel="noreferrer" target="_blank" href="%s">%s</a>', $Block['Attr'], $Block['Attr']);
+                                ?? sprintf('<a rel="noreferrer" target="_blank" href="%s">%s</a>', self::encode_url($Block['Attr']), $Block['Attr']);
                             }
                         }
 

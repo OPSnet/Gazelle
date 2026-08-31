@@ -70,6 +70,20 @@ class TextTest extends TestCase {
             ["text-s",          "[s]sss[/s]",                    "<span style=\"text-decoration: line-through;\">sss</span>"],
             ["text-u",          "[u]uuu[/u]",                    "<span style=\"text-decoration: underline;\">uuu</span>"],
             ["text-url",        $url,                            "<a rel=\"noreferrer\" target=\"_blank\" href=\"https://www.example.com/\">https://www.example.com/</a>"],
+            ["text-url-unicode", "https://www.example.com/Fältskog",
+                "<a rel=\"noreferrer\" target=\"_blank\" href=\"https://www.example.com/F%C3%A4ltskog\">https://www.example.com/Fältskog</a>"],
+            ["text-url-already-encoded", "https://www.example.com/F%C3%A4ltskog",
+                "<a rel=\"noreferrer\" target=\"_blank\" href=\"https://www.example.com/F%C3%A4ltskog\">https://www.example.com/F%C3%A4ltskog</a>"],
+            [
+                "text-url-tag-unicode",
+                "[url=https://www.discogs.com/release/5386732-Various-特撮狂-TOKUSATZCREW-]Link[/url]",
+                "<a rel=\"noreferrer\" target=\"_blank\" href=\"https://www.discogs.com/release/5386732-Various-%E7%89%B9%E6%92%AE%E7%8B%82-TOKUSATZCREW-\">Link</a>",
+            ],
+            [
+                "text-url-unicode-query-fragment",
+                "https://www.example.com/search?q=café#résumé",
+                "<a rel=\"noreferrer\" target=\"_blank\" href=\"https://www.example.com/search?q=caf%C3%A9#r%C3%A9sum%C3%A9\">https://www.example.com/search?q=café#résumé</a>",
+            ],
 
             ["text-hide",       "[hide]secret[/hide]",
                 "<strong>Hidden text</strong>: <a href=\"javascript:void(0);\" onclick=\"BBCode.spoiler(this);\">Show</a><blockquote class=\"hidden spoiler\">secret</blockquote>"
