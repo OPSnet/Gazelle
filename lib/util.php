@@ -6,7 +6,6 @@ declare(strict_types=1);
 // that it'd just be annoying to stick them in namespaces.
 
 use Gazelle\Enum\CacheBucket;
-use Gazelle\Image;
 use Gazelle\Util\Irc;
 use Gazelle\Util\Time;
 use Gazelle\Util\Type;

@@ -7,7 +7,7 @@ use Gazelle\Exception\AuthnError;
 
 class Authentication extends Base {
     protected AuthnMechanism $mechanism = AuthnMechanism::none;
-    protected ?string $data = null;
+    protected ?string        $data      = null;
 
     public function __construct(
         protected $banMan  = new Manager\Ban(),
@@ -64,14 +64,18 @@ class Authentication extends Base {
         $user   = null;
         $isApi  = $module === 'ajax';
 
-        if (!empty($_SERVER['HTTP_AUTHORIZATION']) && $isApi) {
+        if (($_SERVER['HTTP_AUTHORIZATION'] ?? '') !== '' && $isApi) {
             $user = $this->findByAuthorization($_SERVER['HTTP_AUTHORIZATION']);  // throws
             $this->mechanism = AuthnMechanism::apikey;
         } elseif (isset($_COOKIE['session'])) {
             $cookie = new SessionCookie($_COOKIE['session']);
             $user = $this->findByCookie($cookie);  // throws
             $this->mechanism = AuthnMechanism::session;
-        } elseif ($module === 'torrents' && ($_REQUEST['action'] ?? '') == 'download' && isset($_REQUEST['torrent_pass'])) {
+        } elseif (
+            $module === 'torrents'
+            && ($_REQUEST['action'] ?? '') === 'download'
+            && isset($_REQUEST['torrent_pass'])
+        ) {
             $user = $this->userMan->findByAnnounceKey($_REQUEST['torrent_pass']);
             if (is_null($user) || !$user->isEnabled() || $user->isLocked()) {
                 throw new AuthnError('invalid passkey', AuthnMechanism::passkey);
@@ -80,13 +84,31 @@ class Authentication extends Base {
             $this->data = $_REQUEST['torrent_pass'];
         } elseif (!in_array($module, ['chat', 'enable', 'index', 'login', 'recovery', 'register'])) {
             if (
-                // Ocelot is allowed
-                !($module === 'tools' && ($_GET['action'] ?? '') === 'ocelot' && ($_GET['key'] ?? '') === TRACKER_SECRET)
+                $module === 'tools'
+                && ($_GET['action'] ?? '') === 'ocelot'
+                && ($_GET['key'] ?? '') === TRACKER_SECRET
             ) {
+                // Ocelot is allowed
+                $this->data = 'ocelot';
+            } elseif (
+                $module === 'view'
+                && ($_GET['type'] ?? '') === 'url'
+            ) {
+                $remoteIp = ip2long($ctx->remoteAddr());
+                if (
+                    $remoteIp >= IMAGE_CACHE_HOST_IP['min']
+                    &&
+                    $remoteIp <= IMAGE_CACHE_HOST_IP['max']
+                ) {
+                    // image proxy is allowed
+                    $this->data = 'imgproxy';
+                } else {
+                    throw new AuthnError('', AuthnMechanism::none);
+                }
+            } else {
                 // but for everything else, we need a $Viewer
                 throw new AuthnError('', AuthnMechanism::none);
             }
-            $this->data = 'ocelot';
         }
 
         if ($user) {
@@ -108,7 +130,7 @@ class Authentication extends Base {
     }
 
     public function updateIp(?User $user): void {
-        if (!$user) {
+        if ($user === null) {
             return;
         }
 

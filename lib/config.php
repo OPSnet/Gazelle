@@ -363,6 +363,29 @@ defined('IMAGE_CACHE_SECRET') or define('IMAGE_CACHE_SECRET', 'changeme');
 // When local image caching is enabled, this hostname is used.
 defined('IMAGE_CACHE_HOST') or define('IMAGE_CACHE_HOST', SITE_URL);
 
+// Local network where the image cache server is hosted (to allow transparent reconfiguration)
+defined('IMAGE_CACHE_HOST_IP') or define('IMAGE_CACHE_HOST_IP', [
+    'min' => ip2long('127.0.0.0'),
+    'max' => ip2long('127.255.255.255')]
+);
+
+// Some remote hosts require an API key to fetch them.
+// These items are required:
+//   auth-header - the value used in the Authorization: header
+//   path-regexp - the strictest possible pattern that identifies an asset on the remote site
+//   secret      - a generated random string that protects the remote urls from being tampered with.
+//   valid-mime  - the remote server must return a payload that matches one of these mime types
+// The value for secret can be changed at any time after launch, it will only invalidate inflight requests.
+// See the Image class for all the gory details.
+defined('IMAGE_HOST_AUTHENTICATED') or define('IMAGE_HOST_AUTHENTICATED', [
+    'phpunit.host' => [
+        'auth-header' => 'Bearer token.changeme',
+        'path-regexp' => '#/image/.*?\.\s+$#',
+        'secret'      => 'secret.changeme',
+        'valid-mime'  => ['image/gif', 'image/jpeg', 'image/png', 'image/webp'],
+    ],
+]);
+
 // ------------------------------------------------------------------------
 // Email settings
 

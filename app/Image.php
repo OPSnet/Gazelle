@@ -6,10 +6,26 @@ namespace Gazelle;
 
 class Image {
     protected string|null $errorMessage = null;
+    protected string|null $hostname     = null;
+    protected bool $isAuthenticated     = false;
 
     public function __construct(
         protected string|null $url,
-    ) {}
+    ) {
+        if ($url === null) {
+            return;
+        }
+        $info = parse_url($url);
+        if (is_array($info) && isset($info['host'])) {
+            $this->hostname = strtolower($info['host']);
+            if (isset(IMAGE_HOST_AUTHENTICATED[$this->hostname])) {
+                $hoster = IMAGE_HOST_AUTHENTICATED[$this->hostname];
+                if (preg_match($hoster['path-regexp'], $info['path'])) {
+                    $this->isAuthenticated = true;
+                }
+            }
+        }
+    }
 
     public static function fromUntrusted(string|null $url): Image {
         if (is_string($url) && trim($url) === '') {
@@ -71,7 +87,51 @@ class Image {
         return $this->errorMessage;
     }
 
+    /**
+     * This asset must be fetch via an API call
+     */
+    public function isAuthenticated(): bool {
+        return $this->isAuthenticated;
+    }
+
+    /**
+     * Note: In production this method is overridden.
+     */
+    public function payload(string $signature): string {
+        return $signature;
+    }
+
+    /**
+     * This secret is used to sign the remote url
+     */
+    public function secret(): string|null {
+        return $this->isAuthenticated()
+            ? IMAGE_HOST_AUTHENTICATED[$this->hostname]['secret']
+            : null;
+    }
+
+    /**
+     * Authenticated images are signed to prevent abuse of private API keys
+     */
+    public function signature(): string {
+        return urlencode_safe(substr(
+            hash_hmac(DIGEST_ALGO, $this->url, $this->secret(), binary: true),
+            0, 12)
+        );
+    }
+
+    /**
+     * The url of the image. It will always be passed through as-is, even
+     * if it is from a hostname that requires authentication to be fetched.
+     * For that, it is "wrapped" to be reinjected as a local url.
+     */
     public function url(): string|null {
         return $this->url;
+    }
+
+    public function urlWrapped(): string {
+        return SITE_URL
+            . "/view.php?type=url&s={$this->signature()}&u="
+            . urlencode($this->url);
     }
 }

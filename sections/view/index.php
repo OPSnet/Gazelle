@@ -24,6 +24,11 @@ switch ($_GET['type'] ?? '') {
         header("Content-Disposition: inline; filename=\"{$match[1]}_{$match[2]}.txt\"");
         echo new File\RipLog((int)$match[1], (int)$match[2])->get();
         break;
+    case 'url':
+        if (isset($_GET['s'], $_GET['u'])) {
+            echo new Image(urldecode($_GET['u']))->payload($_GET['s']);
+        }
+        break;
     default:
         Error404::error();
 }
