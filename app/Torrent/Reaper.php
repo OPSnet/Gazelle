@@ -337,9 +337,7 @@ class Reaper extends \Gazelle\Base {
                 );
                 foreach (self::$db->collect(0) as $snatcherId) {
                     $snatcherId = (int)$snatcherId;
-                    if (!isset($userList[$snatcherId])) {
-                        $userList[$snatcherId] = [];
-                    }
+                    $userList[$snatcherId] ??= [];
                     $userList[$snatcherId][] = $torrent->group();
                 }
 

@@ -25,7 +25,7 @@ class MultiFactorAuth extends \Gazelle\BaseUser {
     protected const RECOVERY_KEY_LEN = 20;
 
     private string|false  $secret;
-    private TwoFactorAuth $auth;
+    private readonly TwoFactorAuth $auth;
 
     public function __construct(\Gazelle\User $user) {
         parent::__construct($user);
@@ -103,12 +103,10 @@ class MultiFactorAuth extends \Gazelle\BaseUser {
     }
 
     protected function secret(): string|false {
-        if (!isset($this->secret)) {
-            $this->secret = $this->pg()->scalarex('
+        $this->secret ??= $this->pg()->scalarex('
                 select secret from multi_factor_auth where id_user = $1
                 ', $this->user->id
-            ) ?? false;
-        }
+        ) ?? false;
         return $this->secret;
     }
 

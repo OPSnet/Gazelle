@@ -241,9 +241,7 @@ class Torrent extends \Gazelle\BaseManager {
             $torrent = $this->findById($torrentId)->flush();
             $tracker->modifyTorrent($torrent, $leechType);
             $tgroupId = $torrent->groupId();
-            if (!isset($refresh[$tgroupId])) {
-                $refresh[$tgroupId] = $torrent->group();
-            }
+            $refresh[$tgroupId] ??= $torrent->group();
             $this->logger()
                 ->torrent(
                     $torrent,

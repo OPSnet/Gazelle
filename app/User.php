@@ -765,12 +765,10 @@ class User extends BaseAttrObject {
      * @return int epoch of catchup
      */
     public function forumCatchupEpoch() {
-        if (!isset($this->lastReadForum)) {
-            $this->lastReadForum = (int)self::$db->scalar("
+        $this->lastReadForum ??= (int)self::$db->scalar("
                 SELECT unix_timestamp(last_read) FROM user_read_forum WHERE user_id = ?
                 ", $this->id
-            );
-        }
+        );
         return $this->lastReadForum;
     }
 

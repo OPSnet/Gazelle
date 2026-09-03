@@ -91,9 +91,7 @@ class Cache extends \Memcached {
             $value = false;
         } else {
             $value = $this->get($key);
-            if (!isset($this->hit[$key])) {
-                $this->hit[$key] = 0;
-            }
+            $this->hit[$key] ??= 0;
             ++$this->hit[$key];
         }
         $this->elapsed += (hrtime(true) - $begin) * 1e-9;
@@ -107,9 +105,7 @@ class Cache extends \Memcached {
             $ret = false;
         } else {
             $ret = $this->delete($key);
-            if (!isset($this->delete)) {
-                $this->delete = [];
-            }
+            $this->delete ??= [];
             $this->delete[] = $key;
         }
         $this->elapsed += (hrtime(true) - $begin) * 1e-9;
@@ -135,9 +131,7 @@ class Cache extends \Memcached {
     public function increment_value(string $key, int $delta = 1): int|false {
         $begin = hrtime(true);
         $new = $this->increment($key, $delta);
-        if (!isset($this->hit[$key])) {
-            $this->hit[$key] = 0;
-        }
+        $this->hit[$key] ??= 0;
         ++$this->hit[$key];
         $this->elapsed += (hrtime(true) - $begin) * 1e-9;
         return $new;
@@ -146,9 +140,7 @@ class Cache extends \Memcached {
     public function decrement_value($key, $delta = 1): int|false {
         $begin = hrtime(true);
         $new = $this->decrement($key, $delta);
-        if (!isset($this->hit[$key])) {
-            $this->hit[$key] = 0;
-        }
+        $this->hit[$key] ??= 0;
         ++$this->hit[$key];
         $this->elapsed += (hrtime(true) - $begin) * 1e-9;
         return $new;

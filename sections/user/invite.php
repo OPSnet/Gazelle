@@ -40,15 +40,11 @@ if ($inviteSourceMan && isset($_GET['edit'])) {
 
     $update = [];
     foreach (array_key_filter_and_map('user-', $_POST) as $userId => $source) {
-        if (!isset($update[$userId])) {
-            $update[$userId] = ['user_id' => $userId];
-        }
+        $update[$userId] ??= ['user_id' => $userId];
         $update[$userId]['source'] = (int)$source;
     }
     foreach (array_key_filter_and_map('reason-', $_POST) as $userId => $reason) {
-        if (!isset($update[$userId])) {
-            $update[$userId] = [];
-        }
+        $update[$userId] ??= [];
         $update[$userId]['profile'] = trim($reason);
     }
 

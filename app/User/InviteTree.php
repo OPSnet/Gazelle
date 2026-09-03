@@ -119,16 +119,10 @@ class InviteTree extends \Gazelle\BaseUser {
                 // we have to go deeper
                 $this->info['branch']++;
             }
-            if (!isset($userlevelMap[$row['userclass']])) {
-                $userlevelMap[$row['userclass']] = $row['userlevel'];
-            }
-            if (!isset($userclassMap[$row['userclass']])) {
-                $userclassMap[$row['userclass']] = 0;
-            }
+            $userlevelMap[$row['userclass']] ??= $row['userlevel'];
+            $userclassMap[$row['userclass']] ??= 0;
             $userclassMap[$row['userclass']]++;
-            if (!isset($this->info['userclass'][$row['userclass']])) {
-                $this->info['userclass'][$row['userclass']] = 0;
-            }
+            $this->info['userclass'][$row['userclass']] ??= 0;
             $this->info['userclass'][$row['userclass']]++;
             if ($this->info['depth'] < $row['depth']) {
                 $this->info['depth'] = $row['depth'];

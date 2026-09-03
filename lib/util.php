@@ -463,12 +463,10 @@ function json_or_error(mixed $JsonError, mixed $Error = null): never {
 }
 
 function add_json_info(array $info): array {
-    if (!isset($info['info'])) {
-        $info['info'] = [
-            'source' => SITE_NAME,
-            'version' => 1,
-        ];
-    }
+    $info['info'] ??= [
+        'source' => SITE_NAME,
+        'version' => 1,
+    ];
     global $Viewer;
     if (!isset($info['debug']) && $Viewer instanceof \Gazelle\User && $Viewer->permitted('site_debug')) {
         $info['debug'] = ['queries' => \Gazelle\DB::DB()->queryList()];

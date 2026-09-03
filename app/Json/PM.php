@@ -12,9 +12,7 @@ class PM extends \Gazelle\Json {
         $user = [];
         $conversation = [];
         foreach ($this->pm->postList($this->pm->postTotal(), 0) as $post) {
-            if (!isset($user[$post['sender_id']])) {
-                $user[$post['sender_id']] = $this->userMan->findById($post['sender_id']);
-            }
+            $user[$post['sender_id']] ??= $this->userMan->findById($post['sender_id']);
             $conversation[] = [
                 'messageId'  => $post['id'],
                 'senderId'   => $post['sender_id'],

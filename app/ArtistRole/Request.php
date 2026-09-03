@@ -108,15 +108,11 @@ class Request extends \Gazelle\ArtistRole {
      * A role is an array of three keys: ["id" => 801, "aliasid" => 768, "name" => "The Group"]
      */
     public function idList(): array {
-        if (!isset($this->artistList)) {
-            $this->artistList = $this->artistList();
-        }
+        $this->artistList ??= $this->artistList();
         $list = [];
         foreach ($this->artistList as $artist) {
             $roleId = $artist['id_artist_role'];
-            if (!isset($list[$roleId])) {
-                $list[$roleId] = [];
-            }
+            $list[$roleId] ??= [];
             $list[$roleId][] = [
                 'id'      => $artist['artist_id'],
                 'aliasid' => $artist['alias_id'],
@@ -127,15 +123,11 @@ class Request extends \Gazelle\ArtistRole {
     }
 
     public function roleNameList(): array {
-        if (!isset($this->artistList)) {
-            $this->artistList = $this->artistList();
-        }
+        $this->artistList ??= $this->artistList();
         $list = [];
         foreach ($this->artistList as $artist) {
             $roleId = $artist['id_artist_role'];
-            if (!isset($list[$roleId])) {
-                $list[$roleId] = [];
-            }
+            $list[$roleId] ??= [];
             $list[$roleId][] = $artist['name'];
         }
         return $list;
@@ -152,15 +144,11 @@ class Request extends \Gazelle\ArtistRole {
     }
 
     public function roleList(): array {
-        if (!isset($this->artistList)) {
-            $this->artistList = $this->artistList();
-        }
+        $this->artistList ??= $this->artistList();
         $list = [];
         foreach ($this->artistList as $artist) {
             $roleName = $artist['slug'];
-            if (!isset($list[$roleName])) {
-                $list[$roleName] = [];
-            }
+            $list[$roleName] ??= [];
             $list[$roleName][] = [
                 'artist' => $this->manager->findById($artist['artist_id']),
                 'id'     => $artist['artist_id'],

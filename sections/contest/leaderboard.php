@@ -18,9 +18,7 @@ if (!empty($_POST['leaderboard'])) {
     $contest = new Contest((int)$_GET['id']);
 } else {
     $contest = $contestMan->currentContest();
-    if (is_null($contest)) {
-        $contest = array_last($prior);
-    }
+    $contest ??= array_last($prior);
 }
 
 $paginator = new Util\Paginator(CONTEST_ENTRIES_PER_PAGE, (int)($_GET['page'] ?? 1));

@@ -21,10 +21,8 @@ if (is_null($collage)) {
         // Looks like a URL
         $collage = $collMan->findById((int)$match['id']);
     }
-    if (is_null($collage)) {
-        // Must be a name of a collage
-        $collage = $collMan->findByName(trim($_REQUEST['name']));
-    }
+    // Must be a name of a collage
+    $collage ??= $collMan->findByName(trim($_REQUEST['name']));
     if (is_null($collage)) {
         json_die("failure", "collage not found");
     }

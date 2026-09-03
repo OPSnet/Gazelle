@@ -24,7 +24,7 @@ class Subscription extends \Gazelle\BaseUser {
      * (Un)subscribe from a forum thread.
      */
     public function subscribe(ForumThread $thread): int {
-        if ($this->isSubscribed($thread) !== false) {
+        if ($this->isSubscribed($thread)) {
             self::$db->prepared_query('
                 DELETE FROM users_subscriptions
                 WHERE UserID = ?

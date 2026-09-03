@@ -47,7 +47,7 @@ class RipLog extends \Gazelle\File {
     public function put(string $source): bool {
         // From a $_FILES post?
         if (is_uploaded_file($source)) {
-            return move_uploaded_file($source, $this->path()) !== false;
+            return move_uploaded_file($source, $this->path());
         }
         return parent::put((string)file_get_contents($source));
     }

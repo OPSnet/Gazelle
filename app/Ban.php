@@ -14,7 +14,7 @@ class Ban extends BasePgObject {
     }
 
     public function link(): string {
-        return sprintf("<a href=\"{$this->url()}\">IP {$this->ip()}</a>");
+        return "<a href=\"{$this->url()}\">IP {$this->ip()}</a>";
     }
 
     public function location(): string {

@@ -177,13 +177,9 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
                 ARTIST_GUEST    => ARTIST_SECTION_GUEST,
                 default         => $releaseTypeId,
             };
-            if (!isset($this->section[$sectionId])) {
-                $this->section[$sectionId] = [];
-            }
+            $this->section[$sectionId] ??= [];
             $this->section[$sectionId][$groupId] = true;
-            if (!isset($this->groupRole[$groupId])) {
-                $this->groupRole[$groupId] = [];
-            }
+            $this->groupRole[$groupId] ??= [];
             $this->groupRole[$groupId][] = $role;
             ++$this->artistRole[$role];
         }
@@ -302,9 +298,7 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
     }
 
     public function stats(): Stats\Artist {
-        if (!isset($this->stats)) {
-            $this->stats = new Stats\Artist($this->id);
-        }
+        $this->stats ??= new Stats\Artist($this->id);
         return $this->stats;
     }
 

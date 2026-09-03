@@ -695,9 +695,7 @@ class Request extends BasePgObject implements Bookmarked, CategoryHasArtist {
         $bounty  = $this->bountyTotal();
         $torrent = $torMan->findById($this->torrentId());
         $filler  = $userMan->findById($this->fillerId());
-        if (is_null($torrent)) {
-            $torrent = $torMan->findDeletedById($this->torrentId());
-        }
+        $torrent ??= $torMan->findDeletedById($this->torrentId());
 
         $updated = $this->pg()->query("
             update request set

@@ -127,9 +127,7 @@ if (!empty($_GET['categories'])) {
     }
 }
 
-if (!isset($_GET['tags_type'])) {
-    $_GET['tags_type'] = '1';
-}
+$_GET['tags_type'] ??= '1';
 
 if (!empty($_GET['tags'])) {
     $tagMan = new Manager\Tag();

@@ -362,9 +362,7 @@ class Users extends \Gazelle\Base {
         // away as it requires specialised handling (selecting a match among
         // a list, viewing a list of results) and so the joins are do not
         // resemble the usual state of affairs.
-        if (!isset($input['view'])) {
-            $input['view'] = 'username.joined.lastseen.inviter';
-        }
+        $input['view'] ??= 'username.joined.lastseen.inviter';
         $this->column = explode('.', $input['view']);
         foreach (
             [

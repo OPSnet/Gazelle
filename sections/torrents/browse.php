@@ -60,9 +60,7 @@ if (isset($_GET['searchsubmit'])) {
     $GroupResults = (bool)$Viewer->option('DisableGrouping2') === false;
 }
 
-if (!isset($_GET['tags_type'])) {
-    $_GET['tags_type'] = '1';
-}
+$_GET['tags_type'] ??= '1';
 
 $paginator = new Util\Paginator(TORRENTS_PER_PAGE, (int)($_GET['page'] ?? 1));
 $Search = new Search\Torrent(

@@ -76,15 +76,12 @@ class Privilege extends \Gazelle\BaseManager {
             foreach ($permission as $id => $perm) {
                 $perm = unserialize($perm);
                 foreach (array_keys($perm) as $p) {
-                    if (!isset($privilege[$p])) {
-                        // orphan permissions in the db that no longer do anything
-                        $privilege[$p] = [
-                            'can'         => [],
-                            'description' => $p,
-                            'name'        => $p,
-                            'orphan'      => 1
-                        ];
-                    }
+                    $privilege[$p] ??= [
+                        'can'         => [],
+                        'description' => $p,
+                        'name'        => $p,
+                        'orphan'      => 1
+                    ];
                     $privilege[$p]['can'][] = $id;
                 }
             }

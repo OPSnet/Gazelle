@@ -120,9 +120,7 @@ class Report extends \Gazelle\Base {
 
     public function pageSql(): string {
         $this->configure();
-        if (!isset($this->orderBy)) {
-            $this->orderBy = 'ORDER BY r.ReportedTime';
-        }
+        $this->orderBy ??= 'ORDER BY r.ReportedTime';
         return "SELECT r.ID FROM reportsv2 AS r "
             . (isset($this->join) ? implode(' ', $this->join) : '')
             . " WHERE " . implode(' AND ', $this->cond)

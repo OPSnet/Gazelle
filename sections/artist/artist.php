@@ -50,9 +50,7 @@ echo $Twig->render('artist/header.twig', [
 $artistReleaseType = [];
 $sections = $artist->sections();
 foreach ($sections as $sectionId => $groupList) {
-    if (!isset($artistReleaseType[$sectionId])) {
-        $artistReleaseType[$sectionId] = 0;
-    }
+    $artistReleaseType[$sectionId] ??= 0;
     $artistReleaseType[$sectionId]++;
 }
 ?>

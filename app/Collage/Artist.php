@@ -50,9 +50,7 @@ class Artist extends AbstractCollage {
             }
             $this->artists[$artist['ArtistID']]['count']++;
 
-            if (!isset($this->contributors[$artist['UserID']])) {
-                $this->contributors[$artist['UserID']] = 0;
-            }
+            $this->contributors[$artist['UserID']] ??= 0;
             $this->contributors[$artist['UserID']]++;
         }
         arsort($this->contributors);

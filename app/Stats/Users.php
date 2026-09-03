@@ -260,9 +260,7 @@ class Users extends \Gazelle\Base {
     }
 
     public function peerStat(): array {
-        if (!isset($this->info)) {
-            $this->info = [];
-        }
+        $this->info ??= [];
         if (!isset($this->info['xbt_files_users'])) {
             $stat = self::$cache->get_value('stat_xbt_fu');
             if ($stat === false) {
@@ -295,9 +293,7 @@ class Users extends \Gazelle\Base {
     }
 
     public function snatchTotal(): int {
-        if (!isset($this->info)) {
-            $this->info = [];
-        }
+        $this->info ??= [];
         if (!isset($this->info['snatch'])) {
             $total = self::$cache->get_value('stats_snatch');
             if ($total === false) {
@@ -315,9 +311,7 @@ class Users extends \Gazelle\Base {
      * @return int Number of enabled users (this is cached).
      */
     public function enabledUserTotal(): int {
-        if (!isset($this->info)) {
-            $this->info = [];
-        }
+        $this->info ??= [];
         if (!isset($this->info['enabled'])) {
             $total = self::$cache->get_value('stats_user_count');
             if ($total === false) {
@@ -346,9 +340,7 @@ class Users extends \Gazelle\Base {
     }
 
     public function activityStat(): array {
-        if (!isset($this->info)) {
-            $this->info = [];
-        }
+        $this->info ??= [];
         if (!isset($this->info['active'])) {
             $active = self::$cache->get_value('stats_user_active');
             if ($active === false) {

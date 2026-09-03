@@ -252,9 +252,7 @@ abstract class TorrentAbstract extends BaseAttrObject {
             }
             $ext = substr($file['ext'], 1); // skip over period
             if (preg_match('/^' . PRIMARY_EXT_REGEXP . '$/i', $ext)) {
-                if (!isset($map[$ext])) {
-                    $map[$ext] = 0;
-                }
+                $map[$ext] ??= 0;
                 ++$map[$ext];
             }
         }

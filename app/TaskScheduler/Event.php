@@ -9,9 +9,7 @@ class Event {
         public readonly int               $reference,
         protected \DateTimeImmutable|null $timestamp = null,
     ) {
-        if (is_null($this->timestamp)) {
-            $this->timestamp = new \DateTimeImmutable();
-        }
+        $this->timestamp ??= new \DateTimeImmutable();
     }
 
     public function timestamp(): \DateTimeImmutable {

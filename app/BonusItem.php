@@ -94,12 +94,11 @@ class BonusItem extends \Gazelle\BasePgObject {
         // scale the price up by BONUS_OTHER_TOKEN_SCALE percent.
         return (int)ceil(
             $this->price()
-            * pow(
-                1 + (BONUS_OTHER_TOKEN_SCALE / 100),
-                floor(max(0, $exchange['received'] - $exchange['sent'])
+            * (1 + BONUS_OTHER_TOKEN_SCALE / 100)
+                ** floor(
+                    max(0, $exchange['received'] - $exchange['sent'])
                     / BONUS_OTHER_TOKEN_INTERVAL
                 )
-            )
         );
     }
 

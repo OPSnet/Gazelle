@@ -249,9 +249,7 @@ class Helper {
         int         $interval = 5,
         string|null $useragent = null,
     ): int {
-        if (is_null($useragent)) {
-            $useragent = 'ua-' . randomString(12);
-        }
+        $useragent ??= 'ua-' . randomString(12);
         $db = \Gazelle\DB::DB();
         $db->prepared_query("
             INSERT INTO xbt_files_users
@@ -269,9 +267,7 @@ class Helper {
         int         $interval = 5,
         string|null $useragent = null,
     ): int {
-        if (is_null($useragent)) {
-            $useragent = 'ua-' . randomString(12);
-        }
+        $useragent ??= 'ua-' . randomString(12);
         $db = \Gazelle\DB::DB();
         $db->prepared_query("
             INSERT INTO xbt_files_users

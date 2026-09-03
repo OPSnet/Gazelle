@@ -89,9 +89,7 @@ while (true) { // break early on error
                 // ignore bogus artist role
                 continue;
             }
-            if (!isset($artistRole[$roleId])) {
-                $artistRole[$roleId] = [];
-            }
+            $artistRole[$roleId] ??= [];
             $artistRole[$roleId][] = $name;
             if (in_array($roleId, [ARTIST_ARRANGER, ARTIST_COMPOSER, ARTIST_CONDUCTOR, ARTIST_DJ, ARTIST_MAIN])) {
                 $main++;

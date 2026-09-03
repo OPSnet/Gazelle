@@ -148,9 +148,7 @@ class Report extends \Gazelle\BaseObject {
     public function torrent(): \Gazelle\Torrent|\Gazelle\TorrentDeleted|null {
         if (!isset($this->torrent)) {
             $this->torrent = $this->torManager->findById($this->torrentId());
-            if (is_null($this->torrent)) {
-                $this->torrent = $this->torManager->findDeletedById($this->torrentId());
-            }
+            $this->torrent ??= $this->torManager->findDeletedById($this->torrentId());
         }
         return $this->torrent;
     }

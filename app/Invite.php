@@ -10,8 +10,7 @@ class Invite extends Base {
     ) {}
 
     public function info(): array {
-        if (!isset($this->info)) {
-            $this->info = self::$db->rowAssoc("
+        $this->info ??= self::$db->rowAssoc("
                 SELECT InviterID AS user_id,
                     Email        AS email,
                     Expires      AS created,
@@ -19,8 +18,7 @@ class Invite extends Base {
                 FROM invites
                 WHERE InviteKey = ?
                 ", $this->key
-            ) ?? [];
-        }
+        ) ?? [];
         return $this->info;
     }
 

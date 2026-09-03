@@ -111,9 +111,7 @@ class Forum extends \Gazelle\BaseManager {
             while ($row = self::$db->next_row(MYSQLI_ASSOC)) {
                 $category = $row['categoryName'];
                 $row['AutoLock'] = ($row['AutoLock'] == '1');
-                if (!isset($toc[$category])) {
-                    $toc[$category] = [];
-                }
+                $toc[$category] ??= [];
                 $toc[$category][] = $row;
             }
             self::$cache->cache_value(self::CACHE_TOC_MAIN, $toc, 86400 * 10);

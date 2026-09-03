@@ -62,9 +62,7 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
         $list  = [];
         foreach ($this->thread() as $post) {
             [$postId, $userId, $created, $body, $editedUserID, $editedTime, $editedUsername] = array_values($post);
-            if (!isset($cache[$userId])) {
-                $cache[$userId] = $manager->findById($userId);
-            }
+            $cache[$userId] ??= $manager->findById($userId);
             $author = $cache[$userId];
             $list[] = [
                 'postId'         => $postId,
@@ -91,12 +89,10 @@ abstract class AbstractComment extends \Gazelle\BaseObject {
     }
 
     public function userId(): int {
-        if (!isset($this->userId)) {
-            $this->userId = (int)self::$db->scalar("
+        $this->userId ??= (int)self::$db->scalar("
                 SELECT AuthorID FROM comments WHERE ID = ?
                 ", $this->id
-            );
-        }
+        );
         return $this->userId;
     }
 

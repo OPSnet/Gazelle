@@ -84,15 +84,9 @@ if (!isset($Properties)) {
     }
 }
 
-if (!isset($Properties)) {
-    $Properties = false;
-}
-if (!isset($Err)) {
-    $Err = false;
-}
-if (!isset($categoryId)) {
-    $categoryId = CATEGORY_MUSIC;
-}
+$Properties ??= false;
+$Err        ??= false;
+$categoryId ??= CATEGORY_MUSIC;
 $uploadForm = new Upload($Viewer, $Properties, $Err);
 
 View::show_header('Upload', ['js' => 'upload,validate_upload,musicbrainz,bbcode', 'css' => 'musicbrainz']);

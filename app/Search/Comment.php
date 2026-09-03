@@ -112,9 +112,7 @@ class Comment extends \Gazelle\Base {
             } elseif ($this->commentType === CommentType::tgroup) {
                 $tgroupList[$result['id_type']] = $tgroupMan->findById($result['id_type']);
             }
-            if (!isset($userList[$result['id_user']])) {
-                $userList[$result['id_user']] = $userMan->findById($result['id_user']);
-            }
+            $userList[$result['id_user']] ??= $userMan->findById($result['id_user']);
             if (isset($result['id_editor']) && !isset($userList[$result['id_editor']])) {
                 $userList[$result['id_editor']] = $userMan->findById($result['id_editor']);
             }

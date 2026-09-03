@@ -11,9 +11,7 @@ namespace Gazelle;
 
 $torMan  = new Manager\Torrent();
 $torrent = $torMan->findById((int)$_GET['torrentid']);
-if (is_null($torrent)) {
-    $torrent = $torMan->findDeletedById((int)$_GET['torrentid']);
-}
+$torrent ??= $torMan->findDeletedById((int)$_GET['torrentid']);
 if (is_null($torrent)) {
     Error404::error();
 }

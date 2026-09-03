@@ -520,7 +520,7 @@ class Mysql {
     }
 
     public function begin_transaction(): void {
-        if (!$this->LinkID !== false) {
+        if (!$this->LinkID) {
             $this->connect();
         }
         if ($this->LinkID !== false) {

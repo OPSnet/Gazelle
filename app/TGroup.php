@@ -305,9 +305,7 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
         if ($this->categoryName() !== 'Music') {
             return null;
         }
-        if (!isset($this->artistRole)) {
-            $this->artistRole = new ArtistRole\TGroup($this, new Manager\Artist());
-        }
+        $this->artistRole ??= new ArtistRole\TGroup($this, new Manager\Artist());
         return $this->artistRole;
     }
 
@@ -398,9 +396,7 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
 
     public function releaseTypeName(): ?string {
         static $releaseTypes;
-        if (is_null($releaseTypes)) {
-            $releaseTypes = new ReleaseType()->list();
-        }
+        $releaseTypes ??= new ReleaseType()->list();
         return $this->info()['ReleaseType'] == 0 ? null : $releaseTypes[$this->releaseType()];
     }
 
@@ -436,9 +432,7 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
      * Delegate stats methods to the Stats\TGroup class
      */
     public function stats(): Stats\TGroup {
-        if (!isset($this->stats)) {
-            $this->stats = new Stats\TGroup($this->id);
-        }
+        $this->stats ??= new Stats\TGroup($this->id);
         return $this->stats;
     }
 

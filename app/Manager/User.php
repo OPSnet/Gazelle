@@ -367,9 +367,7 @@ class User extends \Gazelle\BaseManager {
             $list = self::$db->to_array(false, MYSQLI_ASSOC);
             $staff = [];
             foreach ($list as $user) {
-                if (!isset($staff[$user['staffGroup']])) {
-                    $staff[$user['staffGroup']] = [];
-                }
+                $staff[$user['staffGroup']] ??= [];
                 $staff[$user['staffGroup']][] = $user['ID'];
             }
             self::$cache->cache_value('idstaff', $staff, 3600);

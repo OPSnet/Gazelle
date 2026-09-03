@@ -18,9 +18,7 @@ $userMan = new Manager\User();
 $JsonComments = [];
 foreach ($thread as $Post) {
     [$PostID, $AuthorID, $AddedTime, $Body, $EditedUserID, $EditedTime, $EditedUsername] = array_values($Post);
-    if (!isset($userCache[$AuthorID])) {
-        $userCache[$AuthorID] = $userMan->findById((int)$AuthorID);
-    }
+    $userCache[$AuthorID] ??= $userMan->findById((int)$AuthorID);
     $author = $userCache[$AuthorID];
     $JsonComments[] = [
         'postId'         => $PostID,

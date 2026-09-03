@@ -128,9 +128,7 @@ class UserCreator extends Base {
                 (SELECT s.ID FROM stylesheets s WHERE s.Default = '1' LIMIT 1))
             ", ...$mainArgs
         );
-        if (!isset($this->id)) {
-            $this->id = self::$db->inserted_id();
-        }
+        $this->id ??= self::$db->inserted_id();
         $user = new User($this->id);
 
         // create users_info row

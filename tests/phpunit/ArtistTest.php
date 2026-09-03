@@ -646,9 +646,7 @@ class ArtistTest extends TestCase {
                 'zac' . randomString(5) . '.off',
             ] as $name
         ) {
-            if (is_null($composer)) {
-                $composer = $name;
-            }
+            $composer ??= $name;
             $artist = $manager->create($name);
             $this->artistIdList[] = $artist->id;
             $tgroup = Helper::makeTGroupMusic(

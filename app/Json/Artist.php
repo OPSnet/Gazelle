@@ -50,9 +50,7 @@ class Artist extends \Gazelle\Json {
 
             $tagList = $tgroup->tagNameList();
             foreach ($tagList as $tag) {
-                if (!isset($Tags[$tag])) {
-                    $Tags[$tag] = ['name' => $tag, 'count' => 0];
-                }
+                $Tags[$tag] ??= ['name' => $tag, 'count' => 0];
                 $Tags[$tag]['count']++;
             }
 

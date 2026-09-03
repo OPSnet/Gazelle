@@ -24,13 +24,9 @@ class Forum extends \Gazelle\Json {
                     && strtotime($thread->lastPostTime()) > $this->user->forumCatchupEpoch()
                 );
 
-            if (!isset($userCache[$thread->authorId()])) {
-                $userCache[$thread->authorId()] = $this->userMan->findById($thread->authorId());
-            }
+            $userCache[$thread->authorId()] ??= $this->userMan->findById($thread->authorId());
             $author = $userCache[$thread->authorId()];
-            if (!isset($userCache[$thread->lastAuthorId()])) {
-                $userCache[$thread->lastAuthorId()] = $this->userMan->findById($thread->lastAuthorId());
-            }
+            $userCache[$thread->lastAuthorId()] ??= $this->userMan->findById($thread->lastAuthorId());
             $lastAuthor = $userCache[$thread->lastAuthorId()];
 
             $list[] = [

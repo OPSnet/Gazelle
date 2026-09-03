@@ -33,8 +33,7 @@ class AutoEnable extends \Gazelle\BaseUser {
     }
 
     public function info(): array {
-        if (!isset($this->info)) {
-            $this->info = self::$db->rowAssoc("
+        $this->info ??= self::$db->rowAssoc("
                 SELECT uer.UserID        AS user_id,
                     uer.Email            AS email,
                     uer.IP               AS ipv4,
@@ -49,8 +48,7 @@ class AutoEnable extends \Gazelle\BaseUser {
                 LEFT JOIN users_info ui USING (UserID)
                 WHERE uer.ID = ?
                 ", $this->id
-            );
-        }
+        );
         return $this->info;
     }
 
