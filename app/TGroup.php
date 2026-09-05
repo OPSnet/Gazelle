@@ -281,6 +281,9 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
     }
 
     protected function fetchIsSnatched(): bool {
+        if (!$this->requestContext()->hasViewer()) {
+            return false;
+        }
         $viewer = $this->requestContext()->viewer();
         return $viewer->option('ShowSnatched') && (bool)self::$db->scalar("
             SELECT 1

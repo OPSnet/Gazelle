@@ -1,0 +1,35 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+namespace Gazelle;
+
+require __DIR__ . '/../lib/bootstrap.php';
+
+$user = new Manager\User()->find($argv[1]);
+if (!$user) {
+    die("user not found");
+}
+$execute = ($argv[2] ?? '') === '--execute';
+
+$db = DB::DB();
+$db->prepared_query("
+    SELECT ID
+    FROM torrents
+    WHERE Scene = '1'
+        AND UserID = ?
+    ORDER BY ID
+    ", $user->id
+);
+
+$n      = 0;
+$torMan = new Manager\Torrent();
+foreach ($db->collect(0) as $torrentId) {
+    ++$n;
+    $torrent = $torMan->findById($torrentId);
+    echo "$n: $torrentId – {$torrent->fullName()}\n"; 
+    if ($execute) {
+        $torrent->setField('Scene', '0')->modify();
+    }
+}
