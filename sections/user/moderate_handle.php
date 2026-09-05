@@ -303,10 +303,12 @@ if ($Viewer->permitted('users_warn')) {
             $body,
         );
     } elseif ($weeks || $extend) {
-        $staffReason = $reason ?: ($extend ? 'warning extension' : 'no reason');
-        $weeks = $extend ?: $weeks;
-        $user->warning()->warn($weeks, $staffReason, $Viewer, $_POST['WarnReason'] ?? 'none given');
-        $duration = 'week' . plural($weeks);
+        $user->warning()->warn(
+            $extend ?: $weeks,
+            trim($_POST['WarnReason'] ?? ($extend ? 'warning extension' : 'no reason')),
+            $Viewer,
+            $_POST['WarnReason'] ?? 'none given'
+        );
     }
 }
 
