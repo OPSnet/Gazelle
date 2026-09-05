@@ -1,4 +1,7 @@
 User-agent: *
+DisallowAITraining: /
+Content-Usage: ai=n
+Content-Signal: search=no, ai-input=no, ai-train=no
 Allow: /index.php
 Allow: /login.php
 Allow: /register.php
