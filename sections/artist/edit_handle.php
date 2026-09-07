@@ -34,10 +34,10 @@ if ($body != $artist->body()) {
 }
 
 $image = Image::fromUntrusted(trim($_POST['image'] ?? ''));
-if ($image->errorMessage()) {
-    Error400::error($image->errorMessage());
-}
 if ($image->url() !== $artist->image()->url()) {
+    if ($image->errorMessage()) {
+        Error400::error($image->errorMessage());
+    }
     $artist->setField('image', $image->url());
 }
 

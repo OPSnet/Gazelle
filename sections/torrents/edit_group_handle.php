@@ -82,10 +82,10 @@ if (!isset($_POST['image'])) {
     $image = new Image(null);
 } else {
     $image = Image::fromUntrusted($_POST['image']);
-    if ($image->errorMessage()) {
-        Error400::error($image->errorMessage());
-    }
     if ($tgroup->image()->url() !== $image->url()) {
+        if ($image->errorMessage()) {
+            Error400::error($image->errorMessage());
+        }
         $tgroup->setField('WikiImage', $image->url());
         $newRevision = true;
     }

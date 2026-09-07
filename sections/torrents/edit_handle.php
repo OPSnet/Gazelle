@@ -135,15 +135,6 @@ switch ($torrent->group()->categoryName()) {
 
 $Err = $Validate->validate($_POST) ? false : $Validate->errorMessage();
 
-if (!$Err && isset($Properties['Image'])) { /** @phpstan-ignore-line */
-    $image = Image::fromUntrusted($Properties['Image']);
-    if ($image->errorMessage()) {
-        $Err = $image->errorMessage();
-    } else {
-        $Properties['Image'] = $image->url();
-    }
-}
-
 if ($Err) {
     Error400::error($Err);
 }

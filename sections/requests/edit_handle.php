@@ -71,11 +71,11 @@ while (true) {
 
     if (isset($_POST['image'])) {
         $image = Image::fromUntrusted($_POST['image']);
-        if ($image->errorMessage()) {
-            $error = $image->errorMessage();
-            break;
-        }
         if ($image->url() !== $request->image()->url()) {
+            if ($image->errorMessage()) {
+                $error = $image->errorMessage();
+                break;
+            }
             $request->setField('image', $image->url());
         }
     }
