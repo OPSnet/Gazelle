@@ -69,6 +69,9 @@ $Validate = new Util\Validator();
 switch ($torrent->group()->categoryName()) {
     case 'Music':
         if (!is_null($Properties['RemasterYear'])) {
+            if ($Properties['RemasterYear'] < 1925) {
+                Error400::error("Year is too faar in the past");
+            }
             $future = (int)date('Y') + 1;
             if ($Properties['RemasterYear'] > $future && !$Viewer->permitted('users_mod')) {
                 Error400::error(

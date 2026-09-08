@@ -109,6 +109,8 @@ if ($tgroup->year() !== $year) {
         json_error(
             "You may not specify a year that far in the future. Instead, set it to $future and report the upload afterwards to have the year set as appropriate by staff."
         );
+    } elseif ($year < 1925) {
+        json_error("Year is too far in the past");
     }
     $tgroup->setField('Year', $year);
     $log[] = "year {$tgroup->year()} → $year";

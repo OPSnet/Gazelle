@@ -36,6 +36,11 @@ if (!$newName) {
     Error400::error("Cannot change category to same category ({$newName})");
 }
 
+$year = (int)($_POST['year'] ?? 0);
+if ($year < 1925 or $year > (int)date('Y') + 1) {
+    Error400::error("Year is out of range");
+}
+
 $new = $tgMan->changeCategory(
     old:         $old,
     torrent:     $torrent,
@@ -43,7 +48,7 @@ $new = $tgMan->changeCategory(
     artistName:  trim($_POST['artist'] ?? ''),
     name:        $title,
     releaseType: (int)($_POST['releasetype'] ?? 0),
-    year:        (int)($_POST['year'] ?? 0),
+    year:        $year,
     artistMan:   new Manager\Artist(),
     user:        $Viewer,
 );

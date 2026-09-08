@@ -154,7 +154,7 @@ if ($categoryName === 'Music') {
     ]);
     if (!$Properties['GroupID']) {
         $Validate->setFields([
-            ['year', true, 'number','The year of the original release must be entered.', ['maxlength' => $nextYear]],
+            ['year', true, 'number','The year of the original release must be entered.', ['range' => [1925, $nextYear]]],
             ['releasetype', true, 'inarray','Please select a valid release type.', ['inarray' => array_keys(new ReleaseType()->list())]],
             ['record_label', false, 'string','Record label must be between 1 and 80 characters.', ['range' => [1, 80]]],
             ['catalogue_number', false, 'string','Catalogue Number must be between 1 and 80 characters.', ['range' => [1, 80]]],
@@ -174,7 +174,8 @@ if ($categoryName === 'Music') {
             );
         } else {
             $Validate->setField('remaster_year', true, 'number',
-                'The year of the edition must be entered.', ['maxlength' => $nextYear]);
+                'The year of the edition must be entered.', ['range' => [1925, $nextYear]]
+            );
         }
     }
 } elseif (in_array($categoryName, ['Audiobooks', 'Comedy'], true)) {
