@@ -672,19 +672,48 @@ class UserTest extends TestCase {
     }
 
     public function testUserReleaseOrder(): void {
-        $releaseOrder = new ReleaseType()->extendedList();
         $this->assertSame(
             [],
             $this->user->releaseOrder([]),
             'user-no-release-order',
         );
+        $extended = new ReleaseType()->extendedList();
         $this->assertCount(
-            count($releaseOrder),
+            count($extended),
             array_filter(
-                $this->user->releaseOrder($releaseOrder),
+                $this->user->releaseOrder($extended),
                 fn ($r) => $r['checked'] === 0,
             ),
             'user-default-release-order',
+        );
+        $this->user->modifyOption(
+            'SortHide',
+            [
+                10 /* Demo */           => true,
+                6  /* Anthology */      => false,
+                ARTIST_SECTION_COMPOSER => true,
+                3  /* Soundtrack */     => true,
+            ],
+        );
+        $userExtended = $this->user->releaseOrder($extended);
+        $this->assertSame(
+            [
+                "id"      => "6_0",
+                "relid"   => 6,
+                "checked" => false,
+                "label"   => "Anthology"
+            ],
+            $userExtended[1],
+            'user-custom-release-order',
+        );
+        $this->assertSame(
+            [
+                "Demo",
+                "Anthology",
+                "Soundtrack",
+            ],
+            array_slice($this->user->releaseOrderLabel($extended), 0, 3),
+            'user-custom-release-label',
         );
     }
 

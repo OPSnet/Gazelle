@@ -81,7 +81,7 @@ switch ($type) {
 
 echo $Twig->render('report/create.twig', [
     'id'          => $id,
-    'release'     => new ReleaseType()->list(),
+    'release'     => $Viewer->releaseOrderLabel(new ReleaseType()->list()),
     'report'      => $report,
     'report_type' => $reportType,
     'type'        => $type,

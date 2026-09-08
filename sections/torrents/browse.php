@@ -99,7 +99,7 @@ echo $Twig->render('torrent/browse-header.twig', [
     'input'         => $_GET,
     'filtered'      => $Search->has_filters(),
     'grouped'       => $GroupResults,
-    'release_type'  => new ReleaseType()->list(),
+    'release_type'  => $Viewer->releaseOrderLabel(new ReleaseType()->list()),
     'results_total' => $RealNumResults,
     'results_shown' => $NumResults,
     'show_basic'    => !$advancedSearch,

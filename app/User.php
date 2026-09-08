@@ -1346,6 +1346,7 @@ class User extends BaseAttrObject {
 
     /**
      * Generates a check list of release types, ordered by the user or default
+     * @param array<int> $releaseType
      */
     public function releaseOrder(array $releaseType): array {
         if ($this->option('SortHide') === []) {
@@ -1361,6 +1362,7 @@ class User extends BaseAttrObject {
 
         $order = [];
         foreach ($sort as $key => $val) {
+            $key = (int)$key;
             if (isset($defaults)) {
                 $checked = $defaults && isset($this->option('HideTypes')[$key]);
             } elseif (isset($releaseType[$key])) {
@@ -1369,9 +1371,31 @@ class User extends BaseAttrObject {
             } else {
                 $checked = true;
             }
-            $order[] = ['id' => $key . '_' . (int)(!!$checked), 'checked' => $checked, 'label' => $val];
+            $order[] = [
+                'id'      => $key . '_' . (int)(!!$checked),
+                'relid'   => $key,
+                'checked' => $checked,
+                'label'   => $val,
+            ];
         }
         return $order;
+    }
+
+    /**
+     * The releaseType list shown on the upload form, following
+     * the order set for artist pages.
+     */
+    public function releaseOrderLabel(array $releaseType): array {
+        $ordered = [];
+        foreach (
+            array_filter(
+                $this->releaseOrder($releaseType),
+                fn ($r) => $r['relid'] < 1000
+            ) as $r
+        ) {
+            $ordered[$r['relid']] = $r['label'];
+        }
+        return $ordered;
     }
 
     public function tokenCount(): int {

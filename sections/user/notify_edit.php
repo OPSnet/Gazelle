@@ -35,6 +35,6 @@ echo $Twig->render('user/edit-notification-filter.twig', [
             'Users'         => '',
         ]
     ],
-    'release_type' => new ReleaseType()->list(),
+    'release_type' => $Viewer->releaseOrderLabel(new ReleaseType()->list()),
     'viewer'       => $Viewer,
 ]);

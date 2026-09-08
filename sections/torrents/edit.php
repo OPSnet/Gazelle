@@ -88,7 +88,7 @@ if ($torrent->remasterYear() !== null || $Viewer->permitted('edit_unknowns')) {
 
 echo $Twig->render('torrent/edit-torrent.twig', [
     'artist'            => $artist,
-    'release_type_list' => new ReleaseType()->list(),
+    'release_type_list' => $Viewer->releaseOrderLabel(new ReleaseType()->list()),
     'torrent'           => $torrent,
     'viewer'            => $Viewer,
 ]);

@@ -28,7 +28,7 @@ if (isset($_GET['artistid'])) {
         $categoryName = $tgroup->categoryName();
         $title        = $tgroup->name();
         $year         = $tgroup->year();
-        $releaseType  = $tgroup->releaseType();
+        $releaseType  = $Viewer->releaseOrderLabel(new ReleaseType()->list());
         $image        = $tgroup->image();
         $tags         = implode(', ', $tgroup->tagNameList());
         $artistRole   = $tgroup->artistRole()?->nameList() ?? [];

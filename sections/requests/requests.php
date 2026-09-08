@@ -100,7 +100,7 @@ echo $Twig->render('request/index.twig', [
     'media_strict'    => $mediaStrict,
     'initial'         => $initial,
     'paginator'       => $paginator,
-    'release_types'   => new \Gazelle\ReleaseType()->list(),
+    'release_types'   => $Viewer->releaseOrderLabel(new ReleaseType()->list()),
     'result'          => $search->page($paginator->limit(), $paginator->offset()),
     'search'          => $search,
     'search_text'     => $_GET['search'] ?? null,

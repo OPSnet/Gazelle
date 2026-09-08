@@ -27,7 +27,7 @@ echo $Twig->render('tgroup/edit.twig', [
         ) === [],
     'leech_reason' => Enum\LeechReason::cases(),
     'leech_type'   => Enum\LeechType::cases(),
-    'release_type' => new ReleaseType()->list(),
+    'release_type' => $Viewer->releaseOrderLabel(new ReleaseType()->list()),
     'size'         => NEUTRAL_LEECH_THRESHOLD,
     'tgroup'       => $tgroup->showFallbackImage(false),
     'unit'         => NEUTRAL_LEECH_UNIT,

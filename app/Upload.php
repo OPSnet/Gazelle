@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Gazelle;
 
 use Gazelle\Util\Textarea;
+use OrpheusNET\Logchecker\Logchecker;
 
 class Upload extends Base {
     final public const TORRENT_INPUT_ACCEPT = ['application/x-bittorrent', '.torrent'];
@@ -137,10 +138,12 @@ class Upload extends Base {
             'description_album'   => $this->albumDescription(),
             'description_release' => $this->releaseDescription(),
             'is_uploaded'         => $this->isUploaded,
-            'logchecker_accept'   => \OrpheusNET\Logchecker\Logchecker::getAcceptValues(),
-            'release_type'        => new ReleaseType()->list(),
+            'logchecker_accept'   => Logchecker::getAcceptValues(),
+            'release_type'        => $this->user->releaseOrderLabel(new ReleaseType()->list()),
             'tag_list'            => $GenreTags,
-            'tgroup'              => $this->isUploaded && is_array($this->Torrent) ? $manager->findById($this->Torrent['GroupID']) : null,
+            'tgroup'              => $this->isUploaded && is_array($this->Torrent)
+                ? $manager->findById($this->Torrent['GroupID'])
+                : null,
             'torrent'             => $this->Torrent,
             'torrent_flags'       => Enum\TorrentFlag::cases(),
             'user'                => $this->user,

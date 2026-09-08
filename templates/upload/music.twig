@@ -23,6 +23,7 @@
 {%  endfor %}
             </select>
             <br>Please take the time to fill this out correctly (especially when adding Compilations and Anthologies). Need help? Try reading <a href="wiki.php?action=article&amp;id=58" target="_blank">this wiki article</a> or searching <a href="https://musicbrainz.org/search" target="_blank">MusicBrainz</a>.
+            <br>The displayed order of release types can be adjusted in <a href="user.php?action=edit&id={{ user.id }}#order-reltype">user settings</a>.
         </td>
     </tr>
 {%  include 'upload/cover.twig' with {'is_uploaded': is_uploaded, 'image': torrent.Image} only %}

@@ -36,7 +36,7 @@ if (isset($returnEdit)) {
     $description     = $request->description();
     $year            = $request->year();
     $tags            = implode(', ', $request->tagNameList());
-    $releaseType     = $request->releaseType();
+    $releaseType     = $Viewer->releaseOrderLabel(new ReleaseType()->list());
     $catalogueNumber = $request->catalogueNumber();
 
     $encoding        = $request->encoding();
