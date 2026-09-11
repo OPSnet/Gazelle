@@ -39,10 +39,10 @@ class Bookmark extends \Gazelle\BaseUser {
 
     public function flush(): static {
         self::$cache->delete_multi([
-            sprintf(self::CACHE_KEY, 'artist',  $this->id),
-            sprintf(self::CACHE_KEY, 'collage', $this->id),
-            sprintf(self::CACHE_KEY, 'request', $this->id),
-            sprintf(self::CACHE_KEY, 'tgroup',  $this->id),
+            sprintf(self::CACHE_KEY, BookmarkType::artist->name,  $this->id),
+            sprintf(self::CACHE_KEY, BookmarkType::collage->name, $this->id),
+            sprintf(self::CACHE_KEY, BookmarkType::request->name, $this->id),
+            sprintf(self::CACHE_KEY, BookmarkType::tgroup->name,  $this->id),
         ]);
         unset($this->bookmarkList);
         return $this;
@@ -304,10 +304,9 @@ class Bookmark extends \Gazelle\BaseUser {
             ', $this->id
         );
         self::$cache->delete_multi([
-            sprintf(self::CACHE_KEY, 'tgroup', $this->id),
-            "bookmarks_group_ids_" . $this->id,
+            sprintf(self::CACHE_KEY, BookmarkType::tgroup->name, $this->id),
         ]);
-        $this->flush();
+        unset($this->bookmarkList);
         return $affected;
     }
 
@@ -324,8 +323,62 @@ class Bookmark extends \Gazelle\BaseUser {
         if ($affected && $object->bookmarkType() === BookmarkType::tgroup) {
             new TGroup($object->id())->stats()->increment('bookmark_total', -1);
         }
-        self::$cache->delete_value(sprintf(self::CACHE_KEY, $object->bookmarkType()->name, $this->id));
-        $this->flush();
+        self::$cache->delete_value(
+            sprintf(self::CACHE_KEY, BookmarkType::tgroup->name, $this->id)
+        );
+        unset($this->bookmarkList);
+        return $affected;
+    }
+
+    /**
+     * Uses (checkboxes) $_POST['remove'] to delete entries.
+     * @param $list array<int, int>
+     */
+    public function removeList(array $list): int {
+        $affected = $this->pg()->query("
+            delete from bookmark_tgroup
+            where id_user = $1
+                and id_tgroup = any($2)
+            ", $this->id,
+            $this->pg()->integerConverter()->output($list)
+        );
+        self::$cache->delete_value(
+            sprintf(self::CACHE_KEY, BookmarkType::tgroup->name, $this->id)
+        );
+        unset($this->bookmarkList);
+        return $affected;
+    }
+
+    /**
+     * Uses $_POST['sort'] values to update entries.
+     * @param $list array<int, int>
+     */
+    public function modifyList(array $list): int {
+        if ($list === []) {
+            return 0;
+        }
+        $args         = [$this->id];
+        $placeholders = [];
+        foreach ($list as $tgroupId => $sequence) {
+            $placeholders[] = sprintf(
+                '($1,$%d,$%d)',
+                count($args) + 1, count($args) + 2,
+            );
+            $args = array_merge($args,  [(int)$tgroupId, (int)$sequence]);
+        }
+        $affected = $this->pg()->query("
+            insert into bookmark_tgroup
+                (id_user, id_tgroup, seq)
+            values " . implode(', ', $placeholders) . "
+            on conflict (id_tgroup, id_user)
+                do update set
+                    seq = EXCLUDED.seq
+            ", ...$args
+        );
+        self::$cache->delete_value(
+            sprintf(self::CACHE_KEY, BookmarkType::tgroup->name, $this->id)
+        );
+        unset($this->bookmarkList);
         return $affected;
     }
 

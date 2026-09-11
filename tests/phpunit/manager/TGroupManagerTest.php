@@ -127,33 +127,33 @@ class TGroupManagerTest extends TestCase {
         );
     }
 
-    public function testTGroupBookmarkEditor(): void {
+    public function testTGroupBookmarkBulkEdit(): void {
         $this->tgroupList[] = Helper::makeTGroupMusic(
             name:       'phpunit tgman ' . randomString(6),
             artistName: [[ARTIST_MAIN], ['phpunit tgman ' . randomString(12)]],
             tagName:    ['neo.folk'],
             user:       $this->user,
         );
-        $editor = new Editor\UserBookmark($this->user->id);
+        $bookmarker = new User\Bookmark($this->user);
         $this->assertSame(
             0,
-            $editor->modify([]),
-            'tgroup-bookmark-editor-no-modify',
+            $bookmarker->modifyList([]),
+            'tgroup-bookmark-bulk-no-modify',
         );
         $this->assertSame(
             2,
-            $editor->modify([
+            $bookmarker->modifyList([
                 $this->tgroupList[0]->id => 10,
                 $this->tgroupList[1]->id => 20,
             ]),
-            'tgroup-bookmark-editor-modify',
+            'tgroup-bookmark-bulk-modify',
         );
         $this->assertSame(
             1,
-            $editor->remove([
+            $bookmarker->removeList([
                 $this->tgroupList[1]->id,
             ]),
-            'tgroup-bookmark-editor-remove',
+            'tgroup-bookmark-bulk-remove',
         );
     }
 }

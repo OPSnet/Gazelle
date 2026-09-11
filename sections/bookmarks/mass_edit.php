@@ -9,13 +9,13 @@ namespace Gazelle;
 authorize();
 
 if ($_POST['type'] === 'torrents') {
-    $editor = new Editor\UserBookmark($Viewer);
+    $bookmarker = new User\Bookmark($Viewer);
     if (isset($_POST['update']) && $_POST['sort'] !== []) {
-        $editor->modify($_POST['sort']);
+        $bookmarker->modifyList($_POST['sort']);
     } elseif (isset($_POST['delete'])) {
         $remove = array_keys($_POST['remove']);
         if ($remove !== []) {
-            $editor->remove($remove);
+            $bookmarker->removeList($remove);
         }
     }
 }
