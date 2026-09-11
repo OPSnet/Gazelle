@@ -170,7 +170,6 @@ class User extends BaseAttrObject {
                 uls.Downloaded,
                 p.Level AS userclass_level,
                 p.Name  AS userclass_name,
-                if(p.Level >= (SELECT Level FROM permissions WHERE ID = ?), 1, 0) as isStaff,
                 uf.tokens AS FLTokens,
                 coalesce(ub.points, 0) AS BonusPoints,
                 la.Type as locked_account
@@ -182,7 +181,7 @@ class User extends BaseAttrObject {
             LEFT JOIN user_bonus         AS ub ON (ub.user_id = um.ID)
             LEFT JOIN locked_accounts    AS la ON (la.UserID = um.ID)
             WHERE um.ID = ?
-            ", FORUM_MOD, $this->id
+            ", $this->id
         );
         $this->info = self::$db->next_record(MYSQLI_ASSOC);
         self::$db->set_query_id($qid);
@@ -710,7 +709,7 @@ class User extends BaseAttrObject {
     /**
      * Checks whether user has the permission to create a forum.
      *
-     * @return boolean true if user has permission
+     * @return boolean user is allowed to create a thread
      */
     public function createAccess(Forum $forum): bool {
         return $this->forumAccess($forum, $forum->minClassCreate());
@@ -740,8 +739,7 @@ class User extends BaseAttrObject {
      * @return bool the user is up to date
      */
     public function hasReadLastPost(Forum $forum): bool {
-        return $forum->isLocked()
-            || $this->lastReadInThread($forum->lastThread()) >= $forum->lastPostId()
+        return $this->lastReadInThread($forum->lastThread()) >= $forum->lastPostId()
             || $this->forumCatchupEpoch() >= $forum->lastPostEpoch();
     }
 
@@ -1121,7 +1119,7 @@ class User extends BaseAttrObject {
     }
 
     public function isStaff(): bool {
-        return (bool)$this->info()['isStaff'];
+        return $this->info()['userclass_level'] >= CLASSLEVEL_STAFF;
     }
 
     public function isFLS(): bool {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\User;
 
 use Gazelle\Enum\NotificationType;
@@ -38,7 +40,7 @@ class Quote extends \Gazelle\BaseUser {
             $notifMan->pushableTokensById([$this->user->id], NotificationType::INBOX),
             "{$quoter->username()} quoted you on the forum",
             "",
-            SITE_URL . '/' . $postMan->findById($postId)->location()
+            $postMan->findById($postId)->publicLocation()
         );
         $this->flush();
 

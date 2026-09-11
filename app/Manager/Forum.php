@@ -1,26 +1,30 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\Manager;
 
+use Gazelle\User;
+
 class Forum extends \Gazelle\BaseManager {
-    protected const CACHE_TOC_MAIN   = 'forum_toc_main';
-    protected const CACHE_LIST       = 'forum_list';
-    protected const ID_KEY           = 'zz_f_%d';
+    protected const CACHE_TOC_MAIN = 'forum_toc_main';
+    protected const CACHE_LIST     = 'forum_list';
+    protected const ID_KEY         = 'zz_f_%d';
 
     /**
      * Create a forum
      */
     public function create(
-        \Gazelle\User $user,
-        int $sequence,
-        int $categoryId,
-        string $name,
-        string $description,
-        int $minClassRead,
-        int $minClassWrite,
-        int $minClassCreate,
-        bool $autoLock,
-        int $autoLockWeeks,
+        User       $user,
+        int        $sequence,
+        int        $categoryId,
+        string     $name,
+        string     $description,
+        int        $minClassRead,
+        int        $minClassWrite,
+        int        $minClassCreate,
+        bool       $autoLock,
+        int        $autoLockWeeks,
     ): \Gazelle\Forum {
         self::$db->prepared_query("
             INSERT INTO forums
@@ -119,7 +123,7 @@ class Forum extends \Gazelle\BaseManager {
         return $toc;
     }
 
-    public function tableOfContents(\Gazelle\User $user): array {
+    public function tableOfContents(User $user): array {
         $toc = $this->tableOfContentsMain();
         $userToc = [];
         $autosubList = $this->forumAutosubscribeList($user);
@@ -225,28 +229,28 @@ class Forum extends \Gazelle\BaseManager {
         return [$cond, $args];
     }
 
-    public function subscribedForumTotal(\Gazelle\User $user): int {
+    public function subscribedForumTotal(User $user): int {
         [$cond, $args] = $this->configureForUser($user);
         return (int)self::$db->scalar("
             SELECT count(*)
-            FROM users_subscriptions AS s
-            LEFT JOIN forums_last_read_topics AS l ON (l.UserID = s.UserID AND l.TopicID = s.TopicID)
-            INNER JOIN forums_topics AS t ON (t.ID = s.TopicID)
-            INNER JOIN forums AS f ON (f.ID = t.ForumID)
+            FROM users_subscriptions          s
+            LEFT JOIN forums_last_read_topics l ON (l.UserID = s.UserID AND l.TopicID = s.TopicID)
+            INNER JOIN forums_topics          t ON (t.ID = s.TopicID)
+            INNER JOIN forums                 f ON (f.ID = t.ForumID)
             WHERE s.UserID = ?
                 AND " . implode(' AND ', $cond),
             $user->id, ...$args
         );
     }
 
-    public function unreadSubscribedForumTotal(\Gazelle\User $user): int {
+    public function unreadSubscribedForumTotal(User $user): int {
         [$cond, $args] = $this->configureForUser($user);
         return (int)self::$db->scalar("
             SELECT count(*)
-            FROM users_subscriptions AS s
-            LEFT JOIN forums_last_read_topics AS l ON (l.UserID = s.UserID AND l.TopicID = s.TopicID)
-            INNER JOIN forums_topics AS t ON (t.ID = s.TopicID)
-            INNER JOIN forums AS f ON (f.ID = t.ForumID)
+            FROM users_subscriptions          s
+            LEFT JOIN forums_last_read_topics l ON (l.UserID = s.UserID AND l.TopicID = s.TopicID)
+            INNER JOIN forums_topics          t ON (t.ID = s.TopicID)
+            INNER JOIN forums                 f ON (f.ID = t.ForumID)
             WHERE if(t.IsLocked = '1' AND t.IsSticky = '0', t.LastPostID, coalesce(l.PostID, 0)) < t.LastPostID
                 AND s.UserID = ?
                 AND " . implode(' AND ', $cond),
@@ -254,7 +258,12 @@ class Forum extends \Gazelle\BaseManager {
         );
     }
 
-    public function latestPostsList(\Gazelle\User $user, bool $showUnread, int $limit, int $offset): array {
+    public function latestPostsList(
+        User $user,
+        bool $showUnread,
+        int  $limit,
+        int  $offset,
+    ): array {
         [$cond, $args] = $this->configureForUser($user);
         if ($showUnread) {
             $cond[] = "if(t.IsLocked = '1' AND t.IsSticky = '0', t.LastPostID, flrt.PostID) < t.LastPostID";
@@ -272,11 +281,11 @@ class Forum extends \Gazelle\BaseManager {
                 t.LastPostID       AS lastPostId,
                 (t.IsLocked = '1') AS locked,
                 (p.ID < t.LastPostID AND t.IsLocked != '1') AS new
-            FROM users_subscriptions AS s
-            INNER JOIN forums_last_read_topics AS flrt ON (flrt.TopicID = s.TopicID AND flrt.UserID = ?)
-            INNER JOIN forums_topics AS t ON (t.ID = s.TopicID)
-            INNER JOIN forums_posts AS p ON (p.ID = flrt.PostID and p.TopicID = flrt.TopicID)
-            INNER JOIN forums AS f ON (f.ID = t.ForumID)
+            FROM users_subscriptions           s
+            INNER JOIN forums_last_read_topics l ON (l.TopicID = s.TopicID AND l.UserID = ?)
+            INNER JOIN forums_topics           t ON (t.ID = s.TopicID)
+            INNER JOIN forums_posts            p ON (p.ID = l.PostID AND p.TopicID = l.TopicID)
+            INNER JOIN forums                  f ON (f.ID = t.ForumID)
             WHERE " . implode(' AND ', $cond) . "
             GROUP BY p.TopicID
             ORDER BY t.LastPostID DESC
@@ -286,7 +295,7 @@ class Forum extends \Gazelle\BaseManager {
         return self::$db->to_array(false, MYSQLI_ASSOC);
     }
 
-    public function forumAutosubscribeList(\Gazelle\User $user): array {
+    public function forumAutosubscribeList(User $user): array {
         if (!$user->permitted('site_forum_autosub')) {
             return [];
         }

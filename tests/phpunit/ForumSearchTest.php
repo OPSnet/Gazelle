@@ -40,16 +40,16 @@ class ForumSearchTest extends TestCase {
         $this->assertFalse($search->isBodySearch(), 'forum-search-title');
 
         $search->setSearchText('textnotfound ' . randomString(40));
-        $this->assertSame(0, $search->totalHits(), 'forum-search-title-miss');
+        $this->assertSame(0, $search->total(), 'forum-search-title-miss');
         $search->setSearchText($title);
-        $this->assertSame(1, $search->totalHits(), 'forum-search-title-hit');
+        $this->assertSame(1, $search->total(), 'forum-search-title-hit');
 
         $search->setSearchType('body');
         $this->assertTrue($search->isBodySearch(), 'forum-search-body');
         $search->setSearchText('textnotfound ' . randomString(40));
-        $this->assertSame(0, $search->totalHits(), 'forum-search-body-miss');
+        $this->assertSame(0, $search->total(), 'forum-search-body-miss');
         $search->setSearchText($body);
-        $this->assertSame(1, $search->totalHits(), 'forum-search-body-hit');
+        $this->assertSame(1, $search->total(), 'forum-search-body-hit');
 
         $resultList = $search->results(new Util\Paginator(25, 1));
         $this->assertCount(1, $resultList, 'forum-search-body-result');
@@ -65,6 +65,9 @@ class ForumSearchTest extends TestCase {
     }
 
     public function testForumSearchAuthor(): void {
+        $search = new Search\Forum($this->user);
+        $initial = $search->total();
+
         $this->category = new Manager\ForumCategory()->create('phpunit category', 10001);
         $this->forum  = Helper::makeForum(
             user:        $this->user,
@@ -79,10 +82,10 @@ class ForumSearchTest extends TestCase {
         $this->thread = $threadMan->create($this->forum, $this->user, $title, $body);
 
         $search = new Search\Forum($this->user);
-        $this->assertSame(1, $search->totalHits(), 'forum-search-user-hit');
+        $this->assertSame(1, $search->total() - $initial, 'forum-search-user-hit');
 
         $search->setAuthor('nobody-by-this-name!');
-        $this->assertSame(0, $search->totalHits(), 'forum-search-user-miss');
+        $this->assertSame(0, $search->total(), 'forum-search-user-miss');
     }
 
     public function testForumSearchJson(): void {

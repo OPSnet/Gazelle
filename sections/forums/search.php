@@ -69,7 +69,7 @@ if (isset($_GET['forums']) && is_array($_GET['forums'])) {
 }
 
 $paginator = new Util\Paginator(POSTS_PER_PAGE, (int)($_GET['page'] ?? 1));
-$paginator->setTotal($search->totalHits());
+$paginator->setTotal($search->total());
 
 echo $Twig->render('forum/search.twig', [
     'forum_list'    => new Manager\Forum()->forumList(),

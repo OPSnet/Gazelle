@@ -1,13 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\User;
 
 class Donor extends \Gazelle\BaseUser {
-    final public const tableName     = 'donor_rewards';
-    final public const pkName        = 'UserID';
-    protected const CACHE_KEY = 'donor_%d';
-
-    protected bool $isDonor;
+    final public const tableName = 'donor_rewards';
+    final public const pkName    = 'UserID';
+    protected const CACHE_KEY    = 'donor_v2_%d';
 
     public function link(): string {
         return sprintf('<a class="username" href="%s">%s</a>', $this->user->url(), html_escape($this->user->username()));
@@ -15,13 +15,12 @@ class Donor extends \Gazelle\BaseUser {
 
     public function flush(): static {
         self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->user->id));
-        unset($this->isDonor);
-        $this->info = [];
+        unset($this->info);
         return $this;
     }
 
     public function info(): array {
-        if (isset($this->info) && !empty($this->info)) {
+        if (isset($this->info)) {
             return $this->info;
         }
         $key = sprintf(self::CACHE_KEY, $this->user->id);
@@ -52,7 +51,7 @@ class Donor extends \Gazelle\BaseUser {
                     dfu.Prefix              AS forum_prefix,
                     dfu.Suffix              AS forum_suffix,
                     dfu.Usecomma            AS forum_use_comma
-                FROM users_donor_ranks udr
+                FROM users_donor_ranks          udr
                 LEFT JOIN donor_rewards         dr  USING (UserID)
                 LEFT JOIN donor_forum_usernames dfu USING (UserID)
                 WHERE udr.UserID = ?
@@ -84,7 +83,8 @@ class Donor extends \Gazelle\BaseUser {
             ];
             $info['hidden']          = ($info['hidden'] === 1);
             $info['forum_use_comma'] = (bool)$info['forum_use_comma'];
-            if ($this->user()->isStaff()) {
+            $info['is_donor'] = $this->user->isStaff() || $this->user->privilege()->hasSecondaryClassId(DONOR);
+            if ($this->user->isStaff()) {
                 $info['donor_rank']   = MAX_EXTRA_RANK;
                 $info['special_rank'] = MAX_SPECIAL_RANK;
             }
@@ -95,7 +95,7 @@ class Donor extends \Gazelle\BaseUser {
     }
 
     public function isDonor(): bool {
-        return $this->isDonor ??= $this->user->isStaff() || $this->user->privilege()->hasSecondaryClassId(DONOR);
+        return $this->info()['is_donor'];
     }
 
     public function isVisible(): bool {
@@ -665,7 +665,7 @@ class Donor extends \Gazelle\BaseUser {
             return 0;
         }
         $affected = $this->user->privilege()->addSecondaryClass(DONOR);
-        $this->isDonor = ($affected === 1);
+        $this->info['is_donor'] = (bool)$affected;
         return $affected;
     }
 
@@ -683,7 +683,6 @@ class Donor extends \Gazelle\BaseUser {
         self::$db->commit();
         $this->flush();
         $this->user->flush();
-        $this->isDonor = false;
         return $affected;
     }
 

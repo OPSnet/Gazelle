@@ -53,9 +53,9 @@ class Forum extends BaseObject {
                isset($args['autolock']) ? '1' : '0', (int)$args['autolockweeks'],
                $this->id
         );
-        $changed = self::$db->affected_rows();
+        $affected = self::$db->affected_rows();
         $this->flush();
-        return $changed == 1;
+        return $affected == 1;
     }
 
     /**
@@ -124,10 +124,6 @@ class Forum extends BaseObject {
 
     public function hasRevealVotes(): bool {
         return in_array($this->id, FORUM_REVEAL_VOTE);
-    }
-
-    public function isLocked(): bool {
-        return (bool)$this->info()['is_locked'];
     }
 
     public function lastPostId(): int {

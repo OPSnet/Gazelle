@@ -4,6 +4,7 @@
     xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.3/phpunit.xsd"
     bootstrap="phpunit-autoload.php"
     cacheDirectory="../cache/phpunit"
+    displayDetailsOnTestsThatTriggerWarnings="true"
 >
   <php>
     <const name="IMAGE_CACHE_HOST" value="https://image.host" />

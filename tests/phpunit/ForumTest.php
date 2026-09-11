@@ -97,7 +97,6 @@ class ForumTest extends TestCase {
 
         $this->assertFalse($this->forum->autoLock(), 'forum-autolock');
         $this->assertFalse($this->forum->hasRevealVotes(), 'forum-has-reveal-votes');
-        $this->assertFalse($this->forum->isLocked(), 'forum-is-locked');
         $this->assertSame(0, $this->forum->lastPostEpoch(), 'forum-last-post-time');
         $this->assertSame(0, $this->forum->numPosts(), 'forum-post-total');
         $this->assertSame(0, $this->forum->numThreads(), 'forum-thread-total');
@@ -197,7 +196,6 @@ class ForumTest extends TestCase {
         );
 
         $user = $this->userList['user'];
-        $this->assertFalse($user->forumAccess($secret, 10000), 'fthread-secret-userlevel');
         $this->assertFalse($user->readAccess($secret), 'fthread-secret-user-read');
         $this->assertFalse($user->writeAccess($secret), 'fthread-secret-user-write');
         $this->assertFalse($user->createAccess($secret), 'fthread-secret-user-create');

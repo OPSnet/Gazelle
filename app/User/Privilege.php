@@ -1,10 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\User;
+
+use Gazelle\Forum;
+use Gazelle\Manager\Forum      as ForumManager;
+use Gazelle\Manager\Privilege  as PrivilegeManager;
+use Gazelle\Manager\SiteOption as SiteOptionManager;
 
 class Privilege extends \Gazelle\BaseUser {
     final public const tableName = 'users_levels';
-    final public const CACHE_KEY = 'u_prv_%d';
+    final public const CACHE_KEY = 'u_prv_v2_%d';
+    final public const FORUM_KEY = 'u_prv_forum_%d_%d';
 
     public function flush(): static {
         unset($this->info);
@@ -16,8 +24,7 @@ class Privilege extends \Gazelle\BaseUser {
         if (isset($this->info)) {
             return $this->info;
         }
-        $id = $this->user->id;
-        $key = sprintf(self::CACHE_KEY, $id);
+        $key = sprintf(self::CACHE_KEY, $this->id);
         $info = self::$cache->get_value($key);
         if ($info !== false) {
             return $this->info = $info;
@@ -69,9 +76,9 @@ class Privilege extends \Gazelle\BaseUser {
             INNER JOIN users_levels ul ON (ul.PermissionID = p.ID)
             WHERE ul.UserID = ?
             ORDER BY p.Level DESC
-            ", $id
+            ", $this->id
         );
-        foreach (self::$db->to_array('ID', MYSQLI_ASSOC) as $class) {
+        foreach (self::$db->to_array(false, MYSQLI_ASSOC) as $class) {
             $info['secondary'][$class['ID']] = $class['Name'];
             if ($class['badge']) {
                 $info['badge'][$class['badge']] = $class['Name'];
@@ -114,11 +121,12 @@ class Privilege extends \Gazelle\BaseUser {
         }
 
         self::$cache->cache_value($key, $info, 3600);
-        return $this->info = $info;
+        $this->info = $info;
+        return $this->info;
     }
 
-    public function isSecondary(int $privilegeId): bool {
-        return isset($this->info()['secondary'][$privilegeId]);
+    public function isSecondary(int $permissionId): bool {
+        return isset($this->info()['secondary'][$permissionId]);
     }
 
     public function isFLS(): bool {
@@ -211,16 +219,23 @@ class Privilege extends \Gazelle\BaseUser {
         return $this->info()['level_secondary'];
     }
 
+    /*
+     * @return array<string, bool>
+     */
     public function customList(): array {
         return $this->info()['custom'];
     }
 
+    /*
+     * @return array<string, bool>
+     */
     public function defaultList(): array {
         return $this->info()['privilege'];
     }
 
     /**
      * Get the secondary classes of the user (enabled or not)
+     * @return array<string, array{permId: int, permName: string, isSet: int, Level: int}>
      */
     public function secondaryClassesList(): array {
         self::$db->prepared_query("
@@ -228,11 +243,11 @@ class Privilege extends \Gazelle\BaseUser {
                 p.Name                 AS permName,
                 (l.UserID IS NOT NULL) AS isSet,
                 p.Level
-            FROM permissions AS p
-            LEFT JOIN users_levels AS l ON (l.PermissionID = p.ID AND l.UserID = ?)
+            FROM permissions       p
+            LEFT JOIN users_levels l ON (l.PermissionID = p.ID AND l.UserID = ?)
             WHERE p.Secondary = 1
             ORDER BY p.Name
-            ", $this->user->id
+            ", $this->id
         );
         return self::$db->to_array('permName', MYSQLI_ASSOC);
     }
@@ -250,7 +265,7 @@ class Privilege extends \Gazelle\BaseUser {
             INSERT INTO users_levels
                    (UserID, PermissionID)
             VALUES (?,      ?)
-            ", $this->user->id, $userclassId
+            ", $this->id, $userclassId
         );
         $affected = self::$db->affected_rows();
         $this->flush();
@@ -263,7 +278,7 @@ class Privilege extends \Gazelle\BaseUser {
             FROM users_levels
             WHERE UserID = ?
                 AND PermissionID = ?
-            ", $this->user->id, $userclassId
+            ", $this->id, $userclassId
         );
         $affected = self::$db->affected_rows();
         $this->flush();
@@ -282,7 +297,7 @@ class Privilege extends \Gazelle\BaseUser {
                 UPDATE users_main SET
                     CustomPermissions = NULL
                 WHERE ID = ?
-                ", $this->user->id
+                ", $this->id
             );
             $affected = self::$db->affected_rows();
             $this->flush();
@@ -290,7 +305,7 @@ class Privilege extends \Gazelle\BaseUser {
         }
         $default = $this->defaultList();
         $delta = [];
-        foreach (array_keys(\Gazelle\Manager\Privilege::privilegeList()) as $p) {
+        foreach (array_keys(PrivilegeManager::privilegeList()) as $p) {
             if (($default[$p] ?? false) && ($current[$p] ?? false) === false) {
                 $delta[$p] = 0;
             } elseif (!isset($default[$p]) && ($current[$p] ?? false)) {
@@ -301,7 +316,7 @@ class Privilege extends \Gazelle\BaseUser {
             UPDATE users_main SET
                 CustomPermissions = ?
             WHERE ID = ?
-            ", count($delta) ? serialize($delta) : null, $this->user->id
+            ", $delta !== [] ? serialize($delta) : null, $this->id
         );
         $affected = self::$db->affected_rows();
         $this->flush();

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\Manager;
 
 class Privilege extends \Gazelle\BaseManager {
@@ -14,7 +16,16 @@ class Privilege extends \Gazelle\BaseManager {
         return $this;
     }
 
-    public function create(string $name, int $level, int $secondary, string $forums, array $values, int|null $staffGroupId, string $badge, bool $displayStaff): \Gazelle\Privilege {
+    public function create(
+        string   $name,
+        int      $level,
+        int      $secondary,
+        string   $forums,
+        array    $values,
+        ?int     $staffGroupId,
+        string   $badge,
+        bool     $displayStaff,
+    ): \Gazelle\Privilege {
         self::$db->prepared_query('
             INSERT INTO permissions
                    (Name, Level, Secondary, PermittedForums, `Values`, StaffGroup, badge, DisplayStaff)
@@ -125,9 +136,9 @@ class Privilege extends \Gazelle\BaseManager {
                 sg.Name     AS staff_group,
                 count(um.ID) + count(DISTINCT ul.UserID) AS total
             FROM permissions AS p
-            LEFT JOIN staff_groups AS sg ON (sg.ID = p.StaffGroup)
-            LEFT JOIN users_main   AS um ON (um.PermissionID = p.ID)
-            LEFT JOIN users_levels AS ul ON (ul.PermissionID = p.ID)
+            LEFT JOIN staff_groups sg ON (sg.ID = p.StaffGroup)
+            LEFT JOIN users_main   um ON (um.PermissionID = p.ID)
+            LEFT JOIN users_levels ul ON (ul.PermissionID = p.ID)
             GROUP BY p.ID
             ORDER BY p.Secondary ASC, p.Level ASC
         ");

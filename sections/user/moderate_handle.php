@@ -82,16 +82,11 @@ $disableTagging  = isset($_POST['DisableTagging']);
 $disableUpload   = isset($_POST['DisableUpload']);
 $disableWiki     = isset($_POST['DisableWiki']);
 $logoutSession   = isset($_POST['Logout']);
-$resetRatioWatch = isset($_POST['ResetRatioWatch']);
+$resetAuthkey    = isset($_POST['ResetAuthkey']);
 $resetIPHistory  = isset($_POST['ResetIPHistory']);
 $resetPasskey    = isset($_POST['ResetPasskey']);
-$resetAuthkey    = isset($_POST['ResetAuthkey']);
-if (isset($_POST['SendHackedMail'])) {
-    $hackedEmail = trim($_POST['HackedEmail']);
-    if ($hackedEmail === '') {
-        unset($hackedEmail);
-    }
-}
+$resetRatioWatch = isset($_POST['ResetRatioWatch']);
+
 $mergeStatsFrom = trim($_POST['MergeStatsFrom']);
 $reason         = trim($_POST['Reason']);
 
@@ -108,6 +103,7 @@ if ($mergeStatsFrom && $Viewer->permitted('users_edit_ratio')) {
     }
 }
 
+$cur                = $user->info();
 $tracker            = new Tracker();
 $needTrackerAdd     = false;
 $needTrackerRefresh = false;
@@ -152,7 +148,10 @@ if ($resetIPHistory && $Viewer->permitted('users_edit_reset_keys')) {
 }
 
 if (isset($_POST['ResetEmailHistory']) && $Viewer->permitted('users_edit_reset_keys')) {
-    $user->history()->resetEmail($user->username() . '@' . SITE_HOST, $resetIPHistory ? '127.0.0.1' : $user->ipaddr());
+    $user->history()->resetEmail(
+        $user->username() . '@' . SITE_HOST,
+        $resetIPHistory ? '127.0.0.1' : $user->ipaddr()
+    );
     $editSummary[] = 'email history cleared';
 }
 
@@ -312,10 +311,7 @@ if ($Viewer->permitted('users_warn')) {
     }
 }
 
-$secondaryClasses = array_filter(
-    array_map(intval(...), $_POST['secondary_classes'] ?? [] ),
-    fn($id) => $id > 0
-);
+$secondaryClasses = array_map(intval(...), $_POST['secondary_classes'] ?? [] );
 
 if ($Viewer->permitted('users_give_donor')) {
     $donor = new User\Donor($user);
@@ -523,9 +519,9 @@ if ($privChange && $userReason) {
     $editSummary[] = 'PM sent';
 }
 
-$userStatus = UserStatus::tryFrom($_POST['UserStatus']) ?? UserStatus::disabled;
+$userStatus = UserStatus::tryFrom($_POST['UserStatus'] ?? '') ?? UserStatus::unconfirmed;
 if ($userStatus !== $user->userStatus() && $Viewer->permitted('users_disable_users')) {
-    $enableStr = "account status {$user->userStatus()->label()} → {$userStatus->label()}";
+    $enableSummary = "account status {$user->userStatus()->label()} → {$userStatus->label()}";
     if ($userStatus == UserStatus::disabled) {
         $userMan->disableUserList(
             [$user->id],
@@ -542,7 +538,7 @@ if ($userStatus !== $user->userStatus() && $Viewer->permitted('users_disable_use
                 ->setField('RatioWatchEnds', null)
                 ->setField('RatioWatchDownload', 0);
         } else {
-            $enableStr .= ' (Ratio: ' . ratio_html($user->uploadedSize(), $user->downloadedSize(), false)
+            $enableSummary .= ' (Ratio: ' . ratio_html($user->uploadedSize(), $user->downloadedSize(), false)
                 . ', RR: ' . number_format($user->requiredRatio(), 2) . ')';
             if ($cur['RatioWatchEnds']) {
                 $user->setField('can_leech', 1)
@@ -553,15 +549,15 @@ if ($userStatus !== $user->userStatus() && $Viewer->permitted('users_disable_use
         $user->setField('BanReason', '0');
     }
     $user->setField('Enabled', $userStatus->value);
-    $editSummary[] = $enableStr;
+    $editSummary[] = $enableSummary;
 }
 
 if ($Viewer->permitted('users_edit_reset_keys')) {
-    if ($resetAuthkey == 1) {
+    if ($resetAuthkey) {
         $user->setField('auth_key', authKey());
         $editSummary[] = 'authkey reset';
     }
-    if ($resetPasskey == 1) {
+    if ($resetPasskey) {
         $oldPasskey = $user->announceKey();
         $passkey = randomString();
         $user->history()->modifyAnnounceKey(old: $oldPasskey, new: $passkey);
@@ -570,20 +566,23 @@ if ($Viewer->permitted('users_edit_reset_keys')) {
     }
 }
 
-if (isset($hackedEmail) && $Viewer->permitted('users_disable_any')) {
-    new Mail()->send($hackedEmail, SITE_NAME . ' account - suspicious activity',
-        $Twig->render('email/hacked.text.twig', [
-            'user' => $user
-        ])
-    );
-    $userMan->disableUserList(
-        [$user->id],
-        UserAuditEvent::activity,
-        "Disabled via hacked email",
-        Manager\User::DISABLE_MANUAL,
-    );
-    $editSummary[] = "hacked account email sent to $hackedEmail";
-    Util\DisabledUserHistory::add($user, "Disabled via hacked email");
+if (isset($_POST['SendHackedMail']) && $Viewer->permitted('users_disable_any')) {
+    $hackedEmail = trim($_POST['HackedEmail'] ?? '');
+    if ($hackedEmail !== '') {
+        new Mail()->send($hackedEmail, SITE_NAME . ' account - suspicious activity',
+            $Twig->render('email/hacked.text.twig', [
+                'user' => $user
+            ])
+        );
+        $userMan->disableUserList(
+            [$user->id],
+            UserAuditEvent::activity,
+            "Disabled via hacked email",
+            Manager\User::DISABLE_MANUAL,
+        );
+        $editSummary[] = "hacked account email sent to $hackedEmail";
+        Util\DisabledUserHistory::add($user, "Disabled via hacked email");
+    }
 }
 
 if (isset($mergeFrom)) {
@@ -594,6 +593,8 @@ if (isset($mergeFrom)) {
 
 if ($changePassword && $Viewer->permitted('users_edit_password')) {
     $editSummary[] = 'password reset';
+    $user->history()->modifyPassword($_POST['ChangePassword'], false);
+    new User\Session($user)->dropAll();
 }
 
 if ($removedClasses) {
@@ -602,11 +603,16 @@ if ($removedClasses) {
 if ($addedClasses) {
     $user->addClasses($addedClasses);
 }
+if ($newBonusPoints !== false) {
+    new User\Bonus($user)->setPoints($newBonusPoints);
+}
+if ($flTokens != $user->tokenCount()) {
+    $user->updateTokens($flTokens);
+}
 
 if ($editSummary === [] && $reason) {
     $editSummary[] = 'notes added';
 }
-
 if ($editSummary) {
     $summary = implode(', ', $editSummary);
     if ($reason) {
@@ -615,19 +621,6 @@ if ($editSummary) {
     $user->auditTrail()->addEvent(UserAuditEvent::staffNote, ucfirst($summary), $Viewer);
 } elseif ($adminComment !== $cur['admincomment']) {
     $user->auditTrail()->addEvent(UserAuditEvent::staffNote, $adminComment, $Viewer);
-}
-
-if ($changePassword && $Viewer->permitted('users_edit_password')) {
-    $user->history()->modifyPassword($_POST['ChangePassword'], false);
-    new User\Session($user)->dropAll();
-}
-
-if ($newBonusPoints !== false) {
-    new User\Bonus($user)->setPoints($newBonusPoints);
-}
-
-if ($flTokens != $user->tokenCount()) {
-    $user->updateTokens($flTokens);
 }
 
 $user->modify();

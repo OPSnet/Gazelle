@@ -315,7 +315,11 @@ class Collage extends \Gazelle\BaseManager {
         return $autocomplete;
     }
 
-    public function subscribedTGroupCollageList(User $user, bool $viewAll, $manager = new TGroup()): array {
+    public function subscribedTGroupCollageList(
+        User   $user,
+        bool   $viewAll,
+        TGroup $manager = new TGroup(),
+    ): array {
         $cond = ['s.UserID = ?'];
         $args = [$user->id];
         if ($viewAll) {
@@ -363,9 +367,9 @@ class Collage extends \Gazelle\BaseManager {
     }
 
     public function subscribedArtistCollageList(
-        User $user,
-        bool $viewAll,
-        $manager = new Artist(),
+        User   $user,
+        bool   $viewAll,
+        Artist $manager = new Artist(),
     ): array {
         $cond = ['s.UserID = ?'];
         $args = [$user->id];

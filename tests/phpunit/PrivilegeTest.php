@@ -152,6 +152,19 @@ class PrivilegeTest extends TestCase {
         $this->assertSame($total + 1, $flsList[0]['total'], 'privilege-one-new-fls');
     }
 
+    public function testPrivilegePair(): void {
+        $this->assertEquals(
+            [
+                ['lower' => 0,      'higher' => USER],
+                ['lower' => USER,   'higher' => MEMBER],
+                ['lower' => MEMBER, 'higher' => ELITE],
+                ['lower' => ELITE,  'higher' => SYSOP],
+            ],
+            new Manager\Privilege()->pairUserclass([USER, MEMBER, ELITE, SYSOP]),
+            'privilege-pair-userclass',
+        );
+    }
+
     public function testPrivilegeCompare(): void {
         $manager = new Manager\Privilege();
         $compare = $manager->compareUserclass(USER, MEMBER);

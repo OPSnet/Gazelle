@@ -1,6 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\Search;
+
+use Gazelle\Util\Paginator;
+use Gazelle\User;
 
 class Forum extends \Gazelle\BaseUser {
     final public const tableName = 'forums';
@@ -28,7 +33,7 @@ class Forum extends \Gazelle\BaseUser {
     protected bool $showGrouped = false;
     protected bool $showUnread = true;
 
-    protected \Gazelle\User $viewer;
+    protected User $viewer;
 
     public function flush(): static {
         $this->user()->flush();
@@ -61,7 +66,7 @@ class Forum extends \Gazelle\BaseUser {
         return $this->threadId;
     }
 
-    public function setViewer(\Gazelle\User $viewer): static {
+    public function setViewer(User $viewer): static {
         $this->viewer = $viewer;
         $this->permittedForums = $this->viewer->permittedForums();
         $this->forbiddenForums = $this->viewer->forbiddenForums();
@@ -115,11 +120,11 @@ class Forum extends \Gazelle\BaseUser {
 
     /**
      * Set the list of forum IDs within which to search
+     * @param array<int> $list
      */
     public function setForumList(array $list): static {
         $this->selectedForums = [];
         foreach ($list as $id) {
-            $id = (int)$id;
             if ($id > 0) {
                 $this->selectedForums[] = $id;
             }
@@ -146,7 +151,7 @@ class Forum extends \Gazelle\BaseUser {
     /**
      * Save a condition related to forums
      */
-    protected function setForumCond(string $condition, $arg): static {
+    protected function setForumCond(string $condition, mixed $arg): static {
         $this->forumCond[] = $condition;
         if (is_array($arg)) {
             $this->forumArgs = array_merge($this->forumArgs, $arg);
@@ -159,7 +164,7 @@ class Forum extends \Gazelle\BaseUser {
     /**
      * Save a condition related to thread searches
      */
-    protected function setThreadCond(string $condition, $arg): static {
+    protected function setThreadCond(string $condition, mixed $arg): static {
         $this->threadCond[] = $condition;
         if (is_array($arg)) {
             $this->threadArgs = array_merge($this->threadArgs, $arg);
@@ -191,7 +196,7 @@ class Forum extends \Gazelle\BaseUser {
     /**
      * Save a condition related to post searches
      */
-    protected function setPostCond(string $condition, $arg): static {
+    protected function setPostCond(string $condition, mixed $arg): static {
         $this->postCond[] = $condition;
         if (is_array($arg)) {
             $this->postArgs = array_merge($this->postArgs, $arg);
@@ -304,7 +309,7 @@ class Forum extends \Gazelle\BaseUser {
      * Return the total number of rows the unpaginated query would return
      * (so that we can set up pagination links)
      */
-    public function totalHits(): int {
+    public function total(): int {
         [$cond, $args] = $this->setSplitWords(true)->configure();
         $forumPostJoin = $this->isBodySearch() ? 'INNER JOIN forums_posts AS p ON (p.TopicID = t.ID)' : '';
         return (int)self::$db->scalar("
@@ -318,7 +323,7 @@ class Forum extends \Gazelle\BaseUser {
     /**
      * Return a paginated section of the result set
      */
-    public function results(\Gazelle\Util\Paginator $paginator): array {
+    public function results(Paginator $paginator): array {
         [$cond, $args] = $this->setSplitWords(true)->configure();
         $forumPostJoin = $this->isBodySearch() ? 'INNER JOIN forums_posts AS p ON (p.TopicID = t.ID)' : '';
         if ($this->isBodySearch()) {
