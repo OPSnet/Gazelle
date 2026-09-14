@@ -24,7 +24,9 @@ class UserAuditTrailTest extends TestCase {
         $auditTrail = $this->user->auditTrail();
         $id1 = $auditTrail->addEvent(UserAuditEvent::staffNote, 'phpunit first');
         $this->assertGreaterThan(0, $id1, 'uat-insert');
-        $this->assertSame($id1, $auditTrail->lastEventId(), 'uat-last-event');
+        $last = $auditTrail->lastEvent();
+        $this->assertSame($id1, $last['id'], 'uat-last-event-id');
+        $this->assertSame('phpunit first', $last['note'], 'uat-last-event-note');
         $id2 = $auditTrail->addEvent(UserAuditEvent::staffNote, 'phpunit second');
         $this->assertSame($id1 + 1, $id2, 'uat-second');
 
@@ -34,7 +36,7 @@ class UserAuditTrailTest extends TestCase {
 
         $this->assertSame(2, $auditTrail->resetAuditTrail(), 'uat-remove');
         $this->assertCount(0, $auditTrail->fullEventList(), 'uat-reset');
-        $this->assertSame(0, $auditTrail->lastEventId(), 'uat-no-last-event');
+        $this->assertSame([], $auditTrail->lastEvent(), 'uat-no-last-event');
     }
 
     public function testAuditTrailAbsent(): void {

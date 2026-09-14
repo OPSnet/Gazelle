@@ -88,11 +88,15 @@ class AuditTrail extends \Gazelle\BaseUser {
     }
 
     /**
-     * Return the id of the most recent audit event. (0 if no events)
+     * Return the details of the most recent audit event.
      */
-    public function lastEventId(): int {
-        return (int)$this->pg()->scalarex("
-            select id_audit_trail_user
+    public function lastEvent(): array {
+        return $this->pg()->rowAssocex("
+            select id_audit_trail_user as id,
+                id_user_creator,
+                created,
+                event,
+                note
             from audit_trail_user
             where id_user = $1
             order by id_audit_trail_user desc

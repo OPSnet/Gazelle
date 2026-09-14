@@ -309,7 +309,7 @@ class User extends BaseAttrObject {
      */
     public function checkpoint(): string {
         return signature(
-            "{$this->auditTrail()->lastEventId()}|{$this->updated()}",
+            "{$this->auditTrail()->lastEvent()['id']}|{$this->updated()}",
             USER_EDIT_SALT
         );
     }

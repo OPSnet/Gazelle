@@ -192,13 +192,17 @@
         </tr>
 {%  set profile = u.externalProfile.profile %}
         <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
-{%  if edit_source %}
             <td colspan="8">
+{%  if edit_source %}
                 External profile (URL): <input type="text" name="reason-{{ u.id }}" size="40" maxlength="255" value="{{ profile }}">
-            </td>
 {%  else %}
-            <td colspan="8">{% if profile %}{{ profile }}{% else %}<i>External profile not specified</i>{% endif %}</td>
+{%      if profile %}{{ profile }}{% else %}<i>External profile not specified</i>{% endif %}
 {%  endif %}
+{%  if viewer.isStaff %}
+{%      set last = u.auditTrail.lastEvent %}
+                <br>⧼{{ last.event }}⧽ {{ last.note }} ({{ last.created|time_diff }})
+{%  endif %}
+            </td>
         </tr>
 {% endfor %}
 {% if is_site_inviter and edit_source %}
