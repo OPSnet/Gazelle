@@ -325,5 +325,15 @@ div#header {
   }
 }
 
+#noty_bottomRight_layout_container .noty_buttons a {
+  color: variables.$fore-1000 !important;
+}
+
+#noty_bottomRight_layout_container .noty_buttons a:hover {
+  background-color: variables.$color-obj-tag-bubble-bg;
+  color: variables.$color-obj-tag-bubble-fg !important;
+  border-color: variables.$color-obj-tag-bubble-fg;
+}
+
 // EOF
 // ////////////////////////////////////////////////////////////////////////////////

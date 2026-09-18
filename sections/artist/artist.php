@@ -168,38 +168,44 @@ echo ' selected="selected"'; } ?>>Prefer Bonus Tracks</option>
     'summary' => $collageMan->artistSummary($artist),
 ]); ?>
 <div id="discog_table">
+<?php if ($sections || $requestList) { ?>
     <div class="box center">
 <?php
-if ($sections = $artist->sections()) {
-    /* Move the sections to the way the viewer wants to see them. */
-    $sortHide = $Viewer->option('SortHide') ?? [];
-    $reorderedSections = [];
-    foreach (array_keys($sortHide) as $reltype) {
-        if (isset($artistReleaseType[$reltype])) {
-            $reorderedSections[(int)$reltype] = $sections[$reltype];
-            unset($artistReleaseType[$reltype]);
+    if ($sections) {
+        /* Move the sections to the way the viewer wants to see them. */
+        $sortHide = $Viewer->option('SortHide') ?? [];
+        $reorderedSections = [];
+        foreach (array_keys($sortHide) as $reltype) {
+            if (isset($artistReleaseType[$reltype])) {
+                $reorderedSections[(int)$reltype] = $sections[$reltype];
+                unset($artistReleaseType[$reltype]);
+            }
         }
-    }
-    /* Any left-over release types */
-    foreach (array_keys($artistReleaseType) as $reltype) {
-        $reorderedSections[(int)$reltype] = $sections[$reltype];
-    }
-    $sections = $reorderedSections;
+        /* Any left-over release types */
+        foreach (array_keys($artistReleaseType) as $reltype) {
+            $reorderedSections[(int)$reltype] = $sections[$reltype];
+        }
+        $sections = $reorderedSections;
 
-    foreach (array_keys($sections) as $sectionId) {
-        $collapseSection = ($sortHide[$sectionId] ?? 0) == 1;
+        foreach (array_keys($sections) as $sectionId) {
+            $collapseSection = ($sortHide[$sectionId] ?? 0) == 1;
 ?>
         <a href="#torrents_<?= $artistMan->sectionLabel($sectionId) ?>" class="brackets"<?=
             $collapseSection ? " onclick=\"$('.releases_$sectionId').gshow(); return true;\"" : '' ?>><?=
             $artistMan->sectionTitle($sectionId) ?></a>
 <?php
+        }
     }
 
     if ($requestList) {
 ?>
-    <a href="#request_table" class="brackets">Requests</a>
+    <a href="#requests-list" class="brackets">Requests</a>
 <?php } ?>
     </div>
+<?php
+}
+if ($sections) {
+?>
     <table class="torrent_table grouped release_table m_table">
 <?php
     $urlStem = new User\Stylesheet($Viewer)->imagePath();
@@ -210,7 +216,7 @@ if ($sections = $artist->sections()) {
         $sectionClosed = (bool)($sortHide[$sectionId] ?? 0);
         $groupsHidden = ($groupsClosed || $sectionClosed) ? ' hidden' : '';
 ?>
-                <tr class="colhead_dark" id="torrents_<?= $artistMan->sectionLabel($sectionId) ?>">
+                <tr class="colhead_dark artist-discog-section-header" id="torrents_<?= $artistMan->sectionLabel($sectionId) ?>">
                     <td class="small"><!-- expand/collapse --></td>
                     <td class="m_th_left m_th_left_collapsable" width="70%"><a href="#">↑</a>&nbsp;<strong><?=
                         $artistMan->sectionTitle($sectionId) ?></strong> <a href="#" class="tooltip brackets" onclick="$('.releases_<?=
@@ -284,9 +290,11 @@ if ($sections = $artist->sections()) {
 
 <?php
 echo $Twig->render('request/list.twig', [
-    'bounty' => $Viewer->ordinal()->value('request-bounty-vote'),
-    'list'   => $requestList,
-    'viewer' => $Viewer,
+    'bounty'     => $Viewer->ordinal()->value('request-bounty-vote'),
+    'list'       => $requestList,
+    'section_id' => 'requests-list',
+    'title'      => 'Requests',
+    'viewer'     => $Viewer,
 ]);
 
 echo $Twig->render('artist/similar-graph.twig', [

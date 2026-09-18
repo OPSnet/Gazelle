@@ -274,6 +274,7 @@ $z-notifications: 1000;
 $z-sticky-table-headers: 1;
 $z-avatar-mobile: 1;
 $height-mobilemenu-closed-tab: 32px;
+$menu-bar-height: 50px;
 $wrapper-max-width: 1020px;
 
 /* ## 0.3 Fonts */
@@ -1699,11 +1700,11 @@ form input {
 
 /* # 1.5 Discography Pages
 
-/* Discog table: for rows 'Albums', 'Compilations', 'Live Albums', etc. */
-#discog_table tr[id^="torrents_"] {
+/* Discog table: for rows 'Albums', 'Compilations', 'Live Albums', 'Requests', etc. */
+.artist-discog-section-header {
   background-color: variables.$color-background-table-keyrows;
 }
-#discog_table tr[id^="torrents_"] :not(a.tooltip.brackets) strong {
+.artist-discog-section-header :not(a.tooltip.brackets) strong {
   font-size: large;
   color: variables.$color-text-bold;
 }
@@ -1904,7 +1905,7 @@ body#collage .cats_music {
   flex-flow: row nowrap;
   font-size: 13px;
   overflow: hidden;
-  width: calc(100% - 149px);
+  width: 100%;
 }
 
 #menu > ul li {
@@ -1914,7 +1915,7 @@ body#collage .cats_music {
 #menu > ul a {
   display: block;
   height: 100%;
-  line-height: 50px;
+  line-height: $menu-bar-height;
   text-align: center;
 }
 
@@ -1929,14 +1930,15 @@ body#collage .cats_music {
 }
 
 #userinfo_username #nav_userinfo > a {
+  box-sizing: border-box;
   display: block;
   font-size: 13px;
-  line-height: 50px;
+  line-height: $menu-bar-height;
   overflow: hidden;
   text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
-  width: 100px;
+  width: 100%;
 }
 
 #userinfo_major > li,
@@ -1961,7 +1963,7 @@ body#collage .cats_music {
 
 #userinfo_stats {
   font-size: 13px;
-  top: -31px;
+  top: -44px;
 }
 
 #menu ul li:not(#nav_staff) a,
@@ -2010,13 +2012,81 @@ body#collage .cats_music {
 }
 
 #menu {
-  border-radius: 5px 5px 0 0;
+  border-radius: 5px 0 0 0;
   overflow: hidden;
 }
 
 @media (min-width: $phone-screen-size) {
   .thin:last-child > :not(.two_columns) {
     margin: 4px;
+  }
+
+  #header {
+    align-items: start;
+    display: grid;
+    grid-template-areas:
+      "logo logo"
+      "menu userinfo"
+      "searchbars searchbars";
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  #logo {
+    grid-area: logo;
+  }
+
+  #menu {
+    grid-area: menu;
+    min-width: 0;
+  }
+
+  #searchbars {
+    grid-area: searchbars;
+  }
+
+  #menu > ul {
+    height: $menu-bar-height;
+    width: 100%;
+  }
+
+  #userinfo {
+    --ap-userinfo-icon-width: 50px;
+    --ap-userinfo-username-min-width: 12ch;
+    --ap-userinfo-username-max-width: 25ch;
+    --ap-userinfo-pulldown-min-width: 150px;
+
+    align-self: flex-start;
+    display: flex;
+    grid-area: userinfo;
+    height: $menu-bar-height;
+    position: static;
+  }
+
+  #userinfo_username,
+  #userinfo_minor {
+    position: relative;
+  }
+
+  #userinfo_username {
+    background-color: variables.$color-menu-username;
+    flex: 0 1 auto;
+    max-width: var(--ap-userinfo-username-max-width);
+    min-width: var(--ap-userinfo-username-min-width);
+    right: auto;
+    width: auto;
+  }
+
+  #userinfo_username #nav_userinfo > a {
+    padding: 0 12px;
+    width: auto;
+  }
+
+  #userinfo_major {
+    top: 29px;
+  }
+
+  #userinfo_stats {
+    top: 51px;
   }
 
   #nav_donate .tooltip::after {
@@ -2054,32 +2124,39 @@ body#collage .cats_music {
     background-size: 28px;
     background-position: center;
     display: block;
-    height: 50px;
-    line-height: 50px;
-    width: 50px;
+    height: $menu-bar-height;
+    line-height: $menu-bar-height;
+    width: var(--ap-userinfo-icon-width);
   }
 
   #userinfo_minor a,
   #userinfo_username a {
+    box-sizing: border-box;
     display: none;
     line-height: 32px;
     padding: 0 8px;
-    width: 150px;
+    width: 100%;
+  }
+
+  #userinfo_username #nav_userinfo > a {
+    width: auto;
   }
 
   #userinfo_minor:hover::before {
-    margin-left: 100px;
+    margin-left: 0;
   }
 
   #userinfo_minor {
     background-color: variables.$color-menu-userinfo;
     border-radius: 0 5px 0 0;
-    right: 0;
+    flex: 0 0 var(--ap-userinfo-icon-width);
+    right: auto;
+    width: var(--ap-userinfo-icon-width);
   }
 
   #userinfo_minor,
   #userinfo_username {
-    position: absolute;
+    position: relative;
     z-index: $z-desktop-menu-closed !important;
   }
 
@@ -2089,16 +2166,50 @@ body#collage .cats_music {
   }
 
   #userinfo_username:hover {
-    border-radius: 0 10px 0 0;
-    right: 0;
+    border-radius: 0;
+    right: auto;
   }
 
   #userinfo_minor:hover {
+    align-items: flex-end;
     background-color: variables.$color-menu-userinfo-hover;
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
   }
 
   #userinfo_username:hover {
     background-color: variables.$color-menu-username-hover;
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+  }
+
+  #userinfo_minor:hover::before {
+    flex-shrink: 0;
+    position: relative;
+    right: auto;
+    top: auto;
+  }
+
+  #userinfo_minor:hover > li {
+    background-color: variables.$color-menu-userinfo-hover;
+    margin-left: 0;
+    position: relative;
+    width: var(--ap-userinfo-pulldown-min-width);
+  }
+
+  #userinfo_username:hover #nav_useredit,
+  #userinfo_username:hover #nav_logout {
+    background-color: variables.$color-menu-username-hover;
+    margin-left: 0;
+    position: relative;
+    width: calc(100% + var(--ap-userinfo-icon-width));
+  }
+
+  #userinfo_username:hover #nav_useredit > a,
+  #userinfo_username:hover #nav_logout > a {
+    width: 100%;
   }
 
   .settings_sidebar {
@@ -2166,7 +2277,7 @@ body#collage .cats_music {
   align-items: center;
   background-color: variables.$color-background-searchbars-surround;
   display: flex;
-  height: 50px;
+  height: $menu-bar-height;
   padding: 0 9px;
 }
 
@@ -2491,7 +2602,7 @@ table.torrent_table.cats.checkboxes.border.m_table td.td_info.big_info div.group
 /* This monstrosity is for torrents.php?type=uploaded */
 table.torrent_table.cats.m_table td.td_info.big_info div.group_info.clear div.tags {
   /* use alpha, not invisibility, to preserve copy & paste ability */
-  color: rgb(0 0 0 / 10%);
+  color: rgb(0 0 0 / 60%);
 }
 /* ============================================
    2.2.5  Snatched & other Torrent Indicators
@@ -3205,6 +3316,10 @@ Documentation of mobile classes:
     padding-inline: 1rem;
   }
 
+  body#artist #requests-list td.m_th_left a {
+    padding-inline: 1rem;
+  }
+
   /* END table headers */
 
   /* ************************************************ */
@@ -3895,7 +4010,7 @@ Documentation of mobile classes:
   #userinfo_username a {
     display: block;
     height: 100%;
-    line-height: 50px;
+    line-height: $menu-bar-height;
     text-align: center;
   }
 
