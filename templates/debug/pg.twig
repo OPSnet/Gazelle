@@ -22,7 +22,9 @@
 {%          if not loop.first %}, {% endif -%}
 {%          if arg is instanceof('\\DateTimeInterface') -%}
 '{{              arg|date('Y-m-d H:i:s.u') -}}'
-{%-          else -%}
+{%          elseif arg is is_string -%}
+'{{              arg|replace({"'": "''"}) -}}'
+{%-         else -%}
 {{              arg -}}
 {%          endif -%}
 {%      endfor -%}

@@ -320,6 +320,18 @@ END;
         );
         $this->assertSame(
             'yes',
+            self::twig('{% if value is is_string %}yes{% endif %}')
+                ->render(['value' => 'abc']),
+            'twig-test-is-string',
+        );
+        $this->assertSame(
+            'no',
+            self::twig('{% if not value is is_string %}no{% endif %}')
+                ->render(['value' => 77]),
+            'twig-test-is-not-string',
+        );
+        $this->assertSame(
+            'yes',
             self::twig('{% if value is nan %}yes{% endif %}')
                 ->render(['value' => sqrt(-1)]),
             'twig-test-nan'

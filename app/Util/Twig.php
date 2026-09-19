@@ -335,13 +335,30 @@ class Twig {
             'UTF-8'
         )));
 
-        $twig->addTest(new \Twig\TwigTest('donor', fn ($user) => !is_null($user) && $user::class === \Gazelle\User::class && new \Gazelle\User\Donor($user)->isDonor()));
-        $twig->addTest(new \Twig\TwigTest('forum_thread', fn ($thread) => $thread instanceof \Gazelle\ForumThread));
-        $twig->addTest(new \Twig\TwigTest('instanceof', fn ($obj, $class) => $obj instanceof $class));
-
-        $twig->addTest(new \Twig\TwigTest('nan', fn ($value) => is_nan($value)));
-
-        $twig->addTest(new \Twig\TwigTest('request_fill', fn ($contest) => $contest instanceof \Gazelle\Contest\RequestFill));
+        $twig->addTest(new \Twig\TwigTest(
+            'donor',
+            fn ($user) => !is_null($user) && $user::class === \Gazelle\User::class && new \Gazelle\User\Donor($user)->isDonor()
+        ));
+        $twig->addTest(new \Twig\TwigTest(
+            'forum_thread',
+            fn ($thread) => $thread instanceof \Gazelle\ForumThread)
+        );
+        $twig->addTest(new \Twig\TwigTest(
+            'instanceof',
+            fn ($obj, $class) => $obj instanceof $class
+        ));
+        $twig->addTest(new \Twig\TwigTest(
+            'is_string',
+            fn ($value) => is_string($value)
+        ));
+        $twig->addTest(new \Twig\TwigTest(
+            'nan',
+            fn ($value) => is_nan($value)
+        ));
+        $twig->addTest(new \Twig\TwigTest(
+            'request_fill',
+            fn ($contest) => $contest instanceof \Gazelle\Contest\RequestFill
+        ));
 
         $twig->addGlobal('dom', new Dominator());
 
