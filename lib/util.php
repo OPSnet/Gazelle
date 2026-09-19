@@ -905,6 +905,42 @@ function image_cache_signature(string $url, int|null $epoch = null, string $secr
     );
 }
 
+function parse_bbcode_image_attr(string $attr): ?array {
+    if ($attr === '') {
+        return null;
+    }
+
+    $parts = explode('|', $attr);
+    $size = array_shift($parts);
+    $imageAttr = [];
+    if (preg_match('/^(\d+)$/', $size, $match)) {
+        $imageAttr['width'] = (int)$match[1];
+    } elseif (preg_match('/^(\d+)x(\d*)$/i', $size, $match)) {
+        $imageAttr['width'] = (int)$match[1];
+        if ($match[2] !== '') {
+            $imageAttr['height'] = (int)$match[2];
+        }
+    } elseif (preg_match('/^x(\d+)$/i', $size, $match)) {
+        $imageAttr['height'] = (int)$match[1];
+    } else {
+        return null;
+    }
+
+    if (($imageAttr['width'] ?? 1) <= 0 || ($imageAttr['height'] ?? 1) <= 0) {
+        return null;
+    }
+
+    foreach ($parts as $part) {
+        if (preg_match('/^alt=(.*)$/i', $part, $match)) {
+            $alt = trim($match[1]);
+            if ($alt !== '') {
+                $imageAttr['alt'] = $alt;
+            }
+        }
+    }
+    return $imageAttr;
+}
+
 /**
  * Transform a URL with an optional resize directive to a image cache url
  * E.g. https://example.com/image.jpg => /i/full/bf27c278bc5b/aHR0cHM6Ly9leGFtcGxlLmNvbS9pbWFnZS5qcGc

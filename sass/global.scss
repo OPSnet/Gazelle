@@ -778,6 +778,24 @@ td.number_column.td_size.highlight_non_primary {
   max-width: 500px;
 }
 
+/* Some containers, such as wiki articles and album descriptions, set
+ * preferred limits for images. When a user gives an [img] tag its own
+ * size, that size may override those limits, but the image cannot be
+ * wider than its container.
+ */
+.bbcode_image {
+  max-width: 100%;
+}
+
+.bbcode_image_width,
+.bbcode_image_size {
+  height: auto;
+}
+
+.bbcode_image_height {
+  width: auto;
+}
+
 .sidebar img {
   max-width: 220px;
 }

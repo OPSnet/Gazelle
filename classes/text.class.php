@@ -543,7 +543,7 @@ class Text {
             // phpcs:disable Generic.CodeAnalysis.EmptyStatement.DetectedElseif
             if ($i >= strlen($Str)) {
                 // document end, tag unclosed
-            } elseif ($TagName == 'img' && isset($Tag[3][0])) { //[img=...] /** @phpstan-ignore-line need more magic */
+            } elseif ($TagName == 'img' && isset($Tag[3][0]) && is_string($Attrib) && parse_bbcode_image_attr($Attrib) === null) { //[img=...] /** @phpstan-ignore-line need more magic */
                 $Block = ''; // Nothing inside this tag
                 // Don't need to touch $i
             } elseif ($TagName == 'hr') {
@@ -676,10 +676,17 @@ class Text {
                     break;
                 case 'image':
                 case 'img':
+                    $ImageAttr = is_string($Attrib) ? parse_bbcode_image_attr($Attrib) : null;
+                    if ($ImageAttr !== null) {
+                        $Block = strtr($Block, ['[inlineurl]' => '']);
+                    }
                     if (empty($Block)) {
                         $Block = $Attrib;
                     }
                     $Array[$ArrayPos] = ['Type' => 'img', 'Val' => $Block];
+                    if ($ImageAttr !== null) {
+                        $Array[$ArrayPos]['Attr'] = $ImageAttr;
+                    }
                     break;
                 case 'inlineurl':
                     $Array[$ArrayPos] = ['Type' => 'inlineurl', 'Attr' => $Block, 'Val' => ''];
@@ -760,6 +767,7 @@ class Text {
                         // Basic tags, like [b] or [size=5]
                         $Array[$ArrayPos] = ['Type' => $TagName, 'Val' => self::parse($Block)];
                         if ($MaxAttribs > 0) {
+                            /** @phpstan-var string $Attrib */
                             $Array[$ArrayPos]['Attr'] = strtolower($Attrib);
                         }
                     }
@@ -1100,9 +1108,29 @@ class Text {
                         if (!self::valid_url($Block['Val'], '\.' . IMAGEEXT_REGEXP_STEM)) {
                             $Str .= "[img]{$Block['Val']}[/img]";
                         } else {
+                            $style = '';
+                            $imageClass = 'scale_image';
+                            $dimension = '';
+                            $ImageAttr = $Block['Attr'] ?? null;
+                            if (is_array($ImageAttr)) {
+                                $dimension = isset($ImageAttr['width']) ? " width=\"{$ImageAttr['width']}\"" : '';
+                                $dimension .= isset($ImageAttr['height']) ? " height=\"{$ImageAttr['height']}\"" : '';
+                                if (isset($ImageAttr['width'], $ImageAttr['height'])) {
+                                    $imageClass .= ' bbcode_image bbcode_image_size';
+                                    $style = " style=\"aspect-ratio: {$ImageAttr['width']} / {$ImageAttr['height']}; width: {$ImageAttr['width']}px; max-width: 100%; height: auto;\"";
+                                } elseif (isset($ImageAttr['width'])) {
+                                    $imageClass .= ' bbcode_image bbcode_image_width';
+                                    $style = " style=\"width: {$ImageAttr['width']}px; max-width: 100%; height: auto;\"";
+                                } elseif (isset($ImageAttr['height'])) {
+                                    $imageClass .= ' bbcode_image bbcode_image_height';
+                                    $style = " style=\"height: {$ImageAttr['height']}px; max-width: 100%; width: auto;\"";
+                                }
+                            }
+                            $alt = $ImageAttr['alt'] ?? $Block['Val'];
+                            $title = is_array($ImageAttr) && isset($ImageAttr['alt']) ? " title=\"{$ImageAttr['alt']}\"" : '';
                             $LocalURL = self::local_url($Block['Val']);
                             if ($LocalURL) {
-                                $Str .= '<img loading="lazy" class="scale_image" onclick="lightbox.init(this, $(this).width());" alt="' . $Block['Val'] . '" src="' . $LocalURL . '">';
+                                $Str .= '<img loading="lazy" class="' . $imageClass . '"' . $dimension . $style . ' onclick="lightbox.init(this, $(this).width());" alt="' . $alt . '"' . $title . ' src="' . $LocalURL . '">';
                             } else {
                                 if ($cache !== ImageCacheMode::off) {
                                     $passthru = $cache === ImageCacheMode::passthru;
@@ -1112,7 +1140,7 @@ class Text {
                                     $image    = $Block['Val'];
                                     $original = "";
                                 }
-                                $Str .= "<img loading=\"lazy\" class=\"scale_image\" onclick=\"lightbox.init(this, $(this).width());\" alt=\"{$Block['Val']}\" src=\"$image\"$original>";
+                                $Str .= "<img loading=\"lazy\" class=\"$imageClass\"$dimension$style onclick=\"lightbox.init(this, $(this).width());\" alt=\"$alt\"$title src=\"$image\"$original>";
                             }
                         }
                         break;

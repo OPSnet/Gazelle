@@ -129,6 +129,87 @@ class TextTest extends TestCase {
                 "text-image2-cache-implicit-$ext"
             );
         }
+
+        $image = 'https://www.example.com/a.jpg';
+        $this->assertSame(
+            "<img loading=\"lazy\" class=\"scale_image bbcode_image bbcode_image_width\" width=\"90\" style=\"width: 90px; max-width: 100%; height: auto;\" onclick=\"lightbox.init(this, \$(this).width());\" alt=\"$image\" src=\"$image\">",
+            \Text::full_format("[IMG=90]{$image}[/img]"),
+            'text-image-width'
+        );
+        $this->assertSame(
+            "<img loading=\"lazy\" class=\"scale_image bbcode_image bbcode_image_width\" width=\"90\" style=\"width: 90px; max-width: 100%; height: auto;\" onclick=\"lightbox.init(this, \$(this).width());\" alt=\"$image\" src=\"$image\">",
+            \Text::full_format("[IMG=90x]{$image}[/img]"),
+            'text-image-width-trailing-x'
+        );
+        $this->assertSame(
+            "<img loading=\"lazy\" class=\"scale_image bbcode_image bbcode_image_size\" width=\"90\" height=\"120\" style=\"aspect-ratio: 90 / 120; width: 90px; max-width: 100%; height: auto;\" onclick=\"lightbox.init(this, \$(this).width());\" alt=\"$image\" src=\"$image\">",
+            \Text::full_format("[IMG=90x120]{$image}[/img]"),
+            'text-image-width-height'
+        );
+        $this->assertSame(
+            "<img loading=\"lazy\" class=\"scale_image bbcode_image bbcode_image_height\" height=\"120\" style=\"height: 120px; max-width: 100%; width: auto;\" onclick=\"lightbox.init(this, \$(this).width());\" alt=\"$image\" src=\"$image\">",
+            \Text::full_format("[IMG=x120]{$image}[/img]"),
+            'text-image-height'
+        );
+        $this->assertSame(
+            '<img loading="lazy" class="scale_image bbcode_image bbcode_image_width" width="200" style="width: 200px; max-width: 100%; height: auto;" onclick="lightbox.init(this, $(this).width());" alt="&lt;Screenshot&gt;" title="&lt;Screenshot&gt;" src="' . $image . '">',
+            \Text::full_format("[IMG=200|ALT=<Screenshot>]{$image}[/img]"),
+            'text-image-alt'
+        );
+        $this->assertSame(
+            '<img loading="lazy" class="scale_image bbcode_image bbcode_image_width" width="200" style="width: 200px; max-width: 100%; height: auto;" onclick="lightbox.init(this, $(this).width());" alt="0" title="0" src="' . $image . '">',
+            \Text::full_format("[IMG=200|ALT=0]{$image}[/img]"),
+            'text-image-alt-zero'
+        );
+        $this->assertSame(
+            "<img loading=\"lazy\" class=\"scale_image bbcode_image bbcode_image_width\" width=\"90\" style=\"width: 90px; max-width: 100%; height: auto;\" onclick=\"lightbox.init(this, \$(this).width());\" alt=\"$image\" src=\"$image\">",
+            \Text::full_format("[IMG=00090]{$image}[/img]"),
+            'text-image-leading-zero'
+        );
+        $this->assertSame(
+            "<img loading=\"lazy\" class=\"scale_image bbcode_image bbcode_image_width\" width=\"90\" style=\"width: 90px; max-width: 100%; height: auto;\" onclick=\"lightbox.init(this, \$(this).width());\" alt=\"$image\" src=\"$image\">",
+            \Text::full_format("[IMG=90|ALT=]{$image}[/img]"),
+            'text-image-empty-alt'
+        );
+        $this->assertSame(
+            "<img loading=\"lazy\" class=\"scale_image bbcode_image bbcode_image_width\" width=\"90\" style=\"width: 90px; max-width: 100%; height: auto;\" onclick=\"lightbox.init(this, \$(this).width());\" alt=\"$image\" src=\"$image\">",
+            \Text::full_format("[IMG=90|FOO=bar]{$image}[/img]"),
+            'text-image-unknown-option'
+        );
+        $this->assertMatchesRegularExpression(
+            '@^<img loading="lazy" class="scale_image bbcode_image bbcode_image_width" width="200" style="width: 200px; max-width: 100%; height: auto;" onclick=".*?" alt="\Q' . $image . '\E" src=".*?/i/full/[\w-]+/[\w-]+" data-origin-src="\Q' . $image . '\E">$@',
+            \Text::full_format("[IMG=200]{$image}[/img]", cache: Enum\ImageCacheMode::cache),
+            'text-image-cache-display-width-full-cache'
+        );
+        $legacyImage = 'https://www.example.com/90x120.jpg';
+        $this->assertSame(
+            "<img loading=\"lazy\" class=\"scale_image\" onclick=\"lightbox.init(this, \$(this).width());\" alt=\"$legacyImage\" src=\"$legacyImage\">",
+            \Text::full_format("[IMG=$legacyImage]"),
+            'text-image-legacy-url-with-x'
+        );
+
+        foreach ([
+            '[IMG=]',
+            '[IMG=|ALT=Foo]',
+            "[IMG=|ALT=Fo\no]",
+            '[IMG=123.123x234.234]',
+            '[IMG=-40x-40]',
+            '[IMG=40x-40]',
+            '[IMG=20,30]',
+            '[IMG=20,30x40,50]',
+            '[IMG=0]',
+            '[IMG=0x100]',
+            '[IMG=100x0]',
+            '[IMG=x]',
+            '[img=0x-40]',
+            '[img=-40x0]',
+            '[img=10x-40]',
+            '[img=-40x10]',
+        ] as $invalid) {
+            $rendered = \Text::full_format("$invalid{$image}[/img]");
+            $this->assertStringNotContainsString(' width="', $rendered, "text-image-invalid-width-$invalid");
+            $this->assertStringNotContainsString(' height="', $rendered, "text-image-invalid-height-$invalid");
+        }
     }
 
     public function testCollage(): void {
