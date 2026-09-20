@@ -291,7 +291,7 @@
                             <input type="hidden" name="requestid" value="{{ request.id }}">
                             <input type="text" size="50" name="link"{% if link %}  value="{{ link }}"{% endif %}>
                             <br>
-                            <strong>Must be the permalink [PL] of the torrent<br>(<i>e.g.<.i> {{
+                            <strong>Must be the permalink [PL] of the torrent<br>(<i>e.g.</i> {{
                                 constant('SITE_URL') }}/torrents.php?torrentid=nnn).</strong>
                         </div>
 {%  if viewer.permitted('site_moderate_requests') %}
