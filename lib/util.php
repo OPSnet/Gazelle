@@ -6,9 +6,9 @@ declare(strict_types=1);
 // that it'd just be annoying to stick them in namespaces.
 
 use Gazelle\Enum\CacheBucket;
+use Gazelle\Exception\EarlyExitException;
 use Gazelle\Util\Irc;
 use Gazelle\Util\Time;
-use Gazelle\Util\Type;
 
 /**
  * Return true if the given string is an integer. The original Gazelle developers
@@ -176,7 +176,7 @@ function ratio_percent(float $percent): string {
  * @param array $NewParams New query items to insert into the URL
  */
 function get_url(array $Exclude = [], bool $Escape = true, bool $Sort = false, array $NewParams = []): string {
-    $QueryItems = null;
+    $QueryItems = [];
     parse_str($_SERVER['QUERY_STRING'], $QueryItems);
 
     foreach ($Exclude as $Key) {
@@ -431,7 +431,7 @@ function parse_user_agent(string $useragent): array {
  */
 function json_die(array|string $status, array|string $message = "bad parameters"): never {
     json_print($status, $message);
-    exit;
+    throw new EarlyExitException();
 }
 
 /**
@@ -451,7 +451,7 @@ function json_print(array|string $status, array|int|string|null $message = null)
 
 function json_error(int|string $code): never {
     echo json_encode(add_json_info(['status' => 'failure', 'error' => $code, 'response' => []]));
-    exit;
+    throw new EarlyExitException();
 }
 
 function json_or_error(mixed $JsonError, mixed $Error = null): never {

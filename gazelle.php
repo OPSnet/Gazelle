@@ -4,8 +4,6 @@
 
 namespace Gazelle;
 
-use Gazelle\Enum\AuthnMechanism;
-
 // 1. Initialization
 
 require __DIR__ . '/lib/bootstrap.php';
@@ -98,13 +96,14 @@ $Cache->cache_value('php_' . getmypid(), [
 header('Cache-Control: no-cache, must-revalidate, post-check=0, pre-check=0');
 
 $file = realpath(__DIR__ . "/sections/{$module}/index.php");
-if ($file === false) {
-    Error400::error();
-}
-
 try {
+    if ($file === false) {
+        Error400::error();
+    }
     $Debug->mark('call ' . str_replace(SERVER_ROOT . '/', '', $file));
     require $file;
+} catch (Exception\EarlyExitException) {
+    // pass
 } catch (\Error | \Exception $e) {
     // if there was an ongoing transaction, abort it
     if ($e::class === DB\MysqlException::class) {
@@ -112,11 +111,15 @@ try {
     }
     new Manager\ErrorLog()->pg()->abort();
     $errorLog = $Debug->saveError($e);
-    Error500::error(
-        $Viewer?->permitted('site_debug')
-            ? ($e->getMessage() . " ({$errorLog->link()})")
-            : "That is not supposed to happen. Check to see whether someone has created a thread in the the Bugs forum, or create a new thread to explain what you were doing and reference the Error ID {$errorLog->id}."
-    );
+    try {
+        Error500::error(
+            $Viewer?->permitted('site_debug')
+                ? ($e->getMessage() . " ({$errorLog->link()})")
+                : "That is not supposed to happen. Check to see whether someone has created a thread in the the Bugs forum, or create a new thread to explain what you were doing and reference the Error ID {$errorLog->id}."
+        );
+    } catch (Exception\EarlyExitException) {
+        // pass
+    }
 } finally {
     if (!is_null($Viewer)) {
         $Debug->profile($Viewer, isset($_REQUEST['profile']));

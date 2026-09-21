@@ -32,7 +32,8 @@ class Authentication extends Base {
         } catch (AuthnError $e) {
             if ($e->mechanism === AuthnMechanism::apikey) {
                 header('Content-type: application/json');
-                json_die('failure', $e->getMessage());
+                json_print('failure', $e->getMessage());
+                exit;
             }
             if ($e->mechanism === AuthnMechanism::session) {
                 SessionCookie::expire();
@@ -44,7 +45,11 @@ class Authentication extends Base {
                 exit;
             }
             if ($msg = $e->getMessage()) {
-                Error403::error($msg);
+                try {
+                    Error403::error($msg);
+                } catch (Exception\EarlyExitException) {
+                    exit;
+                }
             }
             header('Location: login.php');
             exit;
