@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
+use Rector\DeadCode\Rector\ConstFetch\RemovePhpVersionIdCheckRector;
 use Rector\DeadCode\Rector\If_\RemoveAlwaysTrueIfConditionRector;
 use Rector\Php73\Rector\FuncCall\RegexDashEscapeRector;
 use Rector\Php73\Rector\FuncCall\StringifyStrNeedlesRector;
@@ -43,6 +44,7 @@ return RectorConfig::configure()
     ->withSkip([
         NullToStrictStringFuncCallArgRector::class,
         RegexDashEscapeRector::class,
+        RemovePhpVersionIdCheckRector::class,
         StringifyStrNeedlesRector::class,
         // From the one-thing-at-a-time department
         AddTypeToConstRector::class,

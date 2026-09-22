@@ -21,6 +21,9 @@ $tgroup = $tgMan->findById((int)($_GET['id'] ?? 0));
 if (is_null($tgroup)) {
     Error404::error();
 }
+if (isset($_GET['revisionid'])) {
+    $tgroup->setRevisionId((int)$_GET['revisionid']);
+}
 
 // Comments (must be loaded before View::show_header so that subscriptions and quote notifications are handled properly)
 $commentPage = new Comment\Torrent($tgroup->id, (int)($_GET['page'] ?? 0), (int)($_GET['postid'] ?? 0));

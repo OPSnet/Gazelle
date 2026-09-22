@@ -12,7 +12,7 @@ use Gazelle\Intf\CollageEntry;
 
 class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, CollageEntry {
     final public const tableName            = 'torrents_group';
-    final public const CACHE_KEY            = 'tg_2_%d';
+    final public const CACHE_KEY            = 'tg_v3_%d';
     final public const CACHE_TLIST_KEY      = 'tlist_%d';
     final public const USER_RECENT_UPLOAD   = 'u_recent_up_%d';
     final public const CACHE_REQUEST_TGROUP = 'req_tg_%d';
@@ -24,8 +24,7 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
 
     final protected const USER_RECENT_SNATCH = 'u_recent_snatch_%d';
 
-    protected int  $revisionId = 0;
-    protected bool $showFallbackImage = true;
+    protected int               $revisionId;
     protected ArtistRole\TGroup $artistRole;
     protected Stats\TGroup      $stats;
     protected TGroup\Artwork    $artwork;
@@ -65,107 +64,20 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
         return "torrents.php?id={$this->id}";
     }
 
-    public function artwork(): TGroup\Artwork {
-        return $this->artwork ??= new TGroup\Artwork($this);
-    }
-
-    public function torrentLink(int $torrentId): string {
-        $url = '<a href="' . $this->url() . "&amp;torrentid={$torrentId}#torrent{$torrentId}\" dir=\"ltr\">"
-            . display_str($this->name()) . '</a>';
-        return match ($this->categoryName()) {
-            'Music'  => "{$this->artistRole()->link()} – $url [{$this->year()} {$this->releaseTypeName()}]",
-            'Audiobooks',
-            'Comedy' => "$url [{$this->year()}]",
-            default  => $url,
-        };
-    }
-
-    public function text(): string {
-        return match ($this->categoryName()) {
-            'Music'  => "{$this->artistRole()->text()} – {$this->name()} [{$this->year()} {$this->releaseTypeName()}]"
-                . ($this->isShowcase() ? '[Showcase]' : ''),
-            'Audiobooks',
-            'Comedy' => "{$this->name()} [{$this->year()}]",
-            default  => $this->name(),
-        };
-    }
-
-    /**
-     * When the image of a release group is changed, we need to flush other things
-     */
-    public function imageFlush(): static {
-        self::$db->prepared_query("
-            SELECT CollageID FROM collages_torrents WHERE GroupID = ?
-            ", $this->id
-        );
-        if (self::$db->has_results()) {
-            self::$cache->delete_multi(array_map(fn ($id) => "collagev2_$id", self::$db->collect(0)));
-        }
-
-        self::$db->prepared_query("
-            SELECT DISTINCT UserID
-            FROM torrents AS t
-            LEFT JOIN torrents_group AS tg ON (t.GroupID = tg.ID)
-            WHERE tg.ID = ?
-            ", $this->id
-        );
-        if (self::$db->has_results()) {
-            self::$cache->delete_multi(array_map(fn ($id) => sprintf(self::USER_RECENT_UPLOAD, $id), self::$db->collect(0)));
-        }
-
-        self::$db->prepared_query("
-            SELECT DISTINCT xs.uid
-            FROM xbt_snatched xs
-            INNER JOIN torrents t ON (t.ID = xs.fid)
-            WHERE t.GroupID = ?
-            ", $this->id
-        );
-        if (self::$db->has_results()) {
-            self::$cache->delete_multi(array_map(fn ($id) => sprintf(self::USER_RECENT_SNATCH, $id), self::$db->collect(0)));
-        }
-        return $this;
-    }
-
-    public function touch(): static {
-        self::$db->prepared_query('
-            UPDATE torrents_group SET
-                Time = now()
-            WHERE ID = ?
-            ', $this->id
-        );
-        return $this->flush();
-    }
-
-    /**
-     * Toggle whether an internal URL is returnd for missing cover artwork
-     * is returned, or null. Used by API endpoints.
-     */
-    public function showFallbackImage(bool $showFallbackImage): static {
-        $this->showFallbackImage = $showFallbackImage;
-        return $this;
-    }
-
     /**
      * Get the metadata of the torrent
      *
      * @return array of many things
      */
-    public function info(int $revisionId = 0): ?array {
+    public function info(): array {
         if (isset($this->info)) {
             return $this->info;
         }
         $key = sprintf(self::CACHE_KEY, $this->id);
-        $this->revisionId = $revisionId;
-        if (!$revisionId) {
+        if (!isset($this->revisionId)) {
             $cached = self::$cache->get_value($key);
             if ($cached !== false) {
                 $refresh = false;
-                if (!isset($cached['Image'])) {
-                    $cached['Image'] = $this->showFallbackImage
-                        ? (STATIC_SERVER . '/common/noartwork/' . CATEGORY_ICON[$cached['CategoryID'] - 1])  // @phpstan-ignore offsetAccess.invalidOffset
-                        : null;
-                    $refresh = true;
-                }
                 $cached['Flags'] = [
                     'IsSnatched' => $this->fetchIsSnatched(),
                 ];
@@ -189,15 +101,18 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
                 return $this->info;
             }
         }
-        $sql = 'SELECT '
-            . ($this->revisionId ? 'w.Body, w.Image,' : 'tg.WikiBody AS Body, tg.WikiImage AS Image,')
-            . " tg.ID,
+        $info = self::$db->rowAssoc("
+            SELECT
+                tg.ID,
+                tg.RevisionID,
                 tg.Name,
                 tg.Year,
                 tg.ReleaseType,
                 tg.CategoryID,
                 tg.Time,
                 tg.VanityHouse,
+                tg.WikiBody     AS Body,
+                tg.WikiImage    AS Image,
                 group_concat(tag.Name ORDER BY tt.PositiveVotes - tt.NegativeVotes DESC, tag.Name)         AS tagNames,
                 group_concat(tag.ID ORDER BY tt.PositiveVotes - tt.NegativeVotes DESC, tag.Name)           AS tagIds,
                 group_concat(tag.UserID ORDER BY tt.PositiveVotes - tt.NegativeVotes DESC, tag.Name)       AS tagVoteUserIds,
@@ -205,34 +120,36 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
                 group_concat(tt.NegativeVotes ORDER BY tt.PositiveVotes - tt.NegativeVotes DESC, tag.Name) AS tagDownvotes,
                 max(coalesce(t.Size, 0)) AS max_torrent_size,
                 max(coalesce(t.created, '2000-01-01 00:00:00')) AS most_recent_upload
-            FROM torrents_group AS tg
-            LEFT JOIN torrents AS t ON (t.GroupID = tg.ID)
-            LEFT JOIN torrents_tags AS tt ON (tt.GroupID = tg.ID)
-            LEFT JOIN tags as tag ON (tag.ID = tt.TagID)
-        ";
-
-        $args = [];
-        if ($this->revisionId) {
-            $sql .= '
-                LEFT JOIN wiki_torrents AS w ON (w.PageID = ? AND w.RevisionID = ?)';
-            $args[] = $this->id;
-            $args[] = $this->revisionId;
-        }
-        $sql .= " WHERE tg.ID = ? GROUP BY tg.ID";
-        $args[] = $this->id;
-
-        $info = self::$db->rowAssoc($sql, ...$args) ?? [
+            FROM torrents_group     tg
+            LEFT JOIN torrents      t   ON (t.GroupID = tg.ID)
+            LEFT JOIN torrents_tags tt  ON (tt.GroupID = tg.ID)
+            LEFT JOIN tags          tag ON (tag.ID = tt.TagID)
+            WHERE tg.ID = ?
+            GROUP BY tg.ID
+            ", $this->id
+        ) ?? [
             // ... a deleted torrent led to a deleted tgroup
             'CategoryID'   => 1,
-            'Image'        => null,
             'Name'         => "deleted group #{$this->id}",
             'ReleaseType'  => 0,
             'VanityHouse'  => false,
             'Year'         => null,
         ];
 
+        // fetch previous revision if required
+        if (isset($this->revisionId)) {
+            $revision = self::$db->rowAssoc("
+                SELECT wt.Body, wt.Image
+                FROM wiki_torrents wt
+                WHERE wt.PageID       = ?
+                    AND wt.RevisionID = ?
+                ", $this->id, $this->revisionId
+            );
+            $info['Body']  = $revision['Body'];
+            $info['Image'] = $revision['Image'];
+        }
+
         // make the values sane (null, boolean as appropriate)
-        // TODO: once all get_*_info calls have been ported over, do this prior to caching
         $info['VanityHouse'] = ($info['VanityHouse'] == 1);
         $info['ReleaseType'] = (int)$info['ReleaseType'];
 
@@ -264,13 +181,8 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
         );
         $info['torrent_list'] = self::$db->collect(0);
 
-        if (!$this->revisionId) {
+        if (!isset($this->revisionId)) {
             self::$cache->cache_value($key, $info, 0);
-        }
-        if (!$info['Image']) {
-            $info['Image'] = $this->showFallbackImage
-                ? (STATIC_SERVER . '/common/noartwork/' . CATEGORY_ICON[$info['CategoryID'] - 1])  // @phpstan-ignore offsetAccess.invalidOffset
-                : null;
         }
         $info['Flags'] = [
             'IsSnatched' => $this->fetchIsSnatched(),
@@ -300,6 +212,34 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
         );
     }
 
+    public function remasterList(): array {
+        self::$db->prepared_query("
+            SELECT group_concat(ID)     AS id_concat,
+                RemasterYear            AS year,
+                RemasterTitle           AS title,
+                RemasterRecordLabel     AS record_label,
+                RemasterCatalogueNumber AS catalogue_number
+            FROM torrents
+            WHERE RemasterYear IS NOT NULL
+                AND GroupID = ?
+            GROUP BY RemasterYear,
+                cast(RemasterTitle AS binary),
+                cast(RemasterRecordLabel AS binary),
+                cast(RemasterCatalogueNumber AS binary)
+            ORDER BY RemasterYear DESC,
+                cast(RemasterTitle AS binary) ASC,
+                cast(RemasterRecordLabel AS binary) ASC,
+                cast(RemasterCatalogueNumber AS binary) ASC
+            ", $this->id
+        );
+        $list = [];
+        foreach (self::$db->to_array(false, MYSQLI_BOTH) as $item) {
+            $item['id_list'] = array_map(intval(...), explode(',', $item['id_concat']));
+            $list[] = $item;
+        }
+        return $list;
+    }
+
     public function artistName(): ?string {
         return $this->artistRole()?->text();
     }
@@ -314,6 +254,10 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
 
     public function hasArtistRole(): bool {
         return $this->artistRole() instanceof ArtistRole\TGroup;
+    }
+
+    public function artwork(): TGroup\Artwork {
+        return $this->artwork ??= new TGroup\Artwork($this);
     }
 
     public function categoryId(): int {
@@ -346,6 +290,10 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
             . '\', 90)" data-origin-src="'
             . html_escape($image)
             . '">';
+    }
+
+    public function created(): string {
+        return $this->info()['Time'];
     }
 
     public function description(): string {
@@ -403,32 +351,8 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
         return $this->info()['ReleaseType'] == 0 ? null : $releaseTypes[$this->releaseType()];
     }
 
-    public function remasterList(): array {
-        self::$db->prepared_query("
-            SELECT group_concat(ID)     AS id_concat,
-                RemasterYear            AS year,
-                RemasterTitle           AS title,
-                RemasterRecordLabel     AS record_label,
-                RemasterCatalogueNumber AS catalogue_number
-            FROM torrents
-            WHERE RemasterYear IS NOT NULL
-                AND GroupID = ?
-            GROUP BY RemasterYear,
-                cast(RemasterTitle AS binary),
-                cast(RemasterRecordLabel AS binary),
-                cast(RemasterCatalogueNumber AS binary)
-            ORDER BY RemasterYear DESC,
-                cast(RemasterTitle AS binary) ASC,
-                cast(RemasterRecordLabel AS binary) ASC,
-                cast(RemasterCatalogueNumber AS binary) ASC
-            ", $this->id
-        );
-        $list = [];
-        foreach (self::$db->to_array(false, MYSQLI_BOTH) as $item) {
-            $item['id_list'] = array_map(intval(...), explode(',', $item['id_concat']));
-            $list[] = $item;
-        }
-        return $list;
+    public function revisionId(): int|null {
+        return $this->revisionId ?? null;
     }
 
     /**
@@ -460,15 +384,30 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
         return implode(' ', array_map(fn($t) => htmlentities("#$t"), $this->tagNameList()));
     }
 
-    /**
-     * To be consistent with requests
-     */
+    public function text(): string {
+        return match ($this->categoryName()) {
+            'Music'  => "{$this->artistRole()->text()} – {$this->name()} [{$this->year()} {$this->releaseTypeName()}]"
+                . ($this->isShowcase() ? '[Showcase]' : ''),
+            'Audiobooks',
+            'Comedy' => "{$this->name()} [{$this->year()}]",
+            default  => $this->name(),
+        };
+    }
+
     public function title(): string {
+        // to be consistent with requests
         return $this->info()['Name'];
     }
 
-    public function created(): string {
-        return $this->info()['Time'];
+    public function torrentLink(int $torrentId): string {
+        $url = '<a href="' . $this->url() . "&amp;torrentid={$torrentId}#torrent{$torrentId}\" dir=\"ltr\">"
+            . display_str($this->name()) . '</a>';
+        return match ($this->categoryName()) {
+            'Music'  => "{$this->artistRole()->link()} – $url [{$this->year()} {$this->releaseTypeName()}]",
+            'Audiobooks',
+            'Comedy' => "$url [{$this->year()}]",
+            default  => $url,
+        };
     }
 
     public function year(): int|null {
@@ -717,7 +656,7 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
             ", $this->id,
             $description,
             $image->url(),
-            $this->requestContext()->viewer()->id,
+            $user->id,
             mb_substr(trim($summary), 0, 100),
         );
         $revisionId = self::$db->inserted_id();
@@ -847,6 +786,57 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
                 );
         }
         return $success;
+    }
+
+    /**
+     * When the image of a release group is changed, we need to flush other things
+     */
+    public function imageFlush(): static {
+        self::$db->prepared_query("
+            SELECT CollageID FROM collages_torrents WHERE GroupID = ?
+            ", $this->id
+        );
+        if (self::$db->has_results()) {
+            self::$cache->delete_multi(array_map(fn ($id) => "collagev2_$id", self::$db->collect(0)));
+        }
+
+        self::$db->prepared_query("
+            SELECT DISTINCT UserID
+            FROM torrents AS t
+            LEFT JOIN torrents_group AS tg ON (t.GroupID = tg.ID)
+            WHERE tg.ID = ?
+            ", $this->id
+        );
+        if (self::$db->has_results()) {
+            self::$cache->delete_multi(array_map(fn ($id) => sprintf(self::USER_RECENT_UPLOAD, $id), self::$db->collect(0)));
+        }
+
+        self::$db->prepared_query("
+            SELECT DISTINCT xs.uid
+            FROM xbt_snatched xs
+            INNER JOIN torrents t ON (t.ID = xs.fid)
+            WHERE t.GroupID = ?
+            ", $this->id
+        );
+        if (self::$db->has_results()) {
+            self::$cache->delete_multi(array_map(fn ($id) => sprintf(self::USER_RECENT_SNATCH, $id), self::$db->collect(0)));
+        }
+        return $this;
+    }
+
+    public function setRevisionId(int $revisionId): static {
+        $this->revisionId = $revisionId;
+        return $this;
+    }
+
+    public function touch(): static {
+        self::$db->prepared_query('
+            UPDATE torrents_group SET
+                Time = now()
+            WHERE ID = ?
+            ', $this->id
+        );
+        return $this->flush();
     }
 
     /**

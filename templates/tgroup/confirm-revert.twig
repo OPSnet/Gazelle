@@ -1,19 +1,29 @@
 {{ header('Revert Revision ' ~ revision_id) }}
-<div class="center thin">
 <div class="header">
-    <h2>Revert Confirm!</h2>
+    <h3>You intend to revert {{ tgroup.link|raw }} to revision <a href="torrents.php?id={{
+        tgroup.id }}&amp;revisionid={{ revision_id }}">{{ revision_id }}</a>.</h3>
+    <br>
 </div>
-<div class="box pad">
+<div class="thin box pad">
+    <div class="pad">
+{% if tgroup.image.url %}
+        <h4>Cover</h4>
+        {{ tgroup.image.url }}
+        <br>
+        <img width="150" src="{{ tgroup.image.url|image_cache(width = 150) }}">
+        <br>
+{% endif %}
+        <h4>Description</h4>
+        {{ tgroup.description|bb_format }}
+    </div>
+
     <form class="confirm_form" name="torrent_group" action="torrents.php" method="get">
         <input type="hidden" name="action" value="revert">
         <input type="hidden" name="confirm" value="true">
         <input type="hidden" name="auth" value="{{ viewer.auth }}">
         <input type="hidden" name="groupid" value="{{ tgroup.id }}">
         <input type="hidden" name="revisionid" value="{{ revision_id }}">
-        <h3>You intend to revert {{ tgroup.link|raw }} to revision <a href="torrents.php?id={{
-            tgroup.id }}&amp;revisionid={{ revision_id }}">{{ revision_id }}</a>.</h3>
         <input type="submit" value="Confirm">
     </form>
-</div>
 </div>
 {{ footer() }}

@@ -5,17 +5,20 @@
 }}
 <div class="thin">
     <div class="header">
-        <h2>{{ tgroup.link | raw }}</h2>
+        <h2>{{ tgroup.link | raw }}
+{%- if revision_id %} <strong class="important_text">(rev:{{ revision_id }})</strong>{% endif %}</h2>
         <div class="linkbox">
 {% if viewer.permitted('torrents_edit') %}
             <a href="{{ tgroup.url|raw }}&amp;action=editgroup" class="brackets">Edit group details</a>
 {%   if revision_id %}
-            <a href="{{ tgroup.url|raw }}&amp;action=revert&amp;revisionid={{ revision_id }}&amp;auth={{ viewer.auth }}" class="brackets">Revert to this revision</a>
+            <b><a href="{{ tgroup.url|raw }}&amp;action=revert&amp;revisionid={{
+                revision_id }}&amp;auth={{ viewer.auth }}" class="brackets">Revert to this revision</a></b>
 {%   endif %}
 {% endif %}
             <a href="{{ tgroup.url|raw }}&amp;action=editrequest" class="brackets">Request an Edit</a>
 {%- include 'bookmark/action.twig' with {'class': 'torrent', 'id': tgroup.id, 'is_bookmarked': is_bookmarked} only %}
-            <a href="#" id="subscribelink_torrents{{ tgroup.id }}" class="brackets" onclick="SubscribeComments('torrents', {{ tgroup.id }}); return false;">{%-
+            <a href="#" class="brackets" id="subscribelink_torrents{{
+                tgroup.id }}" onclick="SubscribeComments('torrents', {{ tgroup.id }}); return false;">{%-
                 if is_subscribed %}Unsubscribe{% else %}Subscribe{% endif %}</a>
 {% if tgroup.categoryName == 'Music' %}
             <a href="upload.php?groupid={{ tgroup.id }}" class="brackets">Add format</a>

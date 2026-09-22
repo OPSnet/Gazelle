@@ -15,17 +15,21 @@ if (!$Viewer->permitted('torrents_edit')) {
     Error403::error("You are not allowed to edit torrents");
 }
 
-$tgroup = new Manager\TGroup()->findById((int)$_REQUEST['groupid']);
+// more fun with inconsistent url parameters :-/
+$revert = ($_GET['action'] ?? '') === 'revert';
+$tgroup = new Manager\TGroup()->findById((int)$_REQUEST[$revert ? 'id' : 'groupid']);
 if (is_null($tgroup)) {
     Error404::error();
 }
 
-if (($_GET['action'] ?? '') === 'revert') {
+if ($revert) {
     // we're reverting to a previous revision
     $revisionId = (int)$_GET['revisionid'];
     if (!$revisionId) {
         Error400::error('No revision specified to revert');
     }
+    $tgroup->flush();
+    $tgroup->setRevisionId($revisionId);
     if (!isset($_GET['confirm'])) {
         echo $Twig->render('tgroup/confirm-revert.twig', [
             'revision_id' => $revisionId,

@@ -16,7 +16,6 @@ $tgroup = new Manager\TGroup()->findById((int)($_GET['id'] ?? 0));
 if (is_null($tgroup)) {
     Error404::error();
 }
-$torMan = new Manager\Torrent();
 
 echo $Twig->render('tgroup/edit.twig', [
     'body'         => new Util\Textarea('body', $tgroup->description(), 80, 20),
@@ -25,11 +24,7 @@ echo $Twig->render('tgroup/edit.twig', [
             new Manager\Request()->findByTGroup($tgroup),
             fn ($r) => !$r->isFilled()
         ) === [],
-    'leech_reason' => Enum\LeechReason::cases(),
-    'leech_type'   => Enum\LeechType::cases(),
     'release_type' => $Viewer->releaseOrderLabel(new ReleaseType()->list()),
-    'size'         => NEUTRAL_LEECH_THRESHOLD,
-    'tgroup'       => $tgroup->showFallbackImage(false),
-    'unit'         => NEUTRAL_LEECH_UNIT,
+    'tgroup'       => $tgroup,
     'viewer'       => $Viewer,
 ]);

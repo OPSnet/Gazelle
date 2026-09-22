@@ -429,6 +429,10 @@ class TGroupTest extends TestCase {
     }
 
     public function testTGroupRevision(): void {
+        $this->assertNull(
+            $this->tgroup->revisionId(),
+            'tgroup-no-revision-id',
+        );
         [$description, $image] = [$this->tgroup->description(), $this->tgroup->image()];
         $revisionId = $this->tgroup->createRevision(
             $this->tgroup->description() . "\nmore text",
@@ -436,17 +440,26 @@ class TGroupTest extends TestCase {
             'phpunit testTGroup summary',
             $this->userList['user'],
         );
-        $this->tgroup->showFallbackImage(true);
         $this->assertCount(2, $this->tgroup->revisionList(), 'tgroup-revision-list');
-        $info = $this->tgroup->flush()->info($revisionId);
+        $this->tgroup->flush()->setRevisionId($revisionId);
+        $this->assertSame(
+            $revisionId,
+            $this->tgroup->revisionId(),
+            'tgroup-revision-id',
+        );
+        $info = $this->tgroup->info();
         $this->assertFalse(
             $info['from_cache'],
             'tgroup-revision-info',
         );
-        $this->assertStringEndsWith(
-            '/common/noartwork/music.png',
+        $this->assertNull(
             $info['Image'],
-            'tgroup-fallback-image',
+            'tgroup-fallback-image-null',
+        );
+        $this->assertSame(
+            STATIC_SERVER . '/common/noartwork/music.png',
+            $this->tgroup->cover(),
+            'tgroup-fallback-image-cover',
         );
         $this->assertSame(
             [$description, $image->url()],
