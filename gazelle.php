@@ -95,13 +95,13 @@ $Cache->cache_value('php_' . getmypid(), [
 
 header('Cache-Control: no-cache, must-revalidate, post-check=0, pre-check=0');
 
-$file = realpath(__DIR__ . "/sections/{$module}/index.php");
 try {
-    if ($file === false) {
-        Error400::error();
+    $route = Router::resolve($context, $Cache, $Debug, $Twig);
+    if ($route === null) {
+        Error404::error('invalid module name');
     }
-    $Debug->mark('call ' . str_replace(SERVER_ROOT . '/', '', $file));
-    require $file;
+    $Debug->mark('call ' . $route::class);
+    $route->process();
 } catch (Exception\EarlyExitException) {
     // pass
 } catch (\Error | \Exception $e) {
