@@ -38,7 +38,7 @@ $userMan = new Manager\User();
 $user = $userMan->findById((int)$_POST['userid']);
 if (is_null($user)) {
     header("Location: log.php?search=User+" . (int)$_POST['userid']);
-    exit;
+    return;
 }
 if ($_POST['checkpoint'] != $user->checkpoint()) {
     Error400::error(
@@ -116,7 +116,7 @@ if ($_POST['UserStatus'] === 'delete' && $Viewer->permitted('users_delete_users'
     $tracker->removeUser($user);
     $user->remove();
     header("Location: log.php?search=User+{$user->id}");
-    exit;
+    return;
 }
 
 // User was not deleted. Perform other stuff.
@@ -639,7 +639,7 @@ if (isset($_POST['invite_source_update'])) {
     if ($idList) {
         new Manager\InviteSource()->modifyInviterConfiguration($user, $idList);
         header("Location: tools.php?action=invite_source");
-        exit;
+        return;
     }
 }
 

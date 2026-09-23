@@ -76,7 +76,7 @@ if (isset($_REQUEST['json'])) {
     } else {
         print(json_encode($result));
     }
-    exit;
+    return;
 }
 
 echo $Twig->render('admin/cache-management.twig', [

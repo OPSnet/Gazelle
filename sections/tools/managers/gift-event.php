@@ -26,7 +26,7 @@ if (isset($_POST['name'], $_POST['begin'], $_POST['end'])) {
         $Viewer,
     );
     header('Location: tools.php?action=gift-event');
-    exit;
+    return;
 } elseif (isset($_REQUEST['id'])) {
     $event = $manager->findById((int)$_REQUEST['id']);
     if (is_null($event)) {
@@ -39,7 +39,7 @@ if (isset($_POST['name'], $_POST['begin'], $_POST['end'])) {
             Error404::error("No such user: " . html_escape($search));
         }
         header("Location: {$event->location()}&userid={$user->id}");
-        exit;
+        return;
     }
     if (isset($_GET['userid'])) {
         $user = new Manager\User()->findById((int)$_GET['userid']);
@@ -51,7 +51,7 @@ if (isset($_POST['name'], $_POST['begin'], $_POST['end'])) {
             'user'   => $user,
             'viewer' => $Viewer,
         ]);
-        exit;
+        return;
     }
     $paginator = new Util\Paginator(ITEMS_PER_PAGE, (int)($_GET['page'] ?? 1));
     $paginator->setTotal($event->totalUser());
@@ -66,7 +66,7 @@ if (isset($_POST['name'], $_POST['begin'], $_POST['end'])) {
         'paginator' => $paginator,
         'viewer'    => $Viewer,
     ]);
-    exit;
+    return;
 }
 
 echo $Twig->render('gift/admin-event.twig', [

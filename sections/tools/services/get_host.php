@@ -9,6 +9,6 @@ namespace Gazelle;
 header('Content-Type: application/json; charset=text/plain');
 if (!$Viewer->permitted('users_view_ips')) {
     echo '"Forbidden"';
-    exit;
+    return;
 }
 echo json_hostname(trim($_GET['ip'] ?? ''));

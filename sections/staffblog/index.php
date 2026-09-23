@@ -25,7 +25,7 @@ if ($Viewer->permitted('admin_manage_blog')) {
             case 'deleteblog':
                 $blog->remove();
                 header('Location: staffblog.php');
-                exit;
+                return;
 
             case 'editblog':
                 // we have a blog to edit
@@ -51,7 +51,7 @@ if ($Viewer->permitted('admin_manage_blog')) {
                         ->modify();
                 }
                 header('Location: staffblog.php');
-                exit;
+                return;
 
             default:
                 Error403::error();

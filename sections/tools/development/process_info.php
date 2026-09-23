@@ -20,7 +20,7 @@ if (($_GET['view'] ?? '') === 'histogram') {
         'duration' => $Debug->durationHistogram(),
         'memory'   => $Debug->memoryHistogram(),
     ]);
-    exit;
+    return;
 }
 
 $proc = [];

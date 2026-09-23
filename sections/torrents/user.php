@@ -13,7 +13,7 @@ namespace Gazelle;
 
 if (!isset($_GET['userid'])) {
     header("Location: torrents.php?type={$_GET['type']}&userid={$Viewer->id}");
-    exit;
+    return;
 }
 if ($_GET['userid'] == 'me') {
     $_GET['userid'] = $Viewer->id;

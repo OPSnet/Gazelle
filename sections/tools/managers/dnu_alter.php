@@ -17,7 +17,7 @@ $manager = new Manager\DNU();
 if ($_POST['submit'] == 'Reorder') {
     // Reorder, issued from an ajax call, see dnu.js
     echo json_encode($manager->reorder(array_map(intval(...), $_POST['item'] ?? [])));
-    exit;
+    return;
 }
 
 if ($_POST['submit'] == 'Delete') {

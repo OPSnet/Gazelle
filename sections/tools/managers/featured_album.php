@@ -25,7 +25,7 @@ if (isset($_GET['unfeature'])) {
         default    => Error403::error(),
     };
     header('Location: tools.php?action=featured_album');
-    exit;
+    return;
 }
 
 $size = (int)($_POST['size'] ?? NEUTRAL_LEECH_THRESHOLD);
@@ -85,7 +85,7 @@ if (isset($_POST['groupid'])) {
     );
 
     header("Location: " . $featuredAlbum->location());
-    exit;
+    return;
 }
 
 echo  $Twig->render('admin/feature-album.twig', [

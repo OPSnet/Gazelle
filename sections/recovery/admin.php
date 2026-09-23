@@ -40,7 +40,7 @@ if (isset($_GET['task'])) {
             $value = trim($_POST[$field]);
             if (strlen($value)) {
                 header("Location: /recovery.php?action=search&$field=$value");
-                exit;
+                return;
             }
         }
     }

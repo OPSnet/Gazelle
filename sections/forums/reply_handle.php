@@ -25,7 +25,7 @@ if (!$Viewer->readAccess($forum) || !$Viewer->writeAccess($forum) || $thread->is
 $body = trim($_POST['quickpost'] ?? '');
 if ($body === '') {
     header("Location: " . redirectUrl($thread->location()));
-    exit;
+    return;
 }
 
 if ($thread->lastAuthorId() == $Viewer->id && isset($_POST['merge'])) {

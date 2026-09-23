@@ -23,7 +23,7 @@ if (is_null($user)) {
 $idList = $_REQUEST['id_list'] ?? '';
 if (!$idList) {
     header("Location: ?action=audit&edit=1&id={$user->id}");
-    exit;
+    return;
 }
 if ($Viewer->hashHmac('audit', $idList) !== $_REQUEST['sig']) {
     Error400::error('bad signature');

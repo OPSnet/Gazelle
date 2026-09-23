@@ -22,7 +22,7 @@ if (isset($_GET['postid'])) {
     }
     if (!isset($_GET['threadid'])) {
         header("Location: {$post->location()}");
-        exit;
+        return;
     }
     $thread = $post->thread();
 } elseif (isset($_GET['threadid'])) {

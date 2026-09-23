@@ -101,7 +101,7 @@ if ($Viewer->isLocked() || $Viewer->enforceMFA()) {
         json_error("Insufficient privileges");
     }
     require __DIR__ . '/preview.php';
-    exit;
+    return;
 }
 
 if (

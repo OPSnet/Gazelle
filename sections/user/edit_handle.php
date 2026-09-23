@@ -74,7 +74,7 @@ if ($user->email() != $emailClean) {
             $user->addStaffNote("forced logout because of weak/compromised password")->modify();
             $user->session()->logoutEverywhere();
             echo $Twig->render('login/weak-password.twig');
-            exit;
+            return;
         }
     }
     $newEmail = $emailClean;
@@ -105,7 +105,7 @@ if (!empty($_POST['password']) && !empty($_POST['new_pass_1']) && !empty($_POST[
         $user->addStaffNote("forced logout because of weak/compromised password")->modify();
         $user->session()->logoutEverywhere();
         echo $Twig->render('login/weak-password.twig');
-        exit;
+        return;
     } else {
         if (!Util\PasswordCheck::checkPasswordStrength($_POST['new_pass_1'], $user)) {
             Error400::error(Util\PasswordCheck::ERROR_MSG);

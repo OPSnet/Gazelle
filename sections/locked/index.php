@@ -11,7 +11,7 @@ namespace Gazelle;
 
 if (!$Viewer->permitted('users_mod') && !$Viewer->isLocked()) {
     header('Location: /');
-    exit;
+    return;
 }
 
 echo $Twig->render('user/locked.twig', [

@@ -11,7 +11,7 @@ use Gazelle\Enum\UserTokenType;
 $userToken = new Manager\UserToken()->findByToken($_GET['key'] ?? '');
 if ($userToken?->type() != UserTokenType::password) {
     header('Location: login.php?action=recover');
-    exit;
+    return;
 }
 
 $validator = new Util\Validator();
@@ -34,7 +34,7 @@ if (isset($_REQUEST['password'])) {
         // Form validates without error, try and use the token
         if (!$userToken->consume()) {
             header('Location: login.php?action=recover&expired=1');
-            exit;
+            return;
         } else {
             // set new password.
             $userToken->user()->history()->modifyPassword($_REQUEST['password'], true);

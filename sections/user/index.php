@@ -8,7 +8,7 @@ namespace Gazelle;
 
 if ($Viewer->enforceMFA()) {
     require __DIR__ . '/mfa/index.php';
-    exit;
+    return;
 }
 
 switch ($_REQUEST['action'] ?? '') {

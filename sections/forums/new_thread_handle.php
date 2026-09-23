@@ -37,7 +37,7 @@ if (!$Viewer->writeAccess($forum) || !$Viewer->createAccess($forum)) {
 // If you're not sending anything, go back
 if (empty($_POST['body']) || empty($_POST['title'])) {
     header('Location: ' . redirectUrl($forum->location()));
-    exit;
+    return;
 }
 $title = shortenString(trim($_POST['title']), 150, true, false);
 $body = trim($_POST['body']);

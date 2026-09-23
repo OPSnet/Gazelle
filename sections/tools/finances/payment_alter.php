@@ -27,7 +27,7 @@ if ($_POST['submit'] === 'Delete') {
     if (!$Validator->validate($_POST)) {
         $Err = $Validator->errorMessage();
         require __DIR__ . '/payment_list.php';
-        exit;
+        return;
     }
 
     if ($_POST['submit'] === 'Create') {

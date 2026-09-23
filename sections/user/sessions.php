@@ -27,7 +27,7 @@ if (isset($_POST['all'])) {
     authorize();
     $session->dropAll();
     header('Location: /');
-    exit;
+    return;
 }
 if (isset($_POST['session'])) {
     authorize();

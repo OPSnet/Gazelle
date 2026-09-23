@@ -13,7 +13,7 @@ $username = $_GET['username'] ?? null;
 $mode     = $_REQUEST['mode'] ?? '';
 if (!$username && $mode != 'weekly') {
     echo json_encode(null);
-    exit;
+    return;
 }
 echo json_encode(match ($mode) {
     'flush'       => $username == $lastfm->username($Viewer) && $lastfm->flush($username),

@@ -28,7 +28,7 @@ if (isset($_POST['auth'])) {
             $error = "That role is no longer open.";
         } else {
             header("Location: {$role->apply($Viewer, $body)->location()}");
-            exit;
+            return;
         }
     }
 }

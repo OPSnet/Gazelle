@@ -241,7 +241,7 @@ while (true) {
 
 if (isset($error)) {
     require __DIR__ . '/edit.php';
-    exit;
+    return;
 }
 
 if (isset($_POST['cataloguenumber'])) {

@@ -30,7 +30,7 @@ if ($id || $name !== '') {
     } else {
         $collage->logger()->general("Collage {$collage->flush()->id} was recovered by {$Viewer->username()}");
         header('Location: ' . $collage->location());
-        exit;
+        return;
     }
 }
 

@@ -37,7 +37,7 @@ if ($status == DownloadStatus::ok) {
     header('Content-Type: ' . ($Viewer->downloadAsText() ? 'text/plain' : 'application/x-bittorrent'));
     header('Content-Disposition: attachment; filename="' . $torrent->torrentFilename($Viewer->downloadAsText(), MAX_PATH_LEN) . '"');
     echo $torrent->torrentBody($Viewer->announceUrl());
-    exit;
+    return;
 }
 
 if ($status == DownloadStatus::flood) {

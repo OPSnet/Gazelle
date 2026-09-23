@@ -25,7 +25,7 @@ if ($task) {
     } elseif ($_REQUEST['mode'] === 'enqueue') {
         $scheduler->enqueue($task['id_task']);
         header("Location: ?action=periodic&mode=view");
-        exit;
+        return;
     }
 }
 

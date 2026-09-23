@@ -60,7 +60,7 @@ if ($Err) {
     $Tags = $_POST['tags'];
     $Description = $_POST['description'];
     require __DIR__ . '/new.php';
-    exit;
+    return;
 }
 
 $collage = $collageMan->create(

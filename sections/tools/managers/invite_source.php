@@ -16,7 +16,7 @@ if (!$Viewer->permitted('admin_manage_invite_source')) {
 $user = new Manager\User()->find(trim($_POST['user'] ?? ''));
 if ($user) {
     header("Location: {$user->location()}#invite_source");
-    exit;
+    return;
 }
 
 echo $Twig->render('admin/invite-source.twig', [

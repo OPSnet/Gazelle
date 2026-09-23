@@ -656,7 +656,7 @@ if (defined('AJAX')) {
         $Response['warnings'][] = trim($Twig->render('upload/warnings/folderclash.twig', ['clash' => $folderClash]));
     }
     json_print('success', $Response);
-    exit;
+    return;
 }
 
 // all uploads should go through ajax.php, but we keep this for backwards compatibility with old scripts

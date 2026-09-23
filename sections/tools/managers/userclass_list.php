@@ -15,7 +15,7 @@ if (!$Viewer->permitted('admin_manage_permissions')) {
 
 if (isset($_REQUEST['id']) && $_REQUEST['id'] === 'new') {
     require __DIR__ . '/userclass_edit.php';
-    exit;
+    return;
 }
 
 echo $Twig->render('admin/privilege-usage.twig', [

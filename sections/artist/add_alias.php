@@ -37,7 +37,7 @@ if ($otherArtist) {
         'alias'  => $newName,
         'artist' => $otherArtist,
     ]);
-    exit;
+    return;
 }
 
 $redirArtist = null;

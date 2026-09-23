@@ -15,7 +15,7 @@ if (empty($_GET['nojump'])) {
     $article = $wikiMan->findByAlias($_GET['search'] ?? '');
     if ($article) {
         header('Location: ' . $article->location());
-        exit;
+        return;
     }
 }
 

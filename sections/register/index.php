@@ -16,7 +16,7 @@ if (isset($_REQUEST['confirm'])) {
     if (!$token || $token->type() != UserTokenType::confirm || !$token->consume()) {
         // we have no token, or not of the right type, or not consumable (expired)
         echo $Twig->render('register/expired.twig');
-        exit;
+        return;
     }
     $user = $token->user();
     $user->setField('Enabled', UserStatus::enabled->value)->modify();
@@ -30,7 +30,7 @@ if (isset($_REQUEST['confirm'])) {
     if ($_REQUEST['invite']) {
         if (!new Manager\Invite()->inviteExists($_REQUEST['invite'])) {
             echo $Twig->render('register/no-invite.twig');
-            exit;
+            return;
         }
     }
 
@@ -75,7 +75,7 @@ if (isset($_REQUEST['confirm'])) {
                 $user = $creator->create();
                 if ($newInstall) {
                     header("Location: /login.php");
-                    exit;
+                    return;
                 }
                 new Util\Mail()->send($user->email(), 'New account confirmation at ' . SITE_NAME,
                     $Twig->render('email/registration.text.twig', [
@@ -87,7 +87,7 @@ if (isset($_REQUEST['confirm'])) {
             } catch (Exception\UserCreatorException $e) {
                 if ($e->error === UserCreatorError::invitation) {
                     echo $Twig->render('register/no-invite.twig');
-                    exit;
+                    return;
                 }
                 $error = match ($e->error) {
                     UserCreatorError::duplicate => 'Someone already took that username :-(',

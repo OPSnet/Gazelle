@@ -22,7 +22,7 @@ if (!$collage->isArtist()) {
 if (isset($_POST['drag_drop_collage_sort_order'])) {
     $collage->updateSequence($_POST['drag_drop_collage_sort_order']);
     header("Location: collages.php?id={$collage->id}");
-    exit;
+    return;
 }
 
 $artist = new Manager\Artist()->findById((int)($_POST['artistid'] ?? 0));

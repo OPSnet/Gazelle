@@ -46,7 +46,7 @@ if ($isTitlePurchase) {
 switch ($item->purchase($Viewer, $item->price(), $extra)) {
     case Enum\BonusItemPurchaseStatus::success:
         header("Location: bonus.php?complete={$item->label()}");
-        exit;
+        return;
 
     case Enum\BonusItemPurchaseStatus::insufficientFunds:
         Error400::error("Could not purchase {$item->title()} due to lack of funds.");

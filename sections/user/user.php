@@ -16,7 +16,7 @@ $userMan = new Manager\User();
 $user = $userMan->findById((int)$_GET['id']);
 if (is_null($user)) {
     header("Location: log.php?search=User+" . (int)$_GET['id']);
-    exit;
+    return;
 }
 
 $userId      = $user->id;
@@ -45,7 +45,7 @@ if (isset($_POST['flsubmit'], $_POST['fltype']) && ($_POST['action'] ?? '') === 
     );
     if ($status === Enum\BonusItemPurchaseStatus::success) {
         header("Location: {$user->location()}");
-        exit;
+        return;
     } else {
         Error400::error(
             match ($status) { /* @phpstan-ignore match.unhandled (alreadyPurchased) */

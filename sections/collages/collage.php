@@ -11,7 +11,7 @@ if (is_null($collage)) {
 }
 if ($collage->isDeleted()) {
     header("Location: log.php?search=Collage+" . $collage->id);
-    exit;
+    return;
 }
 
 require __DIR__ . ($collage->isArtist() ? '/collage_artists.php' : '/collage_torrent.php');

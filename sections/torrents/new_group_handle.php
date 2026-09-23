@@ -41,7 +41,7 @@ if (empty($_POST['confirm'])) {
         'torrent' => $torrent,
         'viewer'  => $Viewer,
     ]);
-    exit;
+    return;
 }
 
 $new = new Manager\TGroup()->createFromTorrent(

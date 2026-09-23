@@ -36,7 +36,7 @@ if (!isset($_POST['confirm'])) {
         'old'    => $old,
         'viewer' => $Viewer,
     ]);
-    exit;
+    return;
 }
 
 authorize();

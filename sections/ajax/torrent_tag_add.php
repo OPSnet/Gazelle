@@ -46,7 +46,7 @@ foreach (array_unique(explode(',', $_REQUEST['tagname'])) as $tagName) {
                 json_error('This tag is not allowed');
             } else {
                 header('Location: ' . $tgroup->location());
-                exit;
+                return;
             }
         }
         if ($tag->hasVoteTGroup($tgroup, $Viewer)) {
@@ -55,7 +55,7 @@ foreach (array_unique(explode(',', $_REQUEST['tagname'])) as $tagName) {
                 json_error('you have already voted on this tag');
             } else {
                 header('Location: ' . $tgroup->location());
-                exit;
+                return;
             }
         }
         $tag->addTGroup($tgroup, $Viewer, 3);
@@ -72,7 +72,7 @@ if (defined('AJAX')) {
         'added'    => $added,
         'rejected' => $rejected,
     ]);
-    exit;
+    return;
 }
 
 header('Location: ' . $tgroup->location());

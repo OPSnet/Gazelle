@@ -19,7 +19,7 @@ if (isset($_POST['convid'])) {
     $spm = $manager->findById((int)($_POST['convid'] ?? 0));
     if (is_null($spm)) {
         header("Location: staffpm.php");
-        exit;
+        return;
     }
     if (!$spm->visible($Viewer)) {
         Error403::error();
@@ -35,7 +35,7 @@ if (isset($_POST['convid'])) {
     }
     $manager->create($Viewer, (int)$_POST['level'], $subject, $message);
     header('Location: staffpm.php');
-    exit;
+    return;
 } else {
     Error400::error();
 }

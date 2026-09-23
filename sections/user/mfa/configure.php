@@ -36,7 +36,7 @@ if (isset($_SESSION['private_key'], $_POST['mfa'])) {
         echo $Twig->render('user/mfa/complete.twig', [
             'keys' => $recoveryKeys,
         ]);
-        exit;
+        return;
     }
     session_abort();
     $valid = false;

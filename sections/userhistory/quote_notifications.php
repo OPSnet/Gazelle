@@ -17,7 +17,7 @@ $userQuote = new User\Quote($Viewer);
 if ($_GET['catchup'] ?? 0) {
     $userQuote->clearAll();
     header('Location: userhistory.php?action=quote_notifications');
-    exit;
+    return;
 }
 
 $userQuote->setShowAll(($_GET['showall'] ?? 0) == 1);

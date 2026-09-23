@@ -18,7 +18,7 @@ if (isset($_GET['search'])) {
         $found = $userMan->findById((int)substr($search, 1));
         if ($found) {
             header('Location: ' . $found->location());
-            exit;
+            return;
         }
     } elseif (preg_match(IP_REGEXP, $search)) {
         $_GET['siteip']    = $search;
@@ -31,7 +31,7 @@ if (isset($_GET['search'])) {
         $found = $userMan->findByUsername($username);
         if ($found) {
             header('Location: ' . $found->location());
-            exit;
+            return;
         }
         $_GET['username']    = $username;
         $_GET['username-op'] = 'contains';

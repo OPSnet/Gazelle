@@ -40,7 +40,7 @@ if (isset($_POST['drag_drop_collage_sort_order'])) {
         }
     } else {
         header("Location: {$collage->location()}");
-        exit;
+        return;
     }
 }
 $collage->flush();

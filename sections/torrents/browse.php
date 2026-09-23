@@ -20,7 +20,7 @@ if (isset($_GET['searchstr']) || isset($_GET['groupname'])) {
     $torrent = $torMan->findByInfohash($_GET['searchstr'] ?? $_GET['groupname']);
     if ($torrent) {
         header('Location: ' . $torrent->location());
-        exit;
+        return;
     }
 }
 
@@ -114,7 +114,7 @@ if ($NumResults == 0) {
     echo $Twig->render('torrent/search-none.twig', [
         'list' => $tagMan->userTopTagList($Viewer),
     ]);
-    exit;
+    return;
 }
 
 $bookmark = new User\Bookmark($Viewer);

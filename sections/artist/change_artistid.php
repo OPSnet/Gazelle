@@ -39,7 +39,7 @@ $redirect = (bool)$_POST['redirect'];
 if (isset($_POST['confirm'])) {
     $new->merge($artist, $redirect, $Viewer);
     header("Location: artist.php?action=edit&artistid={$new->id}");
-    exit;
+    return;
 }
 
 echo $Twig->render('artist/merge.twig', [

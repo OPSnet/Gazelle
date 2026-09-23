@@ -13,7 +13,7 @@ if (!$Viewer->isStaffPMReader()) {
 $staffPm = new Manager\StaffPM()->findById((int)($_REQUEST['convid'] ?? 0));
 if (is_null($staffPm)) {
     header('Location: staffpm.php');
-    exit;
+    return;
 }
 
 if (isset($_GET['convid'])) {
@@ -31,7 +31,7 @@ if (isset($_GET['convid'])) {
         default => Error404::error(),
     };
     header('Location: staffpm.php');
-    exit;
+    return;
 }
 
 if (

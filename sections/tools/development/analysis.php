@@ -39,7 +39,7 @@ if (isset($_POST['remove'])) {
 
 if (is_null($case)) {
     header('Location: tools.php?action=analysis_list');
-    exit;
+    return;
 }
 
 echo $Twig->render('debug/analysis.twig', [

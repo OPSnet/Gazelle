@@ -22,7 +22,7 @@ if (preg_match('/([\w-]+(?:\.[\w-]+)?)/', $_GET['table'] ?? '', $match)) {
     echo $Twig->render('admin/pg-table.twig', [
         'table' => $table,
     ]);
-    exit;
+    return;
 }
 
 $info = new DB\PgInfo(

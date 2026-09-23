@@ -20,7 +20,7 @@ if ($privilege) {
     }
     $privilege->remove();
     header("Location: tools.php?action=userclass");
-    exit;
+    return;
 }
 
 $edit = isset($_REQUEST['id']) && $_REQUEST['id'] !== 'new';
@@ -42,7 +42,7 @@ if (isset($_REQUEST['submit'])) {
         $privilege = $privMan->findById((int)$_REQUEST['id']);
         if (is_null($privilege)) {
             header("Location: tools.php?action=userclass");
-            exit;
+            return;
         }
         if (empty($_REQUEST['secondary']) === $privilege->isSecondary() && $privilege->userTotal() > 0) {
             Error400::error("You can't toggle secondary when there are users");
@@ -82,7 +82,7 @@ if (isset($_REQUEST['submit'])) {
             $displayStaff
         );
         header("Location: tools.php?action=userclass");
-        exit;
+        return;
     }
     $privilege->setField('Badge', $badge)
         ->setField('DisplayStaff', $displayStaff ? '1' : '0')

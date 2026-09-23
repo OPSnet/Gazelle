@@ -17,7 +17,7 @@ switch ($_REQUEST['action'] ?? '') {
     case 'cacheflush':
         new Manager\Bonus()->flush();
         header("Location: bonus.php");
-        exit;
+        return;
     case 'history':
         require __DIR__ . '/history.php';
         break;

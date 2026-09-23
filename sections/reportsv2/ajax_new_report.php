@@ -23,7 +23,7 @@ $reportMan = new Manager\Torrent\Report($torMan);
 
 $report = $reportMan->findNewest();
 if (!$report) {
-    exit;
+    return;
 }
 $torrent = $report->torrent();
 if (is_null($torrent)) {
@@ -33,7 +33,7 @@ if (is_null($torrent)) {
     echo $Twig->render('reportsv2/deleted.twig', [
         'report'  => $report,
     ]);
-    exit;
+    return;
 }
 
 $report->claim($Viewer);

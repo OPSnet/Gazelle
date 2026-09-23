@@ -54,16 +54,16 @@ if (isset($_POST['action'])) {
             } else {
                 header('Location: torrents.php?searchstr=' . urlencode($_GET['artistname']));
             }
-            exit;
+            return;
         }
         if ($db->record_count() === 1 || !strcasecmp($Name, $NameSearch)) {
             header("Location: artist.php?id=$FirstID");
-            exit;
+            return;
         }
         while ([$ID, $Name] = $db->next_record(MYSQLI_NUM)) {
             if (!strcasecmp($Name, $NameSearch)) {
                 header("Location: artist.php?id=$ID");
-                exit;
+                return;
             }
         }
         header("Location: artist.php?id=$FirstID");

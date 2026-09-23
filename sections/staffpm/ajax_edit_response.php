@@ -14,7 +14,7 @@ $name    = trim($_POST['name']);
 $message = trim($_POST['message']);
 if (!$name || !$message) {
     echo -1;
-    exit;
+    return;
 }
 
 $id     = (int)($_POST['id'] ?? 0);

@@ -14,7 +14,7 @@ $id      = (int)($_GET['id'] ?? 0);
 $torrent = $torMan->findById($id);
 if (is_null($torrent)) {
     header("Location: log.php?search=Torrent+$id");
-    exit;
+    return;
 }
 
 echo $Twig->render('reportsv2/create.twig', [

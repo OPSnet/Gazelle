@@ -8,11 +8,11 @@ namespace Gazelle;
 
 if (!FEATURE_EMAIL_REENABLE) {
     header("Location: index.php");
-    exit;
+    return;
 }
 if (!isset($_GET['token'])) {
     header("Location: index.php");
-    exit;
+    return;
 }
 
 $enabler = new Manager\AutoEnable()->findByToken($_GET['token']);

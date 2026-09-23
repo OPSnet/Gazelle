@@ -17,7 +17,7 @@ foreach ($_POST['id'] as $id) {
 }
 if (!$list) {
     header("Location: staffpm.php");
-    exit;
+    return;
 }
 
 foreach ($list as $spm) {

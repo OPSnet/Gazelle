@@ -23,7 +23,7 @@ if (preg_match('/([\w-]+)/', $_GET['table'] ?? '', $match)) {
     echo $Twig->render('admin/mysql-table.twig', [
         'table' => $table,
     ]);
-    exit;
+    return;
 }
 
 $info = new DB\MysqlInfo(

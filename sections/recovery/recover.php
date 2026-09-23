@@ -11,7 +11,7 @@ namespace Gazelle;
 
 if (isset($Viewer)) {
     header("Location: index.php");
-    exit;
+    return;
 }
 
 echo $Twig->render('recovery/index.twig');

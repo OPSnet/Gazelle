@@ -12,7 +12,7 @@ namespace Gazelle;
 if (isset($_POST['label'], $_POST['title'])) {
     authorize(ajax: true);
     echo new Json\BonusItemTitle($_POST['label'], $_POST['title'])->response();
-    exit;
+    return;
 }
 
 if (isset($_POST['bonus-user-other'], $_POST['label'])) {
@@ -22,7 +22,7 @@ if (isset($_POST['bonus-user-other'], $_POST['label'])) {
         json_error('bad label for other token item');
     }
     echo new Json\BonusUserOther($Viewer, $item, $_POST['bonus-user-other'])->response();
-    exit;
+    return;
 }
 
 $item = new Manager\Bonus()->findBonusItemByLabel($_REQUEST['item'] ?? '');

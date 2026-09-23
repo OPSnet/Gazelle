@@ -12,7 +12,7 @@ namespace Gazelle;
 
 if ($Viewer) {
     header("Location: index.php");
-    exit;
+    return;
 }
 if (session_status() === PHP_SESSION_NONE) {
     session_start(['read_and_close' => true]);
@@ -36,7 +36,7 @@ if (!OPEN_EXTERNAL_REFERRALS || !count($Accounts) || $ReferralManager->readOnly)
 </div>
 <?php
     View::show_footer();
-    exit;
+    return;
 }
 
 View::show_header('External Tracker Referrals');

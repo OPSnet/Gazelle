@@ -26,7 +26,7 @@ if (!empty($_GET['do']) && $userId !== $Viewer->id && !$Viewer->permitted('users
 if ($_GET['do'] === 'revoke') {
     $user->revokeApiTokenById($tokenId);
     header("Location: {$user->location()}&action=edit");
-    exit;
+    return;
 } elseif ($_GET['do'] === 'generate') {
     $tokenName = $_POST['token_name'] ?? '';
     if (empty($tokenName)) {

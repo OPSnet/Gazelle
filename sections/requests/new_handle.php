@@ -186,7 +186,7 @@ if (isset($error)) {
         $year = null;
     }
     require __DIR__ . '/new.php';
-    exit;
+    return;
 }
 
 $request = new Manager\Request()->create(

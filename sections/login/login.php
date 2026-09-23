@@ -11,7 +11,7 @@ namespace Gazelle;
 
 if (isset($Viewer)) {
     header("Location: /index.php");
-    exit;
+    return;
 }
 
 $login = new Login();
@@ -38,7 +38,7 @@ if (isset($_POST['username'], $_POST['password'])) {
                 ]);
             }
             header("Location: login.php?action=disabled");
-            exit;
+            return;
         }
 
         if ($user->isEnabled()) {
@@ -46,7 +46,7 @@ if (isset($_POST['username'], $_POST['password'])) {
                 $user->addStaffNote("login prevented because of weak/compromised password")->modify();
                 $user->session()->logoutEverywhere();
                 echo $Twig->render('login/weak-password.twig');
-                exit;
+                return;
             }
             $useragent = $_SERVER['HTTP_USER_AGENT'] ?? '[no-useragent]';
             $context = new RequestContext(
@@ -71,7 +71,7 @@ if (isset($_POST['username'], $_POST['password'])) {
                 (int)$login->persistent() * (time() + 60 * 60 * 24 * 90)
             );
             header("Location: index.php");
-            exit;
+            return;
         }
     }
 }

@@ -20,7 +20,7 @@ if ($Viewer->permitted('admin_manage_applicants')) {
     }
     // Staff who can see specific roles cannot see the admin page
     header('Location: apply.php?action=view');
-    exit;
+    return;
 }
 
 $error = null;

@@ -20,7 +20,7 @@ if (isset($_REQUEST['id']) && $_REQUEST['id'] !== 'new') {
     $privilege = $privMan->findById((int)$_REQUEST['id']);
     if (is_null($privilege)) {
         header("Location: tools.php?action=userclass");
-        exit;
+        return;
     }
 }
 

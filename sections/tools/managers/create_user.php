@@ -43,7 +43,7 @@ if (isset($_POST['Username'])) {
         });
     }
     header ("Location: " . $user->location());
-    exit;
+    return;
 }
 
 echo $Twig->render('admin/user-create.twig', [

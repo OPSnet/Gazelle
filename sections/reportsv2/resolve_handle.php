@@ -85,12 +85,12 @@ if ($fromReportPage && in_array($_POST['resolve_type'], ['manual', 'dismiss'])) 
     if ($report->moderatorResolve($Viewer, $comment) < 1) {
         echo $Twig->render('reportsv2/already-resolved.twig', ['report' => $report]);
     }
-    exit;
+    return;
 }
 
 if ($fromReportPage && !$report->moderatorResolve($Viewer, $_POST['comment'] ?? '')) {
     echo $Twig->render('reportsv2/already-resolved.twig', ['report' => $report]);
-    exit;
+    return;
 }
 
 if ($_POST['resolve_type'] == $report->type()) {
@@ -147,7 +147,7 @@ if (!$isDelete) {
     );
     if (!$ok) {
         echo "Failure: $message<br>";
-        exit;
+        return;
     }
 
     $torrent = new TorrentDeleted($torrent->id);

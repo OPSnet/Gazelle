@@ -36,7 +36,7 @@ if ($tgroupList) {
         'artist' => $artist,
         'list'   => $tgroupList,
     ]);
-    exit;
+    return;
 }
 
 $artist->removeAlias($aliasId);

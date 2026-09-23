@@ -37,7 +37,7 @@ if (isset($_POST['name'])) {
         }
         $ErrNoEscape = true;
         require __DIR__ . '/edit.php';
-        exit;
+        return;
     }
     if ($collage->isOwner($Viewer)) {
         if (!$Viewer->permitted('site_collages_renamepersonal') && !stristr($name, $Viewer->username())) {

@@ -29,7 +29,7 @@ if (isset($_POST['delete'])) {
     }
     $thread->remove();
     header('Location: ' . $forum->location());
-    exit;
+    return;
 }
 
 $newForum = null;

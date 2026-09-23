@@ -32,7 +32,7 @@ if (isset($_POST['auth'])) {
             ->modify();
 
         header('Location: apply.php?action=admin');
-        exit;
+        return;
     }
 }
 

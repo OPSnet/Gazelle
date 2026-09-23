@@ -25,10 +25,10 @@ if ($Viewer->permitted('users_edit_password')) {
         Error403::error();
     } elseif (!isset($_POST['password'])) {
         echo $Twig->render('user/mfa/remove.twig', ['bad' => false]);
-        exit;
+        return;
     } elseif (!$user->validatePassword($_POST['password'])) {
         echo $Twig->render('user/mfa/remove.twig', ['bad' => true]);
-        exit;
+        return;
     }
 }
 $user->MFA()->remove();

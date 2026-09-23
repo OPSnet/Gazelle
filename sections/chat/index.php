@@ -8,7 +8,7 @@ namespace Gazelle;
 
 if (!$Viewer || $Viewer->isLocked()) {
     require __DIR__ . '/webirc_disabled.php';
-    exit;
+    return;
 }
 
 require match ($_REQUEST['action'] ?? '') {

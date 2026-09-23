@@ -29,7 +29,7 @@ if ($new->categoryName() !== 'Music') {
 
 if ($torrent->groupId() === $new->id) {
     header("Location: " . redirectUrl("torrents.php?action=edit&id=" . $torrent->groupId()));
-    exit;
+    return;
 }
 
 if (empty($_POST['confirm'])) {
@@ -38,7 +38,7 @@ if (empty($_POST['confirm'])) {
         'torrent' => $torrent,
         'viewer'  => $Viewer,
     ]);
-    exit;
+    return;
 }
 
 authorize();

@@ -30,7 +30,7 @@ if (isset($_REQUEST['id'])) {
                 $app->resolve(true);
                 $appMan->flush();
                 header('Location: /apply.php?action=view');
-                exit;
+                return;
             } elseif ($_POST['resolve'] === 'Reopen') {
                 $app->resolve(false);
                 $appMan->flush();

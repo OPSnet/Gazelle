@@ -31,7 +31,7 @@ if (count($tgroupList) + count($requestList) > 0) {
         'request_list' => $requestList,
         'tgroup_list'  => $tgroupList,
     ]);
-    exit;
+    return;
 }
 
 $name = $artist->name();

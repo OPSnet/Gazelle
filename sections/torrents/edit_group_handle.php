@@ -32,7 +32,7 @@ if (($_GET['action'] ?? '') === 'revert') {
             'tgroup'      => $tgroup,
             'viewer'      => $Viewer,
         ]);
-        exit;
+        return;
     }
     [$body, $imageUrl] = $tgroup->revertRevision($revisionId, $Viewer);
     if (is_null($body)) {
@@ -46,7 +46,7 @@ if (($_GET['action'] ?? '') === 'revert') {
     $tgroup->refresh();
     $tgroup->imageFlush();
     header("Location: {$tgroup->location()}");
-    exit;
+    return;
 }
 
 if (isset($_POST['remove'])) {
@@ -67,7 +67,7 @@ if (isset($_POST['remove'])) {
     $summary = trim($_POST['summary'] ?? 'none given');
     $Viewer->logger()->general("Group $tgroupId ($name) was removed by user {$Viewer->username()}, reason: $summary");
     header('Location: torrents.php');
-    exit;
+    return;
 }
 
 $logInfo = [];

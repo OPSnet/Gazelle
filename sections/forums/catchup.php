@@ -11,7 +11,7 @@ authorize();
 if (($_GET['forumid'] ?? '') == 'all') {
     $Viewer->updateCatchup();
     header('Location: forums.php');
-    exit;
+    return;
 }
 
 $forum = new Manager\Forum()->findById((int)($_GET['forumid'] ?? 0));
