@@ -1,0 +1,65 @@
+#! /usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+namespace Gazelle;
+
+require __DIR__ . '/../lib/bootstrap.php';
+
+array_shift($argv);
+
+if ((bool)array_intersect(['-s', '--summary'], $argv)) {
+    summaryReport();
+    exit;
+}
+
+$userIdx = array_search('-u', $argv);
+if ($userIdx === false) {
+    $userIdx = array_search('--user', $argv);
+}
+if ($userIdx !== false) {
+    userReport(new Manager\User()->find($argv[$userIdx + 1]));
+    exit;
+}
+
+function summaryReport(): void {
+    $manager = new Manager\User();
+    $db = DB::DB();
+    $db->prepared_query('
+        SELECT SiteOptions FROM users_info
+    ');
+    $summary = [];
+    foreach ($db->collect(0) as $opt) {
+        if ($opt !== null) {
+            foreach (unserialize($opt) as $name => $value) {
+                if (is_array($value)) {
+                    $summary[$name] ??= 0;
+                    $summary[$name]++;
+                } else {
+                    // 0 as a key has weird side-effects, so prefix the value
+                    $value = ". $value";
+                    if (!isset($summary[$name])) {
+                        $summary[$name] = [];
+                    }
+                    if (!isset($summary[$name][$value])) {
+                        $summary[$name][$value] = 0;
+                    }
+                    $summary[$name][$value]++;
+                }
+            }
+        }
+    }
+    ksort($summary);
+    show($summary);
+}
+
+function userReport(User $user) {
+    $opt = DB::DB()->scalar('
+        SELECT SiteOptions FROM users_info WHERE UserID = ?
+        ', $user->id
+    );
+    $list = unserialize($opt);
+    ksort($list);
+    show($list);
+}
