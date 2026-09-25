@@ -1,6 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\Manager;
+
+use Gazelle\User as UserInstance;
 
 class StaffPM extends \Gazelle\BaseManager {
     protected const ID_KEY = 'zz_spm_%d';
@@ -9,7 +13,7 @@ class StaffPM extends \Gazelle\BaseManager {
     protected array $cond;
     protected bool  $orderByAssigned = false;
 
-    public function create(\Gazelle\User $user, int $level, string $subject, string $message): \Gazelle\StaffPM {
+    public function create(UserInstance $user, int $level, string $subject, string $message): \Gazelle\StaffPM {
         self::$db->begin_transaction();
         self::$db->prepared_query("
             INSERT INTO staff_pm_conversations
@@ -51,7 +55,7 @@ class StaffPM extends \Gazelle\BaseManager {
         return $pmId ? new \Gazelle\StaffPM($pmId) : null;
     }
 
-    public function findAllByUser(\Gazelle\User $user): array {
+    public function findAllByUser(UserInstance $user): array {
         self::$db->prepared_query("
             SELECT ID
             FROM staff_pm_conversations
@@ -124,7 +128,7 @@ class StaffPM extends \Gazelle\BaseManager {
         return $list;
     }
 
-    public function countByStatus(\Gazelle\User $viewer, array $status): int {
+    public function countByStatus(UserInstance $viewer, array $status): int {
         return (int)self::$db->scalar("
             SELECT count(*) FROM staff_pm_conversations
             WHERE (Level <= ? OR AssignedToUser = ?)
@@ -133,7 +137,7 @@ class StaffPM extends \Gazelle\BaseManager {
         );
     }
 
-    public function countAtLevel(\Gazelle\User $viewer, array $status): int {
+    public function countAtLevel(UserInstance $viewer, array $status): int {
         return (int)self::$db->scalar("
             SELECT count(*) FROM staff_pm_conversations
             WHERE (Level = ? OR AssignedToUser = ?)
@@ -142,7 +146,7 @@ class StaffPM extends \Gazelle\BaseManager {
         );
     }
 
-    public function heading(\Gazelle\User $viewer): array {
+    public function heading(UserInstance $viewer): array {
         if (!$viewer->isStaffPMReader()) {
             return [];
         }
@@ -223,13 +227,38 @@ class StaffPM extends \Gazelle\BaseManager {
         return self::$db->to_array(false, MYSQLI_ASSOC);
     }
 
-    public function setSearchId(\Gazelle\User $user, int $id): static {
+    public function userStaffPmList(UserInstance $user, UserInstance $viewer): array {
+        self::$db->prepared_query("
+            SELECT spc.ID   AS pm_id,
+                spc.Subject AS subject,
+                spc.Status  AS status,
+                if(spc.Level = (SELECT max(Level) FROM permissions),
+                    p.Name,
+                    concat(coalesce(p.Name, 'First Line Support'), '+')
+                )                  AS reader,
+                spc.AssignedToUser AS assigned_to_user,
+                spc.Date           AS date,
+                spc.ResolverID     AS resolver_id,
+                count(spm.ID) - 1  AS replies
+            FROM staff_pm_conversations AS spc
+            INNER JOIN staff_pm_messages spm ON (spm.ConvID = spc.ID)
+            LEFT JOIN permissions p USING (Level)
+            WHERE spc.UserID = ?
+                AND (spc.Level <= ? OR spc.AssignedToUser = ?)
+            GROUP BY spc.ID
+            ORDER BY spc.Date DESC
+            ", $user->id, $viewer->privilege()->effectiveClassLevel(), $viewer->id
+        );
+        return self::$db->to_array(false, MYSQLI_ASSOC);
+    }
+
+    public function setSearchId(UserInstance $user, int $id): static {
         $this->cond = ['spc.Level <= ? AND spc.UserID = ? AND spc.status = ?'];
         $this->args = [$user->privilege()->effectiveClassLevel(), $id, 'Resolved'];
         return $this;
     }
 
-    public function setSearchStatusList(\Gazelle\User $user, array $status): static {
+    public function setSearchStatusList(UserInstance $user, array $status): static {
         $this->cond = ['(spc.Level <= ? OR spc.AssignedToUser = ?) AND spc.Status IN (' . placeholders($status) . ')'];
         $this->args = [$user->privilege()->effectiveClassLevel(), $user->id, ...$status];
         return $this;
@@ -295,7 +324,7 @@ class StaffPM extends \Gazelle\BaseManager {
             ";
     }
 
-    public function page(\Gazelle\User $user, int $limit, int $offset): array {
+    public function page(UserInstance $user, int $limit, int $offset): array {
         $args = [...$this->args];
         if ($this->orderByAssigned) {
             $args[] = $user->id;

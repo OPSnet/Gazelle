@@ -327,8 +327,8 @@ echo $Twig->render('user/information.twig', [
     'request_list' => !$profileViewer->disableRequests() && $user->propertyVisible($profileViewer, 'requestsvoted_list')
         ? new Manager\Request()->findUnfilledByUser($user, 100) : [],
 
-    'staffpm_list' => $profileViewer->permitted('users_mod') || $profileViewer->isStaffPMReader()
-        ? new Staff($profileViewer)->userStaffPmList($user) : [],
+    'staffpm_list' => $profileViewer->isStaffPMReader()
+        ? new Manager\StaffPM()->userStaffPmList($user, $Viewer) : [],
 
     'warning_list' => $profileViewer->permitted('users_warn')
         ? $user->forumWarning() : [],

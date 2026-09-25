@@ -180,6 +180,39 @@ class StaffPMTest extends TestCase {
         $historyUser = $this->spMan->staffHistory($level, [$this->user->id], 1 /* day */);
         $this->assertSame(2, $historyUser[0]['total'], 'spm-fls-user-history-message');
         $this->assertSame(1, $historyUser[0]['total2'], 'spm-fls-user-history-conv');
+
+        $this->assertSame(
+            [],
+            $this->spMan->userStaffPmList($this->fls, $this->user),
+            'spm-pmlist-fls-user',
+        );
+        $this->assertCount(
+            1,
+            $this->spMan->userStaffPmList($this->user, $this->fls),
+            'spm-pmlist-sysop',
+        );
+
+        $sysopPm = $this->spMan->create(
+            $this->mod,
+            new Manager\User()->classList()[SYSOP]['Level'],
+            'for sysop',
+            'message handled by sysop'
+        );
+        $this->assertSame(
+            [],
+            $this->spMan->userStaffPmList($this->sysop, $this->mod),
+            'spm-pmlist-fls-sysop',
+        );
+        $this->assertCount(
+            1,
+            $this->spMan->userStaffPmList($this->mod, $this->sysop),
+            'spm-pmlist-sysop',
+        );
+        $this->assertEquals(
+            'for sysop',
+            array_first($this->spMan->userStaffPmList($this->mod, $this->sysop))['subject'],
+            'spm-pmlist-sysop',
+        );
     }
 
     public function testMany(): void {

@@ -60,29 +60,4 @@ class Staff extends BaseUser {
             FROM staff_pm_conversations
             WHERE " . implode(' AND ', $cond), ...$args);
     }
-
-    public function userStaffPmList(User $user): array {
-        self::$db->prepared_query("
-            SELECT spc.ID   AS pm_id,
-                spc.Subject AS subject,
-                spc.Status  AS status,
-                if(spc.Level = (SELECT max(Level) FROM permissions),
-                    p.Name,
-                    concat(coalesce(p.Name, 'First Line Support'), '+')
-                )                  AS reader,
-                spc.AssignedToUser AS assigned_to_user,
-                spc.Date           AS date,
-                spc.ResolverID     AS resolver_id,
-                count(spm.ID) - 1  AS replies
-            FROM staff_pm_conversations AS spc
-            INNER JOIN staff_pm_messages spm ON (spm.ConvID = spc.ID)
-            LEFT JOIN permissions p USING (Level)
-            WHERE spc.UserID = ?
-                AND (spc.Level <= ? OR spc.AssignedToUser = ?)
-            GROUP BY spc.ID
-            ORDER BY spc.Date DESC
-            ", $user->id, $this->user->privilege()->effectiveClassLevel(), $this->user->id
-        );
-        return self::$db->to_array(false, MYSQLI_ASSOC);
-    }
 }
