@@ -84,7 +84,7 @@
     <td class="td_latest">
         <span style="float: left;" class="last_topic">
             <strong>
-                <a href="forums.php?action=viewthread&amp;threadid={{ thread.ID }}" class="tooltip" data-title-plain="{{ thread.Title }}"{%
+                <a href="forums.php?action=viewthread&amp;threadid={{ thread.ID }}" class="tooltip"{%
                     if thread.Title != thread.cut_title %} title="{{ thread.Title }}"{% endif %}>{{ thread.cut_title }}</a>
                     {%- if thread.has_poll %} <span class="tooltip" title="There is a poll!">🗳</span>{% endif -%}
             </strong>

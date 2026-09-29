@@ -53,7 +53,8 @@ let collageShow = {
                 interactiveTolerance: 500,
                 delay: tooltip_delay,
                 updateAnimation: false,
-                maxWidth: 400
+                maxWidth: 400,
+                contentAsHTML: true,
             });
         } else {
             $('.tooltip_interactive', ul).each(function() {

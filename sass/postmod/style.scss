@@ -1352,13 +1352,19 @@ tr.torrent .bookmark > a::after {
   background: #444;
 }
 
-div[class~="tooltipster-base"] {
+.tooltipster-box {
   background-color: #ECECEC;
-  color: #444;
 }
 
-div[class~="tooltipster-content"] > a {
-  color: #0A84AF;
+.tooltipster-arrow-background {
+  border-color: #ECECEC;
+}
+
+.tooltipster-content {
+  color: #444;
+  a {
+    color: #0A84AF;
+  }
 }
 
 #settings_sections #submit,

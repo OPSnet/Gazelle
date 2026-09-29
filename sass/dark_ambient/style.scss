@@ -2149,14 +2149,19 @@ tr.torrent .bookmark > a::after {
   color: #878787;
 }
 
-div[class~="tooltipster-base"] {
+.tooltipster-box {
   background-color: #1E1E1E;
-  border-color: #A0A0A0;
-  color: #878787;
 }
 
-div[class~="tooltipster-content"] > a {
-  color: #007DC6;
+.tooltipster-arrow-background {
+  border-color: #A0A0A0;
+}
+
+.tooltipster-content {
+  color: #878787;
+  a {
+    color: #007DC6;
+  }
 }
 
 /*

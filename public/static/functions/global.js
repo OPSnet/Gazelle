@@ -497,7 +497,7 @@ $.fn.extend({
     },
     updateTooltip: function(tooltip) {
         if ($.fn.tooltipster) {
-            $(this).tooltipster('update', tooltip);
+            $(this).tooltipster('content', tooltip);
         } else {
             $(this).attr('title', tooltip);
         }

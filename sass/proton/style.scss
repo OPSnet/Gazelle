@@ -2044,8 +2044,15 @@ tr.torrent .bookmark > a::after {
   width: 600px;
 }
 
-div[class~="tooltipster-base"] {
+.tooltipster-box {
   background-color: #F5F5F5;
+}
+
+.tooltipster-arrow-background {
+  border-color: #F5F5F5;
+}
+
+.tooltipster-content {
   color: #575757;
 }
 

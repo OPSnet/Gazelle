@@ -2,9 +2,10 @@
     <a href="torrents.php?id={{ tgroup.id }}" class="bookmark_{{ tgroup.id }}">
 {% set image_url = tgroup.image.url %}
 {% if image_url %}
+{# twig won't auto-escape when using the |escape filter but we need this doubly-escaped #}
         <img width="118" loading="lazy" class="tooltip_interactive" src="{{
-            image_url|image_cache(150, 150) }}" title="{{ tgroup.text }}<br>{{
-            tgroup.tagList|map(tag => "#{tag.name}")|join(', ') }}" data-title-plain="{{
+            image_url|image_cache(150, 150) }}" title="{{ tgroup.text|escape|escape }}&lt;br&gt;{{
+            tgroup.tagList|map(tag => "#{tag.name}")|join(', ')|escape|escape }}" data-title-plain="{{
             tgroup.text }} ({{ tgroup.tagNameList|join(', ') }})">
 {% else %}
         <div style="padding: 5px;">{{ tgroup.text }} ({{ tgroup.tagNameList|join(', ') }})</div>

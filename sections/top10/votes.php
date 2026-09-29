@@ -194,7 +194,11 @@ echo ' [' . $tgroup->year() . ']'; } ?></strong>
             </span>
             <br>
             <span style="white-space: nowrap;">
-                <span class="tooltip_interactive" title="&lt;span style=&quot;font-weight: bold;&quot;&gt;Score: <?=number_format($score * 100, 4)?>&lt;/span&gt;&lt;br /&gt;&lt;br /&gt;This is the lower bound of the binomial confidence interval &lt;a href=&quot;wiki.php?action=article&amp;id=108&quot;&gt;described here&lt;/a&gt;, multiplied by 100." data-title-plain="Score: <?=number_format($score * 100, 4)?>. This is the lower bound of the binomial confidence interval described in the Favorite Album Votes wiki article, multiplied by 100.">Score: <span class="favoritecount_small"><?=number_format($score * 100, 1)?></span></span>
+                <span class="tooltip_interactive" title="&lt;span style=&quot;font-weight: bold;&quot;&gt;Score: <?=
+                    number_format($score * 100, 4)?>&lt;/span&gt;&lt;br /&gt;&lt;br /&gt;This is the lower bound of the binomial confidence interval &lt;a href=&quot;wiki.php?action=article&amp;id=108&quot;&gt;described here&lt;/a&gt;, multiplied by 100."
+                      data-title-plain="Score: <?=number_format($score * 100, 4)?>. This is the lower bound of the binomial confidence interval described in the Favorite Album Votes wiki article, multiplied by 100."
+                    >Score: <span class="favoritecount_small"><?=number_format($score * 100, 1)?></span>
+                </span>
                 &nbsp; | &nbsp;
                 <span class="favoritecount_small"><?=number_format($upVotes / $totalVotes * 100, 1)?>%</span> positive
             </span>

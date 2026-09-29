@@ -27,7 +27,7 @@
     {% for artist in artist_list %}
         {% if artist.name != '[unknown]' and category in ['hyped', 'weekly'] %}
         <li>
-            <a class="tooltip_image" data-title-plain="{{ artist.name }}" href="artist.php?artistname={{ artist.name }}">{{ artist.name }}</a>
+            <a href="artist.php?artistname={{ artist.name }}">{{ artist.name }}</a>
         </li>
         {% endif %}
     {% endfor %}
