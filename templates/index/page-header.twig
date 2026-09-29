@@ -166,10 +166,10 @@
 {%  if alert_list or viewer.permitted('site_analysis') %}
 <div class="alertbar alertbar-user">{{ alert_list|join(' ⋅ ')|raw }}
 {%      if viewer.permitted('site_analysis') %}
-    <form class="analysis-case" action="tools.php" method="POST">
+    <form class="analysis-case" action="tools.php" method="get">
         <input type="hidden" name="action" value="analysis">
         <input value="" type="text" name="case" size="3">
-        <input value="case" type="submit" name="go">
+        <input value="case" type="submit">
     </form>
 {%      endif %}
 </div>{# class="alertbar alertbar-user" #}
