@@ -234,7 +234,7 @@ class Vote extends \Gazelle\BasePgUser {
                             select 1
                             from relay.torrents_tags tt
                             inner join relay.tags t on (t."ID" = tt."TagID")
-                            where tt."GroupID" = tg."ID"
+                            where tt."GroupID" = tg2."ID"
                                 and t."Name" = {$this->pg()->placeholder(count($this->args))}
                         )
                         END_SQL;
@@ -247,32 +247,32 @@ class Vote extends \Gazelle\BasePgUser {
                         select 1
                         from relay.torrents_tags tt
                         inner join relay.tags t ON (t."ID" = tt."TagID")
-                        where tt."GroupID" = tg."ID"
+                        where tt."GroupID" = tg2."ID"
                             and t."Name" in ($placeholder)
                     )
                     END_SQL;
                     $this->args = array_merge($this->args, $this->config['tagList']);
                 }
-                $this->join[] = 'inner join relay.torrents_group tg on (tg."ID" = tvs.id_tgroup)';
+                $this->join[] = 'inner join relay.torrents_group tg2 on (tg2."ID" = tvs.id_tgroup)';
             }
             $join = implode(' ', $this->join);
-            $this->where[] = 'score > 0';
+            $this->where[] = 'tvs.score > 0';
             $where = implode(' and ', $this->where);
             $limit = "limit {$this->pg()->placeholder(count($this->args))}";
             $this->args[] = $this->config['limit'] ?? 25;
             $voteList = $this->pg()->allByKeyex(
                 'id_tgroup',
-                $sql = <<<END_SQL
-                    select tvs.id_tgroup,
-                        tvs.upvote,
-                        tvs.total,
-                        tvs.score,
-                        rank() over (order by tvs.score desc) as tier
-                    from tgroup_vote_summary tvs
-                    $join
-                    where $where
-                    order by tvs.score desc
-                    $limit
+                <<<END_SQL
+                select tvs.id_tgroup,
+                    tvs.upvote,
+                    tvs.total,
+                    tvs.score,
+                    rank() over (order by tvs.score desc) as tier
+                from tgroup_vote_summary tvs
+                $join
+                where $where
+                order by tvs.score desc
+                $limit
                 END_SQL,
                 ...$this->args
             );

@@ -17,7 +17,7 @@ class ForumThread extends \Gazelle\Json {
         $paginator->setTotal($thread->postTotal());
         $slice = $thread->slice($paginator->page(), $paginator->perPage());
 
-        if ($this->updateLastRead) {
+        if ($slice && $this->updateLastRead) {
             $lastPost = array_last($slice);
             $lastPostId = $lastPost['ID'];
             reset($slice);
@@ -55,7 +55,7 @@ class ForumThread extends \Gazelle\Json {
             $response = $poll->response($this->user);
             $answerList = $poll->vote();
             if ($response > 0 || (!is_null($response) && $poll->hasRevealVotes())) {
-                $answerList[$response]['asnswer'] = '» ' . $answerList[$response]['asnswer'];
+                $answerList[$response]['answer'] = '» ' . $answerList[$response]['answer'];
             }
 
             $pollInfo = [

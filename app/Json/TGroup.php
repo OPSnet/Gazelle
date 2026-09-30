@@ -18,12 +18,13 @@ class TGroup extends \Gazelle\Json {
     public function tgroupPayload(): array {
         $tgroup    = $this->tgroup;
         $musicInfo = static::artistPayload($tgroup);
+        $imgUrl    = $tgroup->image()->url();
 
         return [
             'wikiBody'        => \Text::full_format($tgroup->description()),
             'wikiBBcode'      => $tgroup->description(),
-            'wikiImage'       => $tgroup->image()->url(),
-            'proxyImage'      => image_cache_encode($tgroup->image()->url()),
+            'wikiImage'       => $imgUrl,
+            'proxyImage'      => $imgUrl ? image_cache_encode($imgUrl) : null,
             'id'              => $tgroup->id,
             'name'            => $tgroup->name(),
             'year'            => $tgroup->year(),
