@@ -38,26 +38,4 @@ class Staff extends BaseUser {
         }
         return $readTime < $blogTime;
     }
-
-    public function pmCount(): int {
-        $cond = [
-            "Status = 'Unanswered'",
-            '(AssignedToUser = ? OR LEAST((SELECT max(Level) FROM permissions), Level) <= ?)',
-        ];
-        $effectiveClass = $this->user->privilege()->effectiveClassLevel();
-        $args = [$this->user->id, $effectiveClass];
-        $classes = new Manager\User()->classList();
-        if ($effectiveClass >= $classes[MOD]['Level']) {
-            $cond[] = 'Level >= ?';
-            $args[] = $classes[MOD]['Level'];
-        } elseif ($effectiveClass === $classes[FORUM_MOD]['Level']) {
-            $cond[] = 'Level >= ?';
-            $args[] = $classes[FORUM_MOD]['Level'];
-        }
-
-        return (int)self::$db->scalar("
-            SELECT count(*)
-            FROM staff_pm_conversations
-            WHERE " . implode(' AND ', $cond), ...$args);
-    }
 }
