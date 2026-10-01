@@ -10,7 +10,7 @@ describe('artist rich autocomplete', () => {
     const redirectArtistId = 424247;
     const redirectArtistName = 'Redirect Alias Typo';
     const redirectPrimaryArtistName = 'Redirect Alias Canonical Artist';
-    const discogsPath = '/rules.php?p=upload';
+    const discogsPath = '/static/blank.gif';
     const absoluteDiscogsUrl = new URL(discogsPath, Cypress.config('baseUrl')).href;
     const inlineImage = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
 
