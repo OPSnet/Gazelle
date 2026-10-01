@@ -47,7 +47,7 @@
         <td>{{ b.year }}</td>
         <td>{{ b.link_artist|raw }}{% if b.showcase %} [<abbr class="tooltip" title="This is a Showcase release">SC</abbr>]{% endif %}</td>
         <td>{{ b.link_tgroup|raw }}</td>
-        <td class="nobr tooltip" title="{{ b.created }}">{{ b.created|time_diff }}</td>
+        <td class="nobr">{{ b.created|time_diff }}</td>
         <td class="center"><input type="checkbox" name="remove[{{ b.tgroup_id }}]" value=""></td>
     </tr>
 {%  if loop.last %}
