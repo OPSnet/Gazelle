@@ -121,19 +121,12 @@
             });
         }
 
-        artistList.appendChild(document.createTextNode('\n'));
-        let role   = document.createElement('select');
-        role.options[0] = new Option('Main', '1');
-        role.options[1] = new Option('Guest', '2');
-        role.options[2] = new Option('Composer', '4');
-        role.options[3] = new Option('Conductor', '5');
-        role.options[4] = new Option('DJ / Compiler', '6');
-        role.options[5] = new Option('Remixer', '3');
-        role.options[6] = new Option('Producer', '7');
-        role.options[7] = new Option('Arranger', '8');
+        const previousRole = document.getElementById('importance_' + (total - 1));
+        let role   = previousRole.cloneNode(true);
+        role.value = previousRole.value;
         role.id    = 'importance_' + total;
         role.name  = 'importance[]';
-        role.value = document.getElementById('importance_' + (total - 1)).value;
+        artistList.appendChild(document.createTextNode(' '));
         artistList.appendChild(role);
     }
 

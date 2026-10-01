@@ -1,6 +1,6 @@
 /* global showWarningMessage */
 
-let AllowedMediaFormat = {
+const AllowedMediaFormat = {
     WEB:        ['FLAC', 'MP3', 'AAC'],
     CD:         ['FLAC', 'MP3', 'AAC'],
     SACD:       ['FLAC', 'MP3', 'AAC'],
@@ -12,9 +12,9 @@ let AllowedMediaFormat = {
     Cassette:   ['FLAC', 'MP3', 'AAC'],
 };
 
-let AllowedAudiobookFormat = ['FLAC', 'MP3', 'AAC'];
+const AllowedAudiobookFormat = ['FLAC', 'MP3', 'AAC'];
 
-let AllowedBitrate = {
+const AllowedBitrate = {
     FLAC: {
         list: ['24bit Lossless', 'Lossless'],
         rank: [1, 0],
@@ -28,8 +28,8 @@ let AllowedBitrate = {
     DTS: { list: ['Other'], rank: [0] },
 };
 
-let MAX_EXTRA_FORMATS = 5;
-let MAX_RIPLOGS = 400;
+const MAX_EXTRA_FORMATS = 5;
+const MAX_RIPLOGS = 400;
 
 let ArtistCount      = 0;
 let ArtistJsonCount  = 0;
@@ -326,46 +326,28 @@ function AddArtistField() {
     if (ArtistCount >= 200) {
         return;
     }
+    const previousRole = document.getElementById('importance_' + ArtistCount);
+
     ArtistCount++;
-    let ArtistField = document.createElement("input");
-    ArtistField.type = "text";
-    ArtistField.id = "artist_" + ArtistCount;
-    ArtistField.name = "artists[]";
-    ArtistField.size = 45;
+    let ArtistField    = document.createElement("input");
+    ArtistField.type   = "text";
+    ArtistField.id     = "artist_" + ArtistCount;
+    ArtistField.name   = "artists[]";
+    ArtistField.size   = 45;
     ArtistField.onblur = CheckVA;
 
-    let RoleField = document.createElement("select");
-    RoleField.id = "importance_" + ArtistCount;
-    RoleField.name = "importance[]";
-    RoleField.options[0] = new Option("Main", "1");
-    RoleField.options[1] = new Option("Guest", "2");
-    RoleField.options[2] = new Option("Composer", "4");
-    RoleField.options[3] = new Option("Conductor", "5");
-    RoleField.options[4] = new Option("DJ / Compiler", "6");
-    RoleField.options[5] = new Option("Remixer", "3");
-    RoleField.options[6] = new Option("Producer", "7");
-    RoleField.options[7] = new Option("Arranger", "8");
-    let mapping = {
-        1: 0,
-        2: 1,
-        4: 2,
-        5: 3,
-        6: 4,
-        3: 5,
-        7: 6,
-        8: 7,
-    };
-    RoleField.selectedIndex = mapping[document.getElementById("importance_" + (ArtistCount - 1)).value];
+    let role   = previousRole.cloneNode(true);
+    role.value = previousRole.value;
+    role.id    = "importance_" + ArtistCount;
 
-    const x = document.getElementById('artistfields');
     const div = document.createElement("div");
     div.id = "artist_field_" + ArtistCount;
     div.style.display = "inline";
     div.appendChild(document.createElement("br"));
     div.appendChild(ArtistField);
     div.append(' ');
-    div.appendChild(RoleField);
-    x.appendChild(div);
+    div.appendChild(role);
+    document.getElementById('artistfields').appendChild(div);
 
     if (document.getElementById('artist_0').dataset.gazelleAutocomplete) {
         ArtistField.addEventListener('focus', () => {
