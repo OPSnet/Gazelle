@@ -150,7 +150,7 @@ foreach (['DefaultSearch', 'DisableFreeTorrentTop10'] as $opt) {
 if (!isset($_POST['sorthide'])) {
     $option['SortHide'] = [];
 } else {
-    $json = json_decode($_POST['sorthide']);
+    $json = json_decode($_POST['sorthide']) ?? [];
     foreach ($json as $j) {
         [$release, $hidden] = explode('_', $j);
         $option['SortHide'][$release] = (int)$hidden;

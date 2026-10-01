@@ -10,13 +10,14 @@ declare(strict_types=1);
 namespace Gazelle;
 
 $manager = new Manager\User();
-$recipient = $manager->findById((int)$_GET['toid']);
-if (is_null($recipient)) {
-    // see if we came from inbox composer
-    $recipient = $manager->findByUsername($_GET['recipient'] ?? '');
-    if (is_null($recipient)) {
-        Error404::error();
-    }
+$recipient = null;
+if (isset($_GET['toid'])) {
+    $recipient = $manager->findById((int)$_GET['toid']);
+} elseif (isset($_GET['recipient'])) {
+    $recipient = $manager->findByUsername($_GET['recipient']);
+}
+if ($recipient === null) {
+    Error404::error("no such user");
 }
 if ($Viewer->disablePm() && !$recipient->isStaff()) {
     Error403::error('You are not allowed to send private messages');

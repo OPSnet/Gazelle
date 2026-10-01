@@ -87,7 +87,7 @@ View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notificati
 ?>
 <div class="header">
     <h3>
-        Matches for <a href="torrents.php?action=notify&amp;filterid=<?= $filterId . ($ownProfile ? "" : "&amp;userid=$UserID") ?>"><?= $filter['filter']->label() ?? 'deleted filter' ?></a>
+        Matches for <a href="torrents.php?action=notify&amp;filterid=<?= $filterId . ($ownProfile ? "" : "&amp;userid=$UserID") ?>"><?= $filter['filter']?->label() ?? 'deleted filter' ?></a>
     </h3>
 </div>
 <div class="linkbox notify_filter_links">
@@ -117,7 +117,7 @@ View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notificati
             $torrent   = $result['torrent'];
             $torrentId = $torrent->id;
             $tgroup    = $torrent->group();
-            $match     = $tgroup->artistRole()?->matchName($filter['filter']->artistList());
+            $match     = $tgroup->artistRole()?->matchName($filter['filter']?->artistList() ?? []);
 ?>
     <tr id="torrent<?= $torrentId ?>" class="torrent torrent_row<?=
         ($snatcher->isSnatched($torrent) ? ' snatched_torrent' : '')

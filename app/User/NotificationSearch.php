@@ -2,6 +2,8 @@
 
 namespace Gazelle\User;
 
+use Gazelle\NotificationFilter;
+
 class NotificationSearch extends \Gazelle\BaseUser {
     final public const tableName = 'users_notify_torrents';
 
@@ -32,9 +34,10 @@ class NotificationSearch extends \Gazelle\BaseUser {
                 FROM users_notify_torrents AS unt
                 INNER JOIN torrents AS t ON (t.ID = unt.TorrentID)
                 INNER JOIN torrents_leech_stats AS tls ON (tls.TorrentID = unt.TorrentID)
+                LEFT JOIN users_notify_filters AS unf ON (unf.ID = unt.FilterID)
             ";
-            $this->cond = ['unt.UserID = ?'];
-            $this->args = [$this->user->id];
+            $this->cond[] = 'unt.UserID = ?';
+            $this->args[] = $this->user->id;
 
             if ($this->orderBy == 'tg.Year') {
                 $this->baseQuery .= " INNER JOIN torrents_group tg ON (tg.ID = t.GroupID)";
@@ -59,7 +62,8 @@ class NotificationSearch extends \Gazelle\BaseUser {
         return "
             SELECT unt.FilterID AS filter_id,
                 unt.TorrentID   AS torrent_id,
-                unt.UnRead      AS unread
+                unt.UnRead      AS unread,
+                unf.ID IS NULL  AS deleted
             {$this->baseQuery}
             ORDER BY {$this->orderBy} {$this->direction}
             LIMIT ? OFFSET ?
@@ -73,7 +77,7 @@ class NotificationSearch extends \Gazelle\BaseUser {
         foreach (self::$db->to_array(false, MYSQLI_ASSOC) as $row) {
             $filterId = $row['filter_id'];
             if (!isset($list[$filterId])) {
-                $filter = new \Gazelle\NotificationFilter($filterId);
+                $filter = $row['deleted'] ? null : new NotificationFilter($filterId);
                 $list[$filterId] = [
                     'filter' => $filter,
                     'id'     => $filterId,

@@ -17,9 +17,9 @@ if (!$Viewer->permitted('torrents_edit')) {
 
 // more fun with inconsistent url parameters :-/
 $revert = ($_GET['action'] ?? '') === 'revert';
-$tgroup = new Manager\TGroup()->findById((int)$_REQUEST[$revert ? 'id' : 'groupid']);
+$tgroup = new Manager\TGroup()->findById((int)($_REQUEST[$revert ? 'id' : 'groupid'] ?? 0));
 if (is_null($tgroup)) {
-    Error404::error();
+    Error404::error("no such torrent group");
 }
 
 if ($revert) {
