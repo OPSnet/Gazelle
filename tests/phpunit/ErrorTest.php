@@ -49,4 +49,9 @@ class ErrorTest extends TestCase {
         $this->expectOutputRegex("#<title>Error 500 ⠶ " . SITE_NAME . "</title>#");
         echo Error500::payload('');
     }
+
+    public function testFromCode(): void {
+        $this->assertInstanceOf(Error404::class, Error::fromCode(404));
+        $this->assertInstanceOf(Error500::class, Error::fromCode(0));
+    }
 }

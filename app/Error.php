@@ -20,6 +20,15 @@ abstract class Error extends Base {
         ]);
     }
 
+    public static function fromCode(int $errorCode): Error {
+        /** @phpstan-var class-string<Error> $errorClass */
+        $errorClass = "\\Gazelle\\Error{$errorCode}";
+        if (class_exists($errorClass)) {
+            return new $errorClass();
+        }
+        return new Error500();
+    }
+
     abstract public static function errorCode(): int;
 
     abstract public static function errorLabel(): string;

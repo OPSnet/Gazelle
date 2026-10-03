@@ -6,7 +6,7 @@ declare(strict_types=1);
 
 namespace Gazelle;
 
-function print_or_return(string $message, int|null $error = null) {
+function print_or_return(string $message, int|string $error = '') {
     // this function is a crime against humanity
     if (defined('NO_AJAX_ERROR')) {
         return $message;

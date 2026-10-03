@@ -20,7 +20,7 @@ if (!defined('AJAX') || !AJAX) {
 $tgMan = new Manager\TGroup();
 $tgroup = $tgMan->findById((int)($_REQUEST['groupid'] ?? 0));
 if (is_null($tgroup)) {
-    json_or_error('invalid groupid', 0);
+    json_or_error('invalid groupid', 400);
 }
 
 //Delete cached tag used for undos

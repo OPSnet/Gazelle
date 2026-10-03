@@ -454,11 +454,13 @@ function json_error(int|string $code): never {
     throw new EarlyExitException();
 }
 
-function json_or_error(mixed $JsonError, mixed $Error = null): never {
+function json_or_error(int|string $JsonError, int|string $error = ''): never {
     if (defined('AJAX')) {
         json_error($JsonError);
+    } elseif (is_int($error)) {
+        Gazelle\Error::fromCode($error)::error((string)$JsonError);
     } else {
-        Gazelle\Error400::error($Error ?? $JsonError);
+        Gazelle\Error400::error($error ?: (string)$JsonError);
     }
 }
 
