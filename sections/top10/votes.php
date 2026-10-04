@@ -149,7 +149,7 @@ if (count($topVotes) === 0) { ?>
         $totalVotes = $result['total'];
         $score      = $result['score'];
         $downVotes  = $totalVotes - $upVotes;
-        $isSnatched = $tgroup->isSnatched();
+        $isSnatched = $Viewer->snatch()->isTGroupSnatched($tgroup);
         $snatchedGroupClass = $isSnatched ? ' snatched_group' : '';
 
         if (count($torrentIdList) > 1 || $tgroup->categoryGrouped()) {
@@ -222,7 +222,7 @@ echo ' [' . $tgroup->year() . ']'; } ?></strong>
             $torrentId = $torrentIdList[0];
             $torrent = $torMan->findById($torrentId);
 ?>
-    <tr class="torrent torrent_row<?= ($snatcher->showSnatch($torrent) ? ' snatched_torrent' : '')
+    <tr class="torrent torrent_row<?= ($snatcher->isSnatched($torrent) ? ' snatched_torrent' : '')
         . $snatchedGroupClass ?>" id="group_<?= $tgroupId ?>">
         <td></td>
         <td class="td_collage_category center">

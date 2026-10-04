@@ -503,8 +503,8 @@ foreach (CATEGORY as $catKey => $catName) {
         $tgroup = $torrent->group();
         $tagList = $tgroup->tagList();
 ?>
-        <tr class="torrent torrent_row<?= ($snatcher->showSnatch($torrent) ? ' snatched_torrent' : '')
-            . ($tgroup->isSnatched() ? ' snatched_group' : '')
+        <tr class="torrent torrent_row<?= ($snatcher->isSnatched($torrent) ? ' snatched_torrent' : '')
+            . ($Viewer->snatch()->isTGroupSnatched($tgroup) ? ' snatched_group' : '')
             ?>">
             <td class="center cats_col">
                 <div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?= $tgroup->categoryCss() ?> <?= $tgroup->primaryTagCss() ?>"></div>

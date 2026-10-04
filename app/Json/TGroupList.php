@@ -72,7 +72,7 @@ class TGroupList extends \Gazelle\Json {
                         'isNeutralLeech'          => $torrent->isNeutralleech(),
                         'isPersonalFreeleech'     => $torrent->isFreeleechPersonal(),
                         'canUseToken'             => $this->snatcher->user()->canSpendFLToken($torrent),
-                        'hasSnatched'             => $this->snatcher->showSnatch($torrent),
+                        'hasSnatched'             => $this->snatcher->isSnatched($torrent),
                     ];
                 }
 
@@ -120,7 +120,7 @@ class TGroupList extends \Gazelle\Json {
                     'isNeutralLeech'      => $torrent->isNeutralleech(),
                     'isPersonalFreeleech' => $torrent->isFreeleechPersonal(),
                     'canUseToken'         => $this->snatcher->user()->canSpendFLToken($torrent),
-                    'hasSnatched'         => $this->snatcher->showSnatch($torrent),
+                    'hasSnatched'         => $this->snatcher->isSnatched($torrent),
                 ];
             }
         }

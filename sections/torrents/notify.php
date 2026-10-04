@@ -120,8 +120,8 @@ View::show_header(($ownProfile ? 'My' : $user->username() . "'s") . ' notificati
             $match     = $tgroup->artistRole()?->matchName($filter['filter']->artistList());
 ?>
     <tr id="torrent<?= $torrentId ?>" class="torrent torrent_row<?=
-        ($snatcher->showSnatch($torrent) ? ' snatched_torrent' : '')
-        . ($tgroup->isSnatched() ? ' snatched_group' : '')
+        ($snatcher->isSnatched($torrent) ? ' snatched_torrent' : '')
+        . ($Viewer->snatch()->isTGroupSnatched($tgroup) ? ' snatched_group' : '')
         ?>">
         <td class="m_td_left td_checkbox" style="text-align: center;">
             <input type="checkbox" class="notify_box notify_box_<?=$filterId?>" value="<?=$torrentId?>" id="clear_<?=$torrentId?>" tabindex="1">

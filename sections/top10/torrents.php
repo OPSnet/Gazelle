@@ -221,7 +221,7 @@ foreach ($context as $c) {
         $isBookmarked = $bookmark->isBookmarked($tgroup);
 ?>
     <tr class="torrent row<?=$index % 2 ? 'a' : 'b'?> <?=($isBookmarked ? ' bookmarked' : '')
-        . ($snatcher->showSnatch($torrent) ? ' snatched_torrent' : '')?>">
+        . ($snatcher->isSnatched($torrent) ? ' snatched_torrent' : '')?>">
         <td style="padding: 8px; text-align: center;" class="td_rank m_td_left"><strong><?=$index + 1?></strong></td>
         <td class="center cats_col m_hidden"><div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?= $tgroup->categoryCss() ?> <?= $tgroup->primaryTagCss() ?>"></div></td>
         <td class="td_info big_info">

@@ -147,7 +147,7 @@ foreach ($entryList as $tgroupId) {
         continue;
     }
     $torrentIdList = $tgroup->torrentIdList();
-    $SnatchedGroupClass = $tgroup->isSnatched() ? ' snatched_group' : '';
+    $SnatchedGroupClass = $Viewer->snatch()->isTGroupSnatched($tgroup) ? ' snatched_group' : '';
     $prev = '';
     $EditionID = 0;
     unset($FirstUnknown);
@@ -210,7 +210,7 @@ if (!$Viewer->option('NoVoteLinks') && $Viewer->permitted('site_album_votes')) {
             $prev = $current;
 ?>
             <tr class="group_torrent torrent_row groupid_<?= $tgroupId ?> edition_<?= $EditionID ?><?=
-                    ($snatcher->showSnatch($torrent) ? ' snatched_torrent' : '') . $SnatchedGroupClass
+                    ($snatcher->isSnatched($torrent) ? ' snatched_torrent' : '') . $SnatchedGroupClass
                     . ($groupsClosed ? ' hidden' : '') ?>">
                 <td class="td_info" colspan="3">
                     <?= $Twig->render('torrent/action-v2.twig', [
@@ -220,7 +220,7 @@ if (!$Viewer->option('NoVoteLinks') && $Viewer->permitted('site_album_votes')) {
                     ]) ?>
                     &nbsp;&nbsp;»&nbsp;<?= $torrent->shortLabelLink() ?>
 <?php   } else { ?>
-            <tr class="torrent torrent_row<?= ($snatcher->showSnatch($torrent) ? ' snatched_torrent' : '')
+            <tr class="torrent torrent_row<?= ($snatcher->isTorrentSnatched($torrent) ? ' snatched_torrent' : '')
                 . $SnatchedGroupClass ?>" id="group_<?= $tgroupId ?>">
                 <td></td>
                 <td class="td_collage_category center">

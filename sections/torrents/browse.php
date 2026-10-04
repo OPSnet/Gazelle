@@ -155,7 +155,7 @@ foreach ($Results as $Key => $GroupID) {
         $torrentList = [$Key];
     }
 
-    $SnatchedGroupClass = $tgroup->isSnatched() ? ' snatched_group' : '';
+    $SnatchedGroupClass = $Viewer->snatch()->isTGroupSnatched($tgroup) ? ' snatched_group' : '';
 
     if ($GroupResults && (count($torrentList) > 1 || $tgroup->categoryGrouped())) {
 ?>
@@ -230,7 +230,7 @@ foreach ($Results as $Key => $GroupID) {
 <?php
             }
             $prev = $current;
-            $SnatchedTorrentClass = $snatcher->showSnatch($torrent) ? ' snatched_torrent' : '';
+            $SnatchedTorrentClass = $snatcher->isSnatched($torrent) ? ' snatched_torrent' : '';
 ?>
     <tr class="group_torrent groupid_<?=$tgroup->id?> edition_<?=$EditionID?><?=$SnatchedTorrentClass . $SnatchedGroupClass . ($groupsClosed ? ' hidden' : '')?>">
         <td class="td_info" colspan="3">
@@ -260,7 +260,7 @@ foreach ($Results as $Key => $GroupID) {
             if (is_null($torrent)) {
                 continue;
             }
-            $SnatchedTorrentClass = $tgroup->isSnatched() ? ' snatched_torrent' : '';
+            $SnatchedTorrentClass = $Viewer->snatch()->isTGroupSnatched($tgroup) ? ' snatched_torrent' : '';
 ?>
     <tr class="torrent<?=$SnatchedTorrentClass . $SnatchedGroupClass?>">
 <?php       if ($GroupResults) { ?>

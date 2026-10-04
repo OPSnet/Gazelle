@@ -219,7 +219,7 @@ foreach ($bookmarkList as $bm) {
     if (is_null($tgroup)) {
         continue;
     }
-    $isSnatched = $tgroup->isSnatched();
+    $isSnatched = $Viewer->snatch()->isTGroupSnatched($tgroup);
 
     if (count($bm['torrent_list']) > 1 || $tgroup->categoryId() == 1) {
         $tagList = $tgroup->tagList();
@@ -264,7 +264,7 @@ foreach ($bookmarkList as $bm) {
         if (is_null($torrent)) {
             continue;
         }
-        $SnatchedTorrentClass = $snatcher->showSnatch($torrent) ? ' snatched_torrent' : '';
+        $SnatchedTorrentClass = $snatcher->isSnatched($torrent) ? ' snatched_torrent' : '';
 ?>
         <tr class="torrent torrent_row<?= $SnatchedTorrentClass . ($isSnatched ? ' snatched_group' : '') ?>" id="group_<?= $tgroupId ?>">
             <td></td>

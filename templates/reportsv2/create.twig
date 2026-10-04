@@ -7,7 +7,7 @@
         <h3>{{ torrent.group.link|raw }}</h3>
     </div>
     <div class="thin">
-        <table class="torrent_table details{% if viewer.snatch.showSnatch(torrent) %} snatched{% endif %}" id="torrent_details">
+        <table class="torrent_table details{% if viewer.snatch.isSnatched(torrent) %} snatched{% endif %}" id="torrent_details">
             <tr class="colhead_dark">
                 <td width="80%"><strong>Reported torrent</strong></td>
 {% if viewer.hasAttr('feature-file-count') %}

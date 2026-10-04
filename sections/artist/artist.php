@@ -236,7 +236,7 @@ if ($sections) {
         if (is_null($tgroup)) {
             continue;
         }
-        $isSnatched = $tgroup->isSnatched();
+        $isSnatched = $Viewer->snatch()->isTGroupSnatched($tgroup);
 
 ?>
             <tr class="releases_<?= $sectionId ?> group groupid_<?= $groupId ?>_header discog<?= ($sectionClosed ? ' hidden' : '') . ($isSnatched ? ' snatched_group' : '') ?>">

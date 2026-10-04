@@ -2,6 +2,8 @@
 
 namespace Gazelle\User;
 
+use Gazelle\Manager\TGroup as TGroupManager;
+use Gazelle\TGroup;
 use Gazelle\TorrentAbstract;
 use Gazelle\Util\CacheVector;
 
@@ -31,9 +33,10 @@ class Snatch extends \Gazelle\BaseUser {
 
     public function flush(): static {
         self::$cache->delete_value(sprintf(self::USER_RECENT_SNATCH, $this->user->id));
-        foreach (array_values($this->snatchVec) as $vector) {
+        foreach ($this->snatchVec as $vector) {
             $vector->flush();
         }
+        $this->snatchVec = [];
         return $this;
     }
 
@@ -48,21 +51,36 @@ class Snatch extends \Gazelle\BaseUser {
         return $vector->init($offset * self::RANGE_BIT, self::$db->collect(0));
     }
 
-    public function isSnatched(TorrentAbstract $torrent): bool {
-        $offset = (int)floor($torrent->id / self::RANGE_BIT);
+    protected function isTorrentIdSnatched(int $torrentId): bool {
+        $offset = (int)floor($torrentId / self::RANGE_BIT);
         if (!isset($this->snatchVec[$offset])) {
             $vector = new CacheVector(sprintf(self::CACHE_KEY, $this->user->id, $offset), self::RANGE_BIT / 8, self::CACHE_EXPIRY);
             if ($vector->isEmpty()) {
-                // the vector contents might have been cached, but if not, only we know how to initialize it
+                // the vector contents may have been cached, but if not, only we know how to initialize it
                 $this->load($offset, $vector);
             }
             $this->snatchVec[$offset] = $vector;
         }
-        return $this->snatchVec[$offset]->get($torrent->id - $offset * self::RANGE_BIT);
+        return $this->snatchVec[$offset]->get($torrentId - $offset * self::RANGE_BIT);
     }
 
-    public function showSnatch(TorrentAbstract $torrent): bool {
-        return (bool)$this->user->option('ShowSnatched') && $this->isSnatched($torrent);
+    public function isSnatched(TorrentAbstract $torrent): bool {
+        if (!$this->user->option('ShowSnatched')) {
+            return false;
+        }
+        return $this->isTorrentIdSnatched($torrent->id);
+    }
+
+    public function isTGroupSnatched(TGroup $tgroup): bool {
+        if (!$this->user->option('ShowSnatched')) {
+            return false;
+        }
+        foreach ($tgroup->torrentIdList() as $torrentId) {
+            if ($this->isTorrentIdSnatched($torrentId)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

@@ -6,7 +6,7 @@
 {%      set edition_id = edition_id + 1 %}
 {%      set prev_primary = null %}
         <tr class="releases_{{ section_id ?? tgroup.releaseType }} groupid_{{ tgroup.id }} edition group_torrent
-{%      if is_snatched_grp %} snatched_group{% endif %}
+{%      if snatcher.isTGroupSnatched(tgroup) %} snatched_group{% endif %}
 {%      if hide %} hidden{% endif %}">
             <td colspan="{{ 6 + colspan_add + (viewer.ordinal.value('file-count-display') ? 1 : 0) }}" class="edition_info">
 {%      include 'torrent/edition-header.twig' with {

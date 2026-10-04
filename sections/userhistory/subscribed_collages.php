@@ -98,7 +98,7 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
     </tr>
 <?php
             }
-            $SnatchedGroupClass = $tgroup->isSnatched() ? ' snatched_group' : '';
+            $SnatchedGroupClass = $Viewer->snatch()->isTGroupSnatched($tgroup) ? ' snatched_group' : '';
             $torrentIdList = $tgroup->torrentIdList();
             $vh = $tgroup->isShowcase() ? ' [<abbr class="tooltip" title="This is a Showcase release">Showcase</abbr>]' : '';
             if (count($torrentIdList) > 1 || $tgroup->categoryGrouped()) {
@@ -124,7 +124,6 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
 <?php
                 echo $Twig->render('torrent/detail-torrentgroup.twig', [
                     'colspan_add'     => 1,
-                    'is_snatched_grp' => $tgroup->isSnatched(),
                     'report_man'      => $reportMan,
                     'riplog_man'      => new Manager\Riplog(),
                     'snatcher'        => $snatcher,
@@ -140,7 +139,7 @@ View::show_header('Subscribed collages', ['js' => 'browse,collage']);
                     continue;
                 }
 ?>
-    <tr class="torrent<?= $snatcher->showSnatch($torrent) ? ' snatched_torrent' : '' ?>" id="group_<?= $s['collageId'] . $tgroup->id ?>">
+    <tr class="torrent<?= $snatcher->isSnatched($torrent) ? ' snatched_torrent' : '' ?>" id="group_<?= $s['collageId'] . $tgroup->id ?>">
         <td></td>
         <td class="td_collage_category center">
             <div title="<?= $tgroup->primaryTag() ?>" class="tooltip <?= $tgroup->categoryCss() ?> <?= $tgroup->primaryTagCss() ?>"></div>

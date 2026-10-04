@@ -78,9 +78,6 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
             $cached = self::$cache->get_value($key);
             if ($cached !== false) {
                 $refresh = false;
-                $cached['Flags'] = [
-                    'IsSnatched' => $this->fetchIsSnatched(),
-                ];
                 if (!isset($cached['torrent_list'])) {
                     self::$db->prepared_query("
                         SELECT t.ID
@@ -184,32 +181,9 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
         if (!isset($this->revisionId)) {
             self::$cache->cache_value($key, $info, 0);
         }
-        $info['Flags'] = [
-            'IsSnatched' => $this->fetchIsSnatched(),
-        ];
         $info['from_cache'] = false;
         $this->info = $info;
         return $this->info;
-    }
-
-    protected function fetchIsSnatched(): bool {
-        if (!$this->requestContext()->hasViewer()) {
-            return false;
-        }
-        $viewer = $this->requestContext()->viewer();
-        return $viewer->option('ShowSnatched') && (bool)self::$db->scalar("
-            SELECT 1
-            FROM torrents_group tg
-            WHERE exists(
-                SELECT 1
-                FROM torrents t
-                INNER JOIN xbt_snatched xs ON (xs.fid = t.ID)
-                WHERE t.GroupID = tg.ID
-                    AND xs.uid = ?
-                )
-                AND tg.ID = ?
-            ", $viewer->id, $this->id
-        );
     }
 
     public function remasterList(): array {
@@ -316,10 +290,6 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
 
     public function isShowcase(): bool {
         return $this->info()['VanityHouse'];
-    }
-
-    public function isSnatched(): bool {
-        return $this->info()['Flags']['IsSnatched'];
     }
 
     public function label(): string {

@@ -1067,21 +1067,20 @@ class TGroupTest extends TestCase {
     }
 
     public function testTGroupSnatched(): void {
+        $user = $this->userList['admin'];
         $this->assertFalse(
-            $this->tgroup->isSnatched(),
+            $user->snatch()->isTGroupSnatched($this->tgroup),
             'tgroup-is-not-snatched',
         );
-        $user = $this->userList['admin'];
         $user->setField('option_list', ['ShowSnatched' => true])->modify();
         Helper::generateTorrentSnatch(
-            new Manager\Torrent()->findById($this->tgroup->torrentIdList()[0]),
+            new Manager\Torrent()->findById(
+                array_first($this->tgroup->torrentIdList())
+            ),
             $user,
         );
-        $user->requestContext()->setViewer($user);
-        $db = DB::DB();
-        $db->prepared_query('select * from xbt_snatched where uid = ?', $user->id);
         $this->assertTrue(
-            $this->tgroup->flush()->isSnatched(),
+            $user->snatch()->flush()->isTGroupSnatched($this->tgroup),
             'tgroup-is-snatched',
         );
     }

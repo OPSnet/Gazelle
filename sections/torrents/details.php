@@ -91,7 +91,7 @@ echo $Twig->render('collage/summary.twig', [
     'summary' => $collageMan->tgroupPersonalSummary($tgroup),
 ]);
 ?>
-        <table class="torrent_table details<?= $tgroup->isSnatched() ? ' snatched' : ''?> m_table" id="torrent_details">
+        <table class="torrent_table details<?= $Viewer->snatch()->isTGroupSnatched($tgroup) ? ' snatched' : ''?> m_table" id="torrent_details">
             <tr class="colhead_dark">
                 <td class="m_th_left" width="80%"><strong>Torrents</strong></td>
 <?php if ($Viewer->ordinal()->value('file-count-display')) { ?>
@@ -122,7 +122,6 @@ if (!$torrentList) {
     }
 } else {
         echo $Twig->render('torrent/detail-torrentgroup.twig', [
-            'is_snatched_grp' => $tgroup->isSnatched(),
             'report_man'      => new Manager\Torrent\Report($torMan),
             'riplog_man'      => new Manager\Riplog(),
             'show_extended'   => true,

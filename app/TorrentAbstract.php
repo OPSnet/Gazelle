@@ -97,10 +97,8 @@ abstract class TorrentAbstract extends BaseAttrObject {
             $viewer = $this->requestContext()->viewer();
             $info['PersonalFL'] = $info['FreeTorrent'] == LeechType::Normal->value
                 && $viewer->hasToken($this);
-            $info['IsSnatched'] = $viewer->snatch()->showSnatch($this);
         } else {
             $info['PersonalFL'] = false;
-            $info['IsSnatched'] = false;
         }
 
         $this->info = $info;
@@ -720,7 +718,7 @@ abstract class TorrentAbstract extends BaseAttrObject {
     public function labelList(User|null $viewer = null): array {
         $info = $this->info();
         $extra = [];
-        if ($viewer?->snatch()?->showSnatch($this)) {
+        if ($viewer?->snatch()?->isSnatched($this)) {
             $extra[] = $this->labelElement('tl_snatched', 'Snatched!');
         }
         if ($info['PersonalFL']) {
