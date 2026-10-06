@@ -28,7 +28,7 @@ services:
     ports:
       - 127.0.0.1:54321:5432
     volumes:
-      - pg-data:/var/lib/postgresql/data
+      - pg-data:/var/lib/postgresql
       - ./misc/docker/pg/init:/docker-entrypoint-initdb.d:ro
     environment:
       - POSTGRES_USER=nyala
