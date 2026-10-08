@@ -5,7 +5,7 @@
         <div class="linkbox">
 {% for other in other_type %}
             <a href="?action={{ other.value }}" class="brackets">{{
-                other.value|trim('s')|ucfirst }} comments</a>
+                other.value|trim('s')|capitalize }} comments</a>
 {% endfor %}
 {% for a in search.linkList %}
 {%  if loop.first %}

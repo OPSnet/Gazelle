@@ -124,10 +124,13 @@ class User extends \Gazelle\BaseManager {
         if ($user->warning()->isWarned()) {
             $display .= '<a href="wiki.php?action=article&amp;name=warnings"><img loading="lazy" class="tooltip" src="'
                 . STATIC_SERVER . '/common/symbols/warned.png" alt="Warned" title="Warned'
-                . ($viewer->id == $userId
+                . ($viewer->id === $userId || $viewer->isStaff()
                     ? " – Expires {$user->warning()->expiry()->format('Y-m-d H:i')}"
                     : '')
                 . '"></a>';
+        }
+        if ($viewer->isStaff() && $user->isLocked()) {
+            $display .= '<span class="tooltip locked_icon" title="Locked">🔒</span>';
         }
         if ($user->isDisabled()) {
             $display .= '<a href="rules.php"><img loading="lazy" class="tooltip" src="'

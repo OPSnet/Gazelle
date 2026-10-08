@@ -304,7 +304,7 @@
         <select name="disable[]" size="{{ disable|length }}" multiple>
 {% for d in disable %}
           <option value="{{ d.id }}" title="{{ d.description|raw }}"{{ selected(d.id in input['disable']) }}>{{
-            d.name|ucfirst|replace({'-': ' '}) }}</option>
+            d.name|capitalize|replace({'-': ' '}) }}</option>
 {% endfor %}
         </select>
         <br>Shift- or Ctrl-click to select multiple

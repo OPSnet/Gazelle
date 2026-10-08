@@ -42,7 +42,6 @@ class RenderUserTest extends TestCase {
 
         Util\Twig::setViewer($this->userList['admin']);
         $header = Util\Twig::factory($userMan)->render('user/header.twig', [
-            'badge_list' => $this->userList['admin']->privilege()->badgeList(),
             'bonus'      => new User\Bonus($this->userList['user']),
             'donor'      => new User\Donor($this->userList['user']),
             'freeleech' => [
@@ -50,9 +49,7 @@ class RenderUserTest extends TestCase {
                 'other' => null,
             ],
             'friend'       => new User\Friend($this->userList['admin']),
-            'preview_user' => $this->userList['user'],
             'user'         => $this->userList['user'],
-            'userMan'      => $userMan,
             'viewer'       => $this->userList['admin'],
         ]);
         $this->assertStringContainsString('<div class="header">', $header, 'user-header-div-header');

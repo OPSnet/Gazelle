@@ -24,7 +24,7 @@
                 <div class="score" data-score="{{ result.match.score }}"><span class="label">Score: </span>{{ result.match.score }}</div>
 {%      for thing, summary in result.match.summary %}
                     <div class="summary_thing summary_{{ thing }}">
-                        <span class="summary_title">{{ thing|ucfirst }}</span>
+                        <span class="summary_title">{{ thing|capitalize }}</span>
 {%          for value, cnt in summary %}
 {%              set match = enum('Gazelle\\Enum\\UserMatchQuality').from(value) %}
                             <span class="summary_type summary_type_{{ match.name }}">
@@ -41,7 +41,7 @@
                     <ul class="usernames">
 {%          for data in result.match.usernames %}
                             <li class="username_match" data-match="{{ data[2].name }}">
-                                <span class="match_type">{{ data[2].name|ucfirst }}</span>
+                                <span class="match_type">{{ data[2].name|capitalize }}</span>
                                 <span class="label">match on username</span>
                                 <span class="match_found">{{ data[0] }}</span>
                                 <span class="label">against</span>
@@ -54,7 +54,7 @@
                     <ul class="emails">
 {%          for data in result.match.emails %}
                             <li class="email_match" data-match="{{ data[2].name }}">
-                                <span class="match_type">{{ data[2].name|ucfirst }}</span>
+                                <span class="match_type">{{ data[2].name|capitalize }}</span>
                                 <span class="label">match on email</span>
                                 <span class="match_found">{{ data[0] }}</span>
                                 <span class="label">against</span>
@@ -119,12 +119,12 @@
         <span>Order by</span>
         <select name="column">
 {% for sortKey in enum('Gazelle\\Enum\\UserMatchSort').cases %}
-            <option value="{{ sortKey.value }}"{{ selected(column == sortKey) }}>{{ sortKey.name|ucfirst }}</option>
+            <option value="{{ sortKey.value }}"{{ selected(column == sortKey) }}>{{ sortKey.name|capitalize }}</option>
 {% endfor %}
         </select>
         <select name="direction">
 {% for sortDirection in enum('Gazelle\\Enum\\Direction').cases %}
-            <option value="{{ sortDirection.value }}"{{ selected(direction == sortDirection) }}>{{ sortDirection.name|ucfirst }}</option>
+            <option value="{{ sortDirection.value }}"{{ selected(direction == sortDirection) }}>{{ sortDirection.name|capitalize }}</option>
 {% endfor %}
         </select>
 {{ text.button|raw }}

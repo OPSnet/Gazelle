@@ -169,14 +169,14 @@
             Total files</label><br>
             <label><input type="radio" name="file-count-display" value="2"{{
                 checked(user.ordinal.value('file-count-display') == 2) }}>
-            {{ constant('PRIMARY_MEDIA')|ucfirst }} files / Total files</label><br>
+            {{ constant('PRIMARY_MEDIA')|capitalize }} files / Total files</label><br>
             <label><input type="radio" name="file-count-display" value="3"{{
                 checked(user.ordinal.value('file-count-display') == 3) }}>
-            {{ constant('PRIMARY_MEDIA')|ucfirst }} files + Non-{{
+            {{ constant('PRIMARY_MEDIA')|capitalize }} files + Non-{{
                 constant('PRIMARY_MEDIA') }} files</label><br>
             <label><input type="radio" name="file-count-display" value="4"{{
                 checked(user.ordinal.value('file-count-display') == 4) }}>
-            {{ constant('PRIMARY_MEDIA')|ucfirst }} files only</label><br>
+            {{ constant('PRIMARY_MEDIA')|capitalize }} files only</label><br>
         </td>
     </tr>
     <tr id="nonprimary_size_tr">

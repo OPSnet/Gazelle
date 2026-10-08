@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
     Highcharts.chart('{{ c.name }}-stats', {
         chart: { type: 'line' },
         credits: { enabled: false },
-        title: { text: '{{ c.name|ucfirst }} Stats' },
+        title: { text: '{{ c.name|capitalize }} Stats' },
         xAxis: {
             categories: {{ c.timeline|json_encode|raw }},
         },
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
     Highcharts.chart('{{ c.name }}-bp', {
         chart: { type: 'line' },
         credits: { enabled: false },
-        title: { text: '{{ c.name|ucfirst }} Bonus Points' },
+        title: { text: '{{ c.name|capitalize }} Bonus Points' },
         xAxis: {
             categories: {{ c.timeline|json_encode|raw }},
         },
@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', function() {
     Highcharts.chart('{{ c.name }}-upload', {
         chart: { type: 'line' },
         credits: { enabled: false },
-        title: { text: '{{ c.name|ucfirst }} Uploads' },
+        title: { text: '{{ c.name|capitalize }} Uploads' },
         xAxis: {
             categories: {{ c.timeline|json_encode|raw }},
         },

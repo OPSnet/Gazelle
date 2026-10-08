@@ -74,11 +74,6 @@ class Twig {
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
-            'badge_list',
-            fn (\Gazelle\User $user) => $user->privilege()->badgeList()
-        ));
-
-        $twig->addFilter(new \Twig\TwigFilter(
             'bb_format',
             fn ($text, $outputToc = true) => new \Twig\Markup(
                 \Text::full_format(
@@ -201,19 +196,12 @@ class Twig {
 
         $twig->addFilter(new \Twig\TwigFilter(
             'truth',
-            fn (bool $truth) => $truth ? "\xe2\x9c\x85" : "\xe2\x9d\x8c"
-        ));
-
-        $twig->addFilter(new \Twig\TwigFilter(
-            'ucfirst',
-            fn ($text) => ucfirst($text)
+            fn (bool $truth) => $truth ? "✅" : "❌"
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
             'ucfirstall',
-            fn ($text) => ucfirst(
-                implode(' ', array_map(ucfirst(...), explode(' ', $text)))
-            )
+            fn ($text) => mb_convert_case($text, MB_CASE_TITLE, 'UTF-8')
         ));
 
         $twig->addFilter(new \Twig\TwigFilter(
@@ -234,7 +222,7 @@ class Twig {
 
         $twig->addFilter(new \Twig\TwigFilter(
             'user_status',
-            function ($userId, $viewer): \Twig\Markup {
+            function (int $userId, \Gazelle\User $viewer): \Twig\Markup {
                 $user = self::$userMan->findById($userId);
                 if (is_null($user)) {
                     return new \Twig\Markup('', 'UTF-8');
@@ -242,9 +230,12 @@ class Twig {
                 $icon = [new \Gazelle\User\Donor($user)->heart($viewer)];
                 if ($user->warning()->isWarned()) {
                     $icon[] = '<a href="wiki.php?action=article&amp;name=warnings"><img src="'
-                        . STATIC_SERVER . '/common/symbols/warned.png" class="tooltip alt="Warned" title="Warned'
-                        . ($viewer->id === $user->id ? " – Expires {$user->warning()->expiry()->format('Y-m-d H:i')}" : '')
-                        . '></a>';
+                        . STATIC_SERVER . '/common/symbols/warned.png" class="tooltip" alt="Warned" title="Warned'
+                        . ($viewer->id === $user->id || $viewer->isStaff() ? " – Expires {$user->warning()->expiry()->format('Y-m-d H:i')}" : '')
+                        . '"></a>';
+                }
+                if ($viewer->isStaff() && $user->isLocked()) {
+                    $icon[] = '<span class="tooltip locked_icon" title="Locked">🔒</span>';
                 }
                 if ($user->isDisabled()) {
                     $icon[] = '<a href="rules.php"><img src="'
@@ -333,8 +324,6 @@ class Twig {
         $twig->addFunction(new \Twig\TwigFunction('ratio',
             fn ($up, $down) => new \Twig\Markup(ratio_html($up, $down), 'UTF-8'))
         );
-
-        $twig->addFunction(new \Twig\TwigFunction('shorten', fn ($text, $length) => shortenString($text, $length)));
 
         // round up number to next closest power of 10 of n/10
         // 120 => 120, but 121 => 130, 129 => 130

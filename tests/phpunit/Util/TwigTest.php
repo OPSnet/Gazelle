@@ -43,8 +43,6 @@ END;
 
         $this->assertSame('YmxvYg', self::twig('{{ b|b64 }}')->render(['b' => 'blob']), 'twig-b64');
 
-        // badge_list is weird
-
         $this->assertSame(
             '<strong>bold</strong>',
             self::twig('{{ text|bb_format }}')->render(['text' => '[b]bold[/b]']),
@@ -138,7 +136,6 @@ END;
         $this->assertSame('✅', self::twig('{{ value|truth }}')->render(['value' => true]), 'twig-truth-true');
         $this->assertSame('❌', self::twig('{{ value|truth }}')->render(['value' => false]), 'twig-truth-false');
 
-        $this->assertSame('First time', self::twig('{{ value|ucfirst }}')->render(['value' => 'first time']), 'twig-ucfirst-1');
         $this->assertSame('A Day In The Life', self::twig('{{ value|ucfirstall }}')->render(['value' => 'a day in the life']), 'twig-ucfirstall');
 
         Util\Twig::setViewer($this->user);
@@ -176,6 +173,7 @@ END;
             source: 'phpunit twig source',
             reason: 'phpunit twig reason',
         );
+        Util\Twig::setViewer($this->user);
         $this->assertMatchesRegularExpression(
             "@^<a class=\"username\" href=\"user.php\?id={$this->user->id}\">{$this->user->username()}</a><a target=\"_blank\" href=\"[^\"]+\"><img class=\"donor_icon tooltip\" src=\"[^\"]+\"(?: alt=\"[^\"]+\")?(?: title=\"[^\"]+\")?></a> \(Sysop\)$@",
             self::twig('{{ user_id|user_full }}')->render(['user_id' => $this->user->id]),

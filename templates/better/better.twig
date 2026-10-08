@@ -1,5 +1,5 @@
 {% from 'macro/form.twig' import selected -%}
-{{ header('Better ' ~ better.mode|ucfirst ~ 's', {'js': 'better'}) }}
+{{ header('Better ' ~ better.mode|capitalize ~ 's', {'js': 'better'}) }}
 <div class="thin">
 <h2>{% if type == 'single' %}Single seeded{% else %}Attaining perfection{% endif %}</h2>
 {% include 'better/links.twig' only %}
@@ -33,7 +33,7 @@
         <td>
             <select name="filter">
 {%  for filterCase in enum('Gazelle\\Enum\\BetterFilter').cases %}
-                <option value="{{ filterCase.name }}"{{ selected(filter == filterCase) }}>{{ filterCase.name|ucfirst }}</option>
+                <option value="{{ filterCase.name }}"{{ selected(filter == filterCase) }}>{{ filterCase.name|capitalize }}</option>
 {%  endfor %}
             </select>
             <select name="type">

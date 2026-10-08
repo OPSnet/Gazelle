@@ -18,7 +18,7 @@
 {%      if prev_primary is not null and prev_primary != primary_total %}
 {%          set warn_open %}
 <strong class="important_text tooltip" title="{{
-    constant('PRIMARY_MEDIA')|ucfirst }} file counts differ ({{
+    constant('PRIMARY_MEDIA')|capitalize }} file counts differ ({{
     prev_primary }} ≠ {{ primary_total }})">
 {%          endset %}
 {%          set warn_close = '</strong>' %}

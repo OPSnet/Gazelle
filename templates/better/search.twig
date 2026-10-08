@@ -18,12 +18,12 @@
                 <td>
                     <select name="filter">
 {% for filterCase in enum('Gazelle\\Enum\\BetterFilter').cases %}
-                        <option value="{{ filterCase.name }}"{{ selected(filter == filterCase.name) }}>{{ filterCase.name|ucfirst }}</option>
+                        <option value="{{ filterCase.name }}"{{ selected(filter == filterCase.name) }}>{{ filterCase.name|capitalize }}</option>
 {% endfor %}
                     </select>
                     <select name="target">
 {% for encodingCase in enum('Gazelle\\Enum\\BetterEncoding').cases %}
-                        <option value="{{ encodingCase.value }}"{{ selected(target == encodingCase.value) }}>{{ encodingCase.value|ucfirst }} missing</option>
+                        <option value="{{ encodingCase.value }}"{{ selected(target == encodingCase.value) }}>{{ encodingCase.value|capitalize }} missing</option>
 {% endfor %}
                     </select>
                 </td>
