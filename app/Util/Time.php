@@ -11,8 +11,8 @@ class Time {
      */
     public static function timeAgo(string|int|float|\DateInterval|\DateTimeImmutable|null $time): false|int {
         $epoch = match (true) {
-            $time instanceof \DateInterval      => (int)(new \DateTimeImmutable()->sub($time)->format('U')),
-            $time instanceof \DateTimeImmutable => (int)(time() - $time->format('U')),
+            $time instanceof \DateInterval      => new \DateTimeImmutable()->sub($time)->getTimestamp(),
+            $time instanceof \DateTimeImmutable => new \DateTimeImmutable()->getTimestamp() - $time->getTimestamp(),
             is_numeric($time)                   => (int)$time,
             is_string($time)                    => strtotime($time),
             default                             => false,
@@ -33,7 +33,7 @@ class Time {
         }
         $epoch = match (true) {
             is_numeric($time)                   => (int)$time,
-            $time instanceof \DateTimeImmutable => (int)$time->format('U'),
+            $time instanceof \DateTimeImmutable => $time->getTimestamp(),
             default                             => strtotime($time),
         };
         if ($epoch === false) {

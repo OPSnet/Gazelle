@@ -123,7 +123,7 @@ class News extends \Gazelle\Base {
      */
     public function latestEpoch(): int {
         $latest = $this->headlines();
-        return $latest ? $latest[0]['created']->format('U') : 0;
+        return $latest ? $latest[0]['created']->getTimestamp() : 0;
     }
 
     /**

@@ -79,7 +79,7 @@ class Activity extends \Gazelle\BaseUser {
         if ($this->user->permitted('admin_manage_payments')) {
             $soon = $payMan->soon();
             if ($soon['next']) {
-                $class = $soon['next']->format('U') < strtotime('+3 days') ? 'sys-error' : 'sys-warning';
+                $class = $soon['next']->getTimestamp() < strtotime('+3 days') ? 'sys-error' : 'sys-warning';
                 $this->setAlert("<a href=\"tools.php?action=payment_list\"><span title=\"Next payment due: {$soon['next']->format('Y-m-d H:i')}, {$soon['total']} due within 1 week\" class=\"tooltip $class\">PAY</span></a>");
             }
         }

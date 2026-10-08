@@ -214,8 +214,8 @@ class Torrent extends \Gazelle\Base {
             self::$cache->cache_value(
                 self::TORRENT_FLOW,
                 $flow,
-                new \DateTimeImmutable('first day of next month')->format('U')
-                    - new \DateTimeImmutable()->format('U'),
+                new \DateTimeImmutable('first day of next month')->getTimestamp()
+                    - new \DateTimeImmutable()->getTimestamp(),
             );
         }
         return $flow;
