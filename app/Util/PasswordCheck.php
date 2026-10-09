@@ -13,19 +13,25 @@ class PasswordCheck {
     }
 
     public static function checkPasswordStrengthNoUser(#[\SensitiveParameter] string $password, ?string $username, ?string $email, bool $skipRegex = true): bool {
-        if (!$skipRegex && !preg_match(static::REGEXP, $password)) {
-            return false;
+        $butcheredPass = $password;
+        if ($username && $email) {
+            if (!static::checkUserPassword($password, $username, $email)) {
+                return false;
+            }
+            $butcheredPass = static::butcherPassword($password, $username, $email);
         }
-        if ($username && $email && !static::checkUserPassword($password, $username, $email)) {
+        if (!$skipRegex && !preg_match(static::REGEXP, $butcheredPass)) {
             return false;
         }
         if (PASSWORD_CHECK_URL) {
-            $c = new Curl();
-            // phpcs:disable Generic.PHP.ForbiddenFunctions.Found
-            $c->setUseProxy(false)->setPostData(sha1($password, true))->fetch(PASSWORD_CHECK_URL);
-            // phpcs:enable Generic.PHP.ForbiddenFunctions.Found
-            if ($c->responseCode() === 205) {
-                return false;
+            $c = new Curl()->setUseProxy(false);
+            foreach (array_unique([$password, $butcheredPass]) as $candidate) {
+                // phpcs:disable Generic.PHP.ForbiddenFunctions.Found
+                $c->setPostData(sha1($candidate, true))->fetch(PASSWORD_CHECK_URL);
+                // phpcs:enable Generic.PHP.ForbiddenFunctions.Found
+                if ($c->responseCode() === 205) {
+                    return false;
+                }
             }
         }
         return true;
@@ -40,5 +46,10 @@ class PasswordCheck {
             return false;
         }
         return true;
+    }
+
+    protected static function butcherPassword(#[\SensitiveParameter] string $password, string $username, string $email): string {
+        $lhs = explode('@', $email, 2)[0];
+        return str_ireplace([$lhs, $username, SITE_HOST, SITE_NAME], '', $password);
     }
 }
