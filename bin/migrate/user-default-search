@@ -1,0 +1,36 @@
+#! /usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+namespace Gazelle;
+
+require __DIR__ . '/../../lib/bootstrap.php';
+
+$pg = new DB\Pg(PG_RW_DSN);
+$pg->begin();
+
+$n = $pg->query("
+    delete from user_default_search
+");
+echo "$n seaarches removed\n";
+
+$manager = new Manager\User();
+$db = DB::DB();
+$db->prepared_query('
+    SELECT UserID, SiteOptions FROM users_info
+');
+foreach ($db->to_pair('UserID', 'SiteOptions') as $userId => $opt) {
+    if ($opt !== null) {
+        foreach (unserialize($opt) as $name => $value) {
+            if ($name === 'DefaultSearch') {
+                $pg->query('
+                    insert into user_default_search
+                           (id_user, search)
+                    values ($1,      $2)
+                    ', $userId, $value,
+                );
+            }
+        }
+    }
+}

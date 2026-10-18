@@ -162,6 +162,7 @@ if ($user->permitted('site_advanced_search')) {
     unset($option['SearchType']);
 }
 $user->setField('option_list', $option);
+$user->modifyDefaultSearch($option['DefaultSearch'] ?? null);
 
 $navList = [];
 foreach (new Manager\UserNavigation()->fullList() as $n) {

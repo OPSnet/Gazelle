@@ -551,6 +551,36 @@ class User extends BaseAttrObject {
             ?? Enum\UserStatus::unconfirmed;
     }
 
+    public function modifyDefaultSearch(?string $queryString): int {
+        if ($queryString === null) {
+            return $this->pg()->query('
+                delete from user_default_search where id_user = $1
+                ', $this->id,
+            );
+        }
+        parse_str($queryString, $args);
+        unset($args['page'], $args['setdefault'], $args['searchsubmit']);
+        $search = http_build_query($args);
+        if ($search !== '') {
+            return $this->pg()->query('
+                insert into user_default_search
+                       (id_user, search)
+                values ($1,      $2)
+                on conflict (id_user) do update set
+                    search = EXCLUDED.search
+                ', $this->id, $search,
+            );
+        }
+        return 0;
+    }
+
+    public function defaultSearch(): ?string {
+        return $this->pg()->scalarex('
+            select search from user_default_search where id_user = $1
+            ', $this->id,
+        );
+    }
+
     public function setOverrideParanoia(array $paranoia): static {
         $this->overrideParanoia = $paranoia;
         return $this;

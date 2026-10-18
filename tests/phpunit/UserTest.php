@@ -660,6 +660,32 @@ class UserTest extends TestCase {
         $this->assertSame(0, $rank->rank('downloaded'), 'userrank-rank');
     }
 
+    public function testUserDefaultSearch(): void {
+        $this->assertNull($this->user->defaultSearch(), 'user-defsearch-none');
+        $this->assertSame(
+            0,
+            $this->user->modifyDefaultSearch(''),
+            'user-defsearch-nothing',
+        );
+        $this->assertNull($this->user->defaultSearch(), 'user-defsearch-still-none');
+        $this->assertSame(
+            1,
+            $this->user->modifyDefaultSearch('media=WEB&page=2&order=time'),
+            'user-defsearch-set',
+        );
+        $this->assertSame(
+            'media=WEB&order=time',
+            $this->user->defaultSearch(),
+            'user-defsearch-something',
+        );
+        $this->assertSame(
+            1,
+            $this->user->modifyDefaultSearch(null),
+            'user-defsearch-unset',
+        );
+        $this->assertNull($this->user->defaultSearch(), 'user-defsearch-cleared');
+    }
+
     public function testUserHash(): void {
         // ensure the same text hashed by two users is different
         $second = Helper::makeUser('user.' . randomString(6), 'user');

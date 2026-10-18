@@ -38,16 +38,14 @@ $header = new Util\SortableTableHeader('time', $headerMap);
 $headerIcons = new Util\SortableTableHeader('time', $headerMap, ['asc' => '', 'desc' => '']);
 
 if (isset($_GET['setdefault'])) {
-    // Setting default search options, remove page and setdefault params
-    $clear = '/(?:&|^)(?:page|setdefault)=.*?(?:&|$)/';
-    $Viewer->modifyOption('DefaultSearch', preg_replace($clear, '', $_SERVER['QUERY_STRING']));
+    $Viewer->modifyDefaultSearch($_SERVER['QUERY_STRING']);
 } elseif (isset($_GET['cleardefault'])) {
     // Clearing default search options
-    $Viewer->modifyOption('DefaultSearch', null);
-} elseif ($Viewer->option('DefaultSearch') && (count($_GET) === 0 || (isset($_GET['page']) && count($_GET) === 1))) {
+    $Viewer->modifyDefaultSearch(null);
+} elseif ($Viewer->defaultSearch() && (count($_GET) === 0 || (isset($_GET['page']) && count($_GET) === 1))) {
     // Use default search options
     $page = $_GET['page'] ?? false;
-    parse_str($Viewer->option('DefaultSearch'), $_GET);
+    parse_str($Viewer->defaultSearch(), $_GET);
     if ($page !== false) {
         $_GET['page'] = $page;
     }
