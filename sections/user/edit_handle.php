@@ -142,7 +142,7 @@ $option['TorrentGrouping']     = (int)$_POST['torrentgrouping'];
 $autocomplete = Enum\Autocomplete::tryFrom((int)$_POST['autocomplete'])
     ?? Enum\Autocomplete::everywhere;
 $option['AutoComplete'] = $autocomplete->value;
-foreach (['DefaultSearch', 'DisableFreeTorrentTop10'] as $opt) {
+foreach (['DisableFreeTorrentTop10'] as $opt) {
     if ($user->option($opt)) {
         $option[$opt] = $user->option($opt);
     }
@@ -162,7 +162,6 @@ if ($user->permitted('site_advanced_search')) {
     unset($option['SearchType']);
 }
 $user->setField('option_list', $option);
-$user->modifyDefaultSearch($option['DefaultSearch'] ?? null);
 
 $navList = [];
 foreach (new Manager\UserNavigation()->fullList() as $n) {

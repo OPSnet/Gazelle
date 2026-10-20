@@ -34,3 +34,4 @@ foreach ($db->to_pair('UserID', 'SiteOptions') as $userId => $opt) {
         }
     }
 }
+$pg->commit();

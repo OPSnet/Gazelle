@@ -252,7 +252,7 @@
 {% if filtered %}
         <input type="submit" class="setdefault_button" name="setdefault" value="Make default">
 {% endif %}
-{% if viewer.option('DefaultSearch') %}
+{% if viewer.defaultSearch %}
         <input type="submit" class="cleardefault_button" name="cleardefault" value="Clear default">
 {% endif %}
         <input type="hidden" name="action" id="ft_action" value="{{ search_mode }}">

@@ -1,6 +1,13 @@
 #! /usr/bin/env php
 <?php
 
+/* Usage
+ *
+ * -s --summary   statistics of all options by users
+ * -r --remove    remove a specific option for all users (use --execute to persist)
+ * -u --user      dump options of a user ID or @name
+ */
+
 declare(strict_types=1);
 
 namespace Gazelle;
@@ -14,6 +21,15 @@ if ((bool)array_intersect(['-s', '--summary'], $argv)) {
     exit;
 }
 
+$remove = array_search('-r', $argv);
+if ($remove === false) {
+    $remove = array_search('--remove`', $argv);
+}
+if ($remove !== false) {
+    removeOption($argv[$remove + 1], array_search('--execute', $argv) !== false);
+    exit;
+}
+
 $userIdx = array_search('-u', $argv);
 if ($userIdx === false) {
     $userIdx = array_search('--user', $argv);
@@ -24,29 +40,28 @@ if ($userIdx !== false) {
 }
 
 function summaryReport(): void {
-    $manager = new Manager\User();
     $db = DB::DB();
     $db->prepared_query('
-        SELECT SiteOptions FROM users_info
+        SELECT SiteOptions FROM users_info WHERE SiteOptions IS NOT NULL
     ');
     $summary = [];
     foreach ($db->collect(0) as $opt) {
-        if ($opt !== null) {
-            foreach (unserialize($opt) as $name => $value) {
-                if (is_array($value)) {
-                    $summary[$name] ??= 0;
-                    $summary[$name]++;
-                } else {
-                    // 0 as a key has weird side-effects, so prefix the value
+        foreach (unserialize($opt) as $name => $value) {
+            if (is_array($value)) {
+                $summary[$name] ??= 0;
+                $summary[$name]++;
+            } else {
+                // 0 as an array key has weird side-effects, so prefix it
+                if ($value === 0) {
                     $value = ". $value";
-                    if (!isset($summary[$name])) {
-                        $summary[$name] = [];
-                    }
-                    if (!isset($summary[$name][$value])) {
-                        $summary[$name][$value] = 0;
-                    }
-                    $summary[$name][$value]++;
                 }
+                if (!isset($summary[$name])) {
+                    $summary[$name] = [];
+                }
+                if (!isset($summary[$name][$value])) {
+                    $summary[$name][$value] = 0;
+                }
+                $summary[$name][$value]++;
             }
         }
     }
@@ -54,12 +69,44 @@ function summaryReport(): void {
     show($summary);
 }
 
-function userReport(User $user) {
+function removeOption(string $search, bool $execute): void {
+    $db = DB::DB();
+    $db->begin_transaction();
+    $db->prepared_query('
+        SELECT UserID, SiteOptions FROM users_info WHERE SiteOptions IS NOT NULL
+    ');
+    $result = $db->to_array(false, MYSQLI_ASSOC);
+    $processed = 0;
+    foreach ($result as $row) {
+        $option = unserialize($row['SiteOptions']);
+        if (isset($option[$search])) {
+            ++$processed;
+            if (!$execute) {
+                echo "{$row['UserID']}\t{$option[$search]}\n";
+                continue;
+            }
+            unset($option[$search]);
+            $db->prepared_query('
+                UPDATE users_info SET
+                    SiteOptions = ?
+                WHERE UserID = ?
+                ', $option === [] ? null : serialize($option), $row['UserID']
+            );
+        }
+    }
+    echo "processed: $processed\n";
+    $db->commit();
+}
+
+function userReport(User $user): void {
     $opt = DB::DB()->scalar('
         SELECT SiteOptions FROM users_info WHERE UserID = ?
         ', $user->id
     );
-    $list = unserialize($opt);
+    if ($opt === null) {
+        echo "<null>\n";
+    }
+    $list = unserialize((string)$opt);
     ksort($list);
     show($list);
 }
