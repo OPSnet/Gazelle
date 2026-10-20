@@ -223,7 +223,7 @@ class Mysql {
             foreach ($Parameters as $Parameter) {
                 if (is_int($Parameter)) {
                     $Binders .= "i";
-                } elseif (is_double($Parameter)) {
+                } elseif (is_float($Parameter)) {
                     $Binders .= "d";
                 } else {
                     $Binders .= "s";

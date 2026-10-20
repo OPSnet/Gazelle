@@ -56,6 +56,7 @@
                 <element key="extract" value="null"/>
                 <element key="include" value="require"/>
                 <element key="include_once" value="require"/>
+                <element key="is_double" value="is_float"/>
                 <element key="is_integer" value="is_int"/>
                 <element key="join" value="implode"/>
                 <element key="md5" value="hash_file"/>
