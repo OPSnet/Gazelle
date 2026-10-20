@@ -85,14 +85,36 @@ class PgTable extends AbstractTable {
     public function indexRead(): array {
         [$schema, $table] = $this->schemaTable();
         return $this->pgro()->allex("
-            select indexrelname,
-                idx_scan,
-                idx_tup_read,
-                idx_tup_fetch,
-                last_idx_scan
-            from pg_stat_all_indexes
-            where schemaname = $1
-                and relname = $2
+            select
+                i.relname                               as index_name,
+                array_agg(a.attname order by ik.ord)    as column_name,
+                array_agg(s.n_distinct order by ik.ord) as cardinality,
+                si.idx_scan,
+                si.idx_tup_read,
+                si.idx_tup_fetch,
+                si.last_idx_scan
+            from pg_class t
+            inner join pg_namespace nsp on (nsp.oid = t.relnamespace)
+            inner join pg_index ix      on (t.oid = ix.indrelid)
+            inner join pg_class i       on (i.oid = ix.indexrelid)
+            inner join unnest(ix.indkey) with ordinality as ik(attnum, ord)
+                                        on true
+            inner join pg_attribute a   on (a.attrelid = t.oid AND a.attnum = ik.attnum)
+            left join pg_stats s on (
+                s.schemaname    = nsp.nspname
+                and s.tablename = t.relname
+                and s.attname   = a.attname
+            )
+            left join pg_stat_all_indexes si on (
+                si.relid          = t.oid
+                and si.indexrelid = i.oid
+            )
+            where
+                nsp.nspname   = $1
+                and t.relname = $2
+            group by t.relname, i.relname, si.idx_scan, si.idx_tup_read, si.idx_tup_fetch, si.last_idx_scan
+            order by t.relname, i.relname
+
             ", $schema, $table
         );
     }

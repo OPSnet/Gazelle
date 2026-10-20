@@ -465,8 +465,8 @@ class DbTest extends TestCase {
         $index = $indexRead[0];
         $this->assertSame(
             [
-                "indexrelname", "idx_scan", "idx_tup_read",
-                "idx_tup_fetch", "last_idx_scan",
+                'index_name', 'column_name', 'cardinality', 'idx_scan',
+                'idx_tup_read', 'idx_tup_fetch', 'last_idx_scan',
             ],
             array_keys($index),
             'pg-table-index-read'

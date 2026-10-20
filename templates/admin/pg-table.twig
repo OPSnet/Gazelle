@@ -53,7 +53,8 @@
             <th>Tuples read</th>
             <th>Tuples fetched</th>
             <th>Last use</th>
-            <th>Column list and cardinalities</th>
+            <th>Column name</th>
+            <th>Cardinality</th>
         </tr>
 {% for r in table.indexRead %}
         <tr>
@@ -62,7 +63,22 @@
             <td>{{ r.idx_tup_read|number_format }}</td>
             <td>{{ r.idx_tup_fetch|number_format }}</td>
             <td>{{ r.last_idx_scan|time_diff }}</td>
-            <td>todo</td>
+            <td>
+{%  for c in r.column_name %}
+{%      if not loop.first %}
+                <br>
+{%      endif %}
+                {{ c }}
+{%  endfor %}
+            </td>
+            <td>
+{%  for c in r.cardinality %}
+{%      if not loop.first %}
+                <br>
+{%      endif %}
+                {{ c|default('null') }}
+{%  endfor %}
+            </td>
         </tr>
 {% endfor %}
     </table>
