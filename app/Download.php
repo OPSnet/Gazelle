@@ -91,30 +91,41 @@ class Download extends Base {
             if (!$user->hasToken($this->torrent)) {
                 self::$db->begin_transaction();
                 self::$db->prepared_query('
-                    UPDATE user_flt SET
-                        tokens = tokens - ?
-                    WHERE tokens >= ? AND user_id = ?
-                    ', $tokenCount, $tokenCount, $userId
+                    SELECT tokens FROM user_flt WHERE user_id = ? FOR UPDATE
+                    ', $userId
                 );
-                if (self::$db->affected_rows() == 0) {
-                    self::$db->rollback();
-                    return DownloadStatus::no_tokens;
-                }
-                if (!new Tracker()->addToken($this->torrent, $user)) {
-                    self::$db->rollback();
-                    return DownloadStatus::tracker;
-                }
-                self::$db->prepared_query("
-                    INSERT INTO users_freeleeches (UserID, TorrentID, Uses, Time)
-                    VALUES (?, ?, ?, now())
-                    ON DUPLICATE KEY UPDATE
-                        Time = VALUES(Time),
-                        Expired = FALSE,
-                        Uses = Uses + ?
-                    ", $userId, $this->torrent->id(), $tokenCount, $tokenCount
+                $alreadyActive = self::$db->scalar('
+                    SELECT 1 FROM users_freeleeches
+                    WHERE UserID = ? AND TorrentID = ? AND Expired = 0
+                    ', $userId, $this->torrent->id()
                 );
+                if (!$alreadyActive) {
+                    self::$db->prepared_query('
+                        UPDATE user_flt SET
+                            tokens = tokens - ?
+                        WHERE tokens >= ? AND user_id = ?
+                        ', $tokenCount, $tokenCount, $userId
+                    );
+                    if (self::$db->affected_rows() == 0) {
+                        self::$db->rollback();
+                        return DownloadStatus::no_tokens;
+                    }
+                    if (!new Tracker()->addToken($this->torrent, $user)) {
+                        self::$db->rollback();
+                        return DownloadStatus::tracker;
+                    }
+                    self::$db->prepared_query("
+                        INSERT INTO users_freeleeches (UserID, TorrentID, Uses, Time)
+                        VALUES (?, ?, ?, now())
+                        ON DUPLICATE KEY UPDATE
+                            Time = VALUES(Time),
+                            Expired = FALSE,
+                            Uses = Uses + ?
+                        ", $userId, $this->torrent->id(), $tokenCount, $tokenCount
+                    );
+                }
                 self::$db->commit();
-                self::$cache->delete_value("user_tokens_$userId");
+                self::$cache->delete_value("users_tokens_$userId");
                 $user->flush();
             }
         }
