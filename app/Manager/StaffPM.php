@@ -13,6 +13,7 @@ class StaffPM extends \Gazelle\BaseManager {
     protected array $cond;
     protected bool  $orderByAssigned = false;
 
+    #[\NoDiscard]
     public function create(UserInstance $user, int $level, string $subject, string $message): \Gazelle\StaffPM {
         self::$db->begin_transaction();
         self::$db->prepared_query("

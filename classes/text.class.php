@@ -542,10 +542,8 @@ class Text {
             if ($i >= strlen($Str)) {
                 // document end, tag unclosed
             } elseif ($TagName == 'img' && isset($Tag[3][0]) && is_string($Attrib) && parse_bbcode_image_attr($Attrib) === null) { //[img=...] /** @phpstan-ignore-line need more magic */
-                $Block = ''; // Nothing inside this tag
                 // Don't need to touch $i
             } elseif ($TagName == 'hr') {
-                $Block = ''; // Nothing inside this tag either
                 // Don't need to touch $i
             } elseif ($TagName == 'inlineurl') { // We did a big replace early on to turn http:// into [inlineurl]http://
                 // Let's say the block can stop at a newline or a space
@@ -831,7 +829,6 @@ class Text {
             $diff = $Level - $ItemLevel;
             $List .= '</li>' . str_repeat("</$Tag></li>", $diff);
         } elseif ($ItemLevel > $Level) {
-            $diff = $ItemLevel - $Level;
             if ($Offset > 0) {
                 $List .= str_repeat("<li><$Tag>", $Offset - 2);
             }

@@ -229,14 +229,17 @@ class Artist extends \Gazelle\BaseManager {
         );
     }
 
+    // phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundInExtendedClassBeforeLastUsed
+
     public function roleExists(int $categoryId, int $roleId): bool {
         // TODO: roles by category are not yet a thing so ignore categoryId for now
-        $categoryId = 0;
         return (bool)self::$db->scalar("
             SELECT 1 FROM artist_role WHERE artist_role_id = ?
             ", $roleId
         );
     }
+
+    // phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundInExtendedClassBeforeLastUsed
 
     public function tgroupList(int $aliasId, \Gazelle\Manager\TGroup $tgMan): array {
         self::$db->prepared_query("

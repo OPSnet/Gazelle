@@ -479,9 +479,18 @@ class ForumTest extends TestCase {
         }
 
         // TODO: move more warning functionality out of sections/...
-        $this->threadList[] = $thread
-            = new Manager\ForumThread()->create($this->forum, $user, 'user thread title', 'this is a new thread by a user');
-        $thread  = new Manager\ForumThread()->create($this->forum, $user, 'user thread title', 'this is a new thread by a user');
+        $this->threadList[] = new Manager\ForumThread()->create(
+            $this->forum,
+            $user,
+            'user thread title',
+            'this is a new thread by a user',
+        );
+        $thread = new Manager\ForumThread()->create(
+            $this->forum,
+            $user,
+            'user thread title',
+            'this is a new thread by a user',
+        );
         $post    = $thread->addPost($user, 'offensive content');
         $week    = 2;
         $message = "phpunit forum warn test " . randomString(10);

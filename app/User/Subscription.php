@@ -59,7 +59,6 @@ class Subscription extends \Gazelle\BaseUser {
                 break;
             }
         }
-        $success = false;
         if ($key !== -1) {
             self::$db->prepared_query('
                 DELETE FROM users_subscriptions_comments

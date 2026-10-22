@@ -197,24 +197,31 @@ class Transcode extends \Gazelle\Base {
         ];
     }
 
+    /**
+     * @return array{all: int, total_320: int, total_v0: int}
+     */
     public function total(): array {
-        $key = null;
-        $total = false;
+        $key = sprintf(self::CACHE_KEY,
+            'total_' . $this->mode->name,
+            $this->encoding->value,
+            $this->user->id
+        );
         if (!isset($this->search)) {
-            $key = sprintf(self::CACHE_KEY,
-                'total_' . $this->mode->name,
-                $this->encoding->value,
-                $this->user->id
-            );
+            /** @var false|array{all: int, total_320: int, total_v0: int} */
             $total = self::$cache->get_value($key);
-        }
-        if ($total === false) {
-            [$sql, $args] = $this->queryTotal();
-            $total = $this->pg()->rowAssocex($sql, ...$args);
-            if ($key) {
-                self::$cache->cache_value($key, $total, 3600);
+            if (is_array($total)) {
+                return $total;
             }
         }
+        [$sql, $args] = $this->queryTotal();
+        $result = $this->pg()->rowAssocex($sql, ...$args);
+        // intify null totals
+        $total = [
+            'all'       => $result['all'],
+            'total_320' => (int)$result['total_320'],
+            'total_v0'  => (int)$result['total_v0'],
+        ];
+        self::$cache->cache_value($key, $total, 3600);
         return $total;
     }
 }

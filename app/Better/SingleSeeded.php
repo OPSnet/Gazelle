@@ -88,7 +88,7 @@ class SingleSeeded extends AbstractBetter {
                 $args[] = $this->search;
             }
             $where = implode(' and ', $cond);
-            $affected = $this->pg()->query($sql = <<<END_SQL
+            $affected = $this->pg()->query(<<<END_SQL
                 insert into {$this->bssTable}
                 select t."ID" as id_torrent, tg."ID" as id_tgroup
                 from relay.torrents                   t

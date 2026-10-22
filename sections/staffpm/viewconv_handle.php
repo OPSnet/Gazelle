@@ -33,7 +33,7 @@ if (isset($_POST['convid'])) {
     if (empty($subject)) {
         Error400::error("You must provide a subject for your message");
     }
-    $manager->create($Viewer, (int)$_POST['level'], $subject, $message);
+    (void)$manager->create($Viewer, (int)$_POST['level'], $subject, $message);
     header('Location: staffpm.php');
     return;
 } else {

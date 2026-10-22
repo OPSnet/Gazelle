@@ -86,7 +86,7 @@ class InboxTest extends TestCase {
         // reply
         $userMan  = new Manager\User();
         $replyBody = 'reply two ' . randomString(10);
-        $replyId = $userMan->replyPM($senderId, $receiverId, $subject, 'reply one', $pmSent->id);
+        (void)$userMan->replyPM($senderId, $receiverId, $subject, 'reply one', $pmSent->id);
         $replyId = $userMan->replyPM($senderId, $receiverId, $subject, $replyBody, $pmSent->id);
         $this->assertSame($replyId, $pmSent->id, 'inbox-recv-reply');
         $senderList = $senderInbox->messageList($pmSenderManager, 2, 0);

@@ -466,7 +466,7 @@ class CollageTest extends TestCase {
                 $artistList[3]->id,
             ],
             array_map(
-                fn ($c) => $c->id,
+                fn ($c) => $c->id(),
                 $this->collageList[1]->objectList(),
             ),
             'collage-artist-object-list',
@@ -1059,7 +1059,7 @@ class CollageTest extends TestCase {
             ),
         ];
         $collage->addEntry($this->tgroupList[0], $adder, 'collage-add-dupe-entry');
-        $comment = new Manager\Comment()->create(
+        (void)new Manager\Comment()->create(
             $writer,
             CommentType::collage->value,
             $collage->id,

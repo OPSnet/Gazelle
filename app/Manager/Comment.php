@@ -22,6 +22,7 @@ class Comment extends \Gazelle\BaseManager {
     /**
      * Post a comment on an artist, request or torrent page.
      */
+    #[\NoDiscard]
     public function create(
         \Gazelle\User $user,
         string $page,

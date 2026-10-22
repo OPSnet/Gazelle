@@ -89,7 +89,7 @@ class View extends Base {
         $PageID = [$module, $_REQUEST['action'] ?? false, $_REQUEST['type'] ?? false];
         $navLinks = [];
         foreach (new Manager\UserNavigation()->userControlList($user) as $n) {
-            [$ID, $Key, $Title, $Target, $Tests, $TestUser, $Mandatory] = array_values($n);
+            [, $Key, $Title, $Target, $Tests, $TestUser] = array_values($n);
             if (str_contains($Tests, ':')) {
                 $testList = [];
                 foreach (array_map(trim(...), explode(',', $Tests)) as $Part) {

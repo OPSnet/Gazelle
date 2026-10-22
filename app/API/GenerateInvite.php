@@ -7,7 +7,6 @@ use Gazelle\Util\Mail;
 class GenerateInvite extends AbstractAPI {
     public function run(): array {
         $userMan = new \Gazelle\Manager\User();
-        $interviewer = null;
         if (isset($_GET['interviewer_id'])) {
             $interviewer = $userMan->findById((int)$_GET['interviewer_id']);
         } elseif (isset($_GET['interviewer_name'])) {

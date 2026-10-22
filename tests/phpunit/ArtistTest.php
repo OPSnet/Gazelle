@@ -601,7 +601,7 @@ class ArtistTest extends TestCase {
                 ['metal'],
             ),
         ];
-        Helper::makeTorrentMusic(
+        (void)Helper::makeTorrentMusic(
             tgroup:          $this->tgroupList[0],
             user:            $this->user,
             catalogueNumber: 'UA-JSON-1',
@@ -655,7 +655,7 @@ class ArtistTest extends TestCase {
                 [[ARTIST_MAIN], [$name]],
                 ['punk'],
             );
-            Helper::makeTorrentMusic($tgroup, $this->user);
+            (void)Helper::makeTorrentMusic($tgroup, $this->user);
             $this->tgroupList[] = $tgroup;
         }
         $this->tgroupList[0]
@@ -680,7 +680,7 @@ class ArtistTest extends TestCase {
             [[ARTIST_MAIN], [$artist->primaryName()]],
             ['punk'],
         );
-        Helper::makeTorrentMusic($tgroup, $this->user);
+        (void)Helper::makeTorrentMusic($tgroup, $this->user);
         $this->tgroupList[] = $tgroup;
         $Cache->delete_multi([
             $manager->autocompleteKey($redirectName),
@@ -788,7 +788,7 @@ class ArtistTest extends TestCase {
             [[ARTIST_MAIN], [$name]],
             ['punk'],
         );
-        Helper::makeTorrentMusic($tgroup, $this->user);
+        (void)Helper::makeTorrentMusic($tgroup, $this->user);
         $this->tgroupList[] = $tgroup;
 
         $this->assertStringContainsString(
@@ -880,7 +880,7 @@ class ArtistTest extends TestCase {
         $artist = $manager->create('phpunit.' . randomString(12));
         $this->artistIdList[] = $artist->id;
         $body = "phpunit u{$this->user->id} a{$artist->id}";
-        $comment = new Manager\Comment()->create(
+        (void)new Manager\Comment()->create(
             $this->user,
             CommentType::artist->value,
             $artist->id,

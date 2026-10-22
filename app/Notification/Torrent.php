@@ -19,10 +19,8 @@ class Torrent extends \Gazelle\Base {
     }
 
     public function setFilter(int $filterId): static {
-        $cond = [];
-        $args = [];
-        $cond[] = 'unf.ID = ?';
-        $args[] = $filterId;
+        $this->cond[] = 'unf.ID = ?';
+        $this->args[] = $filterId;
         return $this;
     }
 

@@ -252,7 +252,7 @@ class UsersSearchTest extends TestCase {
         [$u1, $u2] = $this->userList;
         $item = new Manager\Bonus()->findBonusItemByLabel('other-3');
         $n = 5;
-        foreach (range(1, $n) as $gift) {
+        while ($n--) {
             $item->purchase($u1, 0, ['receiver' => $u2, 'message' => 'phpunit']);
         }
         $flrx = new Search\Users([
@@ -270,8 +270,8 @@ class UsersSearchTest extends TestCase {
         $this->assertSame(
             [[
                 'c0' => $u2->id,
-                'c1' => $item->amount() * $n,
-                'c2' => $item->amount() * $n,
+                'c1' => $item->amount() * 5,
+                'c2' => $item->amount() * 5,
             ]],
             $flrx->page(2, 0),
             'advs-flrx-page-result',
@@ -293,7 +293,7 @@ class UsersSearchTest extends TestCase {
             [[
                 'c0' => $u1->id,
                 'c1' => 0,
-                'c2' => $item->amount() * $n,
+                'c2' => $item->amount() * 5,
             ]],
             $fltx->page(2, 0),
             'advs-fltx-page-result',

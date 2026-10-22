@@ -241,7 +241,6 @@ class Collage extends BaseAttrObject implements Bookmarked {
     }
 
     public function toggleSubscription(User $user): int {
-        $affected = 0;
         if (
             (bool)self::$db->scalar("
                 SELECT 1

@@ -186,7 +186,7 @@ class GiftEventTest extends TestCase {
         $eventList = $manager->eventList();
         $this->assertGreaterThan(0, count($eventList), 'gift-event-manager-summary');
 
-        [$day, $hour, $minute] = explode(' ', date('Y-m-d H i'));
+        [$day,,] = explode(' ', date('Y-m-d H i'));
         $this->assertSame(
             43,
             strlen($giftEvent->signature($this->user)),

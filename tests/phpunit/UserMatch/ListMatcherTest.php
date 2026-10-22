@@ -36,9 +36,9 @@ class ListMatcherTest extends TestCase {
     }
 
     public function testExtract(): void {
-        $this->assertEmpty($this->matcher->extract(''), 'listmatcher-extract-empty');
-        $this->assertEmpty($this->matcher->extract('garbage'), 'listmatcher-extract-garbage');
-        $this->assertEmpty($this->matcher->extract('1.2.333.4'), 'listmatcher-extract-invalid');
+        $this->assertSame([], $this->matcher->extract(''), 'listmatcher-extract-empty');
+        $this->assertSame([], $this->matcher->extract('garbage'), 'listmatcher-extract-garbage');
+        $this->assertSame([], $this->matcher->extract('1.2.333.4'), 'listmatcher-extract-invalid');
         $this->assertSame([['1.2.3.4', null, null]], $this->matcher->extract('1.2.3.4'), 'listmatcher-extract-simple');
         $this->assertSame([['1.2.3.4', null, null]],
             $this->matcher->extract("aaaaaaa\naaaaa 1.2.3.4 aaaaaaa\naaaaaaa"),
@@ -103,7 +103,7 @@ class ListMatcherTest extends TestCase {
 
         $this->matcher->create();
 
-        $this->assertEmpty($this->matcher->findCandidates($candidate, false), 'listmatcher-findcandidates-strict-nomatch');
+        $this->assertSame([], $this->matcher->findCandidates($candidate, false), 'listmatcher-findcandidates-strict-nomatch');
         $this->assertSame([$user->id], $this->matcher->findCandidates($candidate), 'listmatcher-findcandidates-loose');
 
         $ipMan->registerApi($user, $ips[0][0]);

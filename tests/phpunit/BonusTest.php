@@ -634,7 +634,7 @@ class BonusTest extends TestCase {
             $manager->addSeedPoints(24680),
             'bonus-add-seed-points',
         );
-        $this->assertEquals(
+        $this->assertSame(
             12345 + 23456 + 24680,
             $this->userList[1]->flush()->bonusPointsTotal(),
             'bonus-added-user-1',
@@ -646,7 +646,7 @@ class BonusTest extends TestCase {
             $manager->addGlobalPoints(7531),
             'bonus-add-global-points',
         );
-        $this->assertEquals(
+        $this->assertSame(
             12345 + 23456 + 24680,
             $this->userList[1]->flush()->bonusPointsTotal(),
             'bonus-added-no-global',

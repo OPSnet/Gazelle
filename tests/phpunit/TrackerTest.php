@@ -131,7 +131,7 @@ class TrackerTest extends TestCase {
         $this->assertTrue($tracker->modifyPasskey($announceKey, $this->user->announceKey()), 'tracker-modify-announce-key');
         $this->assertTrue($tracker->removeUser($this->user), 'tracker-remove-user');
 
-        $initial = array_first(array_filter($info, fn ($v) => $v['label'] == 'requests handled'));
+        // $initial = array_first(array_filter($info, fn ($v) => $v['label'] == 'requests handled'));
         // TODO: something with initial
         $current = $tracker->info();
         $this->assertSame($info['requests handled']['value'] + 10, $current['requests handled']['value'], 'tracker-requests-handled');

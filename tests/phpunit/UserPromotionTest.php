@@ -156,12 +156,12 @@ class UserPromotionTest extends TestCase {
         $body = $list[0]->postList(1, 0)[0]['body'];
         $this->assertStringContainsString(
             '✅ 10.00 GiB uploaded, you have 12.00 GiB',
-            $list[0]->postList(1, 0)[0]['body'],
+            $body,
             'demote-ratio-upload',
         );
         $this->assertStringContainsString(
             '❌ 0.6 ratio required, you have 0.5000',
-            $list[0]->postList(1, 0)[0]['body'],
+            $body,
             'demote-user-demote-ratio-ratio',
         );
 

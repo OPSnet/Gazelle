@@ -922,9 +922,10 @@ class TGroup extends BaseAttrObject implements Bookmarked, CategoryHasArtist, Co
         );
 
         $manager = new DB();
+        // we cannot delete the row just yet
         $manager->relaxConstraints(true);
-        // we don´t delete the row just yet
-        [$ok, $message] = $manager->softDelete(
+        // ignore second param $message
+        [$ok] = $manager->softDelete(
             MYSQL_DB, 'torrents_group', 'ID', $this->id, delete: false
         );
         $manager->relaxConstraints(false);

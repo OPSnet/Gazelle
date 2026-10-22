@@ -70,7 +70,7 @@ class UploadFlacNoSingle extends AbstractContest {
     }
 
     public function userPayout(): array {
-        self::$db->prepared_query($sql = "
+        self::$db->prepared_query("
             WITH c AS (
                 SELECT um.ID    AS user_id,
                     count(t.ID) AS total_entries

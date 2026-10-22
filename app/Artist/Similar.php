@@ -286,7 +286,7 @@ class Similar extends \Gazelle\Base {
         $layout = [];
         $angle = fmod($this->artist->id, 2 * M_PI);
         $golden = M_PI * (3 - sqrt(5));
-        foreach (range(0, $nrSimilar - 1) as $r) {
+        for ($n = 0; $n < $nrSimilar; ++$n) {
             $layout[] = $angle;
             $angle = fmod($angle + $golden, 2 * M_PI);
         }

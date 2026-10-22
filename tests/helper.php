@@ -17,6 +17,7 @@ use Gazelle\User;
 class Helper {
     public const string IP_ADDR = '127.0.0.255';
 
+    #[\NoDiscard]
     public static function makeForum(
         string                 $name,
         string                 $description,
@@ -46,6 +47,7 @@ class Helper {
     /**
      * @param array<int> $tagList
      */
+    #[\NoDiscard]
     public static function makeRequestMusic(
         User     $user,
         string   $title,
@@ -88,6 +90,7 @@ class Helper {
     /**
      * @param array<int> $tagList
      */
+    #[\NoDiscard]
     public static function makeRequestComics(
         User   $user,
         string $title,
@@ -113,6 +116,7 @@ class Helper {
         );
     }
 
+    #[\NoDiscard]
     public static function makeTGroupEBook(
         string $name,
     ): TGroup {
@@ -126,6 +130,7 @@ class Helper {
         );
     }
 
+    #[\NoDiscard]
     public static function makeTGroupMusic(
         User        $user,
         string      $name,
@@ -157,6 +162,7 @@ class Helper {
         return $tgroup;
     }
 
+    #[\NoDiscard]
     public static function makeTorrentEBook(
         TGroup $tgroup,
         User   $user,
@@ -181,6 +187,7 @@ class Helper {
         );
     }
 
+    #[\NoDiscard]
     public static function makeTorrentMusic(
         TGroup $tgroup,
         User   $user,
@@ -303,6 +310,7 @@ class Helper {
         $tgroup->removeTGroup();
     }
 
+    #[\NoDiscard]
     public static function makeUser(string $username, string $tag, bool $enable = false, bool $clearInbox = false): User {
         $user = new \Gazelle\UserCreator()
             ->setUsername($username)
@@ -319,6 +327,7 @@ class Helper {
         return $user;
     }
 
+    #[\NoDiscard]
     public static function makeUserByInvite(string $username, string $key): User {
         return new \Gazelle\UserCreator()
             ->setUsername($username)

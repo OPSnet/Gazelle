@@ -103,14 +103,14 @@ class UserSeedboxTest extends TestCase {
             ]
         ]);
         $this->assertSame(2, $changed, 'seedbox-renamed');
-        $hostList = $seedbox->hostList();
-        $this->assertSame('sbox-1', $hostList[$key1]['name'], 'seedbox-rename-1');
-        $this->assertSame('sbox-2', $hostList[$key2]['name'], 'seedbox-rename-2');
-        $this->assertSame('sbox-1', $seedbox->name($hostList[$key1]['id']), 'seedbox-id-1');
-        $this->assertSame('sbox-2', $seedbox->name($hostList[$key2]['id']), 'seedbox-id-2');
+        $newList = $seedbox->hostList();
+        $this->assertSame('sbox-1', $newList[$key1]['name'], 'seedbox-rename-1');
+        $this->assertSame('sbox-2', $newList[$key2]['name'], 'seedbox-rename-2');
+        $this->assertSame('sbox-1', $seedbox->name($newList[$key1]['id']), 'seedbox-id-1');
+        $this->assertSame('sbox-2', $seedbox->name($newList[$key2]['id']), 'seedbox-id-2');
 
         // union (torrentList[1] in common)
-        $seedbox->setSource($hostList[$key1]['id'])->setTarget($hostList[$key2]['id'])->setUnion(true);
+        $seedbox->setSource($newList[$key1]['id'])->setTarget($newList[$key2]['id'])->setUnion(true);
         $this->assertSame([$this->torrentList[1]->id], $seedbox->idList(), 'seedbox-both');
 
         // intersection (point of view sbox-1)
@@ -118,7 +118,7 @@ class UserSeedboxTest extends TestCase {
         $this->assertSame([$this->torrentList[0]->id], $seedbox->idList(), 'seedbox-1-not-2');
 
         // intersection (point of view sbox-2)
-        $seedbox->setSource($hostList[$key2]['id'])->setTarget($hostList[$key1]['id']);
+        $seedbox->setSource($newList[$key2]['id'])->setTarget($newList[$key1]['id']);
         $this->assertSame(
             [$this->torrentList[2]->id, $this->torrentList[3]->id],
             $seedbox->idList(),

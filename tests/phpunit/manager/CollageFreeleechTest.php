@@ -44,7 +44,7 @@ class CollageFreeleechTest extends TestCase {
                     ['format' => 'MP3',  'size' =>  2_000_000],
                 ] as $info
             ) {
-                $torrent = Helper::makeTorrentMusic(
+                (void)Helper::makeTorrentMusic(
                     tgroup: $tgroup,
                     format: $info['format'],
                     size:   $info['size'],

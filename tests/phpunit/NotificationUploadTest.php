@@ -190,7 +190,7 @@ class NotificationUploadTest extends TestCase {
         );
 
         // in some year
-        $this->assertSame($nextFilter++,
+        $this->assertSame($nextFilter,
             $filter['year'] = new Notification\Filter()
                 ->setLabel('Year')
                 ->setMultiLine('artist', '')
@@ -363,7 +363,7 @@ class NotificationUploadTest extends TestCase {
         $ticketManager = new Manager\NotificationTicket();
         $ticket        = $ticketManager->create($this->torrent);
         $manager       = new Manager\Notification();
-        foreach (range(1, 59) as $try) {
+        for ($n = 1; $n < 60; ++$n) {
             $manager->processBacklog($ticketManager, $this->torMan);
         }
 

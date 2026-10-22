@@ -40,19 +40,19 @@ class TGroupTest extends TestCase {
         );
 
         // and add some torrents to the group
-        Helper::makeTorrentMusic(
+        (void)Helper::makeTorrentMusic(
             tgroup:          $this->tgroup,
             user:            $this->userList['user'],
             catalogueNumber: 'UA-TG-1',
         );
-        Helper::makeTorrentMusic(
+        (void)Helper::makeTorrentMusic(
             tgroup:          $this->tgroup,
             user:            $this->userList['admin'],
             catalogueNumber: 'UA-TG-1',
             format:          'MP3',
             encoding:        'V0',
         );
-        Helper::makeTorrentMusic(
+        (void)Helper::makeTorrentMusic(
             tgroup:          $this->tgroup,
             user:            $this->userList['user'],
             catalogueNumber: 'UA-TG-2',
@@ -661,7 +661,7 @@ class TGroupTest extends TestCase {
             releaseType:     new ReleaseType()->findIdByName('Live album'),
             showcase:        false,
         );
-        Helper::makeTorrentMusic(
+        (void)Helper::makeTorrentMusic(
             tgroup:          $this->tgroupExtra,
             user:            $user,
             catalogueNumber: 'UA-MG-1',
@@ -670,7 +670,7 @@ class TGroupTest extends TestCase {
         $oldName = $this->tgroupExtra->name();
 
         new User\Bookmark($admin)->create($this->tgroupExtra);
-        new Manager\Comment()->create($user, 'torrents', $oldId, 'phpunit comment ' . randomString(10));
+        (void)new Manager\Comment()->create($user, 'torrents', $oldId, 'phpunit comment ' . randomString(10));
         $adminVote = new User\Vote($admin);
         $userVote = new User\Vote($user);
         $adminVote->upvote($this->tgroupExtra);
@@ -1094,7 +1094,7 @@ class TGroupTest extends TestCase {
         $creator = $this->userList['user'];
         $writer  = $this->userList['admin'];
         $body    = "phpunit u{$writer->id} t{$this->tgroup->id}";
-        $comment = new Manager\Comment()->create(
+        (void)new Manager\Comment()->create(
             $writer,
             Enum\CommentType::tgroup->value,
             $this->tgroup->id,

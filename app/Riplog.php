@@ -187,7 +187,6 @@ class Riplog extends BasePgObject {
             $column      = [];
             $insert      = [];
             $update      = [];
-            $placeholder = [];
             $args        = [];
             foreach ($adjust as $field => $value) {
                 // nb: placeholders start from $2

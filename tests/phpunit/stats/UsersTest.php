@@ -67,7 +67,7 @@ class UsersTest extends TestCase {
         $stats->flush();
         $this->userList[] = Helper::makeUser('geodist.' . randomString(10), 'user');
         $this->userList[0]->setField('ipcc', 'XA')->setField('PermissionID', SYSOP)->modify();
-        foreach (range(1, COUNTRY_MINIMUM + 1) as $n) {
+        for ($n = 0; $n <= COUNTRY_MINIMUM; ++$n) {
             $user = Helper::makeUser('geodist.' . randomString(10), 'user');
             $user->setField('ipcc', 'XB')->modify();
             $this->userList[] = $user;

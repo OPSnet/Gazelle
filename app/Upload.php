@@ -27,9 +27,8 @@ class Upload extends Base {
      * something that can be added to the DOM and the engine will run it.
      */
     public function albumReleaseJS(): string {
-        $x = $this->albumDescription();
-        $x = $this->releaseDescription();
-        unset($x);
+        (void)$this->albumDescription();
+        (void)$this->releaseDescription();
         return Textarea::factory();
     }
 
@@ -59,10 +58,12 @@ class Upload extends Base {
         return $textarea;
     }
 
+    #[\NoDiscard]
     public function albumDescription(): Textarea {
         return $this->textarea('album_desc', '');
     }
 
+    #[\NoDiscard]
     public function releaseDescription(): Textarea {
         return new Textarea(
             'release_desc', $this->Torrent['TorrentDescription'] ?? '', 60, 5

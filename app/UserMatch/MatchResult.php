@@ -58,7 +58,7 @@ class MatchResult {
     public function score(): int {
         if (!isset($this->score)) {
             $score = 0;
-            foreach ($this->usernames as [$name, $other, $matchType]) {
+            foreach (array_column($this->usernames, 2) as $matchType) {
                 $score += match ($matchType) {
                     UserMatchQuality::full    => 50,
                     UserMatchQuality::partial => 20,
@@ -66,7 +66,7 @@ class MatchResult {
                     default => 0
                 };
             }
-            foreach ($this->emails as [$email, $other, $matchType]) {
+            foreach (array_column($this->emails, 2) as $matchType) {
                 $score += match ($matchType) {
                     UserMatchQuality::full    => 100,
                     UserMatchQuality::partial => 25,
@@ -74,7 +74,7 @@ class MatchResult {
                     default => 0
                 };
             }
-            foreach ($this->ips as [$ip, $ipTime, $otherTime, $matchType]) {
+            foreach (array_column($this->ips, 3) as $matchType) {
                 $score += match ($matchType) {
                     UserMatchQuality::full    => 20,
                     UserMatchQuality::partial => 5,
@@ -89,13 +89,13 @@ class MatchResult {
 
     public function summary(): array {
         $summary = [];
-        foreach ($this->usernames as [$name, $other, $matchType]) {
+        foreach (array_column($this->usernames, 2) as $matchType) {
             $summary['usernames'][$matchType->value] = ($summary['usernames'][$matchType->value] ?? 0) + 1;
         }
-        foreach ($this->emails as [$email, $other, $matchType]) {
+        foreach (array_column($this->emails, 2) as $matchType) {
             $summary['emails'][$matchType->value] = ($summary['emails'][$matchType->value] ?? 0) + 1;
         }
-        foreach ($this->ips as [$ip, $ipTime, $otherTime, $matchType]) {
+        foreach (array_column($this->ips, 3) as $matchType) {
             $summary['ips'][$matchType->value] = ($summary['ips'][$matchType->value] ?? 0) + 1;
         }
         isset($summary['usernames']) && ksort($summary['usernames']);

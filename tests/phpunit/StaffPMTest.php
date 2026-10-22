@@ -192,7 +192,7 @@ class StaffPMTest extends TestCase {
             'spm-pmlist-sysop',
         );
 
-        $sysopPm = $this->spMan->create(
+        (void)$this->spMan->create(
             $this->mod,
             new Manager\User()->classList()[SYSOP]['Level'],
             'for sysop',

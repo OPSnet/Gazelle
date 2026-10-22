@@ -327,8 +327,8 @@ class RequestTest extends TestCase {
         $this->assertNull($this->request->fillDate(), 'request-unfilled-date');
 
         $taxedBounty = (int)($bounty * (1 - REQUEST_TAX));
-        $this->assertSame(1, $after['created-total'], 'request-created-total');
-        $this->assertSame(1, $after['vote-total'], 'request-vote-total');
+        $this->assertSame(1, $after['created-total'] - $before['created-total'], 'request-created-total');
+        $this->assertSame(1, $after['vote-total'] - $before['vote-total'], 'request-vote-total');
         $this->assertSame($taxedBounty, $after['created-size'] - $before['created-size'], 'request-created-size');
         $this->assertSame($taxedBounty, $after['vote-size'] - $before['vote-size'], 'request-vote-size');
         $this->assertSame(-$bounty, $after['uploaded'] - $before['uploaded'], 'request-subtract-bounty');
@@ -378,7 +378,7 @@ class RequestTest extends TestCase {
             tagName:    ['electronic'],
             user:       $user,
         );
-        Helper::makeTorrentMusic(
+        (void)Helper::makeTorrentMusic(
             tgroup: $this->tgroup,
             user:   $user,
             title:  'Deluxe Edition',
@@ -499,7 +499,7 @@ class RequestTest extends TestCase {
             tagName:    ['electronic'],
             user:       $this->userList['user'],
         );
-        Helper::makeTorrentMusic(
+        (void)Helper::makeTorrentMusic(
             tgroup: $this->tgroup,
             user:   $this->userList['user'],
             title:  'Deluxe Edition',
@@ -997,8 +997,8 @@ class RequestTest extends TestCase {
             $creator,
             'phpunit comment ' . randomString()
         );
-        $body    = "phpunit u{$creator->id} r{$this->request->id}";
-        $comment = new Manager\Comment()->create(
+        $body = "phpunit u{$creator->id} r{$this->request->id}";
+        (void)new Manager\Comment()->create(
             $creator,
             CommentType::request->value,
             $this->request->id,
@@ -1088,7 +1088,7 @@ class RequestTest extends TestCase {
 
         $this->request->vote($voter, 1024 * 1024);
         $body    = "phpunit v{$voter->id} r{$this->request->id}";
-        new Manager\Comment()->create(
+        (void)new Manager\Comment()->create(
             $voter,
             CommentType::request->value,
             $this->request->id,

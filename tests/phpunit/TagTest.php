@@ -278,7 +278,7 @@ class TagTest extends TestCase {
             tagName:    ['phpunit.electronic', 'phpunit.folk', 'phpunit.disco'],
             user:       $this->user,
         );
-        Helper::makeTorrentMusic(
+        (void)Helper::makeTorrentMusic(
             tgroup: $this->tgroup,
             user:   $this->user,
         );

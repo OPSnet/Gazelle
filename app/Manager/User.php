@@ -521,6 +521,7 @@ class User extends \Gazelle\BaseManager {
      *
      * @return int conversation Id
      */
+    #[\NoDiscard]
     public function replyPM(int $toId, int $fromId, string $subject, string $body, int $convId): int {
         if ($toId === 0 || $toId === $fromId) {
             // Don't allow users to reply to the system or themselves

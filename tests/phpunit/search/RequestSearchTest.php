@@ -45,10 +45,8 @@ class RequestSearchTest extends TestCase {
         $tagList = [
             $tagManager->create('ut-' . randomString(8), $this->userList[0]),
             $tagManager->create('ut-' . randomString(8), $this->userList[0]),
-            $tagManager->create('ut-' . randomString(8), $this->userList[0]),
         ];
         $title = [
-            'title ' . randomString(16),
             'title ' . randomString(16),
         ];
         $search = [

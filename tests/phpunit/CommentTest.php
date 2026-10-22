@@ -146,7 +146,7 @@ class CommentTest extends TestCase {
         $artistExtra = $artMan->create('phpunit.' . randomString(12));
 
         $comment = $manager->create($this->user, 'artist', $this->artist->id, 'phpunit-merge-keep-artist');
-        $manager->create($this->user, 'artist', $artistExtra->id, 'phpunit-merge-comment');
+        (void)$manager->create($this->user, 'artist', $artistExtra->id, 'phpunit-merge-comment');
 
         $manager->merge('artist', $artistExtra->id, $this->artist->id);
         $this->assertInstanceOf(Comment\Artist::class, $comment->load(), 'comment-merge-load');

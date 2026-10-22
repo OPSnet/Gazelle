@@ -25,7 +25,7 @@ class TorrentReportManagerTest extends TestCase {
             user:       $this->userList[0],
         );
 
-        Helper::makeTorrentMusic(
+        (void)Helper::makeTorrentMusic(
             tgroup: $this->tgroup,
             user:   $this->userList[0],
             title:  'torrent report',

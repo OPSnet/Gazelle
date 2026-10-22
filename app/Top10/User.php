@@ -14,7 +14,7 @@ class User extends \Gazelle\Base {
         $key  = sprintf(self::CACHE_KEY, $type->value, $limit);
         $list = self::$cache->get_value($key);
         if ($list === false) {
-            $list = $this->pg()->allex($sql = <<<END_SQL
+            $list = $this->pg()->allex(<<<END_SQL
                 select
                     um."ID"          as id,
                     um.created       as created,
