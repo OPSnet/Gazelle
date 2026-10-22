@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\Manager;
 
 class ForumPoll extends \Gazelle\BaseManager {
@@ -9,6 +11,7 @@ class ForumPoll extends \Gazelle\BaseManager {
     /**
      * Create a poll for forum thread
      */
+    # [\NoDiscard]
     public function create(
         \Gazelle\ForumThread $thread,
         string               $question,
@@ -19,6 +22,12 @@ class ForumPoll extends \Gazelle\BaseManager {
                    (TopicID, Question, Answers)
             Values (?,       ?,        ?)
             ", $thread->id, $question, serialize($answerList)
+        );
+        $this->pg()->query('
+            insert into forum_poll
+                   (id_forum_thread, question, answer)
+            values ($1,              $2,       $3)
+            ', $thread->id, $question, json_encode($answerList)
         );
         return $this->findById($thread->id);
     }

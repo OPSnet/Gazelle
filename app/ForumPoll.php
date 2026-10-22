@@ -156,8 +156,15 @@ class ForumPoll extends BaseObject {
             WHERE TopicID = ?
             ", serialize($answerList), $this->id
         );
+        $affected = self::$db->affected_rows();
+        $this->pg()->query('
+            update forum_poll set
+                answer = $1
+            where id_forum_thread = $2
+            ', json_encode($answerList), $this->id
+        );
         $this->flush();
-        return self::$db->affected_rows();
+        return $affected;
     }
 
     /**
@@ -169,7 +176,7 @@ class ForumPoll extends BaseObject {
     public function addAnswer(string $answer): int {
         $answerList = $this->answerList();
         $idx = array_keys($answerList);
-        $answerList[(int)end($idx) + 1] = $answer;
+        $answerList[(int)array_last($idx) + 1] = $answer;
         return $this->saveAnswerList($answerList);
     }
 
@@ -185,6 +192,12 @@ class ForumPoll extends BaseObject {
             WHERE TopicID = ?
                 AND Vote = ?
             ", $this->id, $item
+        );
+        $this->pg()->query('
+            delete from forum_poll_vote
+            where id_forum_thread = $1
+                and vote = $2
+            ', $this->id, $item
         );
         $this->flush();
         return $affected;
@@ -202,6 +215,14 @@ class ForumPoll extends BaseObject {
             ", $this->id, $user->id, $vote
         );
         $affected = self::$db->affected_rows();
+        $this->pg()->query('
+            insert into forum_poll_vote
+                   (id_forum_thread, id_user, vote)
+            values ($1,              $2,      $3)
+            on conflict (id_forum_thread, id_user)
+                do nothing
+            ', $this->id, $user->id, $vote
+        );
         $this->flush();
         return $affected;
     }
@@ -215,6 +236,13 @@ class ForumPoll extends BaseObject {
             ", $vote, $this->id, $user->id
         );
         $affected = self::$db->affected_rows();
+        $this->pg()->query('
+            update forum_poll_vote set
+                vote = $3
+            where id_forum_thread = $1
+                and id_user       = $2
+            ', $this->id, $user->id, $vote
+        );
         $this->flush();
         return $affected;
     }
@@ -271,6 +299,10 @@ class ForumPoll extends BaseObject {
             ", $this->id
         );
         $affected = self::$db->affected_rows();
+        $this->pg()->query('
+            delete from forum_poll where id_forum_thread = $1
+            ', $this->id
+        );
         $this->flush();
         return $affected;
     }

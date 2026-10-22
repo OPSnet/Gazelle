@@ -1,0 +1,56 @@
+#! /usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+namespace Gazelle;
+
+require __DIR__ . '/../../lib/bootstrap.php';
+
+$pg = new DB\Pg(PG_RW_DSN);
+$pg->begin();
+
+$n = $pg->query("
+    delete from forum_poll
+");
+echo "forum poll: $n deleted\n";
+
+$result = $pg->allex(<<<END_SQL
+    select ft."ID"       as id,
+        ft."CreatedTime" as thread_created,
+        fp."Featured"    as poll_created,
+        fp."Closed"      as is_closed,
+        fp."Question"    as question,
+        fp."Answers"     as answer
+    from relay.forums_polls fp
+    inner join relay.forums_topics ft on (ft."ID" = fp."TopicID")
+END_SQL
+);
+
+$n = 0;
+foreach ($result as $row) {
+    $answer  = unserialize($row['answer']);
+    $created = $row['poll_created'] ?? $row['thread_created'];
+    $closed  = $row['is_closed'] === '1';
+
+    $n += $pg->query('
+        insert into forum_poll
+               (id_forum_thread, created, is_closed, question, answer)
+        values ($1,              $2,      $3,        $4,       $5)
+        ',      $row['id'], $created, $closed, $row['question'],
+            json_encode($answer),
+    );
+}
+echo "forum poll: $n inserted\n";
+
+$n = $pg->query(<<<END_SQL
+    insert into forum_poll_vote (id_forum_thread, id_user, vote)
+    select fpv."TopicID", fpv."UserID", fpv."Vote"
+    from relay.forums_polls_votes fpv
+    inner join relay.forums_topics ft on (ft."ID" = fpv."TopicID")
+END_SQL
+);
+
+echo "forum vote: $n inserted\n";
+
+$pg->commit();
