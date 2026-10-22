@@ -33,7 +33,7 @@ class SearchEmailTest extends TestCase {
         $this->assertSame(3, $search->add($list), 'search-add-list');
 
         $emailList = array_map(fn($u) => $u->email(), $this->userList);
-        sort($emailList);
+        sort($emailList, SORT_STRING | SORT_FLAG_CASE);
         $this->assertSame($emailList, $search->emailList(), 'search-email-list');
 
         $search->setColumn(1);    // Username

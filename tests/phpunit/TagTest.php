@@ -62,7 +62,7 @@ class TagTest extends TestCase {
 
     public function testCreate(): void {
         $manager = new Manager\Tag();
-        $name    = self::PREFIX . randomString(5);
+        $name    = self::PREFIX . strtolower(randomString(5));
         $this->assertNull($manager->findByName($name), 'tag-lookup-fail');
 
         $this->user = Helper::makeUser('tag.' . randomString(6), 'tag');
@@ -329,7 +329,7 @@ class TagTest extends TestCase {
         $this->user = Helper::makeUser('tag.' . randomString(8), 'tag.split');
         $this->user->requestContext()->setViewer($this->user);
         $manager = new Manager\Tag();
-        $name    = self::PREFIX . randomString(10);
+        $name    = self::PREFIX . strtolower(randomString(10));
         $tag     = $manager->create($name, $this->user);
 
         $this->user->addBounty(500 * 1024 ** 3);
@@ -380,7 +380,7 @@ class TagTest extends TestCase {
         $this->user = Helper::makeUser('tag.' . randomString(8), 'tag.split');
         $this->user->requestContext()->setViewer($this->user);
         $manager = new Manager\Tag();
-        $name    = self::PREFIX . randomString(10);
+        $name    = self::PREFIX . strtolower(randomString(10));
         $tag     = $manager->create($name, $this->user);
 
         $this->user->addBounty(500 * 1024 ** 3);
@@ -430,7 +430,7 @@ class TagTest extends TestCase {
     public function testTag(): void {
         $this->user = Helper::makeUser('tag.' . randomString(8), 'tag.tgroup');
         $manager    = new Manager\Tag();
-        $name       = self::PREFIX . randomString(10);
+        $name       = self::PREFIX . strtolower(randomString(10));
         $tag        = $manager->create($name, $this->user);
         $this->assertSame($name, $tag->name(), 'tag-instance-name');
         $this->assertSame(
@@ -467,7 +467,7 @@ class TagTest extends TestCase {
     public function testTagRejection(): void {
         $this->user = Helper::makeUser('tag.' . randomString(6), 'tag');
         $manager    = new Manager\Tag();
-        $name       = 'reject.' . randomString(16);
+        $name       = 'reject.' . strtolower(randomString(16));
 
         $id = $manager->createRejected($name, $this->user);
         $this->assertGreaterThan(0, $id, 'tag-reject-create');

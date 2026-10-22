@@ -12,7 +12,7 @@ class Crypto {
             throw new \Exception("internal openssl iv error");
         }
         $key = static::hash($key);
-        $iv = openssl_random_pseudo_bytes($iv_size);
+        $iv = random_bytes($iv_size);  // @phpstan-ignore argument.type (iv is >0)
         $cipher = openssl_encrypt(
             $plaintext, static::ENC_ALGO, $key, OPENSSL_RAW_DATA, $iv,
             $tag, $aad, static::GCM_TAG_SIZE);

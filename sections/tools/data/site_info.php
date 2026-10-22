@@ -40,7 +40,6 @@ if (isset($_GET['mode']) && $_GET['mode'] === 'userrank') {
         'table' => $rankTable,
     ]);
 } else {
-    $random = openssl_random_pseudo_bytes(8, $strong);
     $db = new DB();
     $pg = new DB\Pg(PG_RO_DSN);
     echo $Twig->render('admin/site-info.twig', [
@@ -48,7 +47,6 @@ if (isset($_GET['mode']) && $_GET['mode'] === 'userrank') {
         'gid'              => gid(posix_getgid()),
         'euid'             => uid(posix_geteuid()),
         'egid'             => gid(posix_getegid()),
-        'openssl_strong'   => $strong,
         'mysql_version'    => $db->version(),
         'index' => [
             'redundant' => $db->redundantIndexList(),

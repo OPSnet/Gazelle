@@ -73,8 +73,9 @@ class TGroupTest extends TestCase {
     /* Random artist names may not be in alphabetical order, but
      * will be rendered in order, so arrange as appropriate.
      */
-    protected function namePair(string $one, string $two): array {
-        return $two < $one ? [$two, $one] : [$one, $two];
+    protected function namePair(string ...$names): array {
+        sort($names, SORT_STRING | SORT_FLAG_CASE);
+        return $names;
     }
 
     public function testTGroupCreate(): void {
@@ -591,7 +592,7 @@ class TGroupTest extends TestCase {
 
     public function testTGroupTag(): void {
         $user = $this->userList['admin'];
-        $name = 'phpunit.' . randomString(6);
+        $name = 'phpunit.' . strtolower(randomString(6));
 
         $this->assertSame(
             'tags_',
@@ -611,7 +612,7 @@ class TGroupTest extends TestCase {
         $this->assertSame(
             'tags_' . ucfirst(str_replace('.', '_', $name)),
             $this->tgroup->primaryTagCss(),
-            'tgroup-create-noprimary-tag-css'
+            'tgroup-create-primary-tag-css'
         );
 
         $tag2 = $tagMan->create('phpunit.' . randomString(6), $user);
@@ -937,12 +938,11 @@ class TGroupTest extends TestCase {
             $this->tgroup->artistRole()->text(),
             'tgroup-dj-3-text',
         );
-        $sortedArtistList = [
+        $sortedArtistList = $this->namePair(
             $artistName[0],
             $artistName[1],
             $artistName[2],
-        ];
-        sort($sortedArtistList);
+        );
         $this->assertSame(
             '<span class="tooltip" style="float: none"  title="'
                 . implode(' ⁝ ', $sortedArtistList)

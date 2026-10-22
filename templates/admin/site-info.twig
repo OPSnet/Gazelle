@@ -29,15 +29,9 @@ div#phpinfo hr {width: 934px; background-color: #ccc; border: 0; height: 1px;}
         <span style="width: 70px; display: inline-block">Uptime:</span> {{ site_info.uptime.uptime|raw }} <br>
         <span style="width: 70px; display: inline-block">Idle time:</span> {{ site_info.uptime.idletime|raw }} <br><br>
         <span style="width: 100px; display: inline-block">User:</span> {{ uid }} <br>
-        <span style="width: 100px; display: inline-block">Group:</span> {{ euid }} <br>
+        <span style="width: 100px; display: inline-block">Group:</span> {{ gid }} <br>
         <span style="width: 100px; display: inline-block">Effective User:</span> {{ euid }} <br>
-        <span style="width: 100px; display: inline-block">Effective Group:</span> {{ euid }} <br>
-        <br><tt>openssl_random_pseudo_bytes()</tt>:&nbsp;
-{%- if openssl_strong -%}
-            <span style="color:lime;">Strong</span>
-{%- else -%}
-            <span style="color:orangered;"><b>Weak/broken</span>
-{%- endif -%}
+        <span style="width: 100px; display: inline-block">Effective Group:</span> {{ egid }}
     </div>
     <h3>Timestamps</h3>
     <div class="box pad">

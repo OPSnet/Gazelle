@@ -97,7 +97,7 @@ class RequestTest extends TestCase {
         );
 
         $this->assertCount(0, $this->request->tagNameList());
-        $nameList = ['phpunit.' . randomString(6), 'phpunit.' . randomString(6)];
+        $nameList = ['phpunit.' . strtolower(randomString(6)), 'phpunit.' . strtolower(randomString(6))];
         sort($nameList);
         $tagMan   = new Manager\Tag();
         $tag      = $tagMan->create($nameList[0], $admin);
