@@ -42,6 +42,12 @@ class SiteInfo extends Base {
     }
 
     public function uptime(): array {
+        if (!file_exists('/proc/uptime') || !file_exists('/proc/cpuinfo')) {
+            return [
+                'uptime'   => 0,
+                'idletime' => 0,
+            ];
+        }
         $in = fopen('/proc/uptime', 'r');
         if ($in === false) {
             [$uptime, $idletime] = [0, 0];
@@ -62,8 +68,25 @@ class SiteInfo extends Base {
         $now = time();
         return [
             'uptime'   => Time::diff($now - (int)$uptime),
-            'idletime' => Time::diff($now - (int)($idletime / $ncpu), 2, true, false, true),
+            'idletime' => $ncpu ? Time::diff($now - (int)($idletime / $ncpu), 2, true, false, true) : 'unknown',
         ];
+    }
+
+    public static function processList(): array {
+        if (!$processes = glob('/proc/[0-9]*')) {
+            return [];
+        }
+        $pidList = array_map(basename(...), $processes);
+        sort($pidList);
+
+        $proc = [];
+        foreach ($pidList as $pid) {
+            $p = self::$cache->get_value("php_$pid");
+            if ($p !== false) {
+                $proc[$pid] = $p;
+            }
+        }
+        return $proc;
     }
 
     public function phinx(): array {
