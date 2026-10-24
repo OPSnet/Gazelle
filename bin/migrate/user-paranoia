@@ -1,0 +1,35 @@
+#! /usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+namespace Gazelle;
+
+require __DIR__ . '/../../lib/bootstrap.php';
+
+$db = DB::DB();
+$db->begin_transaction();
+
+$db->prepared_query('
+    SELECT ID, Paranoia FROM users_main WHERE Paranoia IS NOT NULL
+');
+$result = $db->to_array(false, MYSQLI_ASSOC);
+
+$n = 0;
+foreach ($result as $row) {
+    ++$n;
+    $paranoia = unserialize($row['Paranoia']);
+    if ($paranoia === []) {
+        $paranoia = null;
+    }
+    $db->prepared_query('
+        UPDATE users_main SET
+            paranoia_v2 = ?
+        WHERE ID = ?
+        ', $paranoia === null ? null : json_encode($paranoia),
+            $row['ID'],
+    );
+}
+$db->commit();
+
+echo "$n paranoia updated\n";

@@ -51,11 +51,11 @@ if (!$validator->validate($_POST)) {
 }
 
 $paranoia = Util\Paranoia::calculate($_POST);
-$user->setField('Paranoia', serialize($paranoia));
-
-$user->setField('IRCKey', $_POST['irckey']);
-$user->setField('profile_info', substr($_POST['info'], 0, 20480));
-$user->setField('profile_title', trim($_POST['profile_title']));
+$user->setField('Paranoia', serialize($paranoia))
+    ->setField('paranoia_v2', json_encode($paranoia))
+    ->setField('IRCKey', $_POST['irckey'])
+    ->setField('profile_info', substr($_POST['info'], 0, 20480))
+    ->setField('profile_title', trim($_POST['profile_title']));
 
 $newEmail = false;
 $emailClean = trim($_POST['email']);
