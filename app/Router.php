@@ -8,14 +8,17 @@ namespace Gazelle;
  * factory class for routes
  */
 readonly class Router {
+    /**
+     * @throws Exception\EarlyExitException
+     */
     public static function resolve(
         RequestContext    $ctx,
         Cache             $cache,
         Debug             $debug,
         \Twig\Environment $twig,
-    ): ?Route {
+    ): Route {
         if (!preg_match('/^[a-z0-9]+(_[a-z0-9]+)*$/', $ctx->module())) {
-            return null;
+            Error404::error('invalid module name');
         }
         // convert snake_case to PascalCase
         $moduleClassName = str_replace('_', '', ucwords($ctx->module(), '_'));
@@ -25,7 +28,7 @@ readonly class Router {
             return $class::create($ctx, $cache, $debug, $twig);
         }
         if (LegacyRoute::resolveFile($ctx) === false) {
-            return null;
+            Error404::error('invalid module name');
         }
         return LegacyRoute::create($ctx, $cache, $debug, $twig);
     }

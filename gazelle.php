@@ -97,9 +97,6 @@ header('Cache-Control: no-cache, must-revalidate, post-check=0, pre-check=0');
 
 try {
     $route = Router::resolve($context, $Cache, $Debug, $Twig);
-    if ($route === null) {
-        Error404::error('invalid module name');
-    }
     $Debug->mark('call ' . $route::class);
     $route->process();
 } catch (Exception\EarlyExitException) {

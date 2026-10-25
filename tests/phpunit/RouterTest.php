@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Gazelle;
 
+use Gazelle\Exception\EarlyExitException;
 use PHPUnit\Framework\TestCase;
 
 class RouterTest extends TestCase {
@@ -25,13 +26,21 @@ class RouterTest extends TestCase {
     public function testRouterInvalid(): void {
         global $Cache, $Debug, $Twig;
         $ctx = new RequestContext('/thismoduledoesnotexist.php', '127.0.0.1', '');
+        Base::setRequestContext($ctx);
         $this->assertFalse(LegacyRoute::resolveFile($ctx), 'router-invalid-resolve');
-        $this->assertNull(Router::resolve($ctx, $Cache, $Debug, $Twig), 'router-invalid-class');
+
+        $this->expectOutputRegex("#Additional details: invalid module name#");
+        $this->expectException(EarlyExitException::class);
+        Router::resolve($ctx, $Cache, $Debug, $Twig);
     }
 
     public function testRouterInvalid2(): void {
         global $Cache, $Debug, $Twig;
         $ctx = new RequestContext('/μηέγκυρη.php', '127.0.0.1', '');
-        $this->assertNull(Router::resolve($ctx, $Cache, $Debug, $Twig), 'router-invalid2-class');
+        Base::setRequestContext($ctx);
+
+        $this->expectOutputRegex("#Additional details: invalid module name#");
+        $this->expectException(EarlyExitException::class);
+        Router::resolve($ctx, $Cache, $Debug, $Twig);
     }
 }
