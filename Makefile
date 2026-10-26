@@ -43,7 +43,7 @@ check-php:
 
 .PHONY: composer-dev-update
 composer-dev-update:
-	composer update --optimize-autoloader
+	docker compose exec web composer update --optimize-autoloader
 
 .PHONY: composer-live-update
 composer-live-update:

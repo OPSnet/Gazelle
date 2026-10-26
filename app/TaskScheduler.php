@@ -303,7 +303,6 @@ class TaskScheduler extends Base {
         );
         $this->requestContext()->setViewer($sysop);
 
-        $processed = -1;
         $taskRunner->begin();
         try {
             $taskRunner->run();

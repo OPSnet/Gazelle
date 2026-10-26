@@ -541,10 +541,16 @@ class Text {
             // phpcs:disable Generic.CodeAnalysis.EmptyStatement.DetectedElseif
             if ($i >= strlen($Str)) {
                 // document end, tag unclosed
-            } elseif ($TagName == 'img' && isset($Tag[3][0]) && is_string($Attrib) && parse_bbcode_image_attr($Attrib) === null) { //[img=...] /** @phpstan-ignore-line need more magic */
-                // Don't need to touch $i
-            } elseif ($TagName == 'hr') {
-                // Don't need to touch $i
+            } elseif (
+                (
+                    $TagName === 'img'
+                    && isset($Tag[3][0])
+                    && is_string($Attrib)
+                    && parse_bbcode_image_attr($Attrib) === null
+                )
+                || $TagName === 'hr'
+            ) { //[img=...]
+                ;
             } elseif ($TagName == 'inlineurl') { // We did a big replace early on to turn http:// into [inlineurl]http://
                 // Let's say the block can stop at a newline or a space
                 $CloseTag = strcspn($Str, " \n\r", $i);
@@ -922,7 +928,7 @@ class Text {
                         if (!preg_match('/^[hr]/', $Rule)) {
                             $Rule = "r$Rule";
                         }
-                        $Str .= '<a href="rules.php?p=upload#' /** @phpstan-ignore-line */
+                        $Str .= '<a href="rules.php?p=upload#'
                             . urlencode(html_unescape($Rule))
                             . '">'
                             . preg_replace('/[aA-zZ]/', '', $Block['Val'])

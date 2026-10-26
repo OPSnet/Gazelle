@@ -291,7 +291,7 @@ class Twig {
 
         $twig->addFunction(new \Twig\TwigFunction('mtime_scss', fn ($filename) => new \Twig\Markup(
             base_convert((string)(filemtime(
-                SERVER_ROOT . '/sass/' . preg_replace('/\.css$/', '.scss', $filename)) ?: '0' /** @phpstan-ignore-line */
+                SERVER_ROOT . '/sass/' . preg_replace('/\.css$/', '.scss', $filename)) ?: '0'
             ), 10, 36),
             'UTF-8'
         )));
