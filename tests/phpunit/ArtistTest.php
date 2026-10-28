@@ -856,6 +856,7 @@ class ArtistTest extends TestCase {
             'artist-add-discogs'
         );
         $this->assertSame($name, $artist->discogs()->name(), 'artist-self-discogs-name');
+        $this->assertSame($artist->id, $manager->findByDiscogsId($id)?->id, 'artist-find-by-discogs-id');
         $context = $artist->widgetContext();
         $this->assertSame($artist, $context['artist'], 'artist-widget-context-object');
         $widget = \Gazelle\Util\Twig::factory(new Manager\User())->render(

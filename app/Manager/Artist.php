@@ -123,6 +123,14 @@ class Artist extends \Gazelle\BaseManager {
         return null;
     }
 
+    public function findByDiscogsId(int $discogsId): ?\Gazelle\Artist {
+        $artistId = self::$db->scalar("
+            SELECT artist_id FROM artist_discogs WHERE artist_discogs_id = ?
+            ", $discogsId
+        );
+        return $artistId ? new \Gazelle\Artist((int)$artistId) : null;
+    }
+
     public function findRandom(): ?\Gazelle\Artist {
         return $this->findById(
             (int)self::$db->scalar("

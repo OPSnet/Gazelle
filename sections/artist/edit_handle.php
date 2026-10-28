@@ -12,7 +12,8 @@ if (!$Viewer->permitted('site_edit_wiki')) {
 
 authorize();
 
-$artist = new Manager\Artist()->findById((int)$_POST['artistid']);
+$artistMan = new Manager\Artist();
+$artist = $artistMan->findById((int)$_POST['artistid']);
 if (is_null($artist)) {
     Error404::error();
 }
@@ -48,7 +49,10 @@ if ($showcase != $artist->isShowcase() && $Viewer->permitted('artist_edit_vanity
 
 $summary   = [];
 $discogsId = (int)($_POST['discogs-id']);
-if ($discogsId != $artist->discogs()->id) {
+if ($discogsId !== $artist->discogs()->id) {
+    if ($discogsArtist = $artistMan->findByDiscogsId($discogsId)) {
+        Error400::error("This Discogs ID is already associated with {$discogsArtist->link()}");
+    }
     $summary[] = $discogsId ? "Discogs relation set to $discogsId" : "Discogs relation cleared";
     $artist->setField('discogs', new Util\Discogs($discogsId));
 }
