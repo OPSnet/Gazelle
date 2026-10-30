@@ -38,10 +38,10 @@
 {%          for key, answer in answer_list %}
 {%              set choice = vote[key] %}
             <li>{% if response == loop.index %}➔ {% endif %}
-{{-         answer }} ({{ choice.percent|number_format(2) }}%)</li>
+{{-         answer }} ({{ (choice.ratio * 100)|number_format(2) }}%)</li>
             <li class="graph">
                 <span class="left_poll"></span>
-                <span class="center_poll" style="width: {{ choice.ratio|number_format(2) }}%;"></span>
+                <span class="center_poll" style="width: {{ (choice.ratio * 100)|number_format(2) }}%;"></span>
                 <span class="right_poll"></span>
             </li>
 {%          endfor %}

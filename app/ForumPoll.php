@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle;
 
 class ForumPoll extends BaseObject {
     final public const tableName = 'forums_polls';
     final public const pkName    = 'TopicID';
-    final protected const CACHE_KEY = 'forum_poll_%d';
+    final protected const CACHE_KEY = 'fpoll_%d';
 
     public function __construct(ForumThread $thread) {
         parent::__construct($thread->id);
@@ -33,77 +35,98 @@ class ForumPoll extends BaseObject {
     }
 
     public function info(): array {
-        if (isset($this->info)) {
-            return $this->info;
-        }
-        $key = sprintf(self::CACHE_KEY, $this->id);
-        $info = self::$cache->get_value($key);
-        if ($info !== false) {
-            $this->info = $info;
-            return $this->info;
-        }
-        $poll = self::$db->rowAssoc("
-            SELECT Question,
-                Answers,
-                Featured,
-                Closed
-            FROM forums_polls
-            WHERE TopicID = ?
-            ", $this->id
-        );
-        $answerList = unserialize($poll['Answers']);
-
-        self::$db->prepared_query("
-            SELECT fpv.Vote,
-                count(*) AS total
-            FROM forums_polls_votes fpv
-            WHERE fpv.TopicID = ?
-            GROUP BY fpv.Vote
-            ", $this->id
-        );
-        $vote = self::$db->to_pair('Vote', 'total');
-
-        $abstainedVotes = $vote[0] ?? 0;
-        unset($vote[0]);
-        $total = array_sum($vote);
-        $max   = count($vote) ? max($vote) : 0;
-        $tally = [
-            0 => [
-                'answer'  => '(Abstain)',
-                'score'   => $abstainedVotes,
-                'ratio'   => 0,
-                'percent' => 0,
-            ],
-        ];
-        foreach ($answerList as $key => $answer) {
-            if (isset($vote[$key])) {
-                $tally[$key] = [
-                    'answer'  => $answer,
-                    'score'   => $vote[$key],
-                    'ratio'   => ($vote[$key] /   $max) * 100.0,
-                    'percent' => ($vote[$key] / $total) * 100.0,
-                ];
-            } else {
-                $tally[$key] = [
-                    'answer'  => $answer,
-                    'score'   => 0,
-                    'ratio'   => 0,
-                    'percent' => 0,
-                ];
+        if (!isset($this->info)) {
+            $key = sprintf(self::CACHE_KEY, $this->id);
+            $info = self::$cache->get_value($key);
+            if ($info === false) {
+                $info = $this->pg()->rowAssocex("
+                    with tally(vote, total) as (
+                        -- true votes
+                        select vote,
+                            count(*)
+                        from forum_poll_vote
+                        where id_forum_thread = $1
+                            and vote != 0
+                        group by vote
+                    ),
+                    grand(total, highest) as (
+                        -- total votes (to calculate percentages)
+                        select
+                            coalesce(sum(total), 0)::integer,
+                            coalesce(max(total), 0)::integer
+                        from tally
+                    ),
+                    abstention(total) as (
+                        select count(*)
+                        from forum_poll_vote
+                        where id_forum_thread = $1
+                            and vote = 0
+                    ),
+                    results as (
+                        -- gather up the vote tallies
+                        select
+                            ans.vote,
+                            jsonb_build_object(
+                                'answer', ans.label,
+                                'score', coalesce(t.total, 0),
+                                'ratio', coalesce(
+                                    t.total::double precision / nullif(grand.total, 0),
+                                    0.0::double precision
+                                )
+                            ) as result
+                        from forum_poll as fp
+                        cross join lateral jsonb_each(fp.answer) as ans(vote, label)
+                        cross join grand
+                        left join tally as t on (t.vote::text = ans.vote)
+                        where fp.id_forum_thread = $1
+                        union all
+                        -- and add the abstentions
+                        select
+                            '0',
+                            jsonb_build_object(
+                                'answer', '(Abstain)',
+                                'score', a.total,
+                                'ratio', 0.0::double precision
+                            )
+                        from abstention as a
+                    ),
+                    poll as (
+                        -- the details of the poll itself
+                        select
+                            question,
+                            answer,
+                            created,
+                            is_closed,
+                            is_featured
+                        from forum_poll
+                        where id_forum_thread = $1
+                    )
+                    select
+                        p.question,
+                        p.created,
+                        p.is_closed,
+                        p.is_featured,
+                        p.answer      as answer_list,
+                        grand.total   as total,
+                        grand.highest as highest,
+                        jsonb_object_agg(vote, result) as tally
+                    from results
+                    cross join grand
+                    cross join poll p
+                    group by
+                        p.question,
+                        p.answer,
+                        p.created,
+                        p.is_closed,
+                        p.is_featured,
+                        grand.total,
+                        grand.highest
+                    ", $this->id
+                );
+                self::$cache->cache_value($key, $info, 86400);
             }
+            $this->info = $info;
         }
-
-        $info = [
-            'is_closed'   => $poll['Closed'] != '0',
-            'is_featured' => (bool)$poll['Featured'],
-            'answer_list' => $answerList,
-            'max'         => $max,
-            'question'    => $poll['Question'],
-            'total'       => $total,
-            'vote'        => $tally,
-        ];
-        self::$cache->cache_value($key, $info, 86400);
-        $this->info = $info;
         return $this->info;
     }
 
@@ -115,12 +138,15 @@ class ForumPoll extends BaseObject {
         return $this->info()['is_featured'];
     }
 
+    /**
+     * @return array<string>
+     */
     public function answerList(): array {
         return $this->info()['answer_list'];
     }
 
     public function max(): int {
-        return $this->info()['max'];
+        return $this->info()['highest'];
     }
 
     public function question(): string {
@@ -132,17 +158,21 @@ class ForumPoll extends BaseObject {
     }
 
     public function close(): static {
+        $this->pg()->query('
+            update forum_poll set
+                is_closed = true
+            where id_forum_thread = $1
+            ', $this->id
+        );
         return $this->setField('Closed', '1');
     }
 
     /**
      * The current tally of votes
-     *
-     * @return array hash keys by vote response with the following keys:
-     *   'answer', 'score', 'ratio', 'percent'
+     * @return array<int, array{answer: string, score: int, ratio: float}>
      */
     public function vote(): array {
-        return $this->info()['vote'];
+        return $this->info()['tally'];
     }
 
     public function hasRevealVotes(): bool {
@@ -248,14 +278,13 @@ class ForumPoll extends BaseObject {
     }
 
     public function response(User $user): ?int {
-        $vote = self::$db->scalar("
-            SELECT Vote
-            FROM forums_polls_votes
-            WHERE UserID = ?
-                AND TopicID = ?
-            ", $user->id, $this->id
+        return $this->pg()->scalarex('
+            select vote
+            from forum_poll_vote
+            where id_user = $1
+                and id_forum_thread = $2
+            ', $user->id, $this->id
         );
-        return $vote !== null ? (int)$vote : null;
     }
 
     /**
@@ -265,29 +294,72 @@ class ForumPoll extends BaseObject {
      * have not yet voted on the poll.
      *
      * @param Manager\User $userMan a user manager object to hydrate user ids.
-     * @return array of vites
+     * @return array of votes
      */
-    public function staffVote(Manager\User $userMan): array {
+    public function staffVote(
+        Manager\User $userMan = new Manager\User(),
+    ): array {
         $vote = $this->vote();
         $vote['missing'] = ['who' => []];
         foreach ($vote as &$v) {
             $v['who'] = [];
         }
         unset($v);
-        self::$db->prepared_query("
-            SELECT um.ID AS user_id,
-                fpv.Vote AS response
-            FROM users_main AS um
-            INNER JOIN permissions AS p ON (p.ID = um.PermissionID)
-            LEFT JOIN forums_polls_votes fpv ON (fpv.UserID = um.ID AND fpv.TopicID = ?)
-            WHERE p.Level >= (SELECT Level FROM permissions WHERE ID = ?)
-            ", $this->id, FORUM_MOD
+        $result = $this->pg()->pair(
+            'id_user',
+            'response',
+            <<<END_SQL
+            select um."ID" as id_user,
+                fpv.vote   as response
+            from relay.users_main        um
+            inner join relay.permissions p   on (p."ID" = um."PermissionID")
+            left join forum_poll_vote    fpv on (fpv.id_user = um."ID" and fpv.id_forum_thread = $1)
+            where p."Level" >= (
+                select "Level" from relay.permissions where "ID" = $2
+            )
+            END_SQL, $this->id, FORUM_MOD
         );
-        $result = self::$db->to_pair('user_id', 'response');
         foreach ($result as $userId => $response) {
             $vote[$response ?? 'missing']['who'][] = $userMan->findById((int)$userId);
         }
         return $vote;
+    }
+
+    public function modify(): bool {
+        $update = [];
+        $args   = [];
+
+        $closed = $this->field('Closed');
+        if ($closed !== null) {
+            if ($closed === '0' && $this->isClosed()) {
+                $update[] = "is_closed = {$this->pg()->placeholder(count($args))}";
+                $args[]   = false;
+            } elseif ($closed === '1' && !$this->isClosed()) {
+                $update[] = "is_closed = {$this->pg()->placeholder(count($args))}";
+                $args[]   = true;
+            }
+        }
+        $featured = $this->field('Featured');
+        if ($featured === null && $this->isFeatured()) {
+            $update[] = "is_featured = {$this->pg()->placeholder(count($args))}";
+            $args[]   = false;
+        } elseif ($featured !== null && !$this->isFeatured()) {
+            $update[] = "is_featured = {$this->pg()->placeholder(count($args))}";
+            $args[]   = true;
+        }
+
+        if ($update !== []) {
+            $phWhere = $this->pg()->placeholder(count($args));
+            $args[]  = $this->id;
+            $this->pg()->query(
+                "update forum_poll set "
+                . implode(', ', $update)
+                . " where id_forum_thread = $phWhere
+                ", ...$args
+            );
+        }
+
+        return parent::modify();
     }
 
     public function remove(): int {

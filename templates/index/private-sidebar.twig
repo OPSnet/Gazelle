@@ -106,7 +106,7 @@
                 choice.percent|number_format(1) }}%)</li>
             <li title="{{ choice.score }}" class="graph">
                 <span class="left_poll"></span>
-                <span class="center_poll" style="width: {{ choice.ratio|number_format(1) }}%;"></span>
+                <span class="center_poll" style="width: {{ (choice.ratio * 100)|number_format(1) }}%;"></span>
                 <span class="right_poll"></span>
             </li>
 {%      endfor %}

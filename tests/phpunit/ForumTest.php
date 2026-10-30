@@ -537,15 +537,17 @@ class ForumTest extends TestCase {
         $this->threadList[] = $thread
             = new Manager\ForumThread()->create($this->forum, $user, 'phpunit post pin', 'this is a new thread for post pins');
 
-        $answer  = ['apple', 'banana', 'carrot'];
+        $answer  = ['1' => 'apple', '2' => 'banana', '3' => 'carrot'];
         $pollMan = new Manager\ForumPoll();
         $poll    = $pollMan->create($thread, 'Best food', $answer);
+        $this->assertSame($answer, $poll->answerList(), 'forum-poll-answer-list');
         $this->assertFalse($poll->isClosed(), 'forum-poll-is-not-closed');
         $this->assertFalse($poll->hasRevealVotes(), 'forum-poll-is-not-featured');
         $this->assertFalse($poll->isFeatured(), 'forum-poll-is-not-featured');
         $this->assertSame(0, $poll->total(), 'forum-poll-total');
         $this->assertSame($thread->id, $poll->thread()->id, 'forum-poll-thread-id');
-        $this->assertCount(3, $poll->vote(), 'forum-poll-vote-count');
+        // one extra for Abstain
+        $this->assertCount(4, $poll->vote(), 'forum-poll-vote-count');
         $this->assertSame($answer[1], $poll->vote()[1]['answer'], 'forum-poll-vote-1');
 
         $find = $pollMan->findById($poll->id);

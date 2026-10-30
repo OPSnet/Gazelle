@@ -55,7 +55,7 @@ class Forum extends BaseObject {
         );
         $affected = self::$db->affected_rows();
         $this->flush();
-        return $affected == 1;
+        return $affected === 1;
     }
 
     /**
@@ -103,7 +103,7 @@ class Forum extends BaseObject {
     }
 
     public function autoLock(): bool {
-        return $this->info()['auto_lock'] == '1';
+        return $this->info()['auto_lock'] === '1';
     }
 
     public function autoLockWeeks(): int {
@@ -279,22 +279,33 @@ class Forum extends BaseObject {
      */
     public function tableOfContentsForum(int $page = 1): array {
         $key = sprintf(self::CACHE_TOC_FORUM, $this->id);
-        $forumToc = null;
-        if ($page > 1 || ($page == 1 && (($forumToc = self::$cache->get_value($key)) === false))) {
+        $forumToc = self::$cache->get_value($key);
+        if ($page > 1 || ($page === 1 && $forumToc === false)) {
             self::$db->prepared_query("
                 SELECT ft.ID, ft.Title, ft.AuthorID, ft.IsLocked, ft.IsSticky,
                     ft.NumPosts, ft.LastPostID, ft.LastPostTime, ft.LastPostAuthorID,
-                    (fp.TopicID IS NOT NULL AND fp.Closed = '0') AS has_poll,
                     ft.Ranking
                 FROM forums_topics ft
-                LEFT JOIN forums_polls fp ON (fp.TopicID = ft.ID)
                 WHERE ft.ForumID = ?
                 ORDER BY ft.Ranking DESC, ft.IsSticky DESC, ft.LastPostTime DESC
                 LIMIT ? OFFSET ?
                 ", $this->id, TOPICS_PER_PAGE, ($page - 1) * TOPICS_PER_PAGE
             );
-            $forumToc = self::$db->to_array('ID', MYSQLI_ASSOC);
-            if ($page == 1) {
+            $result = self::$db->to_array('ID', MYSQLI_ASSOC);
+            // while forums are in Mysql and polls are in Pg, the easiest
+            // approach is to grab the list of forums with open polls and
+            // inject a flag into results from Mysql.
+            $hasPoll = $this->pg()->columnex('
+                select id_forum_thread from forum_poll where is_closed is false
+            ');
+            $forumToc = [];
+            foreach ($result as $row) {
+                $forumToc[] = [
+                    'has_poll' => array_search($row['ID'], $hasPoll) !== false,
+                    ...$row,
+                ];
+            }
+            if ($page === 1) {
                 self::$cache->cache_value($key, $forumToc, 86400 * 10);
             }
         }

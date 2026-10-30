@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle;
 
 class ForumThread extends BaseObject {
     final public const tableName        = 'forums_topics';
-    final public const CACHE_KEY        = 'fthreadv2_%d';
+    final public const CACHE_KEY        = 'fthread_v3_%d';
     final public const CACHE_CATALOG    = 'fthread_cat_%d_%d';
     final protected const ID_THREAD_KEY = 'zz_ft_%d';
 
@@ -68,18 +70,21 @@ class ForumThread extends BaseObject {
                     t.NumPosts          AS post_total_summary,
                     t.IsLocked = '1'    AS is_locked,
                     t.IsSticky = '1'    AS is_pinned,
-                    isnull(p.TopicID)   AS no_poll,
                     count(fp.id)        AS post_total,
                     max(fp.id)          AS last_post_id,
                     max(fp.AddedTime)   AS last_post_time
                 FROM forums_topics AS t
                 INNER JOIN forums_posts AS fp ON (fp.TopicID = t.ID)
-                LEFT JOIN forums_polls AS p ON (p.TopicID = t.ID)
                 WHERE t.ID = ?
                 GROUP BY t.ID
                 ", $this->id
             );
             if ($info) {
+                // cast null to false
+                $info['has_poll'] = (bool)$this->pg()->scalarex('
+                    select true from forum_poll where id_forum_thread = $1
+                    ', $this->id
+                );
                 if ($info['pinned_post_id']) {
                     // without this max() a thread that consists only of a pinned post will have 0 posts
                     $info['post_total'] = max($info['post_total'] - 1, 1);
@@ -133,7 +138,7 @@ class ForumThread extends BaseObject {
     }
 
     public function hasPoll(): bool {
-        return !$this->info()['no_poll'];
+        return $this->info()['has_poll'];
     }
 
     public function poll(): ForumPoll {

@@ -30,7 +30,7 @@ if (!isset($_POST['vote']) || !is_number($_POST['vote'])) {
     <input type="hidden" name="threadid" value="<?= $poll->id ?>">
 <?php foreach ($answerList as $i => $answer) { ?>
     <input type="radio" name="vote" id="answer_<?=$i?>" value="<?=$i?>">
-    <label for="answer_<?=$i?>"><?=display_str($answer)?></label><br>
+    <label for="answer_<?=$i?>"><?= html_escape($answer) ?></label><br>
 <?php } ?>
     <br><input type="radio" name="vote" id="answer_0" value="0"> <label for="answer_0">Blank&nbsp;&mdash;&nbsp;Show the results!</label><br><br>
     <input type="button" onclick="ajax.post('index.php', 'poll', function(response) { $('#poll_container').raw().innerHTML = response });" value="Vote">
@@ -49,14 +49,14 @@ if (!isset($_POST['vote']) || !is_number($_POST['vote'])) {
     if ($poll->hasRevealVotes()) {
         $totalStaff = 0;
         $totalVoted = 0;
-        $staffVote = $poll->staffVote(new Manager\User());
+        $staffVote = $poll->staffVote();
         $staffVoteReordered = array_slice($staffVote, 1, null, true) + [0 => $staffVote[0]];
         foreach ($staffVoteReordered as $response => $info) {
             if ($response !== 'missing') {
                 $totalStaff += count($info['who']);
                 $totalVoted += count($info['who']);
 ?>
-            <li><a href="forums.php?action=change_vote&amp;threadid=<?= $poll->id ?>&amp;auth=<?= $Viewer->auth() ?>&amp;vote=<?= $response ?>"><?=empty($info['answer']) ? 'Abstain' : display_str($info['answer'])?></a> <?=
+            <li><a href="forums.php?action=change_vote&amp;threadid=<?= $poll->id ?>&amp;auth=<?= $Viewer->auth() ?>&amp;vote=<?= $response ?>"><?= $response === 0 ? 'Abstain' : html_escape($info['answer'])?></a> <?=
                 count ($info['who'])
                     ? (" – " . implode(', ', array_map(fn ($u) => $u->link(), $info['who'])))
                     : "<i>none</i>"
@@ -79,10 +79,10 @@ if (!isset($_POST['vote']) || !is_number($_POST['vote'])) {
         foreach ($answerList as $i => $answer) {
             $choice = $vote[$i];
 ?>
-            <li><?=$response === $i ? '➔ ' : ''?><?=display_str($answer)?> (<?=number_format($choice['percent'], 1)?>%)</li>
+            <li><?=$response === $i ? '➔ ' : ''?><?= html_escape($answer) ?> (<?=number_format($choice['ratio'] * 100, 1)?>%)</li>
             <li class="graph">
                 <span class="left_poll"></span>
-                <span class="center_poll" style="width: <?=number_format($choice['ratio'], 1)?>%;"></span>
+                <span class="center_poll" style="width: <?=number_format($choice['ratio'] * 100, 1)?>%;"></span>
                 <span class="right_poll"></span>
             </li>
 <?php

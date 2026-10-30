@@ -103,18 +103,20 @@ class Forum extends \Gazelle\BaseManager {
                     f.ID, f.Name, f.Description, f.NumTopics, f.NumPosts,
                     f.LastPostTopicID, f.MinClassRead, f.MinClassWrite, f.MinClassCreate,
                     f.Sort, f.AutoLock, f.AutoLockWeeks,
-                    ft.Title, ft.LastPostAuthorID, ft.LastPostID, ft.LastPostTime, ft.IsSticky, ft.IsLocked,
-                    (fp.TopicID IS NOT NULL AND fp.Closed = '0') AS has_poll
+                    ft.Title, ft.LastPostAuthorID, ft.LastPostID, ft.LastPostTime, ft.IsSticky, ft.IsLocked
                 FROM forums f
                 INNER JOIN forums_categories cat ON (cat.ID = f.CategoryID)
                 LEFT JOIN forums_topics ft ON (ft.ID = f.LastPostTopicID)
-                LEFT JOIN forums_polls fp ON (fp.TopicID = ft.ID)
                 ORDER BY cat.Sort, cat.Name, f.Sort, f.Name
             ");
+            $hasPoll = $this->pg()->columnex('
+                select id_forum_thread from forum_poll where is_closed is false
+            ');
             $toc = [];
             while ($row = self::$db->next_row(MYSQLI_ASSOC)) {
                 $category = $row['categoryName'];
                 $row['AutoLock'] = ($row['AutoLock'] == '1');
+                $row['has_poll'] = array_search($row['ID'], $hasPoll) !== false;
                 $toc[$category] ??= [];
                 $toc[$category][] = $row;
             }
