@@ -57,6 +57,15 @@ class SiteInfoTest extends TestCase {
         );
     }
 
+    public function testSingleSeedTotal(): void {
+        // the value is beside the point, we are testing the SQL
+        $this->assertGreaterThanOrEqual(
+            0,
+            new SiteInfo()->singleSeededTotal(),
+            'siteinfo-single-seeded-total',
+        );
+    }
+
     #[Group('no-ci')]
     public function testGitInfo(): void {
         $info = new SiteInfo();

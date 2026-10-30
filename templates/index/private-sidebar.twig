@@ -153,6 +153,7 @@
         <li>Releases: {{ torrent_stats.albumTotal|number_format }}</li>
         <li>Artists: {{ torrent_stats.artistTotal|number_format }}</li>
         <li>"Perfect" FLACs: {{ torrent_stats.perfectFlacTotal|number_format }}</li>
+        <li> ↳ <a href="better.php?method=single"><span class="tooltip" title="Here be bonus points!">Single seeded: {{ site_info.singleSeededTotal|number_format }}</span></a></li>
         <li>Collages: {{ collage_count|number_format }}</li>
         <li>Requests: {{ request_stats.total|number_format }} ({{
             request_stats.filledPercent|number_format(1) }}% filled)</li>

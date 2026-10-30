@@ -9,6 +9,7 @@ use Gazelle\Enum\FeaturedAlbumType;
 use Gazelle\Error400;
 use Gazelle\Manager;
 use Gazelle\Route;
+use Gazelle\SiteInfo;
 use Gazelle\Stats;
 use Gazelle\WitnessTable;
 
@@ -56,6 +57,7 @@ class Authenticated extends Route\Util\ActionRoute {
             'staff_blog'    => new Manager\StaffBlog(),
             'poll'          => new Manager\ForumPoll()->findByFeaturedPoll(),
             'request_stats' => new Stats\Request(),
+            'site_info'     => new SiteInfo(),
             'torrent_stats' => new Stats\Torrent(),
             'user_stats'    => new Stats\Users(),
             'viewer'        => $this->ctx->viewer(),

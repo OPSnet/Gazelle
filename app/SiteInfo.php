@@ -7,6 +7,8 @@ namespace Gazelle;
 use Gazelle\Util\Time;
 
 class SiteInfo extends Base {
+    protected const string SINGLE_SEED_KEY = 'sseed';
+
     public function gitBranch(): string {
         return trim((string)shell_exec(BIN_GIT . ' rev-parse --abbrev-ref HEAD'));
     }
@@ -455,5 +457,25 @@ class SiteInfo extends Base {
                 and sm.name = $1
             ", $name
         );
+    }
+
+    public function singleSeededTotal(): int {
+        $total = self::$cache->get_value(self::SINGLE_SEED_KEY);
+        if ($total === false) {
+            $total = (int)$this->pg()->scalarex("
+                select percentile_disc(0.5) within group (order by hsm.metric)
+                from site_metric sm
+                inner join history_site_metric hsm using (id_site_metric)
+                where sm.name = 'torrent-single-seed-flac'
+                and hsm.dt > now() - interval '7 day'
+            ");
+            self::$cache->cache_value(
+                self::SINGLE_SEED_KEY,
+                $total,
+                new \DateTimeImmutable()->setTime(0, 0)->modify('+1 day +1 second')->getTimestamp() // tomorrow
+                    - new \DateTimeImmutable()->getTimestamp()
+            );
+        }
+        return $total;
     }
 }
