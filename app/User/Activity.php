@@ -147,8 +147,11 @@ class Activity extends \Gazelle\BaseUser {
         return $this;
     }
 
-    public function setStaff(\Gazelle\Staff $staff): static {
-        if ($staff->blogAlert()) {
+    public function setStaff(
+        \Gazelle\User $user,
+        \Gazelle\Manager\StaffBlog $manager = new \Gazelle\Manager\StaffBlog(),
+    ): static {
+        if ($manager->blogAlert($user)) {
             $this->setAlert('<a class="nobr" href="staffblog.php">New staff blog post!</a>');
         }
         if (FEATURE_EMAIL_REENABLE) {

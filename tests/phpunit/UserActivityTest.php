@@ -42,7 +42,7 @@ class UserActivityTest extends TestCase {
         $activity->setReport(new Stats\Report());
         $activity->setSSLHost(new Manager\SSLHost());
         $activity->setScheduler(new TaskScheduler());
-        $activity->setStaff(new Staff($this->userList['admin']));
+        $activity->setStaff($this->userList['admin']);
         $activity->setStaffPM(new Manager\StaffPM());
     }
 

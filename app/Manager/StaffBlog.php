@@ -1,6 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\Manager;
+
+use Gazelle\User;
 
 class StaffBlog extends \Gazelle\Base {
     final public const CACHE_KEY = 'sblog';
@@ -11,7 +15,7 @@ class StaffBlog extends \Gazelle\Base {
         return $this;
     }
 
-    public function create(\Gazelle\User $user, string $title, string $body): \Gazelle\StaffBlog {
+    public function create(User $user, string $title, string $body): \Gazelle\StaffBlog {
         self::$db->prepared_query("
             INSERT INTO staff_blog
                    (UserID, Title, Body)
@@ -48,20 +52,34 @@ class StaffBlog extends \Gazelle\Base {
         return array_map($this->findById(...), $list);
     }
 
+    public function blogAlert(User $user): bool {
+        $blogTime = self::$cache->get_value('staff_blog_latest_time');
+        if ($blogTime === false) {
+            $blogTime = self::$db->scalar('
+                SELECT unix_timestamp(max(Time))
+                FROM staff_blog
+                '
+            ) ?? 0;
+            self::$cache->cache_value('staff_blog_latest_time', $blogTime, 1_209_600);
+        }
+        return $this->readBy($user) < $blogTime;
+    }
+
     /**
      * When was the blog read by a user?
      *
      * @return int epoch
      */
-    public function readBy(\Gazelle\User $user): int {
+    public function readBy(User $user): int {
         $key = sprintf(self::CACHE_READ_KEY, $user->id);
         $time = self::$cache->get_value($key);
         if ($time === false) {
-            $time = self::$db->scalar("
-                SELECT Time FROM staff_blog_visits WHERE UserID = ?
+            $time = (int)self::$db->scalar("
+                SELECT unix_timestamp(Time)
+                FROM staff_blog_visits
+                WHERE UserID = ?
                 ", $user->id
             );
-            $time = $time ? (int)strtotime((string)$time) : 0;
             self::$cache->cache_value($key, $time, 86400);
         }
         return $time;
@@ -70,7 +88,7 @@ class StaffBlog extends \Gazelle\Base {
     /**
      * Update the last visited timestamp
      */
-    public function catchup(\Gazelle\User $user): int {
+    public function catchup(User $user): int {
         self::$db->prepared_query("
             INSERT INTO staff_blog_visits
                    (UserID)

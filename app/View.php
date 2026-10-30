@@ -45,7 +45,7 @@ class View extends Base {
         $payMan = new Manager\Payment();
         if ($user->permitted('users_mod')) {
             $raTypeMan = new Manager\ReportAutoType();
-            $activity->setStaff(new Staff($user))
+            $activity->setStaff($user)
                 ->setReport(new Stats\Report())
                 ->setPayment($payMan)
                 ->setApplicant(new Manager\Applicant())
