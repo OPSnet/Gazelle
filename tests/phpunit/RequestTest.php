@@ -79,7 +79,7 @@ class RequestTest extends TestCase {
         $this->assertSame(
             1,
             $this->request->artistRole()->set(
-                [ARTIST_MAIN => [$artistName]],
+                [ARTIST_MAIN => [$artistName, $artistName]],
                 $user,
             ),
             'request-add-artist-role',

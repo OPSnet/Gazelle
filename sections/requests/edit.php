@@ -16,53 +16,26 @@ if (is_null($request)) {
 if (!$request->canEdit($Viewer)) {
     Error403::error("You do not have the necessary privileges to edit requests.");
 }
-$requestId  = $request->id;
-$ownRequest = $request->userId() === $Viewer->id;
-// phpcs:disable Generic.CodeAnalysis.EmptyStatement.DetectedIf
-if (isset($returnEdit)) {
-// phpcs:enable Generic.CodeAnalysis.EmptyStatement.DetectedIf
-    // if we are coming back from an edit, these were already initialized in take_new_edit
-    /** @var string $categoryName */
-    /** @var array $artistRole */
-    /** @var Request\Encoding $encoding */
-    /** @var Request\Format $format */
-    /** @var Request\Media $media */
-    /** @var Request\LogCue $logCue */
-} else {
-    $categoryId      = $request->categoryId();
-    $categoryName    = $request->categoryName();
 
-    $title           = $request->title();
-    $description     = $request->description();
-    $year            = $request->year();
-    $tags            = implode(', ', $request->tagNameList());
-    $releaseType     = $Viewer->releaseOrderLabel(new ReleaseType()->list());
-    $catalogueNumber = $request->catalogueNumber();
-
-    $encoding        = $request->encoding();
-    $format          = $request->format();
-    $media           = $request->media();
-    $logCue          = $request->logCue();
-    $artistRole      = $categoryName === 'Music' ? $request->artistRole()->roleNameList() : [];
-}
+$categoryName ??= $request->categoryName();
 
 echo $Twig->render('request/request.twig', [
     'action'           => 'edit',
     'error'            => $error ?? null,
     'request'          => $request,
     'category_name'    => $categoryName,
-    'artist_role'      => $artistRole,
-    'tgroup'           => new Manager\TGroup()->findById((int)($groupId ?? $request->tgroupId())),
-    'release_list'     => new ReleaseType()->list(),
+    'artist_role'      => $categoryName === 'Music' ? ($artistRole ?? $request->artistRole()->roleNameList()) : [],
+    'tgroup'           => new Manager\TGroup()->findById((int)($tgroupId ?? $request->tgroupId())),
+    'release_list'     => $Viewer->releaseOrderLabel(new ReleaseType()->list()),
     'tag_list'         => new Manager\Tag()->genreList(),
     'catalogue_number' => $catalogueNumber ?? $request->catalogueNumber(),
     'category_id'      => $categoryId      ?? $request->categoryId(),
     'description'      => new Util\Textarea('description', $description ?? $request->description(), 70, 7),
-    'encoding'         => $encoding,
-    'format'           => $format,
-    'log_cue'          => $logCue,
-    'media'            => $media,
-    'image'            => $request->image(),
+    'encoding'         => $encoding        ?? $request->encoding(),
+    'format'           => $format          ?? $request->format(),
+    'log_cue'          => $logCue          ?? $request->logCue(),
+    'media'            => $media           ?? $request->media(),
+    'image'            => $image           ?? $request->image(),
     'record_label'     => $recordLabel     ?? $request->recordLabel(),
     'release_type'     => $releaseType     ?? $request->releaseType(),
     'tags'             => $tags            ?? implode(', ', $request->tagNameList()),

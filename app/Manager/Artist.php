@@ -284,4 +284,31 @@ class Artist extends \Gazelle\BaseManager {
     public function sectionTitle(int $sectionId): string {
         return new \Gazelle\ReleaseType()->sectionTitle($sectionId);
     }
+
+    /**
+     * Cleanup and map two arrays of [artist name] + [artist role] to a combined
+     * [artist role][artist name] array.
+     *
+     * @param int $main count of artists in main roles
+     */
+    public function cleanupArtistList(array $names, array $roles, int &$main = 0): array {
+        $artistRole = [];
+        foreach ($names as $idx => $name) {
+            $name = \Gazelle\Artist::sanitize($name);
+            if ($name === null) {
+                continue;
+            }
+            $roleId = $roles[$idx] ?? 0;
+            if (!$this->roleExists(CATEGORY_MUSIC, $roleId)) {
+                // ignore bogus artist role
+                continue;
+            }
+            $artistRole[$roleId] ??= [];
+            $artistRole[$roleId][] = $name;
+            if (in_array($roleId, [ARTIST_ARRANGER, ARTIST_COMPOSER, ARTIST_CONDUCTOR, ARTIST_DJ, ARTIST_MAIN])) {
+                $main++;
+            }
+        }
+        return $artistRole;
+    }
 }

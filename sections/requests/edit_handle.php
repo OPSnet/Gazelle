@@ -189,7 +189,7 @@ while (true) {
         $tgroupId = preg_match(TGROUP_REGEXP, $tgroupValue, $match)
             ? (int)$match['id']
             : (int)$_POST['groupid'];
-        if ($tgroupId > 0) {
+        if ($tgroupId > 0 || !ctype_digit($_POST['groupid'])) {
             $tgroup = new Manager\TGroup()->findById($tgroupId);
             if (is_null($tgroup)) {
                 $error = 'The torrent group, if entered, must correspond to a music torrent group on the site.';
@@ -209,28 +209,10 @@ while (true) {
         }
 
         $artistMan  = new Manager\Artist();
-        $artistList = $_POST['artists'];
         $roleList   = array_map(intval(...), $_POST['importance']);
-        $seen       = [];
         $main       = 0;
-        for ($i = 0, $il = count($artistList); $i < $il; $i++) {
-            $name = trim($artistList[$i]);
-            if ($name == '' || in_array($name, $seen)) {
-                continue;
-            }
-            $seen[] = $name;
-            $roleId = $roleList[$i];
-            show($i, $roleId);
-            if (!$artistMan->roleExists(CATEGORY_MUSIC, $roleId)) {
-                // ignore bogus artist role
-                continue;
-            }
-            $artistRole[$roleId] ??= [];
-            $artistRole[$roleId][] = $name;
-            if (in_array($roleId, [ARTIST_ARRANGER, ARTIST_COMPOSER, ARTIST_CONDUCTOR, ARTIST_DJ, ARTIST_MAIN])) {
-                $main++;
-            }
-        }
+        $artistRole = $artistMan->cleanupArtistList($_POST['artists'], $roleList, $main);
+
         if ($main < 1) {
             $error = 'Please enter at least one main artist, conductor, arranger, composer, or DJ.';
         }

@@ -19,12 +19,16 @@ class Request extends \Gazelle\ArtistRole {
     ): int {
         self::$db->begin_transaction();
         $this->pg()->begin();
+
+        $mappedRoleList = [];
         foreach ($roleList as $role => $artistList) {
-            foreach ($artistList as $n => $name) {
+            foreach ($artistList as $name) {
                 $artist = $manager->findByName($name) ?? $manager->create($name);
-                $roleList[$role][$n] = $artist;
+                $mappedRoleList[$role] ??= [];
+                $mappedRoleList[$role][$artist->aliasId()] = $artist;
             }
         }
+        $roleList = $mappedRoleList;
 
         // remove any trace of the previous artistRole if we are updating
         self::$cache->delete_multi([

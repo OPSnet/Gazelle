@@ -1032,20 +1032,15 @@ class Artist extends BaseAttrObject implements Bookmarked, CollageEntry {
             return null;
         }
         $name = preg_replace(
-            // weirdo whitespace
-            '/[\s\x{00A0}\x{2000}-\x{200B}\x{202F}\x{205F}\x{3000}]/u',
+            // weirdo whitespace + collapse whitespace
+            '/[\s\x{00A0}\x{2000}-\x{200B}\x{202F}\x{205F}\x{3000}]+/u',
             ' ',
             $name,
         );
         if (!is_string($name)) {
             return null;
         }
-        $name = preg_replace(
-            // collapse whitespace
-            '/\s+/',
-            ' ',
-            $name,
-        );
-        return is_string($name) ? $name : null;
+        $name = trim($name);
+        return $name === '' ? null : $name;
     }
 }
