@@ -20,4 +20,4 @@ if (!$poll->hasRevealVotes()) {
 }
 $poll->addAnswer(trim($_POST['new_option']));
 
-header("Location: " . $poll->location());
+header("Location: {$poll->location()}");

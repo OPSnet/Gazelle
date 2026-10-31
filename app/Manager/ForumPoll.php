@@ -8,6 +8,11 @@ class ForumPoll extends \Gazelle\BaseManager {
     final public const CACHE_FEATURED_POLL = 'polls_featured';
     final protected const ID_KEY = 'zz_fpoll_%d';
 
+    public function flush(): static {
+        self::$cache->delete_value(self::CACHE_FEATURED_POLL);
+        return $this;
+    }
+
     /**
      * Create a poll for forum thread
      */
@@ -17,12 +22,6 @@ class ForumPoll extends \Gazelle\BaseManager {
         string               $question,
         array                $answerList,
     ): \Gazelle\ForumPoll {
-        self::$db->prepared_query("
-            INSERT INTO forums_polls
-                   (TopicID, Question, Answers)
-            Values (?,       ?,        ?)
-            ", $thread->id, $question, serialize($answerList)
-        );
         $this->pg()->query('
             insert into forum_poll
                    (id_forum_thread, question, answer)

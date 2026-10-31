@@ -289,7 +289,7 @@ class ForumThread extends BaseObject {
         $affected = self::$db->affected_rows();
         if ($affected) {
             if ($locked && $this->hasPoll()) {
-                $this->poll()->close()->modify();
+                $this->poll()->close();
             }
             $this->updateRoot(
                 ...self::$db->row("

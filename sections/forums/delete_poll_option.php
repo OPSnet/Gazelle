@@ -26,4 +26,4 @@ if (!$vote) {
 }
 $poll->removeAnswer($vote);
 
-header("Location: " . $poll->location());
+header("Location: {$poll->location()}");

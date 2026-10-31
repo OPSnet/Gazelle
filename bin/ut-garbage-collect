@@ -246,6 +246,9 @@ foreach (['artist', 'collage', 'request', 'tgroup'] as $type) {
     );
 }
 $pgrw->query('
+    delete from forum_poll where id_forum_thread not in (select "ID" from relay.forums_topics)
+');
+$pgrw->query('
     delete from ip_history where id_user not in (select "ID" from relay.users_main)
 ');
 $pgrw->query('

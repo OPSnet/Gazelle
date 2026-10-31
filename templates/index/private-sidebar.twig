@@ -103,7 +103,7 @@
 {%          set choice = poll.vote[id] %}
             <li title="{{ choice.score }}">
 {%-         if id == poll.response(viewer) %}<span title="You voted for this">➔ {% endif %}{{ answer }}</span> ({{
-                choice.percent|number_format(1) }}%)</li>
+                (choice.ratio * 100)|number_format(1) }}%)</li>
             <li title="{{ choice.score }}" class="graph">
                 <span class="left_poll"></span>
                 <span class="center_poll" style="width: {{ (choice.ratio * 100)|number_format(1) }}%;"></span>

@@ -15,11 +15,11 @@ $poll = new Manager\ForumPoll()->findById((int)($_POST['threadid'] ?? 0));
 if ($poll === null) {
     Error404::error('Cannot find a poll for that thread');
 }
-if (isset($_POST['ck-feat'])) {
-    $poll->setField('Featured', $poll->isFeatured() ? null : date('Y-m-d H:i:s'));
+if (isset($_POST['feature'])) {
+    $poll->setField('is_featured', $_POST['feature'] === 'Feature');
 }
-if (isset($_POST['ck-close']) && isset($_POST['close'])) {
-    $poll->setField('Closed', $poll->isClosed() ? '0' : '1');
+if (isset($_POST['close'])) {
+    $poll->setField('is_closed', $_POST['close'] === 'Close');
 }
 $poll->modify();
 

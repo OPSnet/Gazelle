@@ -562,14 +562,19 @@ class ForumTest extends TestCase {
         $this->assertSame(1, $poll->modifyVote($user, 3),  'forum-poll-change-vote');
         $this->assertSame(3, $poll->response($user),       'forum-poll-response-after');
 
-        $poll->setField('Featured', date('Y-m-d H-i-s'))->modify();
+        $poll->setField('is_featured', true)->modify();
         $this->assertTrue($poll->isFeatured(), 'forum-poll-is-featured');
 
-        $poll->close()->setField('Featured', null)->modify();
+        $this->assertSame(
+            1,
+            $poll->close(),
+            'forum-poll-close',
+        );
+        $poll->setField('is_featured', false)->modify();
         $this->assertTrue($poll->isClosed(), 'forum-poll-is-closed');
         $this->assertFalse($poll->isFeatured(), 'forum-poll-is-no-longer-featured');
 
-        $poll->setField('Closed', '0')->setField('Featured', date('Y-m-d H-i-s'))->modify();
+        $poll->setField('is_closed', false)->setField('is_featured', true)->modify();
         $this->assertFalse($poll->isClosed(), 'forum-poll-is-reopened');
         $this->assertTrue($poll->isFeatured(), 'forum-poll-is-refeatured');
     }

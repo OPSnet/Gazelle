@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Gazelle;
 
-class ForumPoll extends BaseObject {
-    final public const tableName = 'forums_polls';
-    final public const pkName    = 'TopicID';
+class ForumPoll extends BasePgObject {
+    final public const tableName    = 'forum_poll';
+    final public const pkName       = 'id_forum_thread';
     final protected const CACHE_KEY = 'fpoll_%d';
 
     public function __construct(ForumThread $thread) {
@@ -14,11 +14,9 @@ class ForumPoll extends BaseObject {
     }
 
     public function flush(): static {
-        self::$cache->delete_multi([
-            sprintf(self::CACHE_KEY, $this->id),
-            Manager\ForumPoll::CACHE_FEATURED_POLL,
-        ]);
+        self::$cache->delete_value(sprintf(self::CACHE_KEY, $this->id));
         unset($this->info);
+        new Manager\ForumPoll()->flush();
         return $this;
     }
 
@@ -157,14 +155,15 @@ class ForumPoll extends BaseObject {
         return $this->info()['total'];
     }
 
-    public function close(): static {
-        $this->pg()->query('
+    public function close(): int {
+        $affected = $this->pg()->query('
             update forum_poll set
                 is_closed = true
             where id_forum_thread = $1
             ', $this->id
         );
-        return $this->setField('Closed', '1');
+        $this->flush();
+        return $affected;
     }
 
     /**
@@ -180,14 +179,7 @@ class ForumPoll extends BaseObject {
     }
 
     protected function saveAnswerList(array $answerList): int {
-        self::$db->prepared_query("
-            UPDATE forums_polls SET
-                Answers = ?
-            WHERE TopicID = ?
-            ", serialize($answerList), $this->id
-        );
-        $affected = self::$db->affected_rows();
-        $this->pg()->query('
+        $affected = $this->pg()->query('
             update forum_poll set
                 answer = $1
             where id_forum_thread = $2
@@ -216,14 +208,7 @@ class ForumPoll extends BaseObject {
             return 0;
         }
         unset($answerList[$item]);
-        $affected = $this->saveAnswerList($answerList);
-        self::$db->prepared_query("
-            DELETE FROM forums_polls_votes
-            WHERE TopicID = ?
-                AND Vote = ?
-            ", $this->id, $item
-        );
-        $this->pg()->query('
+        $affected = $this->pg()->query('
             delete from forum_poll_vote
             where id_forum_thread = $1
                 and vote = $2
@@ -235,17 +220,10 @@ class ForumPoll extends BaseObject {
 
     public function addVote(User $user, int $vote): int {
         $answerList = $this->answerList();
-        if (!isset($answerList[$vote]) && $vote != 0) {
+        if (!isset($answerList[$vote]) && $vote !== 0) {
             return 0;
         }
-        self::$db->prepared_query("
-            INSERT IGNORE INTO forums_polls_votes
-                   (TopicID, UserID, Vote)
-            VALUES (?,       ?,      ?)
-            ", $this->id, $user->id, $vote
-        );
-        $affected = self::$db->affected_rows();
-        $this->pg()->query('
+        $affected = $this->pg()->query('
             insert into forum_poll_vote
                    (id_forum_thread, id_user, vote)
             values ($1,              $2,      $3)
@@ -258,15 +236,7 @@ class ForumPoll extends BaseObject {
     }
 
     public function modifyVote(User $user, int $vote): int {
-        self::$db->prepared_query("
-            UPDATE forums_polls_votes SET
-                Vote = ?
-            WHERE TopicID = ?
-                AND UserID = ?
-            ", $vote, $this->id, $user->id
-        );
-        $affected = self::$db->affected_rows();
-        $this->pg()->query('
+        $affected = $this->pg()->query('
             update forum_poll_vote set
                 vote = $3
             where id_forum_thread = $1
@@ -326,56 +296,22 @@ class ForumPoll extends BaseObject {
     }
 
     public function modify(): bool {
-        $update = [];
-        $args   = [];
-
-        $closed = $this->field('Closed');
-        if ($closed !== null) {
-            if ($closed === '0' && $this->isClosed()) {
-                $update[] = "is_closed = {$this->pg()->placeholder(count($args))}";
-                $args[]   = false;
-            } elseif ($closed === '1' && !$this->isClosed()) {
-                $update[] = "is_closed = {$this->pg()->placeholder(count($args))}";
-                $args[]   = true;
-            }
+        $affected =  parent::modify();
+        if ($affected) {
+            new Manager\ForumPoll()->flush();
         }
-        $featured = $this->field('Featured');
-        if ($featured === null && $this->isFeatured()) {
-            $update[] = "is_featured = {$this->pg()->placeholder(count($args))}";
-            $args[]   = false;
-        } elseif ($featured !== null && !$this->isFeatured()) {
-            $update[] = "is_featured = {$this->pg()->placeholder(count($args))}";
-            $args[]   = true;
-        }
-
-        if ($update !== []) {
-            $phWhere = $this->pg()->placeholder(count($args));
-            $args[]  = $this->id;
-            $this->pg()->query(
-                "update forum_poll set "
-                . implode(', ', $update)
-                . " where id_forum_thread = $phWhere
-                ", ...$args
-            );
-        }
-
-        return parent::modify();
+        return $affected;
     }
 
     public function remove(): int {
-        self::$db->prepared_query("
-            DELET fp, fpv
-            FROM forums_polls fp
-            LEFT JOIN forums_polls_votes vpv USING (TopicID)
-            WHERE fp.TopicID = ?
-            ", $this->id
-        );
-        $affected = self::$db->affected_rows();
-        $this->pg()->query('
+        $affected = $this->pg()->query('
             delete from forum_poll where id_forum_thread = $1
             ', $this->id
         );
         $this->flush();
+        if ($affected) {
+            new Manager\ForumPoll()->flush();
+        }
         return $affected;
     }
 }
