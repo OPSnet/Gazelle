@@ -23,8 +23,12 @@ class SearchEmailTest extends TestCase {
     }
 
     public function testSearchEmail(): void {
-        $search = new Search\Email(new Search\ASN());
-        $search->create(randomString());
+        $search = new Search\Email();
+        $this->assertSame(
+            [],
+            $search->extract('no emails here'),
+            'search-email-no-extract',
+        );
 
         $text = "chaff {$this->userList[0]->email()} chaff {$this->userList[1]->email()} chaff {$this->userList[2]->email()} dup {$this->userList[0]->email()} ";
         $list = $search->extract($text);
@@ -36,12 +40,32 @@ class SearchEmailTest extends TestCase {
         sort($emailList, SORT_STRING | SORT_FLAG_CASE);
         $this->assertSame($emailList, $search->emailList(), 'search-email-list');
 
-        $search->setColumn(1);    // Username
-        $search->setDirection(1); // DESC
+        $this->assertSame(
+            3,
+            $search->liveTotal(),
+            'search-email-live-total'
+        );
+        $search->setColumn(Search\Email::USER);
+        $search->setDirection(Search\Email::DESC);
         $liveList = $search->liveList(3, 0);
         $this->assertCount(3, $liveList, 'search-live-list-count');
         $nameList = array_map(fn($u) => $u->username(), $this->userList);
         rsort($nameList);
-        $this->assertSame($nameList, array_map(fn($e) => $e['username'], $liveList), 'searach-live-page-order');
+        $this->assertSame(
+            $nameList,
+            array_map(fn($e) => $e['username'], $liveList),
+            'search-live-page-order',
+        );
+    }
+
+    public function testSearchHistoryEmail(): void {
+        $newEmail = 'email1.' . randomString(11) . '+abc@example.com';
+        $this->userList[0]->history()->registerNewEmail($newEmail, false);
+
+        $search = new Search\Email();
+        $list = $search->extract("here is my email $newEmail");
+        $this->assertSame(1, $search->add($list), 'search-hist-add-list');
+        $this->assertSame(1, $search->historyTotal(), 'search-hist-total');
+        $this->assertCount(1, $search->historyList(2, 0), 'search-hist-list');
     }
 }

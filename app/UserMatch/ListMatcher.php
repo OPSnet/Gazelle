@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gazelle\UserMatch;
 
 use Gazelle\Enum\Direction;
@@ -169,13 +171,10 @@ class ListMatcher extends \Gazelle\Base {
             $siteIps
         );
 
-        self::$db->prepared_query("
-            SELECT DISTINCT Email
-            FROM users_history_emails
-            WHERE UserID = ?
-            ", $user->id
+        $emails = $this->pg()->columnex('
+            select distinct email from history_email where id_user = $1
+            ', $user->id
         );
-        $emails = self::$db->collect(0);
 
         return new MatchCandidate([$user->username()], $emails, $ips);
     }
@@ -231,37 +230,50 @@ class ListMatcher extends \Gazelle\Base {
             return [];
         }
 
-        $emails = array_unique(array_map(fn ($e) => implode('@', MatchCandidate::cleanupEmail($e)), $emails));
+        $emails = array_unique(
+            array_map(
+                fn ($e) => implode('@', MatchCandidate::cleanupEmail($e)),
+                $emails,
+            )
+        );
         $usernames = array_unique($usernames);
 
-        $emailSql = 'h.Email';
-        if ($loose) {
-            $emailSql = "REPLACE(SUBSTRING_INDEX(SUBSTRING_INDEX(h.Email, '+', 1), '@', 1), '.', '')";
-            $emails = array_map(fn ($e) => str_replace('.', '', array_first(explode('@', $e, 2))), $emails);
+        if (!$loose) {
+            $emailSql = 'he.email';
+        } else {
+            $emailSql = "split_part(split_part(he.email, '@', 1), '+', 1)";
+            $emails = array_map(
+                fn ($e) => str_replace('.', '', array_first(explode('@', $e, 2))),
+                $emails,
+            );
             array_push($emails, ...$usernames);
             $emails = array_unique($emails);
             $usernames = $emails;
         }
 
         $query = [];
+        $args  = [];
         if ($emails) {
             $query[] = "
-            SELECT h.UserID AS user_id
-            FROM users_history_emails AS h
-            WHERE $emailSql IN (" . placeholders($emails) . ")
-            GROUP BY h.UserID
+            select distinct he.id_user as user_id
+            from history_email as he
+            where $emailSql = any($1)
             ";
+            $args[]  = $this->pg()->arrayConverter()->output($emails);
         }
         if ($usernames) {
-            $query[] = "
-            SELECT um.ID AS user_id
-            FROM users_main AS um
-            WHERE um.username IN (" . placeholders($usernames) . ")
-            ";
+            $query[] = <<<END_SQL
+            select um."ID" AS user_id
+            from relay.users_main um
+            where um."Username" = any({$this->pg()->placeholder(count($args))})
+            END_SQL;
+            $args[]  = $this->pg()->arrayConverter()->output($usernames);
         }
 
-        self::$db->prepared_query(implode(' UNION ', $query), ...$emails, ...$usernames);
-        return self::$db->collect('user_id');
+        return $this->pg()->columnex(
+            implode(' union ', $query),
+            ...$args,
+        );
     }
 
     public static function sortMatches(

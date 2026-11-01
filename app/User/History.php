@@ -6,6 +6,7 @@ namespace Gazelle\User;
 
 use Gazelle\UserCreator;
 use Gazelle\Search\ASN;
+use Gazelle\User;
 use Gazelle\Util\Irc;
 use Gazelle\Util\Mail;
 
@@ -16,7 +17,7 @@ use Gazelle\Util\Mail;
 
 class History extends \Gazelle\BaseUser {
     public function __construct(
-        \Gazelle\User $user,
+        User             $user,
         protected string $column = 'ip',
         protected string $direction = 'up'
     ) {
@@ -151,53 +152,55 @@ class History extends \Gazelle\BaseUser {
      * @return array [email address, ip, date, useragent, country code, AS, AS name]
      */
     public function email(ASN $asn = new ASN()): array {
-        self::$db->prepared_query("
-            SELECT h.Email  AS email,
-                h.created   AS created,
-                h.IP        AS ip,
-                h.useragent AS useragent
-            FROM users_history_emails AS h
-            WHERE h.UserID = ?
-            ORDER BY users_history_emails_id DESC
-            ", $this->user->id
+        $result = $this->pg()->allex(<<<END_SQL
+            select h.email,
+                h.created,
+                h.ip,
+                h.useragent
+            from history_email h
+            where h.id_user = $1
+            order by id_history_email desc
+            END_SQL,
+                $this->user->id
         );
-        $list = self::$db->to_array(false, MYSQLI_ASSOC);
-        static::addAsnInfo($asn, $list);
-        return $list;
+        static::addAsnInfo($asn, $result);
+        return $result;
     }
 
     /**
      * Email duplicates
      *
-     * @return array of array of [id, email, user_id, created, ip, \User user]
+     * @return array of array of [id, email, user_id, created, ip, User user]
      */
     public function emailDuplicate(ASN $asn = new ASN()): array {
         // Get history of matches
-        self::$db->prepared_query("
-            SELECT users_history_emails_id AS id,
-                Email  AS email,
-                UserID AS user_id,
-                IP     AS ip,
+        $result = $this->pg()->allex(<<<END_SQL
+            select id_history_email AS id,
+                email,
+                id_user as user_id,
+                ip,
                 created,
                 useragent
-            FROM users_history_emails AS uhe
-            WHERE uhe.UserID != ?
-                AND uhe.Email in (SELECT DISTINCT Email FROM users_history_emails WHERE UserID = ?)
-            ORDER BY uhe.Email, uhe.created DESC
-            ", $this->user->id, $this->user->id
+            from history_email he
+            where he.id_user != $1
+                and he.email in (
+                    select distinct email from history_email where id_user = $1
+                )
+            order by he.email, he.created desc
+            END_SQL,
+                $this->user->id
         );
-        $list = self::$db->to_array(false, MYSQLI_ASSOC);
-        static::addAsnInfo($asn, $list);
-        return $list;
+        static::addAsnInfo($asn, $result);
+        return $result;
     }
 
     /**
      * How many email addresses have been recorded for this user
      */
     public function emailTotal(): int {
-        return (int)self::$db->scalar("
-            SELECT count(*) FROM users_history_emails WHERE UserID = ?
-            ", $this->user->id
+        return $this->pg()->scalarex('
+            select count(*) from history_email where id_user = $1
+            ', $this->user->id
         );
     }
 
@@ -233,7 +236,7 @@ class History extends \Gazelle\BaseUser {
                 $this->user->username(),
                 "Security alert: Your email address was changed via $ipaddr with $useragent. Not you? Contact staff ASAP."
             );
-            if ($ipv4->setFilterIpaddr($ipaddr)->userTotal($this->user) == 0) {
+            if ($ipv4->setFilterIpaddr($ipaddr)->userTotal($this->user) === 0) {
                 $irc::sendMessage(
                     IRC_CHAN_STAFF,
                     "Email address for {$this->user->username()} was changed from {$this->user->email()} to $newEmail from unusual address $ipaddr with UA=$useragent."
@@ -262,6 +265,17 @@ class History extends \Gazelle\BaseUser {
             INSERT INTO users_history_emails
                    (UserID, Email, IP, useragent)
             VALUES (?,      ?,     ?, 'email-reset')
+            ", $this->user->id, $email, $ipaddr
+        );
+        $this->pg()->query('
+            delete from history_email
+            where id_user = $1
+            ', $this->user->id
+        );
+        $this->pg()->query("
+            insert into history_email
+                   (id_user, email, ip, useragent)
+            VALUES ($1,      $2,    $3, 'email-reset')
             ", $this->user->id, $email, $ipaddr
         );
         self::$db->prepared_query("

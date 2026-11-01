@@ -1,7 +1,7 @@
 {% from 'macro/ipv4.twig' import asn, ip_search %}
 <tr><th colspan="7"><br>{{ title }}</th></tr>
 {% for r in info %}
-    {% if loop.first %}
+{%  if loop.first %}
 <tr>
     <th>IP</th>
     <th>CC</th>
@@ -11,11 +11,11 @@
     <th>Email address</th>
     <th>Useragent</th>
 </tr>
-    {% endif %}
+{%  endif %}
 <tr class="row{{ cycle(['a', 'b'], loop.index0) }}">
     <td>{{ ip_search(r.ip) }}</td>
     <td>{{ r.cc }}</td>
-    <td>{{ r.created }}</td>
+    <td>{{ r.created|time_diff }}</td>
     <td>{{ asn(r.name, r.n) }}</td>
     <td><span class="resolve-ipv4" data-ip="{{ r.ip }}">Resolving...</span></td>
     <td>{{ r.email }}</td>

@@ -22,7 +22,7 @@
 
 <h3>Live addresses</h3>
 {% for r in live_page %}
-    {% if loop.first %}
+{%  if loop.first %}
 <table>
 <thead>
     <tr>
@@ -35,19 +35,19 @@
     </tr>
 </thead>
 <tbody>
-    {% endif %}
+{%  endif %}
     <tr>
     <td{% if r.is_tor %} class="tor"{% endif %}>{{ ip_search(r.ipv4) }}</td>
     <td>{{ r.cc }}</td>
-    <td>{{ r.created }}</td>
+    <td>{{ r.created|time_diff }}</td>
     <td>{% if r.user_id %}{{ r.user_id|user_url }}{% else %}User #{{ r.user_id }}{% endif %} / {{ r.email }}</td>
     <td>{{ asn(r.name, r.n) }}</td>
     <td><span class="resolve-ipv4" data-ip="{{ r.ipv4 }}">Resolving...</span></td>
     </tr>
-    {% if loop.last %}
+{%  if loop.last %}
 </tbody>
 </table>
-    {% endif %}
+{%  endif %}
 {% else %}
 <div>no records</div>
 {% endfor %}
@@ -55,7 +55,7 @@
 <br>
 <h3>Historical addresses</h3>
 {% for r in history_page %}
-    {% if loop.first %}
+{%  if loop.first %}
 <table>
 <thead>
     <tr>
@@ -69,20 +69,20 @@
     </tr>
 </thead>
 <tbody>
-    {% endif %}
+{%  endif %}
     <tr>
     <td{% if r.is_tor %} class="tor"{% endif %}>{{ ip_search(r.ipv4) }}</td>
     <td>{{ r.cc }}</td>
-    <td>{{ r.created }}</td>
-    <td>{{ r.change_date }}</td>
+    <td>{{ r.created|time_diff }}</td>
+    <td>{{ r.change_date|time_diff }}</td>
     <td>{% if r.user_id %}{{ r.user_id|user_url }}{% else %}User #{{ r.user_id }}{% endif %} / {{ r.email }}</td>
     <td>{{ asn(r.name, r.n) }}</td>
     <td><span class="resolve-ipv4" data-ip="{{ r.ipv4 }}">Resolving...</span></td>
     </tr>
-    {% if loop.last %}
+{%  if loop.last %}
 </tbody>
 </table>
-    {% endif %}
+{%  endif %}
 {% else %}
 <div>no records</div>
 {% endfor %}

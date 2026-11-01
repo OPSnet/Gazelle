@@ -77,7 +77,7 @@
             <input type="checkbox" name="SendHackedMail" id="SendHackedMail"> <label for="SendHackedMail">Send hacked account email</label> to
             <select name="HackedEmail">
 {%  for e in user.history.email %}
-                <option value="{{ e.email }}">{{ e.email }} - {{ e.created }}</option>
+                <option value="{{ e.email }}">{{ e.email }} – {{ e.created|time_diff }}</option>
 {%  endfor %}
             </select>
             <br>Use when disabling an account due to suspected misuse. (Checking this will disable the account).

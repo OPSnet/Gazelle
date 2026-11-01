@@ -28,8 +28,7 @@ $text = match (true) {
     default                   => '',
 };
 if ($text) {
-    $search = new Search\Email(new Search\ASN())
-        ->create('email_search_' . getmypid())
+    $search = new Search\Email()
         ->setColumn($column)
         ->setDirection($direction);
 

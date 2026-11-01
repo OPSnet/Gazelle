@@ -39,7 +39,7 @@ if ($token) {
     $ipSearch->create();
 
     if ($Viewer->permitted('users_view_email')) {
-        $emailSearch = new Search\Email($asn);
+        $emailSearch = new Search\Email();
         $emails = $emailSearch->extract($text);
     }
     if ($Viewer->permitted('users_view_ips')) {
