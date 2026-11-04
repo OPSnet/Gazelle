@@ -261,7 +261,9 @@
         closePopup();
         clear();
 
-        document.getElementById('artist_0').value = $(xml).find("artist-credit:first").find("name:first").text();
+        const artistField = document.getElementById('artist_0');
+        artistField.value = $(xml).find("artist-credit:first").find("name:first").text();
+        artistField.dispatchEvent(new Event('input', {bubbles: true}));
         document.getElementById('title').value = $(xml).find("release").find("title:first").text();
         document.getElementById('year').value = $year_original;
         document.getElementById('remaster_year').value = year_release;

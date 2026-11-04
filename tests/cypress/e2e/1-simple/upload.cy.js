@@ -5,6 +5,31 @@ describe('uploading torrent', () => {
         cy.loginUser();
     })
 
+    it('warns about artist names that begin with non-Latin letters', () => {
+        cy.visit('/upload.php');
+        cy.get('#categories').select('Music');
+
+        const warning = '#non-latin-artist-warning';
+        const artistField = '#artist_0';
+        cy.get(warning).should('not.be.visible');
+
+        ['Борис', 'Ελένη', '宇多田', 'עפרה', 'أم'].forEach((artistName) => {
+            cy.get(artistField).clear().type(artistName);
+            cy.get(warning).should('be.visible');
+            cy.get(artistField)
+                .should('have.attr', 'aria-invalid', 'true')
+                .and('have.attr', 'aria-describedby', 'non-latin-artist-warning');
+        });
+
+        ['Édith Piaf', '2Pac', '$uicideboy$'].forEach((artistName) => {
+            cy.get(artistField).clear().type(artistName, { parseSpecialCharSequences: false });
+            cy.get(warning).should('not.be.visible');
+            cy.get(artistField)
+                .should('have.attr', 'aria-invalid', 'false')
+                .and('not.have.attr', 'aria-describedby');
+        });
+    });
+
     it('upload music torrent', () => {
         cy.visit('/upload.php');
         cy.ensureFooter();

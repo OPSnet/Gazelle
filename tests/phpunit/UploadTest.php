@@ -64,6 +64,8 @@ class UploadTest extends TestCase {
         $form = $upload->music(['acoustic', 'baroque.era', 'chillout'], new Manager\TGroup());
         $this->assertStringStartsWith('<div id="musicbrainz_popup"', $form, 'upload-music-popup');
         $this->assertStringContainsString('table id="form-music-upload"', $form, 'upload-music-begin');
+        $this->assertStringContainsString('id="non-latin-artist-warning"', $form, 'upload-music-non-latin-warning');
+        $this->assertStringContainsString('wiki.php?action=article&amp;id=83', $form, 'upload-music-non-latin-wiki');
         $this->assertStringContainsString('chillout', $form, 'upload-music-form');
         $this->assertStringEndsWith("</table>\n", $form, 'upload-music-end');
     }
